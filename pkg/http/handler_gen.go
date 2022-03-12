@@ -2,6 +2,8 @@
 package http
 
 import (
+	http2 "github.com/fitan/gink/transport/http"
+	"github.com/gin-gonic/gin"
 	http "github.com/go-kit/kit/transport/http"
 	endpoint "hello/pkg/endpoint"
 	http1 "net/http"
@@ -17,4 +19,10 @@ func NewHTTPHandler(endpoints endpoint.Endpoints, options map[string][]http.Serv
 	makeSayHelloHandler(m, endpoints, options["SayHello"])
 	makeSayHello1Handler(m, endpoints, options["SayHello1"])
 	return m
+}
+
+func NewGinHandler(endpoints endpoint.Endpoints, options map[string][]http2.ServerOption) *gin.Engine {
+	r := gin.Default()
+	makeGinFooHandler(r, endpoints, options["Foo"])
+	return r
 }

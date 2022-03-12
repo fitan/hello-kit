@@ -7,6 +7,10 @@ import (
 	"github.com/go-kit/kit/metrics/prometheus"
 	http3 "github.com/go-kit/kit/transport/http"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
 	endpoint "hello/pkg/endpoint"
 	http1 "hello/pkg/http"
 	service "hello/pkg/service"
@@ -16,20 +20,16 @@ import (
 	"os/signal"
 	"syscall"
 
+	http4 "github.com/fitan/gink/transport/http"
 	endpoint1 "github.com/go-kit/kit/endpoint"
 	log "github.com/go-kit/log"
-	lightsteptracergo "github.com/lightstep/lightstep-tracer-go"
 	group "github.com/oklog/oklog/pkg/group"
-	opentracinggo "github.com/opentracing/opentracing-go"
-	zipkingoopentracing "github.com/openzipkin-contrib/zipkin-go-opentracing"
-	zipkingo "github.com/openzipkin/zipkin-go"
-	http "github.com/openzipkin/zipkin-go/reporter/http"
 	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
-	appdash "sourcegraph.com/sourcegraph/appdash"
-	opentracing "sourcegraph.com/sourcegraph/appdash/opentracing"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/go-kit/kit/otelkit"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 )
 
-var tracer opentracinggo.Tracer
 var logger log.Logger
 
 // Define our flags. Your service probably won't need to bind listeners for
@@ -42,9 +42,13 @@ var thriftAddr = fs.String("thrift-addr", ":8083", "Thrift listen address")
 var thriftProtocol = fs.String("thrift-protocol", "binary", "binary, compact, json, simplejson")
 var thriftBuffer = fs.Int("thrift-buffer", 0, "0 for unbuffered")
 var thriftFramed = fs.Bool("thrift-framed", false, "true to enable framing")
-var zipkinURL = fs.String("zipkin-url", "", "Enable Zipkin tracing via a collector URL e.g. http://localhost:9411/api/v1/spans")
-var lightstepToken = fs.String("lightstep-token", "", "Enable LightStep tracing via a LightStep access token")
-var appdashAddr = fs.String("appdash-addr", "", "Enable Appdash tracing via an Appdash server host:port")
+var jaegerAddr = fs.String("jaeger-addr", "http://localhost:14268/api/traces", "Enable jaeger tracing via an jaeger-addr server http://localhost:14268/api/traces")
+
+const (
+	appName     = "trace-demo"
+	environment = "production"
+	id          = 1
+)
 
 func Run() {
 	fs.Parse(os.Args[1:])
@@ -58,46 +62,37 @@ func Run() {
 
 	//  Determine which tracer to use. We'll pass the tracer to all the
 	// components that use it, as a dependency
-	if *zipkinURL != "" {
-		logger.Log("tracer", "Zipkin", "URL", *zipkinURL)
-		reporter := http.NewReporter(*zipkinURL)
-		defer reporter.Close()
-		endpoint, err := zipkingo.NewEndpoint("hello", "localhost:80")
-		if err != nil {
-			logger.Log("err", err)
-			os.Exit(1)
-		}
-		localEndpoint := zipkingo.WithLocalEndpoint(endpoint)
-		nativeTracer, err := zipkingo.NewTracer(reporter, localEndpoint)
-		if err != nil {
-			logger.Log("err", err)
-			os.Exit(1)
-		}
-		tracer = zipkingoopentracing.Wrap(nativeTracer)
-	} else if *lightstepToken != "" {
-		logger.Log("tracer", "LightStep")
-		tracer = lightsteptracergo.NewTracer(lightsteptracergo.Options{AccessToken: *lightstepToken})
-		defer lightsteptracergo.Flush(context.Background(), tracer)
-	} else if *appdashAddr != "" {
-		logger.Log("tracer", "Appdash", "addr", *appdashAddr)
-		collector := appdash.NewRemoteCollector(*appdashAddr)
-		tracer = opentracing.NewTracer(collector)
-		defer collector.Close()
-	} else {
-		logger.Log("tracer", "none")
-		tracer = opentracinggo.GlobalTracer()
+	if *jaegerAddr != "" {
+		logger.Log("init tracer", "jaeger", "addr", *jaegerAddr)
+		tp := initTracer()
+		otel.SetTracerProvider(tp)
 	}
 
 	svc := service.New(getServiceMiddleware(logger))
 	eps := endpoint.New(svc, getEndpointMiddleware(logger))
 	g := createService(eps)
+	initGinHandler(eps, g)
 	initMetricsEndpoint(g)
 	initCancelInterrupt(g)
 	logger.Log("exit", g.Run())
 
 }
+
+func initGinHandler(endpoints endpoint.Endpoints, g *group.Group) {
+	ginHandler := http1.NewGinHandler(endpoints, map[string][]http4.ServerOption{})
+	httpListener, err := net.Listen("tcp", ":8090")
+	if err != nil {
+		logger.Log("transport", "GinHTTP", "during", "Listen", "err", err)
+	}
+	g.Add(func() error {
+		logger.Log("transport", "GinHTTP", "addr", "8090")
+		return http2.Serve(httpListener, ginHandler)
+	}, func(error) {
+		httpListener.Close()
+	})
+}
 func initHttpHandler(endpoints endpoint.Endpoints, g *group.Group) {
-	options := defaultHttpOptions(logger, tracer)
+	options := defaultHttpOptions(logger)
 
 	pc := http3.ServerBefore(http3.PopulateRequestContext)
 	for k, _ := range options {
@@ -117,6 +112,36 @@ func initHttpHandler(endpoints endpoint.Endpoints, g *group.Group) {
 	})
 
 }
+
+func initTracer() *sdktrace.TracerProvider {
+	ctx := context.Background()
+
+	res, err := resource.New(ctx,
+		resource.WithAttributes(
+			// the service name used to display traces in backends
+			semconv.ServiceNameKey.String("test-service"),
+		),
+	)
+	if err != nil {
+		logger.Log("failed to create resource", err)
+		panic(err)
+	}
+	exporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(*jaegerAddr)))
+	if err != nil {
+		logger.Log("jaeger.New err", err)
+		panic(err)
+	}
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(res),
+	)
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+	tp.Tracer(appName)
+	return tp
+}
+
 func getServiceMiddleware(logger log.Logger) (mw []service.Middleware) {
 	mw = []service.Middleware{}
 	// Append your middleware here
@@ -126,12 +151,16 @@ func getServiceMiddleware(logger log.Logger) (mw []service.Middleware) {
 	mw = append(mw, func(helloService service.HelloService) service.HelloService {
 		return service.NewHelloServiceWithLog(helloService, logger)
 	})
+	mw = append(mw, func(helloService service.HelloService) service.HelloService {
+		return service.NewHelloServiceWithTracing(helloService)
+	})
 
 	return
 }
 func getEndpointMiddleware(logger log.Logger) (mw map[string][]endpoint1.Middleware) {
 	mw = map[string][]endpoint1.Middleware{}
 	// Add you endpoint middleware here
+	addEndpointMiddlewareToAllMethods(mw, otelkit.EndpointMiddleware())
 	addEndpointMiddlewareToAllMethods(mw, endpoint.LoggingMiddleware(logger))
 	addEndpointMiddlewareToAllMethods(mw, endpoint.InstrumentingMiddleware(prometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
 		Namespace: "hello",

@@ -4,10 +4,8 @@ package service
 import (
 	endpoint1 "github.com/go-kit/kit/endpoint"
 	log "github.com/go-kit/kit/log"
-	opentracing "github.com/go-kit/kit/tracing/opentracing"
 	http "github.com/go-kit/kit/transport/http"
 	group "github.com/oklog/oklog/pkg/group"
-	opentracinggo "github.com/opentracing/opentracing-go"
 	endpoint "hello/pkg/endpoint"
 	http1 "hello/pkg/http"
 )
@@ -17,13 +15,13 @@ func createService(endpoints endpoint.Endpoints) (g *group.Group) {
 	initHttpHandler(endpoints, g)
 	return g
 }
-func defaultHttpOptions(logger log.Logger, tracer opentracinggo.Tracer) map[string][]http.ServerOption {
+func defaultHttpOptions(logger log.Logger) map[string][]http.ServerOption {
 	options := map[string][]http.ServerOption{
-		"Foo":       {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger), http.ServerBefore(opentracing.HTTPToContext(tracer, "Foo", logger))},
-		"Say":       {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger), http.ServerBefore(opentracing.HTTPToContext(tracer, "Say", logger))},
-		"Say1":      {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger), http.ServerBefore(opentracing.HTTPToContext(tracer, "Say1", logger))},
-		"SayHello":  {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger), http.ServerBefore(opentracing.HTTPToContext(tracer, "SayHello", logger))},
-		"SayHello1": {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger), http.ServerBefore(opentracing.HTTPToContext(tracer, "SayHello1", logger))},
+		"Foo":       {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger)},
+		"Say":       {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger)},
+		"Say1":      {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger)},
+		"SayHello":  {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger)},
+		"SayHello1": {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger)},
 	}
 	return options
 }

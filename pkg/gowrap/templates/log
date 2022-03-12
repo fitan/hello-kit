@@ -27,7 +27,7 @@ func New{{$decorator}}(base {{.Interface.Type}},log Log) {{$decorator}} {
   // {{$method.Name}} implements {{$.Interface.Type}}
   func (_d {{$decorator}}) {{$method.Declaration}} {
       {{- if $method.HasParams}}
-        _params := []interface{}{"{{$decorator}} calling", "{{$method.Name}}", "params", {{$method.ParamsMap}} }
+        _params := []interface{}{"{{$decorator}} calling", "{{$method.Name}}", "params", {{$method.ParamsMapExcludeCtx}} }
         _d._log.Log(_params...)
       {{else}}
         _d._log.Log("{{$decorator}}: calling {{$method.Name}}")

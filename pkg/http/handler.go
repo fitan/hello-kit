@@ -4,13 +4,25 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/gin-gonic/gin"
 	endpoint "hello/pkg/endpoint"
 	"net/http"
 
+	http2 "github.com/fitan/gink/transport/http"
 	http1 "github.com/go-kit/kit/transport/http"
 )
 
+func ginFooDecode(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	req := endpoint.FooRequest{}
+	err := ctx.ShouldBind(&req)
+	return req, err
+}
+
 // makeFooHandler creates the handler logic
+func makeGinFooHandler(r *gin.Engine, endpoints endpoint.Endpoints, options []http2.ServerOption) {
+	r.GET("/foo", http2.NewServer(endpoints.FooEndpoint, ginFooDecode, http2.EncodeJSONResponse, options...).ServeHTTP)
+}
+
 func makeFooHandler(m *http.ServeMux, endpoints endpoint.Endpoints, options []http1.ServerOption) {
 	m.Handle("/foo", http1.NewServer(endpoints.FooEndpoint, decodeFooRequest, encodeFooResponse, options...))
 }

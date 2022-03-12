@@ -1,10 +1,14 @@
 package service
 
-import "context"
+import (
+	"context"
+	"errors"
+)
 
 // HelloService describes the service.
-//go:generate gowrap.exe gen -p ./ -i HelloService -t ../gowrap/templates/prometheus -o service_with_prometheus.go
-//go:generate gowrap.exe gen -p ./ -i HelloService -t ../gowrap/templates/log -o service_with_log.go
+//go:generate gowrap gen -p ./ -i HelloService -t ../gowrap/templates/prometheus -o service_with_prometheus.go
+//go:generate gowrap gen -p ./ -i HelloService -t ../gowrap/templates/log -o service_with_log.go
+//go:generate gowrap gen -p ./ -i HelloService -t ../gowrap/templates/opentracing -o service_with_trace.go
 type HelloService interface {
 	Foo(ctx context.Context, s string) (rs string, err error)
 	Say(ctx context.Context, req SayReq) (res SayRes, err error)
@@ -18,6 +22,9 @@ type basicHelloService struct{}
 func (b *basicHelloService) Foo(ctx context.Context, s string) (rs string, err error) {
 	// TODO implement the business logic of Foo
 	//r := ctx.Value(http.ContextKeyRequestHost).(string)
+	if s != "" {
+		return "", errors.New("this is erorr")
+	}
 	return s, err
 }
 
