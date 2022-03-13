@@ -11,8 +11,7 @@ import (
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
-	endpoint "hello/pkg/endpoint"
-	http1 "hello/pkg/http"
+	"hello/pkg/mid"
 	service "hello/pkg/service"
 	"net"
 	http2 "net/http"
@@ -20,7 +19,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	http4 "github.com/fitan/gink/transport/http"
 	endpoint1 "github.com/go-kit/kit/endpoint"
 	log "github.com/go-kit/log"
 	group "github.com/oklog/oklog/pkg/group"
@@ -69,29 +67,16 @@ func Run() {
 	}
 
 	svc := service.New(getServiceMiddleware(logger))
-	eps := endpoint.New(svc, getEndpointMiddleware(logger))
+	eps := service.NewEndpoints(svc, getEndpointMiddleware(logger))
+	//eps := endpoint.New(svc, getEndpointMiddleware(logger))
 	g := createService(eps)
-	initGinHandler(eps, g)
 	initMetricsEndpoint(g)
 	initCancelInterrupt(g)
 	logger.Log("exit", g.Run())
 
 }
 
-func initGinHandler(endpoints endpoint.Endpoints, g *group.Group) {
-	ginHandler := http1.NewGinHandler(endpoints, map[string][]http4.ServerOption{})
-	httpListener, err := net.Listen("tcp", ":8090")
-	if err != nil {
-		logger.Log("transport", "GinHTTP", "during", "Listen", "err", err)
-	}
-	g.Add(func() error {
-		logger.Log("transport", "GinHTTP", "addr", "8090")
-		return http2.Serve(httpListener, ginHandler)
-	}, func(error) {
-		httpListener.Close()
-	})
-}
-func initHttpHandler(endpoints endpoint.Endpoints, g *group.Group) {
+func initHttpHandler(endpoints service.Endpoints, g *group.Group) {
 	options := defaultHttpOptions(logger)
 
 	pc := http3.ServerBefore(http3.PopulateRequestContext)
@@ -99,7 +84,7 @@ func initHttpHandler(endpoints endpoint.Endpoints, g *group.Group) {
 		options[k] = append(options[k], pc)
 	}
 
-	httpHandler := http1.NewHTTPHandler(endpoints, options)
+	httpHandler := service.NewHTTPHandler(endpoints, options)
 	httpListener, err := net.Listen("tcp", *httpAddr)
 	if err != nil {
 		logger.Log("transport", "HTTP", "during", "Listen", "err", err)
@@ -161,8 +146,8 @@ func getEndpointMiddleware(logger log.Logger) (mw map[string][]endpoint1.Middlew
 	mw = map[string][]endpoint1.Middleware{}
 	// Add you endpoint middleware here
 	addEndpointMiddlewareToAllMethods(mw, otelkit.EndpointMiddleware())
-	addEndpointMiddlewareToAllMethods(mw, endpoint.LoggingMiddleware(logger))
-	addEndpointMiddlewareToAllMethods(mw, endpoint.InstrumentingMiddleware(prometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+	addEndpointMiddlewareToAllMethods(mw, mid.LoggingMiddleware(logger))
+	addEndpointMiddlewareToAllMethods(mw, mid.InstrumentingMiddleware(prometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
 		Namespace: "hello",
 		Subsystem: "api",
 		Name:      "request_duration_seconds",

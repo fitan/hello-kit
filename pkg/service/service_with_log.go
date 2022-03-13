@@ -6,8 +6,6 @@ import "context"
 // template: ../gowrap/templates/log
 // gowrap: http://github.com/fitan/gowrap
 
-//go:generate gowrap gen -p hello/pkg/service -i HelloService -t ../gowrap/templates/log -o service_with_log.go -l ""
-
 type Log interface {
 	Log(keyvals ...interface{}) error
 }
@@ -99,21 +97,19 @@ func (_d HelloServiceWithLog) SayHello(ctx context.Context, req SayReq) (res Say
 }
 
 // SayHello1 implements HelloService
-func (_d HelloServiceWithLog) SayHello1(ctx context.Context, s1 string, s2 string) (res SayRes, err error) {
+func (_d HelloServiceWithLog) SayHello1(ctx context.Context, s1 string) (res SayRes, err error) {
 	_params := []interface{}{"HelloServiceWithLog calling", "SayHello1", "params", map[string]interface{}{
-		"s1": s1,
-		"s2": s2}}
+		"s1": s1}}
 	_d._log.Log(_params...)
 	defer func() {
 		_results := []interface{}{"HelloServiceWithLog calling", "SayHello1", "results", map[string]interface{}{
 			"ctx": ctx,
-			"s1":  s1,
-			"s2":  s2}}
+			"s1":  s1}}
 		if err != nil {
 			_d._log.Log(_results...)
 		} else {
 			_d._log.Log(_results...)
 		}
 	}()
-	return _d._base.SayHello1(ctx, s1, s2)
+	return _d._base.SayHello1(ctx, s1)
 }

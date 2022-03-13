@@ -6,22 +6,21 @@ import (
 	log "github.com/go-kit/kit/log"
 	http "github.com/go-kit/kit/transport/http"
 	group "github.com/oklog/oklog/pkg/group"
-	endpoint "hello/pkg/endpoint"
-	http1 "hello/pkg/http"
+	"hello/pkg/service"
 )
 
-func createService(endpoints endpoint.Endpoints) (g *group.Group) {
+func createService(endpoints service.Endpoints) (g *group.Group) {
 	g = &group.Group{}
 	initHttpHandler(endpoints, g)
 	return g
 }
 func defaultHttpOptions(logger log.Logger) map[string][]http.ServerOption {
 	options := map[string][]http.ServerOption{
-		"Foo":       {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger)},
-		"Say":       {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger)},
-		"Say1":      {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger)},
-		"SayHello":  {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger)},
-		"SayHello1": {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger)},
+		"Foo":       {},
+		"Say":       {},
+		"Say1":      {},
+		"SayHello":  {},
+		"SayHello1": {},
 	}
 	return options
 }

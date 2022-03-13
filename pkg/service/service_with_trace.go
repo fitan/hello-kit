@@ -4,8 +4,6 @@ package service
 // template: ../gowrap/templates/opentracing
 // gowrap: http://github.com/fitan/gowrap
 
-//go:generate gowrap gen -p hello/pkg/service -i HelloService -t ../gowrap/templates/opentracing -o service_with_trace.go -l ""
-
 import (
 	"context"
 	"encoding/json"
@@ -119,15 +117,14 @@ func (_d HelloServiceWithTracing) SayHello(ctx context.Context, req SayReq) (res
 }
 
 // SayHello1 implements HelloService
-func (_d HelloServiceWithTracing) SayHello1(ctx context.Context, s1 string, s2 string) (res SayRes, err error) {
+func (_d HelloServiceWithTracing) SayHello1(ctx context.Context, s1 string) (res SayRes, err error) {
 	var name = "HelloService.SayHello1"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
 			l := map[string]interface{}{
 				"params": map[string]interface{}{
-					"s1": s1,
-					"s2": s2},
+					"s1": s1},
 				"result": map[string]interface{}{
 					"res": res,
 					"err": err},
@@ -138,5 +135,5 @@ func (_d HelloServiceWithTracing) SayHello1(ctx context.Context, s1 string, s2 s
 		}
 		span.End()
 	}()
-	return _d.HelloService.SayHello1(ctx, s1, s2)
+	return _d.HelloService.SayHello1(ctx, s1)
 }

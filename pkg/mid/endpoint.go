@@ -1,11 +1,11 @@
-package endpoint
+package mid
 
 import (
 	"context"
 	"fmt"
-	endpoint "github.com/go-kit/kit/endpoint"
-	metrics "github.com/go-kit/kit/metrics"
-	log "github.com/go-kit/log"
+	"github.com/go-kit/kit/endpoint"
+	"github.com/go-kit/kit/metrics"
+	"github.com/go-kit/log"
 	"time"
 )
 

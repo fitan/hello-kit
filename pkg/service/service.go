@@ -6,15 +6,17 @@ import (
 )
 
 // HelloService describes the service.
-//go:generate gowrap gen -p ./ -i HelloService -t ../gowrap/templates/prometheus -o service_with_prometheus.go
-//go:generate gowrap gen -p ./ -i HelloService -t ../gowrap/templates/log -o service_with_log.go
-//go:generate gowrap gen -p ./ -i HelloService -t ../gowrap/templates/opentracing -o service_with_trace.go
+//go:generate gowrap gen -g -p ./ -i HelloService -t ../gowrap/templates/prometheus -o service_with_prometheus.go
+//go:generate gowrap gen -g -p ./ -i HelloService -t ../gowrap/templates/log -o service_with_log.go
+//go:generate gowrap gen -g -p ./ -i HelloService -t ../gowrap/templates/opentracing -o service_with_trace.go
+//go:generate gowrap gen -g -p ./ -i HelloService -t ../gowrap/templates/endpoint -o endpoint.go
+//go:generate gowrap gen -g -p ./ -i HelloService -t ../gowrap/templates/http -o http.go
 type HelloService interface {
 	Foo(ctx context.Context, s string) (rs string, err error)
 	Say(ctx context.Context, req SayReq) (res SayRes, err error)
 	Say1(ctx context.Context, req SayReq) (res SayRes, err error)
 	SayHello(ctx context.Context, req SayReq) (res SayRes, err error)
-	SayHello1(ctx context.Context, s1 string, s2 string) (res SayRes, err error)
+	SayHello1(ctx context.Context, s1 string) (res SayRes, err error)
 }
 
 type basicHelloService struct{}
@@ -57,12 +59,12 @@ func (b *basicHelloService) SayHello(ctx context.Context, req SayReq) (res SayRe
 	return res, err
 }
 
-func (b *basicHelloService) SayHello1(ctx context.Context, s1 string, s2 string) (res SayRes, err error) {
+func (b *basicHelloService) SayHello1(ctx context.Context, s1 string) (res SayRes, err error) {
 	// TODO implement the business logic of SayHello1
 	return res, err
 }
 
-func (b *basicHelloService) SayMan(ctx context.Context, id int, name string, email string) (res SayRes, err error) {
+func (b *basicHelloService) SayMan(ctx context.Context, id int) (res SayRes, err error) {
 	// TODO implement the business logic of SayMan
 	return res, err
 }

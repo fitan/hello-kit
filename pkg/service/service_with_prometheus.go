@@ -4,8 +4,6 @@ package service
 // template: ../gowrap/templates/prometheus
 // gowrap: http://github.com/fitan/gowrap
 
-//go:generate gowrap gen -p hello/pkg/service -i HelloService -t ../gowrap/templates/prometheus -o service_with_prometheus.go -l ""
-
 import (
 	"context"
 	"time"
@@ -95,7 +93,7 @@ func (_d HelloServiceWithPrometheus) SayHello(ctx context.Context, req SayReq) (
 }
 
 // SayHello1 implements HelloService
-func (_d HelloServiceWithPrometheus) SayHello1(ctx context.Context, s1 string, s2 string) (res SayRes, err error) {
+func (_d HelloServiceWithPrometheus) SayHello1(ctx context.Context, s1 string) (res SayRes, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -105,5 +103,5 @@ func (_d HelloServiceWithPrometheus) SayHello1(ctx context.Context, s1 string, s
 
 		helloserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "SayHello1", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.SayHello1(ctx, s1, s2)
+	return _d.base.SayHello1(ctx, s1)
 }
