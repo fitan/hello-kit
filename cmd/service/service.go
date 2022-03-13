@@ -4,26 +4,20 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/go-kit/kit/metrics/prometheus"
-	http3 "github.com/go-kit/kit/transport/http"
-	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
-	"hello/pkg/mid"
-	service "hello/pkg/service"
+	"hello/pkg/services"
 	"net"
 	http2 "net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
-	endpoint1 "github.com/go-kit/kit/endpoint"
 	log "github.com/go-kit/log"
 	group "github.com/oklog/oklog/pkg/group"
 	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/go-kit/kit/otelkit"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 )
@@ -66,32 +60,25 @@ func Run() {
 		otel.SetTracerProvider(tp)
 	}
 
-	svc := service.New(getServiceMiddleware(logger))
-	eps := service.NewEndpoints(svc, getEndpointMiddleware(logger))
-	//eps := endpoint.New(svc, getEndpointMiddleware(logger))
-	g := createService(eps)
+	g := &group.Group{}
+	initHttpHandler(g, logger)
 	initMetricsEndpoint(g)
 	initCancelInterrupt(g)
 	logger.Log("exit", g.Run())
 
 }
 
-func initHttpHandler(endpoints service.Endpoints, g *group.Group) {
-	options := defaultHttpOptions(logger)
+func initHttpHandler(g *group.Group, log log.Logger) {
+	m := http2.NewServeMux()
 
-	pc := http3.ServerBefore(http3.PopulateRequestContext)
-	for k, _ := range options {
-		options[k] = append(options[k], pc)
-	}
-
-	httpHandler := service.NewHTTPHandler(endpoints, options)
+	services.InitHttpHandler(m, log)
 	httpListener, err := net.Listen("tcp", *httpAddr)
 	if err != nil {
 		logger.Log("transport", "HTTP", "during", "Listen", "err", err)
 	}
 	g.Add(func() error {
 		logger.Log("transport", "HTTP", "addr", *httpAddr)
-		return http2.Serve(httpListener, httpHandler)
+		return http2.Serve(httpListener, m)
 	}, func(error) {
 		httpListener.Close()
 	})
@@ -127,35 +114,6 @@ func initTracer() *sdktrace.TracerProvider {
 	return tp
 }
 
-func getServiceMiddleware(logger log.Logger) (mw []service.Middleware) {
-	mw = []service.Middleware{}
-	// Append your middleware here
-	mw = append(mw, func(helloService service.HelloService) service.HelloService {
-		return service.NewHelloServiceWithPrometheus(helloService, "hello-kit")
-	})
-	mw = append(mw, func(helloService service.HelloService) service.HelloService {
-		return service.NewHelloServiceWithLog(helloService, logger)
-	})
-	mw = append(mw, func(helloService service.HelloService) service.HelloService {
-		return service.NewHelloServiceWithTracing(helloService)
-	})
-
-	return
-}
-func getEndpointMiddleware(logger log.Logger) (mw map[string][]endpoint1.Middleware) {
-	mw = map[string][]endpoint1.Middleware{}
-	// Add you endpoint middleware here
-	addEndpointMiddlewareToAllMethods(mw, otelkit.EndpointMiddleware())
-	addEndpointMiddlewareToAllMethods(mw, mid.LoggingMiddleware(logger))
-	addEndpointMiddlewareToAllMethods(mw, mid.InstrumentingMiddleware(prometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
-		Namespace: "hello",
-		Subsystem: "api",
-		Name:      "request_duration_seconds",
-		Help:      "Total time spent serving requests.",
-	}, []string{"success"})))
-
-	return
-}
 func initMetricsEndpoint(g *group.Group) {
 	http2.DefaultServeMux.Handle("/metrics", promhttp.Handler())
 	debugListener, err := net.Listen("tcp", *debugAddr)

@@ -1,4 +1,4 @@
-package service
+package hello
 
 import (
 	"context"
@@ -6,11 +6,11 @@ import (
 )
 
 // HelloService describes the service.
-//go:generate gowrap gen -g -p ./ -i HelloService -t ../gowrap/templates/prometheus -o service_with_prometheus.go
-//go:generate gowrap gen -g -p ./ -i HelloService -t ../gowrap/templates/log -o service_with_log.go
-//go:generate gowrap gen -g -p ./ -i HelloService -t ../gowrap/templates/opentracing -o service_with_trace.go
-//go:generate gowrap gen -g -p ./ -i HelloService -t ../gowrap/templates/endpoint -o endpoint.go
-//go:generate gowrap gen -g -p ./ -i HelloService -t ../gowrap/templates/http -o http.go
+//go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/prometheus -o service_with_prometheus.go
+//go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/log -o service_with_log.go
+//go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/opentracing -o service_with_trace.go
+//go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/endpoint -o endpoint.go
+//go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/http -o http.go
 type HelloService interface {
 	Foo(ctx context.Context, s string) (rs string, err error)
 	Say(ctx context.Context, req SayReq) (res SayRes, err error)

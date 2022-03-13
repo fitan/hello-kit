@@ -6,12 +6,21 @@ import (
 	http1 "github.com/go-kit/kit/transport/http"
 )
 
-func NewHTTPHandler(endpoints Endpoints, options map[string][]http1.ServerOption) http.Handler {
-	m := http.NewServeMux()
+func AddHttpOptionToAllMethods(options map[string][]http1.ServerOption, option http1.ServerOption) {
+	methods := []string{
+{{range $method := .Interface.Methods}}
+		"{{$method.Name}}",
+{{end}}
+	}
+	for _, v := range methods {
+		options[v] = append(options[v], option)
+	}
+}
+
+func NewHTTPHandler(m *http.ServeMux, endpoints Endpoints, options map[string][]http1.ServerOption) {
 {{range $method := .Interface.Methods}}
 	make{{$method.Name}}Handler(m, endpoints, options["{{$method.Name}}"])
 {{end}}
-	return m
 }
 
 {{range $method := .Interface.Methods}}

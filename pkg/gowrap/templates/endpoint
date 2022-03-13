@@ -8,6 +8,17 @@ type Endpoints struct {
 {{end}}
 }
 
+func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m endpoint.Middleware) {
+	methods := []string{
+{{range $method := .Interface.Methods}}
+		"{{$method.Name}}",
+{{end}}
+}
+	for _, v := range methods {
+		mw[v] = append(mw[v], m)
+	}
+}
+
 // New returns a Endpoints struct that wraps the provided service, and wires in all of the
 // expected endpoint middlewares
 func NewEndpoints(s {{.Interface.Name}}, mdw map[string][]endpoint.Middleware) Endpoints {
