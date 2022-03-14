@@ -15,7 +15,7 @@ type HelloService interface {
 	Foo(ctx context.Context, s string) (rs string, err error)
 	Say(ctx context.Context, req SayReq) (res SayRes, err error)
 	Say1(ctx context.Context, req SayReq) (res SayRes, err error)
-	// @http-gin /sayhello GET
+	// @http-gin /sayhello/:id GET
 	SayHello(ctx context.Context, req SayReq) (res SayRes, err error)
 	SayHello1(ctx context.Context, s1 string) (res SayRes, err error)
 }
@@ -59,6 +59,7 @@ func (b *basicHelloService) Say1(ctx context.Context, req SayReq) (res SayRes, e
 
 func (b *basicHelloService) SayHello(ctx context.Context, req SayReq) (res SayRes, err error) {
 	// TODO implement the business logic of SayHello
+	res.ID = req.Uri.ID
 	return res, err
 }
 

@@ -2,9 +2,8 @@ package hello
 
 type SayReq struct {
 	Uri struct {
-		ID int
+		ID int `json:"id" uri:"id"`
 	}
-	Body SayRes
 }
 
 type SayRes struct {

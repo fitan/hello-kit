@@ -26,35 +26,34 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options map[string][]htt
 }
 
 {{range $method := .Interface.Methods}}
-func make{{$method.Name}}Handler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 {{if $method.HasGin}}
-	r.{{$method.Gin.Method}}("{{$method.Gin.Method}}", http.NewServer(endpoints.{{$method.Name}}Endpoint, decode{{$method.Name}}Request, http.EncodeJSONResponse, options...))
-{{end}}
+func make{{$method.Name}}Handler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.{{$method.Gin.Method}}("{{$method.Gin.Url}}", http.NewServer(endpoints.{{$method.Name}}Endpoint, decode{{$method.Name}}Request, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
-{{if $method.HasGin}}
 func decode{{$method.Name}}Request(_ context.Context, ctx *gin.Context) (interface{}, error) {
 	var req {{(index $method.Params 1).Type}}
+	var err error
 	{{if $method.Gin.HasQuery}}
-	err = c.ShouldBindQuery(&req.Query)
+	err = ctx.ShouldBindQuery(&req.Query)
     if err != nil {
     	return nil, err
     }
 	{{end}}
 	{{if $method.Gin.HasUri}}
-	err = c.ShouldBindUri(&req.Uri)
+	err = ctx.ShouldBindUri(&req.Uri)
     if err != nil {
     	return nil, err
     }
 	{{end}}
 	{{if $method.Gin.HasHeader}}
-	err = c.ShouldBindHeader(&req.Header)
+	err = ctx.ShouldBindHeader(&req.Header)
     if err != nil {
     	return nil, err
     }
 	{{end}}
 	{{if $method.Gin.HasBody}}
-	err = c.ShouldBindJSON(&req.Body)
+	err = ctx.ShouldBindJSON(&req.Body)
     if err != nil {
     	return nil, err
     }

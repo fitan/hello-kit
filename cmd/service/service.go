@@ -4,11 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
-	"hello/pkg/services/hello"
+	"hello/pkg/services"
 	"net"
 	http2 "net/http"
 	"os"
@@ -64,16 +65,16 @@ func Run() {
 }
 
 func initHttpHandler(g *group.Group, log log.Logger) {
-	m := http2.NewServeMux()
+	r := gin.Default()
 
-	hello.InitHttpHandler(m, log, appName)
+	services.InitServices(r, log, appName)
 	httpListener, err := net.Listen("tcp", *httpAddr)
 	if err != nil {
 		logger.Log("transport", "HTTP", "during", "Listen", "err", err)
 	}
 	g.Add(func() error {
 		logger.Log("transport", "HTTP", "addr", *httpAddr)
-		return http2.Serve(httpListener, m)
+		return http2.Serve(httpListener, r)
 	}, func(error) {
 		httpListener.Close()
 	})

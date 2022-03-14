@@ -1,14 +1,14 @@
 package hello
 
 import (
+	"github.com/fitan/gink/transport/http"
+	"github.com/gin-gonic/gin"
 	endpoint1 "github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/metrics/prometheus"
-	http3 "github.com/go-kit/kit/transport/http"
 	"github.com/go-kit/log"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/go-kit/kit/otelkit"
 	"hello/pkg/mid"
-	http2 "net/http"
 )
 
 func serviceMiddleware(logger log.Logger, appName string) (mw []Middleware) {
@@ -51,12 +51,12 @@ func endpointMiddleware(logger log.Logger) (mw map[string][]endpoint1.Middleware
 	return
 }
 
-func InitHttpHandler(m *http2.ServeMux, log log.Logger, appName string) {
+func InitHttpHandler(r *gin.Engine, log log.Logger, appName string) {
 
 	helloSvc := New(serviceMiddleware(log, appName))
 	helloEps := NewEndpoints(helloSvc, endpointMiddleware(log))
-	pc := http3.ServerBefore(http3.PopulateRequestContext)
-	helloOptions := make(map[string][]http3.ServerOption)
+	pc := http.ServerBefore(http.PopulateRequestContext)
+	helloOptions := make(map[string][]http.ServerOption)
 	AddHttpOptionToAllMethods(helloOptions, pc)
-	NewHTTPHandler(m, helloEps, helloOptions)
+	NewHTTPHandler(r, helloEps, helloOptions)
 }
