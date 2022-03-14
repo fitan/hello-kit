@@ -29,8 +29,10 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options map[string][]htt
 func make{{$method.Name}}Handler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 {{if $method.HasGin}}
 	r.{{$method.Gin.Method}}("{{$method.Gin.Method}}", http.NewServer(endpoints.{{$method.Name}}Endpoint, decode{{$method.Name}}Request, http.EncodeJSONResponse, options...))
+{{end}}
 }
 
+{{if $method.HasGin}}
 func decode{{$method.Name}}Request(_ context.Context, ctx *gin.Context) (interface{}, error) {
 	var req {{(index $method.Params 1).Type}}
 	{{if $method.Gin.HasQuery}}
@@ -60,5 +62,6 @@ func decode{{$method.Name}}Request(_ context.Context, ctx *gin.Context) (interfa
 
 	return req, err
 }
+{{end}}
 {{end}}
 {{end}}
