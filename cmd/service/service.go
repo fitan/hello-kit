@@ -8,7 +8,7 @@ import (
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
-	"hello/pkg/services"
+	"hello/pkg/services/hello"
 	"net"
 	http2 "net/http"
 	"os"
@@ -29,11 +29,6 @@ var logger log.Logger
 var fs = flag.NewFlagSet("hello", flag.ExitOnError)
 var debugAddr = fs.String("debug-addr", ":8081", "Debug and metrics listen address")
 var httpAddr = fs.String("http-addr", ":8080", "HTTP listen address")
-var grpcAddr = fs.String("grpc-addr", ":8082", "gRPC listen address")
-var thriftAddr = fs.String("thrift-addr", ":8083", "Thrift listen address")
-var thriftProtocol = fs.String("thrift-protocol", "binary", "binary, compact, json, simplejson")
-var thriftBuffer = fs.Int("thrift-buffer", 0, "0 for unbuffered")
-var thriftFramed = fs.Bool("thrift-framed", false, "true to enable framing")
 var jaegerAddr = fs.String("jaeger-addr", "http://localhost:14268/api/traces", "Enable jaeger tracing via an jaeger-addr server http://localhost:14268/api/traces")
 
 const (
@@ -71,7 +66,7 @@ func Run() {
 func initHttpHandler(g *group.Group, log log.Logger) {
 	m := http2.NewServeMux()
 
-	services.InitHttpHandler(m, log)
+	hello.InitHttpHandler(m, log, appName)
 	httpListener, err := net.Listen("tcp", *httpAddr)
 	if err != nil {
 		logger.Log("transport", "HTTP", "during", "Listen", "err", err)

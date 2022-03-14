@@ -1,0 +1,64 @@
+import (
+	"context"
+	"github.com/fitan/gink/transport/http"
+	"github.com/gin-gonic/gin"
+)
+
+func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option http.ServerOption) {
+	methods := []string{
+{{range $method := .Interface.Methods}}
+{{if $method.HasGin}}
+		"{{$method.Name}}",
+{{end}}
+{{end}}
+	}
+	for _, v := range methods {
+		options[v] = append(options[v], option)
+	}
+}
+
+func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options map[string][]http.ServerOption) {
+{{range $method := .Interface.Methods}}
+{{if $method.HasGin}}
+	make{{$method.Name}}Handler(r, endpoints, options["{{$method.Name}}"])
+{{end}}
+{{end}}
+}
+
+{{range $method := .Interface.Methods}}
+func make{{$method.Name}}Handler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+{{if $method.HasGin}}
+	r.{{$method.Gin.Method}}("{{$method.Gin.Method}}", http.NewServer(endpoints.{{$method.Name}}Endpoint, decode{{$method.Name}}Request, http.EncodeJSONResponse, options...))
+}
+
+func decode{{$method.Name}}Request(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req {{(index $method.Params 1).Type}}
+	{{if $method.Gin.HasQuery}}
+	err = c.ShouldBindQuery(&req.Query)
+    if err != nil {
+    	return nil, err
+    }
+	{{end}}
+	{{if $method.Gin.HasUri}}
+	err = c.ShouldBindUri(&req.Uri)
+    if err != nil {
+    	return nil, err
+    }
+	{{end}}
+	{{if $method.Gin.HasHeader}}
+	err = c.ShouldBindHeader(&req.Header)
+    if err != nil {
+    	return nil, err
+    }
+	{{end}}
+	{{if $method.Gin.HasBody}}
+	err = c.ShouldBindJSON(&req.Body)
+    if err != nil {
+    	return nil, err
+    }
+	{{end}}
+
+	return req, err
+}
+{{end}}
+{{end}}

@@ -10,11 +10,12 @@ import (
 //go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/log -o service_with_log.go
 //go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/opentracing -o service_with_trace.go
 //go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/endpoint -o endpoint.go
-//go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/http -o http.go
+//go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/http-gin -o http.go
 type HelloService interface {
 	Foo(ctx context.Context, s string) (rs string, err error)
 	Say(ctx context.Context, req SayReq) (res SayRes, err error)
 	Say1(ctx context.Context, req SayReq) (res SayRes, err error)
+	// @http-gin /sayhello GET
 	SayHello(ctx context.Context, req SayReq) (res SayRes, err error)
 	SayHello1(ctx context.Context, s1 string) (res SayRes, err error)
 }
@@ -29,6 +30,8 @@ func (b *basicHelloService) Foo(ctx context.Context, s string) (rs string, err e
 	}
 	return s, err
 }
+
+type Middleware func(HelloService) HelloService
 
 // NewBasicHelloService returns a naive, stateless implementation of HelloService.
 func NewBasicHelloService() HelloService {
