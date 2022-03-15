@@ -6,6 +6,7 @@ package hello
 
 import (
 	"context"
+	"hello/pkg/services/hello/types"
 
 	"github.com/fitan/gink/transport/http"
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,15 @@ import (
 func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option http.ServerOption) {
 	methods := []string{
 
+		"Foo",
+
+		"Say",
+
+		"Say1",
+
 		"SayHello",
+
+		"SayHello1",
 	}
 	for _, v := range methods {
 		options[v] = append(options[v], option)
@@ -23,8 +32,64 @@ func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option ht
 
 func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options map[string][]http.ServerOption) {
 
+	makeFooHandler(r, endpoints, options["Foo"])
+
+	makeSayHandler(r, endpoints, options["Say"])
+
+	makeSay1Handler(r, endpoints, options["Say1"])
+
 	makeSayHelloHandler(r, endpoints, options["SayHello"])
 
+	makeSayHello1Handler(r, endpoints, options["SayHello1"])
+
+}
+
+func makeFooHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.POST("/foo/:id", http.NewServer(endpoints.FooEndpoint, decodeFooRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeFooRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req types.SayReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+func makeSayHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/say/:id", http.NewServer(endpoints.SayEndpoint, decodeSayRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeSayRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req types.SayReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+func makeSay1Handler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.DELETE("/say1/:id", http.NewServer(endpoints.Say1Endpoint, decodeSay1Request, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeSay1Request(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req types.SayReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
 }
 
 func makeSayHelloHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
@@ -32,7 +97,23 @@ func makeSayHelloHandler(r *gin.Engine, endpoints Endpoints, options []http.Serv
 }
 
 func decodeSayHelloRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
-	var req SayReq
+	var req types.SayReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+func makeSayHello1Handler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.GET("/sayhello1/:id", http.NewServer(endpoints.SayHello1Endpoint, decodeSayHello1Request, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeSayHello1Request(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req types.SayReq
 	var err error
 
 	err = ctx.ShouldBindUri(&req.Uri)
