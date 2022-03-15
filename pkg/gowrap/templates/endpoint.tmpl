@@ -1,6 +1,8 @@
 import (
-    endpoint "github.com/go-kit/kit/endpoint"
-    "context"
+	"context"
+	"go.opentelemetry.io/otel/trace"
+
+	endpoint "github.com/go-kit/kit/endpoint"
 )
 type Endpoints struct {
 {{range $method := .Interface.Methods}}
@@ -8,14 +10,14 @@ type Endpoints struct {
 {{end}}
 }
 
-func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m endpoint.Middleware) {
+func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m func(n string) endpoint.Middleware) {
 	methods := []string{
 {{range $method := .Interface.Methods}}
 		"{{$method.Name}}",
 {{end}}
 }
 	for _, v := range methods {
-		mw[v] = append(mw[v], m)
+		mw[v] = append(mw[v], m(v))
 	}
 }
 
@@ -47,6 +49,7 @@ func Make{{$method.Name}}Endpoint(s {{$.Interface.Type}}) endpoint.Endpoint {
 			return result, nil
 		}
 		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
 		return result, nil
 	}
 }

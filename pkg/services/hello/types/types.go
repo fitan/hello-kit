@@ -1,4 +1,4 @@
-package hello
+package types
 
 type SayReq struct {
 	Uri struct {
