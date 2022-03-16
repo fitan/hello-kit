@@ -6,11 +6,11 @@ import (
 )
 
 // HelloService describes the service.
-//go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/prometheus.tmpl -o service_with_prometheus.go
-//go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/log.tmpl -o service_with_log.go
-//go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/opentracing.tmpl -o service_with_trace.go
-//go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/endpoint.tmpl -o endpoint.go
-//go:generate gowrap gen -g -ps -p ./ -i HelloService -t ../../gowrap/templates/http-gin.tmpl -o http.go
+////go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/prometheus.tmpl:service_with_prometheus.go
+////go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/log.tmpl:service_with_log.go
+////go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/opentracing.tmpl:service_with_trace.go
+////go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/endpoint.tmpl:endpoint.go
+//go:generate gowrap gen -g -p ./ -i HelloService -bt "../../gowrap/templates/http-gin.tmpl:http.go ../../gowrap/templates/prometheus.tmpl:service_with_prometheus.go ../../gowrap/templates/log.tmpl:service_with_log.go ../../gowrap/templates/opentracing.tmpl:service_with_trace.go ../../gowrap/templates/endpoint.tmpl:endpoint.go"
 type HelloService interface {
 	// @http-gin /foo/:id POST
 	Foo(ctx context.Context, s types.SayReq) (rs string, err error)
@@ -54,7 +54,7 @@ func NewBasicHelloService() HelloService {
 }
 
 // New returns a HelloService with all of the expected middleware wired in.
-func New(middleware []Middleware) HelloService {
+func NewService(middleware []Middleware) HelloService {
 	var svc HelloService = NewBasicHelloService()
 	for _, m := range middleware {
 		svc = m(svc)

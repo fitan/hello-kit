@@ -3,7 +3,7 @@ package hello
 import (
 	"github.com/fitan/gink/transport/http"
 	"github.com/gin-gonic/gin"
-	endpoint1 "github.com/go-kit/kit/endpoint"
+	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/metrics/prometheus"
 	"github.com/go-kit/log"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
@@ -27,16 +27,16 @@ func serviceMiddleware(logger log.Logger, appName string) (mw []Middleware) {
 	return
 }
 
-func endpointMiddleware(logger log.Logger) (mw map[string][]endpoint1.Middleware) {
-	mw = map[string][]endpoint1.Middleware{}
+func endpointMiddleware(logger log.Logger, ep []endpoint.Middleware) (mw map[string][]endpoint.Middleware) {
+	mw = map[string][]endpoint.Middleware{}
 	// Add you endpoint middleware here
-	otelkitEMW := func(n string) endpoint1.Middleware {
+	otelkitEMW := func(n string) endpoint.Middleware {
 		return otelkit.EndpointMiddleware(otelkit.WithOperation(n))
 	}
-	logEMW := func(n string) endpoint1.Middleware {
+	logEMW := func(n string) endpoint.Middleware {
 		return mid.LoggingMiddleware(logger)
 	}
-	instrumentingEMW := func(n string) endpoint1.Middleware {
+	instrumentingEMW := func(n string) endpoint.Middleware {
 		return mid.InstrumentingMiddleware(prometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
 			Namespace: "hello",
 			Subsystem: n,
@@ -44,19 +44,25 @@ func endpointMiddleware(logger log.Logger) (mw map[string][]endpoint1.Middleware
 			Help:      "Total time spent serving requests.",
 		}, []string{"success"}))
 	}
-	AddEndpointMiddlewareToAllMethods(mw, otelkitEMW)
-	AddEndpointMiddlewareToAllMethods(mw, logEMW)
-	AddEndpointMiddlewareToAllMethods(mw, instrumentingEMW)
+	AddEndpointMiddlewareToAllMethodsWithMethodName(mw, otelkitEMW)
+	AddEndpointMiddlewareToAllMethodsWithMethodName(mw, logEMW)
+	AddEndpointMiddlewareToAllMethodsWithMethodName(mw, instrumentingEMW)
+	AddEndpointMiddlewareToAllMethods(mw, ep)
 
 	return
 }
 
-func InitHttpHandler(r *gin.Engine, log log.Logger, appName string) {
+func serviceOption(op []http.ServerOption) map[string][]http.ServerOption {
+	ops := make(map[string][]http.ServerOption)
+	for _, o := range op {
+		AddHttpOptionToAllMethods(ops, o)
+	}
+	return ops
+}
 
-	helloSvc := New(serviceMiddleware(log, appName))
-	helloEps := NewEndpoints(helloSvc, endpointMiddleware(log))
-	pc := http.ServerBefore(http.PopulateRequestContext)
-	helloOptions := make(map[string][]http.ServerOption)
-	AddHttpOptionToAllMethods(helloOptions, pc)
-	NewHTTPHandler(r, helloEps, helloOptions)
+func InitHttpHandler(r *gin.Engine, log log.Logger, appName string, eps []endpoint.Middleware, ops []http.ServerOption) {
+	Svc := NewService(serviceMiddleware(log, appName))
+	Eps := NewEndpoints(Svc, endpointMiddleware(log, eps))
+	Ops := serviceOption(ops)
+	NewHTTPHandler(r, Eps, Ops)
 }
