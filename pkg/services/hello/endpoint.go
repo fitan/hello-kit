@@ -25,7 +25,25 @@ type Endpoints struct {
 	SayHello1Endpoint endpoint.Endpoint
 }
 
-func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m func(n string) endpoint.Middleware) {
+func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m []endpoint.Middleware) {
+	methods := []string{
+
+		"Foo",
+
+		"Say",
+
+		"Say1",
+
+		"SayHello",
+
+		"SayHello1",
+	}
+	for _, v := range methods {
+		mw[v] = append(mw[v], m)
+	}
+}
+
+func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Middleware, m func(n string) endpoint.Middleware) {
 	methods := []string{
 
 		"Foo",
