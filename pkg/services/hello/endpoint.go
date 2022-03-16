@@ -25,7 +25,7 @@ type Endpoints struct {
 	SayHello1Endpoint endpoint.Endpoint
 }
 
-func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m []endpoint.Middleware) {
+func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m endpoint.Middleware) {
 	methods := []string{
 
 		"Foo",

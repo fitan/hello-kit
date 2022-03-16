@@ -47,7 +47,9 @@ func endpointMiddleware(logger log.Logger, ep []endpoint.Middleware) (mw map[str
 	AddEndpointMiddlewareToAllMethodsWithMethodName(mw, otelkitEMW)
 	AddEndpointMiddlewareToAllMethodsWithMethodName(mw, logEMW)
 	AddEndpointMiddlewareToAllMethodsWithMethodName(mw, instrumentingEMW)
-	AddEndpointMiddlewareToAllMethods(mw, ep)
+	for _, e := range ep {
+		AddEndpointMiddlewareToAllMethods(mw, e)
+	}
 
 	return
 }

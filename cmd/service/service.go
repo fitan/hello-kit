@@ -67,7 +67,7 @@ func Run() {
 func initHttpHandler(g *group.Group, log log.Logger) {
 	r := gin.Default()
 
-	services.InitServices(r, log, appName)
+	services.InitServices(r, log, appName, nil, nil)
 	httpListener, err := net.Listen("tcp", *httpAddr)
 	if err != nil {
 		logger.Log("transport", "HTTP", "during", "Listen", "err", err)

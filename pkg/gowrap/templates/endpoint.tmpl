@@ -10,7 +10,7 @@ type Endpoints struct {
 {{end}}
 }
 
-func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m []endpoint.Middleware) {
+func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m endpoint.Middleware) {
 	methods := []string{
 {{range $method := .Interface.Methods}}
 		"{{$method.Name}}",
