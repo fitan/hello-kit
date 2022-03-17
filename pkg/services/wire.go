@@ -1,4 +1,5 @@
-//+build wireinject
+//go:build wireinject
+// +build wireinject
 
 package services
 
@@ -15,7 +16,7 @@ type wireServices struct {
 	hello hello.WireHttpHandler
 }
 
-var helloSet = wire.NewSet(hello.InitHttpHandler)
+var helloSet = wire.NewSet(hello.NewBasicHelloService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)
 
 var set = wire.NewSet(helloSet, wire.Struct(new(wireServices), "*"))
 

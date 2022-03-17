@@ -14,7 +14,7 @@ import (
 	"hello/pkg/services"
 	log "hello/utils/log"
 	"net"
-	http2 "net/http"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -73,7 +73,7 @@ func initHttpHandler(g *group.Group, log *zap.SugaredLogger) {
 	}
 	g.Add(func() error {
 		logger.Infow("http listener", "transport", "HTTP", "addr", *httpAddr)
-		return http2.Serve(httpListener, r)
+		return http.Serve(httpListener, r)
 	}, func(error) {
 		httpListener.Close()
 	})
@@ -90,13 +90,11 @@ func initTracer() *sdktrace.TracerProvider {
 		),
 	)
 	if err != nil {
-		logger.Errorw("resource.New", "err", err.Error())
-		panic(err)
+		logger.Fatalw("resource.New", "err", err.Error())
 	}
 	exporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(*jaegerAddr)))
 	if err != nil {
-		logger.Errorw("jaeger.New", "err", err.Error())
-		panic(err)
+		logger.Fatalw("jaeger.New", "err", err.Error())
 	}
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
@@ -110,14 +108,14 @@ func initTracer() *sdktrace.TracerProvider {
 }
 
 func initMetricsEndpoint(g *group.Group) {
-	http2.DefaultServeMux.Handle("/metrics", promhttp.Handler())
+	http.DefaultServeMux.Handle("/metrics", promhttp.Handler())
 	debugListener, err := net.Listen("tcp", *debugAddr)
 	if err != nil {
 		logger.Errorw("net.Listen", "transport", "debug/HTTP", "during", "Listen", "err", err.Error())
 	}
 	g.Add(func() error {
 		logger.Infow("init metrics", "transport", "debug/HTTP", "addr", *debugAddr)
-		return http2.Serve(debugListener, http2.DefaultServeMux)
+		return http.Serve(debugListener, http.DefaultServeMux)
 	}, func(error) {
 		debugListener.Close()
 	})

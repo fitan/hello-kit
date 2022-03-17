@@ -18,9 +18,15 @@ import (
 // Injectors from wire.go:
 
 func InitHttp(r *gin.Engine, log *zap.SugaredLogger, appName string, eps []endpoint.Middleware, ops []http.ServerOption) wireServices {
-	wireHttpHandler := hello.InitHttpHandler(r, log, appName, eps, ops)
+	baseService := hello.NewBasicHelloService(log)
+	v := hello.NewServiceMiddleware(log, appName)
+	helloService := hello.NewService(baseService, v)
+	v2 := hello.NewEndpointMiddleware(log, eps)
+	endpoints := hello.NewEndpoints(helloService, v2)
+	v3 := hello.NewServiceOption(ops)
+	wireHttpHandler := hello.NewHTTPHandler(r, endpoints, v3)
 	servicesWireServices := wireServices{
-		WireHttpHandler: wireHttpHandler,
+		hello: wireHttpHandler,
 	}
 	return servicesWireServices
 }
@@ -28,9 +34,9 @@ func InitHttp(r *gin.Engine, log *zap.SugaredLogger, appName string, eps []endpo
 // wire.go:
 
 type wireServices struct {
-	hello.WireHttpHandler
+	hello hello.WireHttpHandler
 }
 
-var helloSet = wire.NewSet(hello.InitHttpHandler)
+var helloSet = wire.NewSet(hello.NewBasicHelloService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)
 
 var set = wire.NewSet(helloSet, wire.Struct(new(wireServices), "*"))
