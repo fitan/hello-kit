@@ -66,7 +66,7 @@ func Run() {
 func initHttpHandler(g *group.Group, log *zap.SugaredLogger) {
 	r := gin.Default()
 
-	services.InitServices(r, log, appName, nil, nil)
+	services.InitHttp(r, log, appName, nil, nil)
 	httpListener, err := net.Listen("tcp", *httpAddr)
 	if err != nil {
 		logger.Errorw(err.Error(), "transport", "HTTP", "during", "Listen")

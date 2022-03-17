@@ -12,7 +12,7 @@ import (
 )
 
 type wireServices struct {
-	hello.WireHttpHandler
+	hello hello.WireHttpHandler
 }
 
 var helloSet = wire.NewSet(hello.InitHttpHandler)
