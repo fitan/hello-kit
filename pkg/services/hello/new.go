@@ -2,16 +2,15 @@ package hello
 
 import (
 	"github.com/fitan/gink/transport/http"
-	"github.com/gin-gonic/gin"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/metrics/prometheus"
-	"github.com/go-kit/log"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/go-kit/kit/otelkit"
+	"go.uber.org/zap"
 	"hello/pkg/mid"
 )
 
-func serviceMiddleware(logger log.Logger, appName string) (mw []Middleware) {
+func NewServiceMiddleware(logger *zap.SugaredLogger, appName string) (mw []Middleware) {
 	mw = []Middleware{}
 	// Append your middleware here
 	mw = append(mw, func(helloService HelloService) HelloService {
@@ -27,7 +26,7 @@ func serviceMiddleware(logger log.Logger, appName string) (mw []Middleware) {
 	return
 }
 
-func endpointMiddleware(logger log.Logger, ep []endpoint.Middleware) (mw map[string][]endpoint.Middleware) {
+func NewEndpointMiddleware(logger *zap.SugaredLogger, ep []endpoint.Middleware) (mw map[string][]endpoint.Middleware) {
 	mw = map[string][]endpoint.Middleware{}
 	// Add you endpoint middleware here
 	otelkitEMW := func(n string) endpoint.Middleware {
@@ -54,17 +53,10 @@ func endpointMiddleware(logger log.Logger, ep []endpoint.Middleware) (mw map[str
 	return
 }
 
-func serviceOption(op []http.ServerOption) map[string][]http.ServerOption {
+func NewServiceOption(op []http.ServerOption) map[string][]http.ServerOption {
 	ops := make(map[string][]http.ServerOption)
 	for _, o := range op {
 		AddHttpOptionToAllMethods(ops, o)
 	}
 	return ops
-}
-
-func InitHttpHandler(r *gin.Engine, log log.Logger, appName string, eps []endpoint.Middleware, ops []http.ServerOption) {
-	Svc := NewService(serviceMiddleware(log, appName))
-	Eps := NewEndpoints(Svc, endpointMiddleware(log, eps))
-	Ops := serviceOption(ops)
-	NewHTTPHandler(r, Eps, Ops)
 }

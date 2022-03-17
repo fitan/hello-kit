@@ -9,21 +9,23 @@ import (
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"hello/pkg/services"
+	log "hello/utils/log"
 	"net"
 	http2 "net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
-	log "github.com/go-kit/log"
 	group "github.com/oklog/oklog/pkg/group"
 	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 )
 
-var logger log.Logger
+var logger *zap.SugaredLogger
 
 // Define our flags. Your service probably won't need to bind listeners for
 // all* supported transports, but we do it here for demonstration purposes.
@@ -41,17 +43,14 @@ const (
 func Run() {
 	fs.Parse(os.Args[1:])
 
-	// Create a single logger, which we'll use and give to other components.
-	logger = log.NewJSONLogger(log.NewSyncWriter(os.Stderr))
-	//logger = log.NewLogfmtLogger(os.Stderr)
-	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
-
-	logger = log.With(logger, "caller", log.DefaultCaller)
+	core := log.DefaultZapCore("hello-kit", "./logs", zapcore.InfoLevel)
+	l := zap.New(core, zap.AddCaller())
+	logger = l.Sugar()
 
 	//  Determine which tracer to use. We'll pass the tracer to all the
 	// components that use it, as a dependency
 	if *jaegerAddr != "" {
-		logger.Log("init tracer", "jaeger", "addr", *jaegerAddr)
+		logger.Infow("init jaeger", "addr", *jaegerAddr)
 		tp := initTracer()
 		otel.SetTracerProvider(tp)
 	}
@@ -60,20 +59,20 @@ func Run() {
 	initHttpHandler(g, logger)
 	initMetricsEndpoint(g)
 	initCancelInterrupt(g)
-	logger.Log("exit", g.Run())
+	logger.Infow("exit", g.Run())
 
 }
 
-func initHttpHandler(g *group.Group, log log.Logger) {
+func initHttpHandler(g *group.Group, log *zap.SugaredLogger) {
 	r := gin.Default()
 
 	services.InitServices(r, log, appName, nil, nil)
 	httpListener, err := net.Listen("tcp", *httpAddr)
 	if err != nil {
-		logger.Log("transport", "HTTP", "during", "Listen", "err", err)
+		logger.Errorw(err.Error(), "transport", "HTTP", "during", "Listen")
 	}
 	g.Add(func() error {
-		logger.Log("transport", "HTTP", "addr", *httpAddr)
+		logger.Infow("http listener", "transport", "HTTP", "addr", *httpAddr)
 		return http2.Serve(httpListener, r)
 	}, func(error) {
 		httpListener.Close()
@@ -91,12 +90,12 @@ func initTracer() *sdktrace.TracerProvider {
 		),
 	)
 	if err != nil {
-		logger.Log("failed to create resource", err)
+		logger.Errorw("resource.New", "err", err.Error())
 		panic(err)
 	}
 	exporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(*jaegerAddr)))
 	if err != nil {
-		logger.Log("jaeger.New err", err)
+		logger.Errorw("jaeger.New", "err", err.Error())
 		panic(err)
 	}
 	tp := sdktrace.NewTracerProvider(
@@ -114,10 +113,10 @@ func initMetricsEndpoint(g *group.Group) {
 	http2.DefaultServeMux.Handle("/metrics", promhttp.Handler())
 	debugListener, err := net.Listen("tcp", *debugAddr)
 	if err != nil {
-		logger.Log("transport", "debug/HTTP", "during", "Listen", "err", err)
+		logger.Errorw("net.Listen", "transport", "debug/HTTP", "during", "Listen", "err", err.Error())
 	}
 	g.Add(func() error {
-		logger.Log("transport", "debug/HTTP", "addr", *debugAddr)
+		logger.Infow("init metrics", "transport", "debug/HTTP", "addr", *debugAddr)
 		return http2.Serve(debugListener, http2.DefaultServeMux)
 	}, func(error) {
 		debugListener.Close()
