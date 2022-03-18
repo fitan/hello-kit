@@ -12,27 +12,27 @@ import (
 	"go.uber.org/zap"
 )
 
-// HttpWithLog implements Http that is instrumented with logging
-type HttpWithLog struct {
+// BaiduApiWithLog implements BaiduApi that is instrumented with logging
+type BaiduApiWithLog struct {
 	_log  *zap.SugaredLogger
-	_base Http
+	_base BaiduApi
 }
 
-// NewHttpWithLog instruments an implementation of the Http with simple logging
-func NewHttpWithLog(base Http, log *zap.SugaredLogger) HttpWithLog {
-	return HttpWithLog{
+// NewBaiduApiWithLog instruments an implementation of the BaiduApi with simple logging
+func NewBaiduApiWithLog(base BaiduApi, log *zap.SugaredLogger) BaiduApiWithLog {
+	return BaiduApiWithLog{
 		_base: base,
 		_log:  log,
 	}
 }
 
-// GetRoot implements Http
-func (_d HttpWithLog) GetRoot(ctx context.Context) (rp1 *resty.Response, err error) {
+// GetRoot implements BaiduApi
+func (_d BaiduApiWithLog) GetRoot(ctx context.Context) (rp1 *resty.Response, err error) {
 
 	_log := _d._log.With(log.TraceId(ctx))
 
 	defer func() {
-		_log.Debugw("HttpWithLog calling GetRoot", "params", map[string]interface{}{}, "results", map[string]interface{}{
+		_log.Debugw("BaiduApiWithLog calling GetRoot", "params", map[string]interface{}{}, "results", map[string]interface{}{
 			"rp1": rp1,
 			"err": err})
 		if err != nil {
@@ -45,13 +45,13 @@ func (_d HttpWithLog) GetRoot(ctx context.Context) (rp1 *resty.Response, err err
 	return _d._base.GetRoot(ctx)
 }
 
-// GetRoot1 implements Http
-func (_d HttpWithLog) GetRoot1(ctx context.Context) (rp1 *resty.Response, err error) {
+// GetRoot1 implements BaiduApi
+func (_d BaiduApiWithLog) GetRoot1(ctx context.Context) (rp1 *resty.Response, err error) {
 
 	_log := _d._log.With(log.TraceId(ctx))
 
 	defer func() {
-		_log.Debugw("HttpWithLog calling GetRoot1", "params", map[string]interface{}{}, "results", map[string]interface{}{
+		_log.Debugw("BaiduApiWithLog calling GetRoot1", "params", map[string]interface{}{}, "results", map[string]interface{}{
 			"rp1": rp1,
 			"err": err})
 		if err != nil {

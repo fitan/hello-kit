@@ -2,7 +2,7 @@ package baidu
 
 import "go.uber.org/zap"
 
-func NewHttp(baseHttp BaseHttp, middleware []Middleware) Http {
+func NewBaiduApi(baseHttp Base, middleware []Middleware) BaiduApi {
 	for _, m := range middleware {
 		baseHttp = m(baseHttp)
 	}
@@ -10,19 +10,19 @@ func NewHttp(baseHttp BaseHttp, middleware []Middleware) Http {
 	return baseHttp
 }
 
-type Middleware func(Http) Http
+type Middleware func(BaiduApi) BaiduApi
 
-func NewHttpMiddleware(log *zap.SugaredLogger) (mw []Middleware) {
+func NewBaiduApiMiddleware(log *zap.SugaredLogger) (mw []Middleware) {
 	mw = []Middleware{}
 
-	mw = append(mw, func(http Http) Http {
-		return NewHttpWithPrometheus(http, "repo.baidu")
+	mw = append(mw, func(http BaiduApi) BaiduApi {
+		return NewBaiduApiWithPrometheus(http, "repo.baidu")
 	})
-	mw = append(mw, func(http Http) Http {
-		return NewHttpWithLog(http, log)
+	mw = append(mw, func(http BaiduApi) BaiduApi {
+		return NewBaiduApiWithLog(http, log)
 	})
-	mw = append(mw, func(http Http) Http {
-		return NewHttpWithTracing(http)
+	mw = append(mw, func(http BaiduApi) BaiduApi {
+		return NewBaiduApiWithTracing(http)
 	})
 
 	return

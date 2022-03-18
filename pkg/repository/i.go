@@ -6,6 +6,6 @@ import (
 )
 
 type Repository struct {
-	Baidu  baidu.Http
-	Taobao taobao.Http
+	Baidu  baidu.BaiduApi
+	Taobao taobao.TaobaoApi
 }

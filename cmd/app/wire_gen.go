@@ -22,16 +22,16 @@ import (
 //var appSet = wire.NewSet(wire.Struct(App{}, "*"))
 func InitApp(r *gin.Engine, g *run.Group, name ConfName) App {
 	myConf := initConf(name)
-	baseHttp := baidu.NewBaseHttp(myConf)
+	base := baidu.NewBase(myConf)
 	sugaredLogger := initLog(myConf)
-	v := baidu.NewHttpMiddleware(sugaredLogger)
-	http := baidu.NewHttp(baseHttp, v)
-	taobaoBaseHttp := taobao.NewBaseHttp(myConf)
-	v2 := taobao.NewHttpMiddleware(sugaredLogger)
-	taobaoHttp := taobao.NewHttp(taobaoBaseHttp, v2)
+	v := baidu.NewBaiduApiMiddleware(sugaredLogger)
+	baiduApi := baidu.NewBaiduApi(base, v)
+	taobaoBase := taobao.NewBase(myConf)
+	v2 := taobao.NewTaobaoApiMiddleware(sugaredLogger)
+	taobaoApi := taobao.NewTaoApi(taobaoBase, v2)
 	repositoryRepository := &repository.Repository{
-		Baidu:  http,
-		Taobao: taobaoHttp,
+		Baidu:  baiduApi,
+		Taobao: taobaoApi,
 	}
 	baseService := hello.NewBasicHelloService(sugaredLogger, repositoryRepository)
 	v3 := hello.NewServiceMiddleware(sugaredLogger, myConf)
@@ -48,7 +48,7 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) App {
 	tracerProvider := initTracer(myConf)
 	appInitCancelInterrupt := initCancelInterrupt(g)
 	appInitMetricsEndpoint := initMetricsEndpoint(g, myConf)
-	appInitHttpHandler := initHttpHandler(g, sugaredLogger, myConf)
+	appInitHttpHandler := initHttpHandler(r, g, sugaredLogger, myConf)
 	app := App{
 		r:                   r,
 		repository:          repositoryRepository,
@@ -72,9 +72,9 @@ var logSet = wire.NewSet(initLog)
 
 var traceSet = wire.NewSet(initTracer)
 
-var baiduHttpSet = wire.NewSet(baidu.NewHttp, baidu.NewBaseHttp, baidu.NewHttpMiddleware)
+var baiduHttpSet = wire.NewSet(baidu.NewBaiduApi, baidu.NewBase, baidu.NewBaiduApiMiddleware)
 
-var taobaoHttpSet = wire.NewSet(taobao.NewHttp, taobao.NewBaseHttp, taobao.NewHttpMiddleware)
+var taobaoHttpSet = wire.NewSet(taobao.NewTaoApi, taobao.NewBase, taobao.NewTaobaoApiMiddleware)
 
 var repoSet = wire.NewSet(baiduHttpSet, taobaoHttpSet, wire.Struct(new(repository.Repository), "*"))
 

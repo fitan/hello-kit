@@ -18,8 +18,8 @@ var confSet = wire.NewSet(initConf)
 var logSet = wire.NewSet(initLog)
 var traceSet = wire.NewSet(initTracer)
 
-var baiduHttpSet = wire.NewSet(baidu.NewHttp, baidu.NewBaseHttp, baidu.NewHttpMiddleware)
-var taobaoHttpSet = wire.NewSet(taobao.NewHttp, taobao.NewBaseHttp, taobao.NewHttpMiddleware)
+var baiduHttpSet = wire.NewSet(baidu.NewBaiduApi, baidu.NewBase, baidu.NewBaiduApiMiddleware)
+var taobaoHttpSet = wire.NewSet(taobao.NewTaoApi, taobao.NewBase, taobao.NewTaobaoApiMiddleware)
 var repoSet = wire.NewSet(baiduHttpSet, taobaoHttpSet, wire.Struct(new(repository.Repository), "*"))
 
 var helloServiceSet = wire.NewSet(hello.NewBasicHelloService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)

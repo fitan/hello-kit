@@ -81,8 +81,7 @@ func initConf(confName ConfName) *conf.MyConf {
 type InitHttpHandler struct {
 }
 
-func initHttpHandler(g *group.Group, log *zap.SugaredLogger, conf *conf.MyConf) InitHttpHandler {
-	r := gin.Default()
+func initHttpHandler(r *gin.Engine, g *group.Group, log *zap.SugaredLogger, conf *conf.MyConf) InitHttpHandler {
 
 	httpListener, err := net.Listen("tcp", conf.App.Addr)
 	if err != nil {

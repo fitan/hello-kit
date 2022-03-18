@@ -12,27 +12,27 @@ import (
 	"go.uber.org/zap"
 )
 
-// HttpWithLog implements Http that is instrumented with logging
-type HttpWithLog struct {
+// TaobaoApiWithLog implements TaobaoApi that is instrumented with logging
+type TaobaoApiWithLog struct {
 	_log  *zap.SugaredLogger
-	_base Http
+	_base TaobaoApi
 }
 
-// NewHttpWithLog instruments an implementation of the Http with simple logging
-func NewHttpWithLog(base Http, log *zap.SugaredLogger) HttpWithLog {
-	return HttpWithLog{
+// NewTaobaoApiWithLog instruments an implementation of the TaobaoApi with simple logging
+func NewTaobaoApiWithLog(base TaobaoApi, log *zap.SugaredLogger) TaobaoApiWithLog {
+	return TaobaoApiWithLog{
 		_base: base,
 		_log:  log,
 	}
 }
 
-// GetRoot implements Http
-func (_d HttpWithLog) GetRoot(ctx context.Context) (rp1 *resty.Response, err error) {
+// GetRoot implements TaobaoApi
+func (_d TaobaoApiWithLog) GetRoot(ctx context.Context) (rp1 *resty.Response, err error) {
 
 	_log := _d._log.With(log.TraceId(ctx))
 
 	defer func() {
-		_log.Debugw("HttpWithLog calling GetRoot", "params", map[string]interface{}{}, "results", map[string]interface{}{
+		_log.Debugw("TaobaoApiWithLog calling GetRoot", "params", map[string]interface{}{}, "results", map[string]interface{}{
 			"rp1": rp1,
 			"err": err})
 		if err != nil {
@@ -45,13 +45,13 @@ func (_d HttpWithLog) GetRoot(ctx context.Context) (rp1 *resty.Response, err err
 	return _d._base.GetRoot(ctx)
 }
 
-// GetRoot1 implements Http
-func (_d HttpWithLog) GetRoot1(ctx context.Context) (rp1 *resty.Response, err error) {
+// GetRoot1 implements TaobaoApi
+func (_d TaobaoApiWithLog) GetRoot1(ctx context.Context) (rp1 *resty.Response, err error) {
 
 	_log := _d._log.With(log.TraceId(ctx))
 
 	defer func() {
-		_log.Debugw("HttpWithLog calling GetRoot1", "params", map[string]interface{}{}, "results", map[string]interface{}{
+		_log.Debugw("TaobaoApiWithLog calling GetRoot1", "params", map[string]interface{}{}, "results", map[string]interface{}{
 			"rp1": rp1,
 			"err": err})
 		if err != nil {

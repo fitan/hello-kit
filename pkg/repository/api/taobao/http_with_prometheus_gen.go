@@ -13,32 +13,32 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-// HttpWithPrometheus implements Http interface with all methods wrapped
+// TaobaoApiWithPrometheus implements TaobaoApi interface with all methods wrapped
 // with Prometheus metrics
-type HttpWithPrometheus struct {
-	base         Http
+type TaobaoApiWithPrometheus struct {
+	base         TaobaoApi
 	instanceName string
 }
 
-var httpDurationSummaryVec = promauto.NewSummaryVec(
+var taobaoapiDurationSummaryVec = promauto.NewSummaryVec(
 	prometheus.SummaryOpts{
-		Name:       "TaobaoHttp_duration_seconds",
-		Help:       "http runtime duration and result",
+		Name:       "taobaoapi_duration_seconds",
+		Help:       "taobaoapi runtime duration and result",
 		MaxAge:     time.Minute,
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 	},
 	[]string{"instance_name", "method", "result"})
 
-// NewHttpWithPrometheus returns an instance of the Http decorated with prometheus summary metric
-func NewHttpWithPrometheus(base Http, instanceName string) HttpWithPrometheus {
-	return HttpWithPrometheus{
+// NewTaobaoApiWithPrometheus returns an instance of the TaobaoApi decorated with prometheus summary metric
+func NewTaobaoApiWithPrometheus(base TaobaoApi, instanceName string) TaobaoApiWithPrometheus {
+	return TaobaoApiWithPrometheus{
 		base:         base,
 		instanceName: instanceName,
 	}
 }
 
-// GetRoot implements Http
-func (_d HttpWithPrometheus) GetRoot(ctx context.Context) (rp1 *resty.Response, err error) {
+// GetRoot implements TaobaoApi
+func (_d TaobaoApiWithPrometheus) GetRoot(ctx context.Context) (rp1 *resty.Response, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -46,13 +46,13 @@ func (_d HttpWithPrometheus) GetRoot(ctx context.Context) (rp1 *resty.Response, 
 			result = "error"
 		}
 
-		httpDurationSummaryVec.WithLabelValues(_d.instanceName, "GetRoot", result).Observe(time.Since(_since).Seconds())
+		taobaoapiDurationSummaryVec.WithLabelValues(_d.instanceName, "GetRoot", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.GetRoot(ctx)
 }
 
-// GetRoot1 implements Http
-func (_d HttpWithPrometheus) GetRoot1(ctx context.Context) (rp1 *resty.Response, err error) {
+// GetRoot1 implements TaobaoApi
+func (_d TaobaoApiWithPrometheus) GetRoot1(ctx context.Context) (rp1 *resty.Response, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -60,7 +60,7 @@ func (_d HttpWithPrometheus) GetRoot1(ctx context.Context) (rp1 *resty.Response,
 			result = "error"
 		}
 
-		httpDurationSummaryVec.WithLabelValues(_d.instanceName, "GetRoot1", result).Observe(time.Since(_since).Seconds())
+		taobaoapiDurationSummaryVec.WithLabelValues(_d.instanceName, "GetRoot1", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.GetRoot1(ctx)
 }

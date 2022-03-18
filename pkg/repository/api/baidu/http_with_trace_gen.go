@@ -15,23 +15,23 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// HttpWithTracing implements Http interface instrumented with opentracing spans
-type HttpWithTracing struct {
-	Http
+// BaiduApiWithTracing implements BaiduApi interface instrumented with opentracing spans
+type BaiduApiWithTracing struct {
+	BaiduApi
 }
 
-// NewHttpWithTracing returns HttpWithTracing
-func NewHttpWithTracing(base Http) Http {
-	d := HttpWithTracing{
-		Http: base,
+// NewBaiduApiWithTracing returns BaiduApiWithTracing
+func NewBaiduApiWithTracing(base BaiduApi) BaiduApi {
+	d := BaiduApiWithTracing{
+		BaiduApi: base,
 	}
 
 	return d
 }
 
-// GetRoot implements Http
-func (_d HttpWithTracing) GetRoot(ctx context.Context) (rp1 *resty.Response, err error) {
-	var name = "Http.GetRoot"
+// GetRoot implements BaiduApi
+func (_d BaiduApiWithTracing) GetRoot(ctx context.Context) (rp1 *resty.Response, err error) {
+	var name = "BaiduApi.GetRoot"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -47,12 +47,12 @@ func (_d HttpWithTracing) GetRoot(ctx context.Context) (rp1 *resty.Response, err
 		}
 		span.End()
 	}()
-	return _d.Http.GetRoot(ctx)
+	return _d.BaiduApi.GetRoot(ctx)
 }
 
-// GetRoot1 implements Http
-func (_d HttpWithTracing) GetRoot1(ctx context.Context) (rp1 *resty.Response, err error) {
-	var name = "Http.GetRoot1"
+// GetRoot1 implements BaiduApi
+func (_d BaiduApiWithTracing) GetRoot1(ctx context.Context) (rp1 *resty.Response, err error) {
+	var name = "BaiduApi.GetRoot1"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -68,5 +68,5 @@ func (_d HttpWithTracing) GetRoot1(ctx context.Context) (rp1 *resty.Response, er
 		}
 		span.End()
 	}()
-	return _d.Http.GetRoot1(ctx)
+	return _d.BaiduApi.GetRoot1(ctx)
 }

@@ -2,7 +2,7 @@ package taobao
 
 import "go.uber.org/zap"
 
-func NewHttp(baseHttp BaseHttp, middleware []Middleware) Http {
+func NewTaoApi(baseHttp Base, middleware []Middleware) TaobaoApi {
 	for _, m := range middleware {
 		baseHttp = m(baseHttp)
 	}
@@ -10,19 +10,19 @@ func NewHttp(baseHttp BaseHttp, middleware []Middleware) Http {
 	return baseHttp
 }
 
-type Middleware func(Http) Http
+type Middleware func(TaobaoApi) TaobaoApi
 
-func NewHttpMiddleware(log *zap.SugaredLogger) (mw []Middleware) {
+func NewTaobaoApiMiddleware(log *zap.SugaredLogger) (mw []Middleware) {
 	mw = []Middleware{}
 
-	mw = append(mw, func(http Http) Http {
-		return NewHttpWithPrometheus(http, "repo.taobao")
+	mw = append(mw, func(http TaobaoApi) TaobaoApi {
+		return NewTaobaoApiWithPrometheus(http, "repo.taobao")
 	})
-	mw = append(mw, func(http Http) Http {
-		return NewHttpWithLog(http, log)
+	mw = append(mw, func(http TaobaoApi) TaobaoApi {
+		return NewTaobaoApiWithLog(http, log)
 	})
-	mw = append(mw, func(http Http) Http {
-		return NewHttpWithTracing(http)
+	mw = append(mw, func(http TaobaoApi) TaobaoApi {
+		return NewTaobaoApiWithTracing(http)
 	})
 
 	return
