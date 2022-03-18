@@ -8,13 +8,14 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/go-kit/kit/otelkit"
 	"go.uber.org/zap"
 	"hello/pkg/mid"
+	"hello/utils/conf"
 )
 
-func NewServiceMiddleware(logger *zap.SugaredLogger, appName string) (mw []Middleware) {
+func NewServiceMiddleware(logger *zap.SugaredLogger, conf *conf.MyConf) (mw []Middleware) {
 	mw = []Middleware{}
 	// Append your middleware here
 	mw = append(mw, func(helloService HelloService) HelloService {
-		return NewHelloServiceWithPrometheus(helloService, appName)
+		return NewHelloServiceWithPrometheus(helloService, conf.App.Name)
 	})
 	mw = append(mw, func(helloService HelloService) HelloService {
 		return NewHelloServiceWithLog(helloService, logger)
@@ -32,9 +33,9 @@ func NewEndpointMiddleware(logger *zap.SugaredLogger, ep []endpoint.Middleware) 
 	otelkitEMW := func(n string) endpoint.Middleware {
 		return otelkit.EndpointMiddleware(otelkit.WithOperation(n))
 	}
-	logEMW := func(n string) endpoint.Middleware {
-		return mid.LoggingMiddleware(logger)
-	}
+	//logEMW := func(n string) endpoint.Middleware {
+	//	return mid.LoggingMiddleware(logger)
+	//}
 	instrumentingEMW := func(n string) endpoint.Middleware {
 		return mid.InstrumentingMiddleware(prometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
 			Namespace: "hello",
@@ -44,7 +45,7 @@ func NewEndpointMiddleware(logger *zap.SugaredLogger, ep []endpoint.Middleware) 
 		}, []string{"success"}))
 	}
 	AddEndpointMiddlewareToAllMethodsWithMethodName(mw, otelkitEMW)
-	AddEndpointMiddlewareToAllMethodsWithMethodName(mw, logEMW)
+	//AddEndpointMiddlewareToAllMethodsWithMethodName(mw, logEMW)
 	AddEndpointMiddlewareToAllMethodsWithMethodName(mw, instrumentingEMW)
 	for _, e := range ep {
 		AddEndpointMiddlewareToAllMethods(mw, e)

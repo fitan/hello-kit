@@ -1,7 +1,7 @@
 package main
 
-import service "hello/cmd/service"
+import "hello/cmd/app"
 
 func main() {
-	service.Run()
+	app.RunApp()
 }

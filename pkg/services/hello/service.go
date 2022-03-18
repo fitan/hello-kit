@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go.uber.org/zap"
+	"hello/pkg/repository"
 	"hello/pkg/services/hello/types"
 )
 
@@ -27,7 +28,8 @@ type HelloService interface {
 }
 
 type basicHelloService struct {
-	log *zap.SugaredLogger
+	log  *zap.SugaredLogger
+	repo *repository.Repository
 }
 
 func (b *basicHelloService) Foo(ctx context.Context, s types.SayReq) (rs string, err error) {
@@ -43,6 +45,11 @@ func (b *basicHelloService) Say1(ctx context.Context, req types.SayReq) (res typ
 }
 
 func (b *basicHelloService) SayHello(ctx context.Context, req types.SayReq) (res types.SayRes, err error) {
+	root, err := b.repo.Baidu.GetRoot(ctx)
+	if err != nil {
+		return types.SayRes{}, err
+	}
+	res.Name = root.String()
 	return
 }
 
@@ -55,9 +62,10 @@ type Middleware func(HelloService) HelloService
 type BaseService HelloService
 
 // NewBasicHelloService returns a naive, stateless implementation of HelloService.
-func NewBasicHelloService(log *zap.SugaredLogger) BaseService {
+func NewBasicHelloService(log *zap.SugaredLogger, repo *repository.Repository) BaseService {
 	return &basicHelloService{
-		log: log,
+		log:  log,
+		repo: repo,
 	}
 }
 
