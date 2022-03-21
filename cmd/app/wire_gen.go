@@ -20,7 +20,7 @@ import (
 // Injectors from wire.go:
 
 //var appSet = wire.NewSet(wire.Struct(App{}, "*"))
-func InitApp(r *gin.Engine, g *run.Group, name ConfName) App {
+func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 	myConf := initConf(name)
 	base := baidu.NewBase(myConf)
 	sugaredLogger := initLog(myConf)
@@ -46,6 +46,14 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) App {
 		Hello: wireHttpHandler,
 	}
 	tracerProvider := initTracer(myConf)
+	db, err := initDb(myConf)
+	if err != nil {
+		return App{}, err
+	}
+	profiler, err := initPyroscope(myConf)
+	if err != nil {
+		return App{}, err
+	}
 	appInitCancelInterrupt := initCancelInterrupt(g)
 	appInitMetricsEndpoint := initMetricsEndpoint(g, myConf)
 	appInitHttpHandler := initHttpHandler(r, g, sugaredLogger, myConf)
@@ -57,11 +65,13 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) App {
 		conf:                myConf,
 		log:                 sugaredLogger,
 		tp:                  tracerProvider,
+		db:                  db,
+		pyroscope:           profiler,
 		InitCancelInterrupt: appInitCancelInterrupt,
 		InitMetricsEndpoint: appInitMetricsEndpoint,
 		InitHttpHandler:     appInitHttpHandler,
 	}
-	return app
+	return app, nil
 }
 
 // wire.go:
@@ -71,6 +81,10 @@ var confSet = wire.NewSet(initConf)
 var logSet = wire.NewSet(initLog)
 
 var traceSet = wire.NewSet(initTracer)
+
+var dbSet = wire.NewSet(initDb)
+
+var pyroscopeSet = wire.NewSet(initPyroscope)
 
 var baiduHttpSet = wire.NewSet(baidu.NewBaiduApi, baidu.NewBase, baidu.NewBaiduApiMiddleware)
 

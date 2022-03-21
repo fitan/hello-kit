@@ -30,7 +30,7 @@ func New{{$decorator}}(base {{.Interface.Type}},log *zap.SugaredLogger) {{$decor
           _log := _d._log
       {{end}}
       defer func() {
-          _log.Debugw("{{$decorator}} calling {{$method.Name}}", "params", {{$method.ParamsMapExcludeCtx}}, "results", {{$method.ResultsMap}})
+          _log.Debugw("{{$decorator}} calling {{$method.Name}}", "params", {{$method.ParamsStructExcludeCtx}}, "results", {{$method.ResultsMap}})
         {{- if $method.HasResults}}
           {{- if $method.ReturnsError}}
             if err != nil {

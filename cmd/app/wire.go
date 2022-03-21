@@ -17,6 +17,8 @@ import (
 var confSet = wire.NewSet(initConf)
 var logSet = wire.NewSet(initLog)
 var traceSet = wire.NewSet(initTracer)
+var dbSet = wire.NewSet(initDb)
+var pyroscopeSet = wire.NewSet(initPyroscope)
 
 var baiduHttpSet = wire.NewSet(baidu.NewBaiduApi, baidu.NewBase, baidu.NewBaiduApiMiddleware)
 var taobaoHttpSet = wire.NewSet(taobao.NewTaoApi, taobao.NewBase, taobao.NewTaobaoApiMiddleware)
@@ -30,7 +32,7 @@ var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 var gSet = wire.NewSet(initCancelInterrupt, initMetricsEndpoint, initHttpHandler)
 
 //var appSet = wire.NewSet(wire.Struct(App{}, "*"))
-func InitApp(r *gin.Engine, g *group.Group, name ConfName) App {
-	wire.Build(gSet, mwSet, confSet, logSet, traceSet, repoSet, servicesSet, wire.Struct(new(App), "*"))
-	return App{}
+func InitApp(r *gin.Engine, g *group.Group, name ConfName) (App, error) {
+	wire.Build(pyroscopeSet, dbSet, gSet, mwSet, confSet, logSet, traceSet, repoSet, servicesSet, wire.Struct(new(App), "*"))
+	return App{}, nil
 }

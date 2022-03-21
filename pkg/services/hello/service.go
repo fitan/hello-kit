@@ -13,7 +13,7 @@ import (
 ////go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/log.tmpl:service_with_log.go
 ////go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/opentracing.tmpl:service_with_trace.go
 ////go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/endpoint.tmpl:endpoint.go
-//go:generate gowrap gen -g -p ./ -i HelloService -bt "../../gowrap/templates/http-gin.tmpl:http_gen.go ../../gowrap/templates/prometheus.tmpl:service_with_prometheus_gen.go ../../gowrap/templates/log.tmpl:service_with_log_gen.go ../../gowrap/templates/opentracing.tmpl:service_with_trace_gen.go ../../gowrap/templates/endpoint.tmpl:endpoint_gen.go"
+//go:generate gowrap gen -g -p ./ -i HelloService -bt "http-gin:http_gen.go prometheus:service_with_prometheus_gen.go log:service_with_log_gen.go opentracing:service_with_trace_gen.go endpoint:endpoint_gen.go"
 type HelloService interface {
 	// @http-gin /foo/:id POST
 	Foo(ctx context.Context, s types.SayReq) (rs string, err error)
@@ -25,11 +25,22 @@ type HelloService interface {
 	SayHello(ctx context.Context, req types.SayReq) (res types.SayRes, err error)
 	// @http-gin /sayhello1/:id GET
 	SayHello1(ctx context.Context, s1 types.SayReq) (res types.SayRes, err error)
+	Attempt(ctx context.Context, id int, limit int, page int, body types.SayReq) (res types.SayRes, err error)
 }
 
 type basicHelloService struct {
 	log  *zap.SugaredLogger
 	repo *repository.Repository
+}
+
+func (b *basicHelloService) Attempt(
+	ctx context.Context,
+	id int,
+	limit int,
+	page int,
+	body types.SayReq,
+) (res types.SayRes, err error) {
+	panic("implement me")
 }
 
 func (b *basicHelloService) Foo(ctx context.Context, s types.SayReq) (rs string, err error) {
