@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"entgo.io/ent/dialect/sql"
 	"flag"
 	"fmt"
 	ginkHttp "github.com/fitan/gink/transport/http"
@@ -21,6 +22,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"hello/pkg/repository"
+	"hello/pkg/repository/dao/ent"
 	"hello/pkg/services"
 	"hello/utils/conf"
 	"hello/utils/log"
@@ -47,6 +49,7 @@ type App struct {
 	log        *zap.SugaredLogger
 	tp         *sdktrace.TracerProvider
 	db         *gorm.DB
+	ent        *ent.Client
 	pyroscope  *profiler.Profiler
 	InitCancelInterrupt
 	InitMetricsEndpoint
@@ -67,6 +70,15 @@ func RunApp() {
 		logger.Errorw("initapp error", "err", err)
 	}
 	logger.Errorw("exit", app.Run().Error())
+}
+
+func initEnt(conf *conf.MyConf) (*ent.Client, error) {
+	drv, err := sql.Open("mysql", conf.Mysql.Url)
+	if err != nil {
+		return nil, err
+	}
+
+	return ent.NewClient(ent.Driver(drv)), nil
 }
 
 func initDb(conf *conf.MyConf) (*gorm.DB, error) {

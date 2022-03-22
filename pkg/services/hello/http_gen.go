@@ -45,7 +45,7 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options map[string][]htt
 
 	makeSayHello1Handler(r, endpoints, options["SayHello1"])
 
-	return wireHttpHandler{}
+	return WireHttpHandler{}
 }
 
 func makeFooHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {

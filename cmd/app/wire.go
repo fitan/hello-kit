@@ -10,6 +10,7 @@ import (
 	"hello/pkg/repository"
 	"hello/pkg/repository/api/baidu"
 	"hello/pkg/repository/api/taobao"
+	"hello/pkg/repository/dao/user"
 	"hello/pkg/services"
 	"hello/pkg/services/hello"
 )
@@ -18,12 +19,19 @@ var confSet = wire.NewSet(initConf)
 var logSet = wire.NewSet(initLog)
 var traceSet = wire.NewSet(initTracer)
 var dbSet = wire.NewSet(initDb)
+var entSet = wire.NewSet(initEnt)
 var pyroscopeSet = wire.NewSet(initPyroscope)
 
+// repo.api.service
 var baiduHttpSet = wire.NewSet(baidu.NewBaiduApi, baidu.NewBase, baidu.NewBaiduApiMiddleware)
 var taobaoHttpSet = wire.NewSet(taobao.NewTaoApi, taobao.NewBase, taobao.NewTaobaoApiMiddleware)
-var repoSet = wire.NewSet(baiduHttpSet, taobaoHttpSet, wire.Struct(new(repository.Repository), "*"))
 
+// repo.dao.service
+var userServiceSet = wire.NewSet(user.NewBasicService, user.NewServiceMiddleware, user.NewService)
+
+var repoSet = wire.NewSet(userServiceSet, baiduHttpSet, taobaoHttpSet, wire.Struct(new(repository.Repository), "*"))
+
+// http service
 var helloServiceSet = wire.NewSet(hello.NewBasicHelloService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)
 var servicesSet = wire.NewSet(helloServiceSet, wire.Struct(new(services.Services), "*"))
 
@@ -33,6 +41,6 @@ var gSet = wire.NewSet(initCancelInterrupt, initMetricsEndpoint, initHttpHandler
 
 //var appSet = wire.NewSet(wire.Struct(App{}, "*"))
 func InitApp(r *gin.Engine, g *group.Group, name ConfName) (App, error) {
-	wire.Build(pyroscopeSet, dbSet, gSet, mwSet, confSet, logSet, traceSet, repoSet, servicesSet, wire.Struct(new(App), "*"))
+	wire.Build(entSet, pyroscopeSet, dbSet, gSet, mwSet, confSet, logSet, traceSet, repoSet, servicesSet, wire.Struct(new(App), "*"))
 	return App{}, nil
 }

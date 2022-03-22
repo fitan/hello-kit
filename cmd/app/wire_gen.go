@@ -13,6 +13,7 @@ import (
 	"hello/pkg/repository"
 	"hello/pkg/repository/api/baidu"
 	"hello/pkg/repository/api/taobao"
+	"hello/pkg/repository/dao/user"
 	"hello/pkg/services"
 	"hello/pkg/services/hello"
 )
@@ -29,19 +30,27 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 	taobaoBase := taobao.NewBase(myConf)
 	v2 := taobao.NewTaobaoApiMiddleware(sugaredLogger)
 	taobaoApi := taobao.NewTaoApi(taobaoBase, v2)
+	client, err := initEnt(myConf)
+	if err != nil {
+		return App{}, err
+	}
+	baseService := user.NewBasicService(client)
+	v3 := user.NewServiceMiddleware(sugaredLogger)
+	userService := user.NewService(baseService, v3)
 	repositoryRepository := &repository.Repository{
 		Baidu:  baiduApi,
 		Taobao: taobaoApi,
+		User:   userService,
 	}
-	baseService := hello.NewBasicHelloService(sugaredLogger, repositoryRepository)
-	v3 := hello.NewServiceMiddleware(sugaredLogger, myConf)
-	helloService := hello.NewService(baseService, v3)
-	v4 := initEndpointMiddleware()
-	v5 := hello.NewEndpointMiddleware(sugaredLogger, v4)
-	endpoints := hello.NewEndpoints(helloService, v5)
-	v6 := initHttpServerOption()
-	v7 := hello.NewServiceOption(v6)
-	wireHttpHandler := hello.NewHTTPHandler(r, endpoints, v7)
+	helloBaseService := hello.NewBasicHelloService(sugaredLogger, repositoryRepository)
+	v4 := hello.NewServiceMiddleware(sugaredLogger, myConf)
+	helloService := hello.NewService(helloBaseService, v4)
+	v5 := initEndpointMiddleware()
+	v6 := hello.NewEndpointMiddleware(sugaredLogger, v5)
+	endpoints := hello.NewEndpoints(helloService, v6)
+	v7 := initHttpServerOption()
+	v8 := hello.NewServiceOption(v7)
+	wireHttpHandler := hello.NewHTTPHandler(r, endpoints, v8)
 	servicesServices := &services.Services{
 		Hello: wireHttpHandler,
 	}
@@ -66,6 +75,7 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 		log:                 sugaredLogger,
 		tp:                  tracerProvider,
 		db:                  db,
+		ent:                 client,
 		pyroscope:           profiler,
 		InitCancelInterrupt: appInitCancelInterrupt,
 		InitMetricsEndpoint: appInitMetricsEndpoint,
@@ -84,14 +94,21 @@ var traceSet = wire.NewSet(initTracer)
 
 var dbSet = wire.NewSet(initDb)
 
+var entSet = wire.NewSet(initEnt)
+
 var pyroscopeSet = wire.NewSet(initPyroscope)
 
+// http api
 var baiduHttpSet = wire.NewSet(baidu.NewBaiduApi, baidu.NewBase, baidu.NewBaiduApiMiddleware)
 
 var taobaoHttpSet = wire.NewSet(taobao.NewTaoApi, taobao.NewBase, taobao.NewTaobaoApiMiddleware)
 
-var repoSet = wire.NewSet(baiduHttpSet, taobaoHttpSet, wire.Struct(new(repository.Repository), "*"))
+// dao service
+var userServiceSet = wire.NewSet(user.NewBasicService, user.NewServiceMiddleware, user.NewService)
 
+var repoSet = wire.NewSet(userServiceSet, baiduHttpSet, taobaoHttpSet, wire.Struct(new(repository.Repository), "*"))
+
+// http service
 var helloServiceSet = wire.NewSet(hello.NewBasicHelloService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)
 
 var servicesSet = wire.NewSet(helloServiceSet, wire.Struct(new(services.Services), "*"))

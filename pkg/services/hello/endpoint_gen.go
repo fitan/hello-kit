@@ -72,8 +72,6 @@ func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Mi
 func NewEndpoints(s HelloService, mdw map[string][]endpoint.Middleware) Endpoints {
 	eps := Endpoints{
 
-		AttemptEndpoint: MakeAttemptEndpoint(s),
-
 		FooEndpoint: MakeFooEndpoint(s),
 
 		SayEndpoint: MakeSayEndpoint(s),
@@ -110,21 +108,6 @@ func NewEndpoints(s HelloService, mdw map[string][]endpoint.Middleware) Endpoint
 	}
 
 	return eps
-}
-
-func MakeAttemptEndpoint(s HelloService) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(int)
-		rs, err := s.Attempt(ctx, req)
-		result := make(map[string]interface{}, 0)
-		if err != nil {
-			result["err"] = err.Error()
-			return result, nil
-		}
-		result["data"] = rs
-		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
-		return result, nil
-	}
 }
 
 func MakeFooEndpoint(s HelloService) endpoint.Endpoint {
