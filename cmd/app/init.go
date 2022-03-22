@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"entgo.io/ent/dialect/sql"
 	"flag"
 	"fmt"
 	ginkHttp "github.com/fitan/gink/transport/http"
@@ -18,6 +19,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"hello/pkg/repository"
+	"hello/pkg/repository/dao/ent"
 	"hello/pkg/services"
 	"hello/utils/conf"
 	"hello/utils/log"
@@ -43,6 +45,7 @@ type App struct {
 	conf       *conf.MyConf
 	log        *zap.SugaredLogger
 	tp         *sdktrace.TracerProvider
+	ent        *ent.Client
 	InitCancelInterrupt
 	InitMetricsEndpoint
 	InitHttpHandler
@@ -62,6 +65,18 @@ func RunApp() {
 }
 
 type ConfName string
+
+func initEnt(conf *conf.MyConf) (*ent.Client, error) {
+	drv, err := sql.Open("mysql", conf.Mysql.Url)
+	if err != nil {
+		return nil, err
+	}
+
+	db := drv.DB()
+	db.SetMaxIdleConns(conf.Mysql.MaxIdleConns)
+	db.SetMaxOpenConns(conf.Mysql.MaxOpenConns)
+	return ent.NewClient(ent.Driver(drv)), nil
+}
 
 func initLog(conf *conf.MyConf) *zap.SugaredLogger {
 	core := log.DefaultZapCore(conf.Log.FileName, conf.Log.Dir, zapcore.Level(conf.Log.Lervel))

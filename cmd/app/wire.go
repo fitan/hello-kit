@@ -17,6 +17,7 @@ import (
 var confSet = wire.NewSet(initConf)
 var logSet = wire.NewSet(initLog)
 var traceSet = wire.NewSet(initTracer)
+var entSet = wire.NewSet(initEnt)
 
 var baiduHttpSet = wire.NewSet(baidu.NewBaiduApi, baidu.NewBase, baidu.NewBaiduApiMiddleware)
 var taobaoHttpSet = wire.NewSet(taobao.NewTaoApi, taobao.NewBase, taobao.NewTaobaoApiMiddleware)
@@ -31,6 +32,6 @@ var gSet = wire.NewSet(initCancelInterrupt, initMetricsEndpoint, initHttpHandler
 
 //var appSet = wire.NewSet(wire.Struct(App{}, "*"))
 func InitApp(r *gin.Engine, g *group.Group, name ConfName) App {
-	wire.Build(gSet, mwSet, confSet, logSet, traceSet, repoSet, servicesSet, wire.Struct(new(App), "*"))
+	wire.Build(entSet, gSet, mwSet, confSet, logSet, traceSet, repoSet, servicesSet, wire.Struct(new(App), "*"))
 	return App{}
 }
