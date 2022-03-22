@@ -29,6 +29,31 @@ func NewHelloServiceWithTracing(base HelloService) HelloService {
 	return d
 }
 
+// Attempt implements HelloService
+func (_d HelloServiceWithTracing) Attempt(ctx context.Context, id int, limit int, page int, body types.SayReq) (res types.SayRes, err error) {
+	var name = "HelloService.Attempt"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id":    id,
+					"limit": limit,
+					"page":  page,
+					"body":  body},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+	return _d.HelloService.Attempt(ctx, id, limit, page, body)
+}
+
 // Foo implements HelloService
 func (_d HelloServiceWithTracing) Foo(ctx context.Context, s types.SayReq) (rs string, err error) {
 	var name = "HelloService.Foo"

@@ -37,6 +37,20 @@ func NewHelloServiceWithPrometheus(base HelloService, instanceName string) Hello
 	}
 }
 
+// Attempt implements HelloService
+func (_d HelloServiceWithPrometheus) Attempt(ctx context.Context, id int, limit int, page int, body types.SayReq) (res types.SayRes, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		helloserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "Attempt", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.Attempt(ctx, id, limit, page, body)
+}
+
 // Foo implements HelloService
 func (_d HelloServiceWithPrometheus) Foo(ctx context.Context, s types.SayReq) (rs string, err error) {
 	_since := time.Now()

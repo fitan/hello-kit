@@ -25,11 +25,22 @@ type HelloService interface {
 	SayHello(ctx context.Context, req types.SayReq) (res types.SayRes, err error)
 	// @http-gin /sayhello1/:id GET
 	SayHello1(ctx context.Context, s1 types.SayReq) (res types.SayRes, err error)
+	Attempt(ctx context.Context, id int, limit int, page int, body types.SayReq) (res types.SayRes, err error)
 }
 
 type basicHelloService struct {
 	log  *zap.SugaredLogger
 	repo *repository.Repository
+}
+
+func (b *basicHelloService) Attempt(
+	ctx context.Context,
+	id int,
+	limit int,
+	page int,
+	body types.SayReq,
+) (res types.SayRes, err error) {
+	panic("implement me")
 }
 
 func (b *basicHelloService) Foo(ctx context.Context, s types.SayReq) (rs string, err error) {

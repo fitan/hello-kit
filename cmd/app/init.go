@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"entgo.io/ent/dialect/sql"
 	"flag"
 	"fmt"
 	ginkHttp "github.com/fitan/gink/transport/http"
@@ -10,6 +9,7 @@ import (
 	"github.com/go-kit/kit/endpoint"
 	"github.com/oklog/oklog/pkg/group"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/pyroscope-io/pyroscope/pkg/agent/profiler"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/propagation"
@@ -18,8 +18,9 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 	"hello/pkg/repository"
-	"hello/pkg/repository/dao/ent"
 	"hello/pkg/services"
 	"hello/utils/conf"
 	"hello/utils/log"
@@ -45,7 +46,8 @@ type App struct {
 	conf       *conf.MyConf
 	log        *zap.SugaredLogger
 	tp         *sdktrace.TracerProvider
-	ent        *ent.Client
+	db         *gorm.DB
+	pyroscope  *profiler.Profiler
 	InitCancelInterrupt
 	InitMetricsEndpoint
 	InitHttpHandler
@@ -60,23 +62,18 @@ func RunApp() {
 
 	r := gin.Default()
 	g := &group.Group{}
-	app := InitApp(r, g, ConfName(*confName))
+	app, err := InitApp(r, g, ConfName(*confName))
+	if err != nil {
+		logger.Errorw("initapp error", "err", err)
+	}
 	logger.Errorw("exit", app.Run().Error())
 }
 
-type ConfName string
-
-func initEnt(conf *conf.MyConf) (*ent.Client, error) {
-	drv, err := sql.Open("mysql", conf.Mysql.Url)
-	if err != nil {
-		return nil, err
-	}
-
-	db := drv.DB()
-	db.SetMaxIdleConns(conf.Mysql.MaxIdleConns)
-	db.SetMaxOpenConns(conf.Mysql.MaxOpenConns)
-	return ent.NewClient(ent.Driver(drv)), nil
+func initDb(conf *conf.MyConf) (*gorm.DB, error) {
+	return gorm.Open(mysql.Open(conf.Mysql.Url))
 }
+
+type ConfName string
 
 func initLog(conf *conf.MyConf) *zap.SugaredLogger {
 	core := log.DefaultZapCore(conf.Log.FileName, conf.Log.Dir, zapcore.Level(conf.Log.Lervel))
@@ -91,6 +88,30 @@ func initConf(confName ConfName) *conf.MyConf {
 		panic("conf.WatchFile" + err.Error())
 	}
 	return &myConf
+}
+
+func initPyroscope(conf *conf.MyConf) (*profiler.Profiler, error) {
+	if conf.Pyroscope.Open {
+		return profiler.Start(
+			profiler.Config{
+				ApplicationName: conf.App.Name,
+
+				// replace this with the address of pyroscope server
+				ServerAddress: conf.Pyroscope.Url,
+
+				// by default all profilers are enabled,
+				// but you can select the ones you want to use:
+				ProfileTypes: []profiler.ProfileType{
+					profiler.ProfileCPU,
+					profiler.ProfileAllocObjects,
+					profiler.ProfileAllocSpace,
+					profiler.ProfileInuseObjects,
+					profiler.ProfileInuseSpace,
+				},
+			},
+		)
+	}
+	return nil, nil
 }
 
 type InitHttpHandler struct {

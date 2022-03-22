@@ -26,6 +26,33 @@ func NewHelloServiceWithLog(base HelloService, log *zap.SugaredLogger) HelloServ
 	}
 }
 
+// Attempt implements HelloService
+func (_d HelloServiceWithLog) Attempt(ctx context.Context, id int, limit int, page int, body types.SayReq) (res types.SayRes, err error) {
+
+	_log := _d._log.With(log.TraceId(ctx))
+
+	defer func() {
+		_log.Debugw("HelloServiceWithLog calling Attempt", "params", map[string]interface{}{
+			"id":    id,
+			"limit": limit,
+			"page":  page,
+			"body":  body}, "results", map[string]interface{}{
+			"res": res,
+			"err": err})
+		if err != nil {
+			_log.Errorw("with_log", "params", map[string]interface{}{
+				"id":    id,
+				"limit": limit,
+				"page":  page,
+				"body":  body}, "results", map[string]interface{}{
+				"res": res,
+				"err": err})
+		}
+
+	}()
+	return _d._base.Attempt(ctx, id, limit, page, body)
+}
+
 // Foo implements HelloService
 func (_d HelloServiceWithLog) Foo(ctx context.Context, s types.SayReq) (rs string, err error) {
 
