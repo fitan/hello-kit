@@ -7,3 +7,7 @@ tasks:
     cmds:
       - vim conf/dev.conf.yaml
     interactive: true
+  gens:
+    dir: "./pkg/services"
+    cmds:
+      - gowrap gen -init {{.CLI_ARGS}}
