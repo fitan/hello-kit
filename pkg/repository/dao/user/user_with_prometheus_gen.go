@@ -6,7 +6,7 @@ package user
 
 import (
 	"context"
-	"hello/pkg/repository/dao/ent"
+	"hello/pkg/ent"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -22,8 +22,8 @@ type UserServiceWithPrometheus struct {
 
 var userserviceDurationSummaryVec = promauto.NewSummaryVec(
 	prometheus.SummaryOpts{
-		Name:       "userservice_duration_seconds",
-		Help:       "userservice runtime duration and result",
+		Name:       "user_duration_seconds",
+		Help:       "user runtime duration and result",
 		MaxAge:     time.Minute,
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 	},

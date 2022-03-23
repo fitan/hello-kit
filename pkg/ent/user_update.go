@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"hello/pkg/repository/dao/ent/predicate"
-	"hello/pkg/repository/dao/ent/user"
+	"hello/pkg/ent/predicate"
+	"hello/pkg/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

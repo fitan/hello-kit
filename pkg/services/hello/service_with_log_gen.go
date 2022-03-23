@@ -6,6 +6,7 @@ package hello
 
 import (
 	"context"
+	"hello/pkg/ent"
 	"hello/pkg/services/hello/types"
 	"hello/utils/log"
 
@@ -138,7 +139,7 @@ func (_d HelloServiceWithLog) SayHello(ctx context.Context, req types.SayReq) (r
 }
 
 // SayHello1 implements HelloService
-func (_d HelloServiceWithLog) SayHello1(ctx context.Context, s1 types.SayReq) (res types.SayRes, err error) {
+func (_d HelloServiceWithLog) SayHello1(ctx context.Context, s1 types.SayReq) (res []*ent.User, err error) {
 
 	_log := _d._log.With(log.TraceId(ctx))
 

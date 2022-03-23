@@ -14,8 +14,6 @@ import (
 )
 
 type Endpoints struct {
-	AttemptEndpoint endpoint.Endpoint
-
 	FooEndpoint endpoint.Endpoint
 
 	SayEndpoint endpoint.Endpoint
@@ -29,8 +27,6 @@ type Endpoints struct {
 
 func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m endpoint.Middleware) {
 	methods := []string{
-
-		"Attempt",
 
 		"Foo",
 
@@ -49,8 +45,6 @@ func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m en
 
 func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Middleware, m func(n string) endpoint.Middleware) {
 	methods := []string{
-
-		"Attempt",
 
 		"Foo",
 
@@ -81,10 +75,6 @@ func NewEndpoints(s HelloService, mdw map[string][]endpoint.Middleware) Endpoint
 		SayHelloEndpoint: MakeSayHelloEndpoint(s),
 
 		SayHello1Endpoint: MakeSayHello1Endpoint(s),
-	}
-
-	for _, m := range mdw["Attempt"] {
-		eps.AttemptEndpoint = m(eps.AttemptEndpoint)
 	}
 
 	for _, m := range mdw["Foo"] {

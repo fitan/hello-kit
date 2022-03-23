@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"log"
 
-	"hello/pkg/repository/dao/ent/migrate"
+	"hello/pkg/ent/migrate"
 
-	"hello/pkg/repository/dao/ent/user"
+	"hello/pkg/ent/user"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

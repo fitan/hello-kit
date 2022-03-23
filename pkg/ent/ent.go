@@ -5,7 +5,7 @@ package ent
 import (
 	"errors"
 	"fmt"
-	"hello/pkg/repository/dao/ent/user"
+	"hello/pkg/ent/user"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

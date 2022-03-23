@@ -1,5 +1,16 @@
 version: '3'
 tasks:
+  ent:
+    dir: "./pkg/ent"
+    cmds:
+      - go generate
+  build:
+    cmds:
+      - go build -ldflags "-X main.GitCommitId=`git rev-parse HEAD` -X 'main.goVersion=$(go version)' -X 'main.gitHash=$(git show -s --format=%H)' -X 'main.buildTime=$(git show -s --format=%cd)'"  -mod vendor -o output/main ./cmd/main.go
+  wire:
+    dir: ./cmd/app/
+    cmds:
+      - wire
   run:
     cmds:
       - go run cmd/main.go
@@ -7,7 +18,15 @@ tasks:
     cmds:
       - vim conf/dev.conf.yaml
     interactive: true
-  gens:
+  gis:
     dir: "./pkg/services"
+    cmds:
+      - gowrap gen -init {{.CLI_ARGS}}
+  gia:
+    dir: "./pkg/repository/api"
+    cmds:
+      - gowrap gen -init {{.CLI_ARGS}}
+  gid:
+    dir: "./pkg/repository/dao"
     cmds:
       - gowrap gen -init {{.CLI_ARGS}}

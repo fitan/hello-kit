@@ -5,12 +5,19 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"flag"
 	"fmt"
+	microConsul "github.com/asim/go-micro/plugins/registry/consul/v4"
+	httpServer "github.com/asim/go-micro/plugins/server/http/v4"
+	"github.com/casbin/casbin/v2"
+	entadapter "github.com/casbin/ent-adapter"
 	ginkHttp "github.com/fitan/gink/transport/http"
 	"github.com/gin-gonic/gin"
 	"github.com/go-kit/kit/endpoint"
+	"github.com/hashicorp/consul/api"
 	"github.com/oklog/oklog/pkg/group"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/pyroscope-io/pyroscope/pkg/agent/profiler"
+	"go-micro.dev/v4"
+	"go-micro.dev/v4/server"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/propagation"
@@ -21,8 +28,8 @@ import (
 	"go.uber.org/zap/zapcore"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"hello/pkg/ent"
 	"hello/pkg/repository"
-	"hello/pkg/repository/dao/ent"
 	"hello/pkg/services"
 	"hello/utils/conf"
 	"hello/utils/log"
@@ -51,9 +58,11 @@ type App struct {
 	db         *gorm.DB
 	ent        *ent.Client
 	pyroscope  *profiler.Profiler
+	casbin     *casbin.Enforcer
 	InitCancelInterrupt
 	InitMetricsEndpoint
-	InitHttpHandler
+	//InitHttpHandler
+	InitMicro
 }
 
 func (a *App) Run() error {
@@ -218,4 +227,48 @@ func initEndpointMiddleware() []endpoint.Middleware {
 func initHttpServerOption() []ginkHttp.ServerOption {
 	so := make([]ginkHttp.ServerOption, 0)
 	return so
+}
+
+type InitMicro struct {
+}
+
+func initMicro(g *group.Group, r *gin.Engine, conf *conf.MyConf) (InitMicro, error) {
+	consulConf := api.DefaultConfig()
+	consulConf.Address = conf.Consul.Addr
+	registry := microConsul.NewRegistry(microConsul.Config(consulConf))
+
+	srv := httpServer.NewServer(
+		server.Name(conf.App.Name),
+		server.Address(conf.App.Addr),
+	)
+
+	gin.SetMode(gin.ReleaseMode)
+
+	hd := srv.NewHandler(r)
+	if err := srv.Handle(hd); err != nil {
+		return InitMicro{}, err
+	}
+	serivce := micro.NewService(
+		micro.Server(srv),
+		micro.Registry(registry),
+	)
+	serivce.Init()
+
+	g.Add(
+		func() error {
+			logger.Infow("micro run...", "transport", "HTTP", "addr", conf.App.Addr)
+			return serivce.Run()
+		}, func(err error) {
+			logger.Errorw("iniMicro.service.Run", "err", err.Error())
+			server.Stop()
+		})
+	return InitMicro{}, nil
+}
+
+func initCasbin(conf *conf.MyConf) (*casbin.Enforcer, error) {
+	a, err := entadapter.NewAdapter("mysql", conf.Mysql.Url)
+	if err != nil {
+		return nil, err
+	}
+	return casbin.NewEnforcer("./conf/rbac_model.conf", a)
 }

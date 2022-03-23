@@ -6,6 +6,7 @@ package hello
 
 import (
 	"context"
+	"hello/pkg/ent"
 	"hello/pkg/services/hello/types"
 	"time"
 
@@ -108,7 +109,7 @@ func (_d HelloServiceWithPrometheus) SayHello(ctx context.Context, req types.Say
 }
 
 // SayHello1 implements HelloService
-func (_d HelloServiceWithPrometheus) SayHello1(ctx context.Context, s1 types.SayReq) (res types.SayRes, err error) {
+func (_d HelloServiceWithPrometheus) SayHello1(ctx context.Context, s1 types.SayReq) (res []*ent.User, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"

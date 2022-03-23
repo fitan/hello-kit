@@ -16,7 +16,7 @@ func NewBaiduApiMiddleware(log *zap.SugaredLogger) (mw []Middleware) {
 	mw = []Middleware{}
 
 	mw = append(mw, func(http BaiduApi) BaiduApi {
-		return NewBaiduApiWithPrometheus(http, "repo.baidu")
+		return NewBaiduApiWithPrometheus(http, "repo.api")
 	})
 	mw = append(mw, func(http BaiduApi) BaiduApi {
 		return NewBaiduApiWithLog(http, log)

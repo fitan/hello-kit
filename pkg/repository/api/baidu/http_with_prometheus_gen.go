@@ -22,8 +22,8 @@ type BaiduApiWithPrometheus struct {
 
 var baiduapiDurationSummaryVec = promauto.NewSummaryVec(
 	prometheus.SummaryOpts{
-		Name:       "baiduapi_duration_seconds",
-		Help:       "baiduapi runtime duration and result",
+		Name:       "baidu_duration_seconds",
+		Help:       "baidu runtime duration and result",
 		MaxAge:     time.Minute,
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 	},

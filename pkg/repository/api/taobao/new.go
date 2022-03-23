@@ -16,7 +16,7 @@ func NewTaobaoApiMiddleware(log *zap.SugaredLogger) (mw []Middleware) {
 	mw = []Middleware{}
 
 	mw = append(mw, func(http TaobaoApi) TaobaoApi {
-		return NewTaobaoApiWithPrometheus(http, "repo.taobao")
+		return NewTaobaoApiWithPrometheus(http, "repo.api")
 	})
 	mw = append(mw, func(http TaobaoApi) TaobaoApi {
 		return NewTaobaoApiWithLog(http, log)

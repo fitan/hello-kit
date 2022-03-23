@@ -4,11 +4,11 @@ import "go.uber.org/zap"
 
 type Middleware func(SayService) SayService
 
-func NewServiceMiddleware(logger *zap.SugaredLogger, appName string) (mw []Middleware) {
+func NewServiceMiddleware(logger *zap.SugaredLogger) (mw []Middleware) {
 	mw = []Middleware{}
 	// Append your middleware here
 	mw = append(mw, func(SayService SayService) SayService {
-		return NewSayServiceWithPrometheus(SayService, appName)
+		return NewSayServiceWithPrometheus(SayService, "service")
 	})
 	mw = append(mw, func(SayService SayService) SayService {
 		return NewSayServiceWithLog(SayService, logger)

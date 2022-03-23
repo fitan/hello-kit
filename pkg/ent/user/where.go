@@ -3,7 +3,7 @@
 package user
 
 import (
-	"hello/pkg/repository/dao/ent/predicate"
+	"hello/pkg/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 )

@@ -22,8 +22,8 @@ type SayServiceWithPrometheus struct {
 
 var sayserviceDurationSummaryVec = promauto.NewSummaryVec(
 	prometheus.SummaryOpts{
-		Name:       "sayservice_duration_seconds",
-		Help:       "sayservice runtime duration and result",
+		Name:       "say_duration_seconds",
+		Help:       "say runtime duration and result",
 		MaxAge:     time.Minute,
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 	},

@@ -6,7 +6,7 @@ package user
 
 import (
 	"context"
-	"hello/pkg/repository/dao/ent"
+	"hello/pkg/ent"
 	"hello/utils/log"
 
 	"go.uber.org/zap"

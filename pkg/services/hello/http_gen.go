@@ -30,10 +30,10 @@ func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option ht
 	}
 }
 
-type WireHttpHandler struct {
+type HttpHandler struct {
 }
 
-func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options map[string][]http.ServerOption) WireHttpHandler {
+func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options map[string][]http.ServerOption) HttpHandler {
 
 	makeFooHandler(r, endpoints, options["Foo"])
 
@@ -45,7 +45,7 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options map[string][]htt
 
 	makeSayHello1Handler(r, endpoints, options["SayHello1"])
 
-	return WireHttpHandler{}
+	return HttpHandler{}
 }
 
 func makeFooHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {

@@ -2,7 +2,7 @@ package user
 
 import (
 	"context"
-	"hello/pkg/repository/dao/ent"
+	"hello/pkg/ent"
 )
 
 // UserService describes the service.

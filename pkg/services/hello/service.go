@@ -2,17 +2,13 @@ package hello
 
 import (
 	"context"
-	"fmt"
 	"go.uber.org/zap"
+	"hello/pkg/ent"
 	"hello/pkg/repository"
 	"hello/pkg/services/hello/types"
 )
 
 // HelloService describes the service.
-////go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/prometheus.tmpl:service_with_prometheus.go
-////go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/log.tmpl:service_with_log.go
-////go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/opentracing.tmpl:service_with_trace.go
-////go:generate gowrap gen -g -p ./ -i HelloService -t ../../gowrap/templates/endpoint.tmpl:endpoint.go
 //go:generate gowrap gen -g -p ./ -i HelloService -bt "http-gin:http_gen.go prometheus:service_with_prometheus_gen.go log:service_with_log_gen.go opentracing:service_with_trace_gen.go endpoint:endpoint_gen.go"
 type HelloService interface {
 	// @http-gin /foo/:id POST
@@ -24,7 +20,7 @@ type HelloService interface {
 	// @http-gin /sayhello/:id GET
 	SayHello(ctx context.Context, req types.SayReq) (res types.SayRes, err error)
 	// @http-gin /sayhello1/:id GET
-	SayHello1(ctx context.Context, s1 types.SayReq) (res types.SayRes, err error)
+	SayHello1(ctx context.Context, s1 types.SayReq) (res []*ent.User, err error)
 	Attempt(ctx context.Context, id int, limit int, page int, body types.SayReq) (res types.SayRes, err error)
 }
 
@@ -64,8 +60,8 @@ func (b *basicHelloService) SayHello(ctx context.Context, req types.SayReq) (res
 	return
 }
 
-func (b *basicHelloService) SayHello1(ctx context.Context, s1 types.SayReq) (res types.SayRes, err error) {
-	return res, fmt.Errorf("sayhello1 error")
+func (b *basicHelloService) SayHello1(ctx context.Context, s1 types.SayReq) (res []*ent.User, err error) {
+	return b.repo.User.GetList(ctx)
 }
 
 type Middleware func(HelloService) HelloService

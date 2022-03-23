@@ -22,8 +22,8 @@ type TaobaoApiWithPrometheus struct {
 
 var taobaoapiDurationSummaryVec = promauto.NewSummaryVec(
 	prometheus.SummaryOpts{
-		Name:       "taobaoapi_duration_seconds",
-		Help:       "taobaoapi runtime duration and result",
+		Name:       "taobao_duration_seconds",
+		Help:       "taobao runtime duration and result",
 		MaxAge:     time.Minute,
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 	},

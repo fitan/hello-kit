@@ -7,6 +7,7 @@ package hello
 import (
 	"context"
 	"encoding/json"
+	"hello/pkg/ent"
 	"hello/pkg/services/hello/types"
 
 	"go.opentelemetry.io/otel"
@@ -143,7 +144,7 @@ func (_d HelloServiceWithTracing) SayHello(ctx context.Context, req types.SayReq
 }
 
 // SayHello1 implements HelloService
-func (_d HelloServiceWithTracing) SayHello1(ctx context.Context, s1 types.SayReq) (res types.SayRes, err error) {
+func (_d HelloServiceWithTracing) SayHello1(ctx context.Context, s1 types.SayReq) (res []*ent.User, err error) {
 	var name = "HelloService.SayHello1"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {

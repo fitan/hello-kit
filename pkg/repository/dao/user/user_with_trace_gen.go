@@ -7,7 +7,7 @@ package user
 import (
 	"context"
 	"encoding/json"
-	"hello/pkg/repository/dao/ent"
+	"hello/pkg/ent"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"

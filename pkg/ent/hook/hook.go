@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"hello/pkg/repository/dao/ent"
+	"hello/pkg/ent"
 )
 
 // The UserFunc type is an adapter to allow the use of ordinary

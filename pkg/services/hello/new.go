@@ -8,14 +8,13 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/go-kit/kit/otelkit"
 	"go.uber.org/zap"
 	"hello/pkg/mid"
-	"hello/utils/conf"
 )
 
-func NewServiceMiddleware(logger *zap.SugaredLogger, conf *conf.MyConf) (mw []Middleware) {
+func NewServiceMiddleware(logger *zap.SugaredLogger) (mw []Middleware) {
 	mw = []Middleware{}
 	// Append your middleware here
 	mw = append(mw, func(helloService HelloService) HelloService {
-		return NewHelloServiceWithPrometheus(helloService, conf.App.Name)
+		return NewHelloServiceWithPrometheus(helloService, "service")
 	})
 	mw = append(mw, func(helloService HelloService) HelloService {
 		return NewHelloServiceWithLog(helloService, logger)

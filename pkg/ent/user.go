@@ -4,7 +4,7 @@ package ent
 
 import (
 	"fmt"
-	"hello/pkg/repository/dao/ent/user"
+	"hello/pkg/ent/user"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"

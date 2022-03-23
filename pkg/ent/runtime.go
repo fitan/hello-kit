@@ -3,8 +3,8 @@
 package ent
 
 import (
-	"hello/pkg/repository/dao/ent/schema"
-	"hello/pkg/repository/dao/ent/user"
+	"hello/pkg/ent/schema"
+	"hello/pkg/ent/user"
 )
 
 // The init function reads all schema descriptors with runtime code
