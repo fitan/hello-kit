@@ -14,9 +14,12 @@ import (
 	"github.com/go-kit/kit/endpoint"
 	"github.com/hashicorp/consul/api"
 	"github.com/oklog/run"
+	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/pyroscope-io/pyroscope/pkg/agent/profiler"
 	"go-micro.dev/v4"
+	"go-micro.dev/v4/config"
+	"go-micro.dev/v4/config/source/file"
 	"go-micro.dev/v4/server"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
@@ -38,7 +41,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 )
 
 // Define our flags. Your service probably won't need to bind listeners for
@@ -76,7 +78,9 @@ func RunApp() {
 	g := &run.Group{}
 	app, err := InitApp(r, g, ConfName(*confName))
 	if err != nil {
-		logger.Errorw("initapp error", "err", err)
+		fmt.Printf("initapp error: %s", err.Error())
+		os.Exit(1)
+
 	}
 	logger.Errorw("exit", app.Run().Error())
 }
@@ -102,14 +106,14 @@ func initLog(conf *conf.MyConf) *zap.SugaredLogger {
 	return logger
 }
 
-func initConf(confName ConfName) *conf.MyConf {
-	myConf := conf.MyConf{}
-	_, err := conf.WatchFile(string(confName)+".conf", []string{"./conf"}, &myConf, 5*time.Second)
-	if err != nil {
-		panic("conf.WatchFile" + err.Error())
-	}
-	return &myConf
-}
+//func initConf(confName ConfName) *conf.MyConf {
+//	myConf := conf.MyConf{}
+//	_, err := conf.WatchFile(string(confName)+".conf", []string{"./conf"}, &myConf, 5*time.Second)
+//	if err != nil {
+//		panic("conf.WatchFile" + err.Error())
+//	}
+//	return &myConf
+//}
 
 func initPyroscope(conf *conf.MyConf) (*profiler.Profiler, error) {
 	if conf.Pyroscope.Open {
@@ -271,4 +275,25 @@ func initCasbin(conf *conf.MyConf) (*casbin.Enforcer, error) {
 		return nil, err
 	}
 	return casbin.NewEnforcer("./conf/rbac_model.conf", a)
+}
+
+func initMicroConf(confName ConfName) (*conf.MyConf, error) {
+	fileSouce := file.NewSource(
+		file.WithPath("./conf/" + string(confName) + ".conf.yaml"),
+		//source.WithEncoder(yaml.NewEncoder()),
+	)
+
+	c, _ := config.NewConfig()
+	err := c.Load(fileSouce)
+	if err != nil {
+		return nil, errors.Wrap(err, "c.Load")
+	}
+
+	myConf := conf.MyConf{}
+	err = c.Scan(&myConf)
+	if err != nil {
+		return nil, errors.Wrap(err, "c.Scan")
+	}
+	fmt.Println("myconf: ", "conf", myConf)
+	return &myConf, nil
 }

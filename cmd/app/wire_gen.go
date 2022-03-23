@@ -22,7 +22,10 @@ import (
 
 //var appSet = wire.NewSet(wire.Struct(App{}, "*"))
 func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
-	myConf := initConf(name)
+	myConf, err := initMicroConf(name)
+	if err != nil {
+		return App{}, err
+	}
 	base := baidu.NewBase(myConf)
 	sugaredLogger := initLog(myConf)
 	v := baidu.NewBaiduApiMiddleware(sugaredLogger)
@@ -94,7 +97,7 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 
 // wire.go:
 
-var confSet = wire.NewSet(initConf)
+var confSet = wire.NewSet(initMicroConf)
 
 var logSet = wire.NewSet(initLog)
 

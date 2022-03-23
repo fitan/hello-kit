@@ -154,6 +154,8 @@ github.com/aryann/difflib v0.0.0-20170710044230-e206f873d14a/go.mod h1:DAHtR1m6l
 github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a/go.mod h1:lB+ZfQJz7igIIfQNfa7Ml4HSf2uFQQRzpGGRXenZAgY=
 github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d h1:Byv0BzEl3/e6D5CLfI0j/7hiIEtvGVFPCZ7Ei2oq8iQ=
 github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d/go.mod h1:WaHUgvxTVq04UNunO+XhnAqY/wQc+bxr74GqbsZ/Jqw=
+github.com/asim/go-micro/plugins/config/encoder/yaml/v4 v4.0.0-20220317022205-c6d352c83291 h1:TzvIW4wBg378MeKYDTeTijwxK9MhVxLvpGIkc8jQ8uI=
+github.com/asim/go-micro/plugins/config/encoder/yaml/v4 v4.0.0-20220317022205-c6d352c83291/go.mod h1:tRcpGjk28FtJQyp4DtmCMdEIyr/wDkCmtVQtv8dx4t0=
 github.com/asim/go-micro/plugins/registry/consul/v4 v4.0.0-20220317022205-c6d352c83291 h1:CfAehpOIS83IKol1FnUj0nGO58kt9tUL4Ed2SSBbrw0=
 github.com/asim/go-micro/plugins/registry/consul/v4 v4.0.0-20220317022205-c6d352c83291/go.mod h1:cCagHmMVGVea+8gzr0AC+yXtwtCIB6iXh20ipF9coOA=
 github.com/asim/go-micro/plugins/server/http/v4 v4.0.0-20220317022205-c6d352c83291 h1:l1l3pUleHu66DNRmaPwfgyXfVXT7UmyzNXD0uQp9SQE=
@@ -337,6 +339,7 @@ github.com/fsnotify/fsnotify v1.5.1 h1:mZcQUHVQUQWoPXXtuf9yuEXKudkV2sx1E06UadKWp
 github.com/fsnotify/fsnotify v1.5.1/go.mod h1:T3375wBYaZdLLcVNkcVbzGHY7f1l/uK5T5Ai1i3InKU=
 github.com/fsouza/go-dockerclient v1.7.3/go.mod h1:8xfZB8o9SptLNJ13VoV5pMiRbZGWkU/Omu5VOu/KC9Y=
 github.com/getkin/kin-openapi v0.13.0/go.mod h1:WGRs2ZMM1Q8LR1QBEwUxC6RJEfaBcD0s+pcEVXFuAjw=
+github.com/ghodss/yaml v1.0.0 h1:wQHKEahhL6wmXdzwWG11gIVCkOv05bNOh+Rxn0yngAk=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE=
 github.com/gin-contrib/sse v0.1.0/go.mod h1:RHrZQHXnP2xjPF+u1gW/2HnVO7nvIa9PG3Gm+fLHvGI=

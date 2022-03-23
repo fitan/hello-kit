@@ -15,7 +15,7 @@ import (
 	"hello/pkg/services/hello"
 )
 
-var confSet = wire.NewSet(initConf)
+var confSet = wire.NewSet(initMicroConf)
 var logSet = wire.NewSet(initLog)
 var traceSet = wire.NewSet(initTracer)
 var dbSet = wire.NewSet(initDb)

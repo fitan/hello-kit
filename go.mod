@@ -41,6 +41,7 @@ require (
 )
 
 require (
+	github.com/asim/go-micro/plugins/config/encoder/yaml/v4 v4.0.0-20220317022205-c6d352c83291
 	github.com/casbin/casbin/v2 v2.37.0
 	github.com/casbin/ent-adapter v0.2.1
 )
@@ -61,6 +62,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/emirpasic/gods v1.12.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
+	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect
