@@ -1,0 +1,62 @@
+app:
+  name: hello-kit
+  addr: ":8080"
+log:
+  # debug -1 info 0 warn 1 error 2 dpanic 3 panic 4 fatal 5
+  lervel: 0
+  dir: ./logs
+  traceLervel: 0
+  fileName: gteml
+debug:
+  addr: ":8081"
+
+trace:
+  open: true
+  tracerProviderAddr: http://10.170.34.122:14268/api/traces
+#  tracerProviderAddr: http://localhost:14268/api/traces
+pyroscope:
+  open: false
+  url: "http://localhost:4040"
+
+apis:
+  baidu:
+    url: http://www.baidu.com
+    traceDebug: false
+    restyDebug: false
+  taobao:
+    url: http://www.taobao.com
+    traceDebug: false
+    restyDebug: false
+
+mysql:
+  url: root:123456@tcp(localhost:3306)/gteml?charset=utf8mb4&parseTime=True&loc=Local
+  maxIdleConns: 10
+  maxOpenConns: 100
+  connMaxLifetime: 1h
+  ConnMaxIdleTime: 1h
+
+redis:
+  url: localhost:6379
+  password: ""
+  db: 0
+  openTrace: true
+
+jwt:
+  realm: gtemp
+  identityKey: id
+  secretKey: HelloWord
+  timeout: 100000h
+  maxRefresh: 100000h
+  tokenHeadName: token
+
+k8sConf:
+  configPath: /root/.kube/config
+
+rbac:
+  model: ./rbac_model.conf
+
+swagger:
+  enable: true
+
+consul:
+  addr: localhost:8500

@@ -40,7 +40,10 @@ require (
 	github.com/hashicorp/consul/api v1.12.0
 )
 
-require github.com/casbin/ent-adapter v0.2.1
+require (
+	github.com/casbin/casbin/v2 v2.37.0
+	github.com/casbin/ent-adapter v0.2.1
+)
 
 require (
 	ariga.io/atlas v0.3.7-0.20220303204946-787354f533c3 // indirect
@@ -54,7 +57,6 @@ require (
 	github.com/armon/go-metrics v0.3.10 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bitly/go-simplejson v0.5.0 // indirect
-	github.com/casbin/casbin/v2 v2.37.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/emirpasic/gods v1.12.0 // indirect

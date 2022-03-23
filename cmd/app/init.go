@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/hashicorp/consul/api"
-	"github.com/oklog/oklog/pkg/group"
+	"github.com/oklog/run"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/pyroscope-io/pyroscope/pkg/agent/profiler"
 	"go-micro.dev/v4"
@@ -44,14 +44,14 @@ import (
 // Define our flags. Your service probably won't need to bind listeners for
 // all* supported transports, but we do it here for demonstration purposes.
 var fs = flag.NewFlagSet("hello", flag.ExitOnError)
-var confName = fs.String("conf", "dev.conf", "open config")
+var confName = fs.String("conf", "home", "open config")
 var logger *zap.SugaredLogger
 
 type App struct {
 	r          *gin.Engine
 	repository *repository.Repository
 	services   *services.Services
-	g          *group.Group
+	g          *run.Group
 	conf       *conf.MyConf
 	log        *zap.SugaredLogger
 	tp         *sdktrace.TracerProvider
@@ -73,7 +73,7 @@ func RunApp() {
 	fs.Parse(os.Args[1:])
 
 	r := gin.Default()
-	g := &group.Group{}
+	g := &run.Group{}
 	app, err := InitApp(r, g, ConfName(*confName))
 	if err != nil {
 		logger.Errorw("initapp error", "err", err)
@@ -104,7 +104,7 @@ func initLog(conf *conf.MyConf) *zap.SugaredLogger {
 
 func initConf(confName ConfName) *conf.MyConf {
 	myConf := conf.MyConf{}
-	_, err := conf.WatchFile(string(confName), []string{"./conf"}, &myConf, 5*time.Second)
+	_, err := conf.WatchFile(string(confName)+".conf", []string{"./conf"}, &myConf, 5*time.Second)
 	if err != nil {
 		panic("conf.WatchFile" + err.Error())
 	}
@@ -138,7 +138,7 @@ func initPyroscope(conf *conf.MyConf) (*profiler.Profiler, error) {
 type InitHttpHandler struct {
 }
 
-func initHttpHandler(r *gin.Engine, g *group.Group, log *zap.SugaredLogger, conf *conf.MyConf) InitHttpHandler {
+func initHttpHandler(r *gin.Engine, g *run.Group, log *zap.SugaredLogger, conf *conf.MyConf) InitHttpHandler {
 
 	httpListener, err := net.Listen("tcp", conf.App.Addr)
 	if err != nil {
@@ -184,7 +184,7 @@ func initTracer(conf *conf.MyConf) *sdktrace.TracerProvider {
 type InitMetricsEndpoint struct {
 }
 
-func initMetricsEndpoint(g *group.Group, conf *conf.MyConf) InitMetricsEndpoint {
+func initMetricsEndpoint(g *run.Group, conf *conf.MyConf) InitMetricsEndpoint {
 	http.DefaultServeMux.Handle("/metrics", promhttp.Handler())
 	debugListener, err := net.Listen("tcp", conf.Debug.Addr)
 	if err != nil {
@@ -202,7 +202,7 @@ func initMetricsEndpoint(g *group.Group, conf *conf.MyConf) InitMetricsEndpoint 
 type InitCancelInterrupt struct {
 }
 
-func initCancelInterrupt(g *group.Group) InitCancelInterrupt {
+func initCancelInterrupt(g *run.Group) InitCancelInterrupt {
 	cancelInterrupt := make(chan struct{})
 	g.Add(func() error {
 		c := make(chan os.Signal, 1)
@@ -232,7 +232,7 @@ func initHttpServerOption() []ginkHttp.ServerOption {
 type InitMicro struct {
 }
 
-func initMicro(g *group.Group, r *gin.Engine, conf *conf.MyConf) (InitMicro, error) {
+func initMicro(g *run.Group, r *gin.Engine, conf *conf.MyConf) (InitMicro, error) {
 	consulConf := api.DefaultConfig()
 	consulConf.Address = conf.Consul.Addr
 	registry := microConsul.NewRegistry(microConsul.Config(consulConf))
