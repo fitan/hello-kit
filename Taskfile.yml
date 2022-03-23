@@ -1,5 +1,8 @@
 version: '3'
 tasks:
+  default:
+    cmds:
+      - task --list-all
   ent:
     dir: "./pkg/ent"
     cmds:
@@ -18,15 +21,15 @@ tasks:
     cmds:
       - vim conf/dev.conf.yaml
     interactive: true
-  gis:
+  gen:s:
     dir: "./pkg/services"
     cmds:
       - gowrap gen -init {{.CLI_ARGS}}
-  gia:
+  gen:a:
     dir: "./pkg/repository/api"
     cmds:
       - gowrap gen -init {{.CLI_ARGS}}
-  gid:
+  gen:d:
     dir: "./pkg/repository/dao"
     cmds:
       - gowrap gen -init {{.CLI_ARGS}}
