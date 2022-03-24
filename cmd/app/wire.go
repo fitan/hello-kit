@@ -10,12 +10,14 @@ import (
 	"hello/pkg/repository"
 	"hello/pkg/repository/api/baidu"
 	"hello/pkg/repository/api/taobao"
-	"hello/pkg/repository/dao/user"
+	userD "hello/pkg/repository/dao/user"
 	"hello/pkg/services"
+	"hello/pkg/services/casbin"
 	"hello/pkg/services/hello"
+	"hello/pkg/services/user"
 )
 
-var confSet = wire.NewSet(initMicroConf)
+var confSet = wire.NewSet(initConf)
 var logSet = wire.NewSet(initLog)
 var traceSet = wire.NewSet(initTracer)
 var dbSet = wire.NewSet(initDb)
@@ -28,13 +30,16 @@ var baiduHttpSet = wire.NewSet(baidu.NewBaiduApi, baidu.NewBase, baidu.NewBaiduA
 var taobaoHttpSet = wire.NewSet(taobao.NewTaoApi, taobao.NewBase, taobao.NewTaobaoApiMiddleware)
 
 // repo.dao.service
-var userServiceSet = wire.NewSet(user.NewBasicService, user.NewServiceMiddleware, user.NewService)
+var userDaoSet = wire.NewSet(userD.NewBasicService, userD.NewServiceMiddleware, userD.NewService)
 
-var repoSet = wire.NewSet(userServiceSet, baiduHttpSet, taobaoHttpSet, wire.Struct(new(repository.Repository), "*"))
+var repoSet = wire.NewSet(userDaoSet, baiduHttpSet, taobaoHttpSet, wire.Struct(new(repository.Repository), "*"))
 
 // http service
+var casbinServiceSet = wire.NewSet(casbin.NewBasicService, casbin.NewService, casbin.NewServiceMiddleware)
+
 var helloServiceSet = wire.NewSet(hello.NewBasicHelloService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)
-var servicesSet = wire.NewSet(helloServiceSet, wire.Struct(new(services.Services), "*"))
+var userServiceSet = wire.NewSet(user.NewBasicService, user.NewService, user.NewEndpointMiddleware, user.NewServiceMiddleware, user.NewEndpoints, user.NewServiceOption, user.NewHTTPHandler)
+var servicesSet = wire.NewSet(casbinServiceSet, userServiceSet, helloServiceSet, wire.Struct(new(services.Services), "*"))
 
 var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 

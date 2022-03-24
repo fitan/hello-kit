@@ -14,12 +14,10 @@ import (
 	"github.com/go-kit/kit/endpoint"
 	"github.com/hashicorp/consul/api"
 	"github.com/oklog/run"
-	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/pyroscope-io/pyroscope/pkg/agent/profiler"
+	"github.com/urfave/cli/v2"
 	"go-micro.dev/v4"
-	"go-micro.dev/v4/config"
-	"go-micro.dev/v4/config/source/file"
 	"go-micro.dev/v4/server"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
@@ -41,12 +39,13 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 // Define our flags. Your service probably won't need to bind listeners for
 // all* supported transports, but we do it here for demonstration purposes.
 var fs = flag.NewFlagSet("hello", flag.ExitOnError)
-var confName = fs.String("conf", "home", "open config")
+var confName = fs.String("conf", "dev", "open config")
 var logger *zap.SugaredLogger
 
 type App struct {
@@ -106,14 +105,14 @@ func initLog(conf *conf.MyConf) *zap.SugaredLogger {
 	return logger
 }
 
-//func initConf(confName ConfName) *conf.MyConf {
-//	myConf := conf.MyConf{}
-//	_, err := conf.WatchFile(string(confName)+".conf", []string{"./conf"}, &myConf, 5*time.Second)
-//	if err != nil {
-//		panic("conf.WatchFile" + err.Error())
-//	}
-//	return &myConf
-//}
+func initConf(confName ConfName) (*conf.MyConf, error) {
+	myConf := conf.MyConf{}
+	_, err := conf.WatchFile(string(confName)+".conf", []string{"./conf"}, &myConf, 5*time.Second)
+	if err != nil {
+		return nil, err
+	}
+	return &myConf, nil
+}
 
 func initPyroscope(conf *conf.MyConf) (*profiler.Profiler, error) {
 	if conf.Pyroscope.Open {
@@ -255,6 +254,10 @@ func initMicro(g *run.Group, r *gin.Engine, conf *conf.MyConf) (InitMicro, error
 	serivce := micro.NewService(
 		micro.Server(srv),
 		micro.Registry(registry),
+		micro.Flags(&cli.StringFlag{
+			Name:  "conf",
+			Value: "dev",
+		}),
 	)
 	serivce.Init()
 
@@ -275,25 +278,4 @@ func initCasbin(conf *conf.MyConf) (*casbin.Enforcer, error) {
 		return nil, err
 	}
 	return casbin.NewEnforcer("./conf/rbac_model.conf", a)
-}
-
-func initMicroConf(confName ConfName) (*conf.MyConf, error) {
-	fileSouce := file.NewSource(
-		file.WithPath("./conf/" + string(confName) + ".conf.yaml"),
-		//source.WithEncoder(yaml.NewEncoder()),
-	)
-
-	c, _ := config.NewConfig()
-	err := c.Load(fileSouce)
-	if err != nil {
-		return nil, errors.Wrap(err, "c.Load")
-	}
-
-	myConf := conf.MyConf{}
-	err = c.Scan(&myConf)
-	if err != nil {
-		return nil, errors.Wrap(err, "c.Scan")
-	}
-	fmt.Println("myconf: ", "conf", myConf)
-	return &myConf, nil
 }

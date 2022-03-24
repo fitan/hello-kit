@@ -15,14 +15,16 @@ import (
 	"hello/pkg/repository/api/taobao"
 	"hello/pkg/repository/dao/user"
 	"hello/pkg/services"
+	"hello/pkg/services/casbin"
 	"hello/pkg/services/hello"
+	user2 "hello/pkg/services/user"
 )
 
 // Injectors from wire.go:
 
 //var appSet = wire.NewSet(wire.Struct(App{}, "*"))
 func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
-	myConf, err := initMicroConf(name)
+	myConf, err := initConf(name)
 	if err != nil {
 		return App{}, err
 	}
@@ -54,8 +56,24 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 	v7 := initHttpServerOption()
 	v8 := hello.NewServiceOption(v7)
 	httpHandler := hello.NewHTTPHandler(r, endpoints, v8)
+	repository2 := repository.Repository{
+		Baidu:  baiduApi,
+		Taobao: taobaoApi,
+		User:   userService,
+	}
+	casbinBaseService := casbin.NewBasicService()
+	v9 := casbin.NewServiceMiddleware(sugaredLogger)
+	casbinService := casbin.NewService(casbinBaseService, v9)
+	userBaseService := user2.NewBasicService(repository2, casbinService, client)
+	v10 := user2.NewServiceMiddleware(sugaredLogger)
+	userUserService := user2.NewService(userBaseService, v10)
+	mws := user2.NewEndpointMiddleware(sugaredLogger, v5)
+	userEndpoints := user2.NewEndpoints(userUserService, mws)
+	ops := user2.NewServiceOption(v7)
+	userHttpHandler := user2.NewHTTPHandler(r, userEndpoints, ops)
 	servicesServices := &services.Services{
 		Hello: httpHandler,
+		User:  userHttpHandler,
 	}
 	tracerProvider := initTracer(myConf)
 	db, err := initDb(myConf)
@@ -97,7 +115,7 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 
 // wire.go:
 
-var confSet = wire.NewSet(initMicroConf)
+var confSet = wire.NewSet(initConf)
 
 var logSet = wire.NewSet(initLog)
 
@@ -117,14 +135,18 @@ var baiduHttpSet = wire.NewSet(baidu.NewBaiduApi, baidu.NewBase, baidu.NewBaiduA
 var taobaoHttpSet = wire.NewSet(taobao.NewTaoApi, taobao.NewBase, taobao.NewTaobaoApiMiddleware)
 
 // repo.dao.service
-var userServiceSet = wire.NewSet(user.NewBasicService, user.NewServiceMiddleware, user.NewService)
+var userDaoSet = wire.NewSet(user.NewBasicService, user.NewServiceMiddleware, user.NewService)
 
-var repoSet = wire.NewSet(userServiceSet, baiduHttpSet, taobaoHttpSet, wire.Struct(new(repository.Repository), "*"))
+var repoSet = wire.NewSet(userDaoSet, baiduHttpSet, taobaoHttpSet, wire.Struct(new(repository.Repository), "*"))
 
 // http service
+var casbinServiceSet = wire.NewSet(casbin.NewBasicService, casbin.NewService, casbin.NewServiceMiddleware)
+
 var helloServiceSet = wire.NewSet(hello.NewBasicHelloService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)
 
-var servicesSet = wire.NewSet(helloServiceSet, wire.Struct(new(services.Services), "*"))
+var userServiceSet = wire.NewSet(user2.NewBasicService, user2.NewService, user2.NewEndpointMiddleware, user2.NewServiceMiddleware, user2.NewEndpoints, user2.NewServiceOption, user2.NewHTTPHandler)
+
+var servicesSet = wire.NewSet(casbinServiceSet, userServiceSet, helloServiceSet, wire.Struct(new(services.Services), "*"))
 
 var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 
