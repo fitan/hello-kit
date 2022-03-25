@@ -39,7 +39,7 @@ var casbinServiceSet = wire.NewSet(casbin.NewBasicService, casbin.NewService, ca
 
 var helloServiceSet = wire.NewSet(hello.NewBasicHelloService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)
 var userServiceSet = wire.NewSet(user.NewBasicService, user.NewService, user.NewEndpointMiddleware, user.NewServiceMiddleware, user.NewEndpoints, user.NewServiceOption, user.NewHTTPHandler)
-var servicesSet = wire.NewSet(casbinServiceSet, userServiceSet, helloServiceSet, wire.Struct(new(services.Services), "*"))
+var servicesSet = wire.NewSet(casbinServiceSet,userServiceSet,helloServiceSet, wire.Struct(new(services.Services), "*"))
 
 var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 

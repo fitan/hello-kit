@@ -1,0 +1,65 @@
+{{/* gotype: entgo.io/ent/entc/gen.Type */}}
+
+{{  define "query/additional/form" }}
+type {{$.Name}}TableFormer interface {
+	Query(q *{{$.Name}}Query)
+}
+
+type {{$.Name}}TablePagingForm struct {
+	Limit *int `json:"_limit" form:"_limit"`
+	Page *int `json:"_page" form:"_page"`
+}
+func (f *{{$.Name}}TablePagingForm) Query(q *{{$.Name}}Query) {
+	if f.Limit != nil && f.Page != nil {
+		q.Limit(*f.Limit).Offset((*f.Page-1) * *f.Limit)
+	}
+}
+
+type {{$.Name}}TableOrderForm struct {
+	Order *string `json:"order" form:"_order"`
+	SortBy *string `json:"sortBy" form:"_sortBy" binding:"oneof=acs desc"`
+}
+
+func (f *{{$.Name}}TableOrderForm) Query(q *{{$.Name}}Query) {
+	if f.Order != nil && f.SortBy != nil {
+		if *f.Order == "acs" {
+			q.Order(Asc(*f.SortBy))
+		}
+
+		if *f.Order == "desc" {
+			q.Order(Desc(*f.SortBy))
+		}
+	}
+}
+
+{{range $f := $.Fields}}
+{{ range $op := $f.Ops }}
+{{ $func := print $f.StructField $op.Name }}
+type {{$.Name}}Table{{ $func }}Form struct {
+    {{ $func }} *{{if $op.Variadic}}[]{{end}}{{ $f.Type }} `form:"{{ $func }}" json:"{{ $func }}"`
+}
+func (f *{{$.Name}}Table{{ $func }}Form) Query(q *{{$.Name}}Query) {
+	if f.{{ $func }} != nil {
+		q.Where({{lower $.Name}}.{{ $func }}(*f.{{ $func }}{{ if $op.Variadic }}...{{end}}))
+	}
+}
+
+{{end}}
+{{end}}
+
+{{/*    */}}{{/* Add the base header for the generated file */}}
+{{/*    {{ $pkg := base $.Config.Package }}*/}}
+{{/*    {{ template "header" $ }}*/}}
+
+{{/*    */}}{{/* Loop over all nodes and implement the "GoStringer" interface */}}
+{{/*    {{ range $n := $.Nodes }}*/}}
+{{/*        {{ $receiver := $n.Receiver }}*/}}
+{{/*        func ({{ $receiver }} *{{ $n.Name }}) GoString() string {*/}}
+{{/*        if {{ $receiver }} == nil {*/}}
+{{/*        return fmt.Sprintf("{{ $n.Name }}(nil)")*/}}
+{{/*        }*/}}
+{{/*        return {{ $receiver }}.String()*/}}
+{{/*        }*/}}
+{{/*    {{ end }}*/}}
+
+{{ end }}

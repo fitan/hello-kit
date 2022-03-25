@@ -2,10 +2,11 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"hello/pkg/ent"
-	"hello/pkg/ent/user"
 	"hello/pkg/repository"
 	"hello/pkg/services/casbin"
+	"reflect"
 )
 
 // UserService describes the service.
@@ -29,27 +30,56 @@ type GetByIdReq struct {
 	} `json:"uri"`
 }
 
+
 func (s *basicUserService) GetById(ctx context.Context, req GetByIdReq) (*ent.User, error) {
 	return s.repo.User.GetById(ctx, req.Uri.Id)
 }
 
 type GetListReq struct {
 	Query struct {
-		Name string `form:"name" json:"name"`
+		say string
+		ent.UserTableNameInForm
+		ent.UserTablePagingForm
 	} `json:"query"`
 }
 
 func (s *basicUserService) GetList(ctx context.Context, req GetListReq) ([]*ent.User, error) {
 	q := s.db.User.Query()
-	if req.Query.Name != "" {
-		QueryName(q, req.Query.Name)
-	}
+	req.Query.UserTableNameInForm.Query(q)
+	req.Query.UserTablePagingForm.Query(q)
+	fmt.Println("all: ",GetUserQueries(req))
 	return q.All(ctx)
 }
 
-func QueryName(m *ent.UserQuery, name string) {
-	if name != "" {
-		m.Where(user.NameEQ(name))
+
+func GetUserQueries(o interface{}) []ent.UserTableFormer {
+	l := make([]ent.UserTableFormer,0)
+	v := reflect.ValueOf(o)
+	t := reflect.TypeOf(o)
+	former := reflect.TypeOf((*ent.UserTableFormer)(nil)).Elem()
+	DepValue(v, t,former, &l)
+	return l
+}
+
+func DepValue(v reflect.Value, t reflect.Type,former reflect.Type, l *[]ent.UserTableFormer)  {
+
+
+	for i := 0; i < v.NumField(); i++ {
+		f := v.Field(i)
+		if f.IsZero() {
+			continue
+		}
+		fmt.Printf("f itnerface %#v\n former %#v\n", f.Interface(), former)
+		if f.Type().Implements(former) {
+			fmt.Println("find: usertableformer")
+			*l = append(*l, f.Interface().(ent.UserTableFormer))
+			continue
+		}
+		fmt.Printf("types kind: %s", f.Type().Kind())
+		if f.Type().Kind() == reflect.Struct {
+			fmt.Println("types kind is struct")
+			DepValue(f, t.Field(i).Type,former, l)
+		}
 	}
 }
 
