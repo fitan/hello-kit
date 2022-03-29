@@ -9,18 +9,18 @@ type {{$.Name}}TablePagingForm struct {
 	Limit *int `json:"_limit" form:"_limit"`
 	Page *int `json:"_page" form:"_page"`
 }
-func (f *{{$.Name}}TablePagingForm) Query(q *{{$.Name}}Query) {
+func (f {{$.Name}}TablePagingForm) Query(q *{{$.Name}}Query) {
 	if f.Limit != nil && f.Page != nil {
 		q.Limit(*f.Limit).Offset((*f.Page-1) * *f.Limit)
 	}
 }
 
 type {{$.Name}}TableOrderForm struct {
-	Order *string `json:"order" form:"_order"`
-	SortBy *string `json:"sortBy" form:"_sortBy" binding:"oneof=acs desc"`
+	Order *string `json:"order" form:"_order" binding:"omitempty,oneof=acs desc"`
+	SortBy *string `json:"sortBy" form:"_sortBy"`
 }
 
-func (f *{{$.Name}}TableOrderForm) Query(q *{{$.Name}}Query) {
+func (f {{$.Name}}TableOrderForm) Query(q *{{$.Name}}Query) {
 	if f.Order != nil && f.SortBy != nil {
 		if *f.Order == "acs" {
 			q.Order(Asc(*f.SortBy))
@@ -31,6 +31,33 @@ func (f *{{$.Name}}TableOrderForm) Query(q *{{$.Name}}Query) {
 		}
 	}
 }
+	
+func Set{{$.Name}}FormQueries(o interface{}, q *{{$.Name}}Query) []{{$.Name}}TableFormer {
+	l := make([]{{$.Name}}TableFormer,0)
+	v := reflect.ValueOf(o)
+	former := reflect.TypeOf((*{{$.Name}}TableFormer)(nil)).Elem()
+	{{$.Name}}FormDepValue(v, former, &l)
+	for _, e := range l {
+		e.Query(q)
+	}
+	return l
+}
+
+func {{$.Name}}FormDepValue(v reflect.Value, former reflect.Type, l *[]{{$.Name}}TableFormer)  {
+	for i := 0; i < v.NumField(); i++ {
+		f := v.Field(i)
+		if f.IsZero() {
+			continue
+		}
+		if f.Type().Implements(former) {
+			*l = append(*l, f.Interface().({{$.Name}}TableFormer))
+			continue
+		}
+		if f.Type().Kind() == reflect.Struct {
+			{{$.Name}}FormDepValue(f, former, l)
+		}
+	}
+}	
 
 {{range $f := $.Fields}}
 {{ range $op := $f.Ops }}
@@ -38,7 +65,7 @@ func (f *{{$.Name}}TableOrderForm) Query(q *{{$.Name}}Query) {
 type {{$.Name}}Table{{ $func }}Form struct {
     {{ $func }} *{{if $op.Variadic}}[]{{end}}{{ $f.Type }} `form:"{{ $func }}" json:"{{ $func }}"`
 }
-func (f *{{$.Name}}Table{{ $func }}Form) Query(q *{{$.Name}}Query) {
+func (f {{$.Name}}Table{{ $func }}Form) Query(q *{{$.Name}}Query) {
 	if f.{{ $func }} != nil {
 		q.Where({{lower $.Name}}.{{ $func }}(*f.{{ $func }}{{ if $op.Variadic }}...{{end}}))
 	}
