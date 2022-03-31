@@ -9,6 +9,7 @@ import (
 	httpServer "github.com/asim/go-micro/plugins/server/http/v4"
 	"github.com/casbin/casbin/v2"
 	entadapter "github.com/casbin/ent-adapter"
+	"github.com/chenjiandongx/ginprom"
 	ginkHttp "github.com/fitan/gink/transport/http"
 	"github.com/gin-gonic/gin"
 	"github.com/go-kit/kit/endpoint"
@@ -77,6 +78,7 @@ func RunApp() {
 	fs.Parse(os.Args[1:])
 
 	r := gin.Default()
+	r.Use(ginprom.PromMiddleware(nil))
 	g := &run.Group{}
 	app, err := InitApp(r, g, ConfName(*confName))
 	if err != nil {

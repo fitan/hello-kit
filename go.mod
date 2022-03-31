@@ -46,8 +46,8 @@ require (
 )
 
 require (
+	github.com/chenjiandongx/ginprom v0.0.0-20210617023641-6c809602c38a
 	github.com/pkg/errors v0.9.1
-	github.com/swaggo/http-swagger v1.2.5
 	github.com/urfave/cli/v2 v2.3.0
 )
 
