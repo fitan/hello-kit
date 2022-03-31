@@ -8,15 +8,28 @@ import (
 	"hello/pkg/ent"
 )
 
-// The ProjectFunc type is an adapter to allow the use of ordinary
-// function as Project mutator.
-type ProjectFunc func(context.Context, *ent.ProjectMutation) (ent.Value, error)
+// The PodFunc type is an adapter to allow the use of ordinary
+// function as Pod mutator.
+type PodFunc func(context.Context, *ent.PodMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f ProjectFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.ProjectMutation)
+func (f PodFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.PodMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProjectMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PodMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The SpiderDevTblServicetreeFunc type is an adapter to allow the use of ordinary
+// function as SpiderDevTblServicetree mutator.
+type SpiderDevTblServicetreeFunc func(context.Context, *ent.SpiderDevTblServicetreeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SpiderDevTblServicetreeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.SpiderDevTblServicetreeMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SpiderDevTblServicetreeMutation", m)
 	}
 	return f(ctx, mv)
 }

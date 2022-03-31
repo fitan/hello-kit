@@ -6,8 +6,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Project is the predicate function for project builders.
-type Project func(*sql.Selector)
+// Pod is the predicate function for pod builders.
+type Pod func(*sql.Selector)
+
+// SpiderDevTblServicetree is the predicate function for spiderdevtblservicetree builders.
+type SpiderDevTblServicetree func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

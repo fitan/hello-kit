@@ -6,6 +6,7 @@ package user
 
 import (
 	"context"
+	"hello/pkg/ent"
 
 	"github.com/fitan/gink/transport/http"
 	"github.com/gin-gonic/gin"
@@ -37,6 +38,18 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops) HttpHandler
 	return HttpHandler{}
 }
 
+type SwagResponse struct {
+	TraceId string      `json:"traceId"`
+	Data    interface{} `json:"data"`
+}
+
+// @Accept  json
+// @Param id path string true " "
+// @Success 200 {object} SwagResponse{data=*ent.User}
+// @Failure 400 {object} httputil.HTTPError
+// @Failure 404 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /user/{id} [get]
 func makeGetByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.GET("/user/:id", http.NewServer(endpoints.GetByIdEndpoint, decodeGetByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
@@ -53,6 +66,28 @@ func decodeGetByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, err
 	return req, err
 }
 
+type GetListQuerySwag struct {
+	*ent.PodTableServiceNameEQForm
+	*ent.PodTableNamespaceEQForm
+	*ent.PodTableServiceNameInForm
+	*ent.PodTablePagingForm `binding:"required"`
+	*ent.PodTableOrderForm
+	*ent.PodTableHostIPEQForm
+}
+
+type GetListBodySwag ent.User
+
+// @Accept  json
+// @Tags UserService
+// @Param body body GetListBodySwag true " "
+// @Param query query GetListQuerySwag false " "
+// @Param project header string false " "
+// @Param service header string false " "
+// @Success 200 {object} SwagResponse{data=GetListRes}
+// @Failure 400 {object} httputil.HTTPError
+// @Failure 404 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /user [get]
 func makeGetListHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.GET("/user", http.NewServer(endpoints.GetListEndpoint, decodeGetListRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
@@ -62,6 +97,16 @@ func decodeGetListRequest(_ context.Context, ctx *gin.Context) (interface{}, err
 	var err error
 
 	err = ctx.ShouldBindQuery(&req.Query)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindHeader(&req.Header)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindJSON(&req.Body)
 	if err != nil {
 		return nil, err
 	}

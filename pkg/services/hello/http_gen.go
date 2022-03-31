@@ -12,6 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type Ops map[string][]http.ServerOption
+
 func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option http.ServerOption) {
 	methods := []string{
 
@@ -33,7 +35,7 @@ func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option ht
 type HttpHandler struct {
 }
 
-func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options map[string][]http.ServerOption) HttpHandler {
+func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops) HttpHandler {
 
 	makeFooHandler(r, endpoints, options["Foo"])
 
@@ -48,6 +50,9 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options map[string][]htt
 	return HttpHandler{}
 }
 
+// @Accept  json
+// @Param body body  true " "
+// @Param id path string true " "
 func makeFooHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.POST("/foo/:id", http.NewServer(endpoints.FooEndpoint, decodeFooRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
@@ -64,6 +69,9 @@ func decodeFooRequest(_ context.Context, ctx *gin.Context) (interface{}, error) 
 	return req, err
 }
 
+// @Accept  json
+// @Param body body  true " "
+// @Param id path string true " "
 func makeSayHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.PUT("/say/:id", http.NewServer(endpoints.SayEndpoint, decodeSayRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
@@ -80,6 +88,9 @@ func decodeSayRequest(_ context.Context, ctx *gin.Context) (interface{}, error) 
 	return req, err
 }
 
+// @Accept  json
+// @Param body body  true " "
+// @Param id path string true " "
 func makeSay1Handler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.DELETE("/say1/:id", http.NewServer(endpoints.Say1Endpoint, decodeSay1Request, http.EncodeJSONResponse, options...).ServeHTTP)
 }
@@ -96,6 +107,9 @@ func decodeSay1Request(_ context.Context, ctx *gin.Context) (interface{}, error)
 	return req, err
 }
 
+// @Accept  json
+// @Param body body  true " "
+// @Param id path string true " "
 func makeSayHelloHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.GET("/sayhello/:id", http.NewServer(endpoints.SayHelloEndpoint, decodeSayHelloRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
@@ -112,6 +126,9 @@ func decodeSayHelloRequest(_ context.Context, ctx *gin.Context) (interface{}, er
 	return req, err
 }
 
+// @Accept  json
+// @Param body body  true " "
+// @Param id path string true " "
 func makeSayHello1Handler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.GET("/sayhello1/:id", http.NewServer(endpoints.SayHello1Endpoint, decodeSayHello1Request, http.EncodeJSONResponse, options...).ServeHTTP)
 }

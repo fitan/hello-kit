@@ -8,8 +8,8 @@ import (
 	"context"
 	"hello/pkg/ent"
 	"hello/pkg/services/hello/types"
-	"hello/utils/log"
 
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
@@ -30,7 +30,7 @@ func NewHelloServiceWithLog(base HelloService, log *zap.SugaredLogger) HelloServ
 // Attempt implements HelloService
 func (_d HelloServiceWithLog) Attempt(ctx context.Context, id int, limit int, page int, body types.SayReq) (res types.SayRes, err error) {
 
-	_log := _d._log.With(log.TraceId(ctx))
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
 	defer func() {
 		_log.Debugw("HelloServiceWithLog calling Attempt", "params", map[string]interface{}{
@@ -57,7 +57,7 @@ func (_d HelloServiceWithLog) Attempt(ctx context.Context, id int, limit int, pa
 // Foo implements HelloService
 func (_d HelloServiceWithLog) Foo(ctx context.Context, s types.SayReq) (rs string, err error) {
 
-	_log := _d._log.With(log.TraceId(ctx))
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
 	defer func() {
 		_log.Debugw("HelloServiceWithLog calling Foo", "params", map[string]interface{}{
@@ -78,7 +78,7 @@ func (_d HelloServiceWithLog) Foo(ctx context.Context, s types.SayReq) (rs strin
 // Say implements HelloService
 func (_d HelloServiceWithLog) Say(ctx context.Context, req types.SayReq) (res types.SayRes, err error) {
 
-	_log := _d._log.With(log.TraceId(ctx))
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
 	defer func() {
 		_log.Debugw("HelloServiceWithLog calling Say", "params", map[string]interface{}{
@@ -99,7 +99,7 @@ func (_d HelloServiceWithLog) Say(ctx context.Context, req types.SayReq) (res ty
 // Say1 implements HelloService
 func (_d HelloServiceWithLog) Say1(ctx context.Context, req types.SayReq) (res types.SayRes, err error) {
 
-	_log := _d._log.With(log.TraceId(ctx))
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
 	defer func() {
 		_log.Debugw("HelloServiceWithLog calling Say1", "params", map[string]interface{}{
@@ -120,7 +120,7 @@ func (_d HelloServiceWithLog) Say1(ctx context.Context, req types.SayReq) (res t
 // SayHello implements HelloService
 func (_d HelloServiceWithLog) SayHello(ctx context.Context, req types.SayReq) (res types.SayRes, err error) {
 
-	_log := _d._log.With(log.TraceId(ctx))
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
 	defer func() {
 		_log.Debugw("HelloServiceWithLog calling SayHello", "params", map[string]interface{}{
@@ -141,7 +141,7 @@ func (_d HelloServiceWithLog) SayHello(ctx context.Context, req types.SayReq) (r
 // SayHello1 implements HelloService
 func (_d HelloServiceWithLog) SayHello1(ctx context.Context, s1 types.SayReq) (res []*ent.User, err error) {
 
-	_log := _d._log.With(log.TraceId(ctx))
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
 	defer func() {
 		_log.Debugw("HelloServiceWithLog calling SayHello1", "params", map[string]interface{}{
