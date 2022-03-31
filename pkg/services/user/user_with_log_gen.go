@@ -7,8 +7,8 @@ package user
 import (
 	"context"
 	"hello/pkg/ent"
-	"hello/utils/log"
 
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
@@ -29,7 +29,7 @@ func NewUserServiceWithLog(base UserService, log *zap.SugaredLogger) UserService
 // GetById implements UserService
 func (_d UserServiceWithLog) GetById(ctx context.Context, req GetByIdReq) (up1 *ent.User, err error) {
 
-	_log := _d._log.With(log.TraceId(ctx))
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
 	defer func() {
 		_log.Debugw("UserServiceWithLog calling GetById", "params", map[string]interface{}{
@@ -48,20 +48,20 @@ func (_d UserServiceWithLog) GetById(ctx context.Context, req GetByIdReq) (up1 *
 }
 
 // GetList implements UserService
-func (_d UserServiceWithLog) GetList(ctx context.Context, req GetListReq) (upa1 []*ent.User, err error) {
+func (_d UserServiceWithLog) GetList(ctx context.Context, req GetListReq) (g1 GetListRes, err error) {
 
-	_log := _d._log.With(log.TraceId(ctx))
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
 	defer func() {
 		_log.Debugw("UserServiceWithLog calling GetList", "params", map[string]interface{}{
 			"req": req}, "results", map[string]interface{}{
-			"upa1": upa1,
-			"err":  err})
+			"g1":  g1,
+			"err": err})
 		if err != nil {
 			_log.Errorw("with_log", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
-				"upa1": upa1,
-				"err":  err})
+				"g1":  g1,
+				"err": err})
 		}
 
 	}()

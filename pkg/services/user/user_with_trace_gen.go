@@ -52,7 +52,7 @@ func (_d UserServiceWithTracing) GetById(ctx context.Context, req GetByIdReq) (u
 }
 
 // GetList implements UserService
-func (_d UserServiceWithTracing) GetList(ctx context.Context, req GetListReq) (upa1 []*ent.User, err error) {
+func (_d UserServiceWithTracing) GetList(ctx context.Context, req GetListReq) (g1 GetListRes, err error) {
 	var name = "UserService.GetList"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -61,8 +61,8 @@ func (_d UserServiceWithTracing) GetList(ctx context.Context, req GetListReq) (u
 				"params": map[string]interface{}{
 					"req": req},
 				"result": map[string]interface{}{
-					"upa1": upa1,
-					"err":  err},
+					"g1":  g1,
+					"err": err},
 			}
 			s, _ := json.Marshal(l)
 			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))

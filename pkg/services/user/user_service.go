@@ -13,7 +13,7 @@ type UserService interface {
 	// @http-gin /user/:id GET
 	GetById(ctx context.Context, req GetByIdReq) (*ent.User, error)
 	// @http-gin /user GET
-	GetList(ctx context.Context, req GetListReq) ([]*ent.User, error)
+	GetList(ctx context.Context, req GetListReq) (GetListRes, error)
 }
 
 type basicUserService struct {
@@ -34,17 +34,42 @@ func (s *basicUserService) GetById(ctx context.Context, req GetByIdReq) (*ent.Us
 
 type GetListReq struct {
 	Query struct {
-		say string
-		ent.UserTableNameInForm
-		ent.UserTablePagingForm
-		ent.UserTableOrderForm
+		*ent.PodTableServiceNameEQForm
+		*ent.PodTableNamespaceEQForm
+		*ent.PodTableServiceNameInForm
+		*ent.PodTablePagingForm `binding:"required"`
+		*ent.PodTableOrderForm
+		*ent.PodTableHostIPEQForm
 	} `json:"query"`
+	Header struct{
+		Project string `header:"project" json:"project"`
+		Service string `header:"service" json:"service"`
+	} `json:"header"`
+	Body ent.User `json:"body"`
 }
 
-func (s *basicUserService) GetList(ctx context.Context, req GetListReq) ([]*ent.User, error) {
-	q := s.db.User.Query()
-	ent.SetUserFormQueries(req, q)
-	return q.All(ctx)
+type GetListRes struct {
+	Count int `json:"count"`
+	List ent.Pods `json:"data"`
+}
+
+func (s *basicUserService) GetList(ctx context.Context, req GetListReq) (res GetListRes,err error) {
+	q := s.db.Pod.Query()
+	ent.SetPodFormQueries(req, q)
+
+	count, err := q.Count(ctx)
+	if err != nil {
+		return
+	}
+	list, err := q.All(ctx)
+	if err != nil {
+		return
+	}
+
+	res.List = list
+	res.Count = count
+	return
+	//ent.SetUserFormQueries(req, q)
 }
 
 type BaseService UserService

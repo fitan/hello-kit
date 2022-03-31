@@ -3,22 +3,60 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
 
 var (
-	// ProjectsColumns holds the columns for the "projects" table.
-	ProjectsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString},
-		{Name: "alias", Type: field.TypeString},
+	// PodsColumns holds the columns for the "pods" table.
+	PodsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true, SchemaType: map[string]string{"mysql": "bigint"}},
+		{Name: "cluster_name", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(32)"}},
+		{Name: "namespace", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(32)"}},
+		{Name: "service_name", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(64)"}},
+		{Name: "pod_name", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(128)"}},
+		{Name: "resource_version", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(24)"}},
+		{Name: "pod_ip", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(64)"}},
+		{Name: "host_ip", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(64)"}},
+		{Name: "start_time", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"mysql": "datetime"}},
+		{Name: "phase", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(64)"}},
+		{Name: "reason", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(128)"}},
+		{Name: "message", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(500)"}},
+		{Name: "detail", Type: field.TypeString, Nullable: true, Size: 2147483647, SchemaType: map[string]string{"mysql": "text"}},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"mysql": "datetime"}},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"mysql": "datetime"}},
+		{Name: "aname", Type: field.TypeInt32, Nullable: true, SchemaType: map[string]string{"mysql": "int"}},
 	}
-	// ProjectsTable holds the schema information for the "projects" table.
-	ProjectsTable = &schema.Table{
-		Name:       "projects",
-		Columns:    ProjectsColumns,
-		PrimaryKey: []*schema.Column{ProjectsColumns[0]},
+	// PodsTable holds the schema information for the "pods" table.
+	PodsTable = &schema.Table{
+		Name:       "pods",
+		Columns:    PodsColumns,
+		PrimaryKey: []*schema.Column{PodsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "service_name",
+				Columns:    []*schema.Column{PodsColumns[15]},
+				RefColumns: []*schema.Column{TblServicetreeColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// TblServicetreeColumns holds the columns for the "tbl_servicetree" table.
+	TblServicetreeColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt32, Increment: true, SchemaType: map[string]string{"mysql": "int"}},
+		{Name: "name", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(255)"}},
+		{Name: "aname", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(255)"}},
+		{Name: "pnode", Type: field.TypeInt32, Nullable: true, SchemaType: map[string]string{"mysql": "int"}},
+		{Name: "type", Type: field.TypeInt32, Nullable: true, SchemaType: map[string]string{"mysql": "int"}},
+		{Name: "key", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(255)"}},
+		{Name: "origin", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(255)"}},
+	}
+	// TblServicetreeTable holds the schema information for the "tbl_servicetree" table.
+	TblServicetreeTable = &schema.Table{
+		Name:       "tbl_servicetree",
+		Columns:    TblServicetreeColumns,
+		PrimaryKey: []*schema.Column{TblServicetreeColumns[0]},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -34,10 +72,18 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		ProjectsTable,
+		PodsTable,
+		TblServicetreeTable,
 		UsersTable,
 	}
 )
 
 func init() {
+	PodsTable.ForeignKeys[0].RefTable = TblServicetreeTable
+	PodsTable.Annotation = &entsql.Annotation{
+		Table: "pods",
+	}
+	TblServicetreeTable.Annotation = &entsql.Annotation{
+		Table: "tbl_servicetree",
+	}
 }

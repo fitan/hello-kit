@@ -29,7 +29,8 @@ apis:
     restyDebug: false
 
 mysql:
-  url: spider_dev:spider_dev123@tcp(10.170.34.22:3307)/gteml?charset=utf8mb4&parseTime=True&loc=Local
+  url: spider_dev:spider_dev123@tcp(10.170.34.22:3307)/spider_dev?charset=utf8mb4&parseTime=True&loc=Local
+#  url: spider_dev:spider_dev123@tcp(10.170.34.22:3307)/gteml?charset=utf8mb4&parseTime=True&loc=Local
 #  url: root:123456@tcp(localhost:3306)/gteml?charset=utf8mb4&parseTime=True&loc=Local
   maxIdleConns: 10
   maxOpenConns: 100

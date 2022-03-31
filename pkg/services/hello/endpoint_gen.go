@@ -13,6 +13,8 @@ import (
 	endpoint "github.com/go-kit/kit/endpoint"
 )
 
+type Mws map[string][]endpoint.Middleware
+
 type Endpoints struct {
 	FooEndpoint endpoint.Endpoint
 
@@ -63,7 +65,7 @@ func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Mi
 
 // New returns a Endpoints struct that wraps the provided service, and wires in all of the
 // expected endpoint middlewares
-func NewEndpoints(s HelloService, mdw map[string][]endpoint.Middleware) Endpoints {
+func NewEndpoints(s HelloService, mdw Mws) Endpoints {
 	eps := Endpoints{
 
 		FooEndpoint: MakeFooEndpoint(s),

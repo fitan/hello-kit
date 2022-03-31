@@ -9,6 +9,7 @@ import (
 	"hello/pkg/ent/predicate"
 	"hello/pkg/ent/user"
 	"math"
+	"reflect"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -448,11 +449,11 @@ func (f UserTablePagingForm) Query(q *UserQuery) {
 }
 
 type UserTableOrderForm struct {
-	Order  *string `json:"order" form:"_order"`
-	SortBy *string `json:"sortBy" form:"_sortBy" binding:"oneof=acs desc"`
+	Order  *string `json:"order" form:"_order" binding:"omitempty,oneof=acs desc"`
+	SortBy *string `json:"sortBy" form:"_sortBy"`
 }
 
-func (f *UserTableOrderForm) Query(q *UserQuery) {
+func (f UserTableOrderForm) Query(q *UserQuery) {
 	if f.Order != nil && f.SortBy != nil {
 		if *f.Order == "acs" {
 			q.Order(Asc(*f.SortBy))
@@ -464,11 +465,38 @@ func (f *UserTableOrderForm) Query(q *UserQuery) {
 	}
 }
 
+func SetUserFormQueries(o interface{}, q *UserQuery) []UserTableFormer {
+	l := make([]UserTableFormer, 0)
+	v := reflect.ValueOf(o)
+	former := reflect.TypeOf((*UserTableFormer)(nil)).Elem()
+	UserFormDepValue(v, former, &l)
+	for _, e := range l {
+		e.Query(q)
+	}
+	return l
+}
+
+func UserFormDepValue(v reflect.Value, former reflect.Type, l *[]UserTableFormer) {
+	for i := 0; i < v.NumField(); i++ {
+		f := v.Field(i)
+		if f.IsZero() {
+			continue
+		}
+		if f.Type().Implements(former) {
+			*l = append(*l, f.Interface().(UserTableFormer))
+			continue
+		}
+		if f.Type().Kind() == reflect.Struct {
+			UserFormDepValue(f, former, l)
+		}
+	}
+}
+
 type UserTableAgeEQForm struct {
 	AgeEQ *int `form:"AgeEQ" json:"AgeEQ"`
 }
 
-func (f *UserTableAgeEQForm) Query(q *UserQuery) {
+func (f UserTableAgeEQForm) Query(q *UserQuery) {
 	if f.AgeEQ != nil {
 		q.Where(user.AgeEQ(*f.AgeEQ))
 	}
@@ -478,7 +506,7 @@ type UserTableAgeNEQForm struct {
 	AgeNEQ *int `form:"AgeNEQ" json:"AgeNEQ"`
 }
 
-func (f *UserTableAgeNEQForm) Query(q *UserQuery) {
+func (f UserTableAgeNEQForm) Query(q *UserQuery) {
 	if f.AgeNEQ != nil {
 		q.Where(user.AgeNEQ(*f.AgeNEQ))
 	}
@@ -488,7 +516,7 @@ type UserTableAgeInForm struct {
 	AgeIn *[]int `form:"AgeIn" json:"AgeIn"`
 }
 
-func (f *UserTableAgeInForm) Query(q *UserQuery) {
+func (f UserTableAgeInForm) Query(q *UserQuery) {
 	if f.AgeIn != nil {
 		q.Where(user.AgeIn(*f.AgeIn...))
 	}
@@ -498,7 +526,7 @@ type UserTableAgeNotInForm struct {
 	AgeNotIn *[]int `form:"AgeNotIn" json:"AgeNotIn"`
 }
 
-func (f *UserTableAgeNotInForm) Query(q *UserQuery) {
+func (f UserTableAgeNotInForm) Query(q *UserQuery) {
 	if f.AgeNotIn != nil {
 		q.Where(user.AgeNotIn(*f.AgeNotIn...))
 	}
@@ -508,7 +536,7 @@ type UserTableAgeGTForm struct {
 	AgeGT *int `form:"AgeGT" json:"AgeGT"`
 }
 
-func (f *UserTableAgeGTForm) Query(q *UserQuery) {
+func (f UserTableAgeGTForm) Query(q *UserQuery) {
 	if f.AgeGT != nil {
 		q.Where(user.AgeGT(*f.AgeGT))
 	}
@@ -518,7 +546,7 @@ type UserTableAgeGTEForm struct {
 	AgeGTE *int `form:"AgeGTE" json:"AgeGTE"`
 }
 
-func (f *UserTableAgeGTEForm) Query(q *UserQuery) {
+func (f UserTableAgeGTEForm) Query(q *UserQuery) {
 	if f.AgeGTE != nil {
 		q.Where(user.AgeGTE(*f.AgeGTE))
 	}
@@ -528,7 +556,7 @@ type UserTableAgeLTForm struct {
 	AgeLT *int `form:"AgeLT" json:"AgeLT"`
 }
 
-func (f *UserTableAgeLTForm) Query(q *UserQuery) {
+func (f UserTableAgeLTForm) Query(q *UserQuery) {
 	if f.AgeLT != nil {
 		q.Where(user.AgeLT(*f.AgeLT))
 	}
@@ -538,7 +566,7 @@ type UserTableAgeLTEForm struct {
 	AgeLTE *int `form:"AgeLTE" json:"AgeLTE"`
 }
 
-func (f *UserTableAgeLTEForm) Query(q *UserQuery) {
+func (f UserTableAgeLTEForm) Query(q *UserQuery) {
 	if f.AgeLTE != nil {
 		q.Where(user.AgeLTE(*f.AgeLTE))
 	}
@@ -548,7 +576,7 @@ type UserTableNameEQForm struct {
 	NameEQ *string `form:"NameEQ" json:"NameEQ"`
 }
 
-func (f *UserTableNameEQForm) Query(q *UserQuery) {
+func (f UserTableNameEQForm) Query(q *UserQuery) {
 	if f.NameEQ != nil {
 		q.Where(user.NameEQ(*f.NameEQ))
 	}
@@ -558,7 +586,7 @@ type UserTableNameNEQForm struct {
 	NameNEQ *string `form:"NameNEQ" json:"NameNEQ"`
 }
 
-func (f *UserTableNameNEQForm) Query(q *UserQuery) {
+func (f UserTableNameNEQForm) Query(q *UserQuery) {
 	if f.NameNEQ != nil {
 		q.Where(user.NameNEQ(*f.NameNEQ))
 	}
@@ -578,7 +606,7 @@ type UserTableNameNotInForm struct {
 	NameNotIn *[]string `form:"NameNotIn" json:"NameNotIn"`
 }
 
-func (f *UserTableNameNotInForm) Query(q *UserQuery) {
+func (f UserTableNameNotInForm) Query(q *UserQuery) {
 	if f.NameNotIn != nil {
 		q.Where(user.NameNotIn(*f.NameNotIn...))
 	}
@@ -588,7 +616,7 @@ type UserTableNameGTForm struct {
 	NameGT *string `form:"NameGT" json:"NameGT"`
 }
 
-func (f *UserTableNameGTForm) Query(q *UserQuery) {
+func (f UserTableNameGTForm) Query(q *UserQuery) {
 	if f.NameGT != nil {
 		q.Where(user.NameGT(*f.NameGT))
 	}
@@ -598,7 +626,7 @@ type UserTableNameGTEForm struct {
 	NameGTE *string `form:"NameGTE" json:"NameGTE"`
 }
 
-func (f *UserTableNameGTEForm) Query(q *UserQuery) {
+func (f UserTableNameGTEForm) Query(q *UserQuery) {
 	if f.NameGTE != nil {
 		q.Where(user.NameGTE(*f.NameGTE))
 	}
@@ -608,7 +636,7 @@ type UserTableNameLTForm struct {
 	NameLT *string `form:"NameLT" json:"NameLT"`
 }
 
-func (f *UserTableNameLTForm) Query(q *UserQuery) {
+func (f UserTableNameLTForm) Query(q *UserQuery) {
 	if f.NameLT != nil {
 		q.Where(user.NameLT(*f.NameLT))
 	}
@@ -618,7 +646,7 @@ type UserTableNameLTEForm struct {
 	NameLTE *string `form:"NameLTE" json:"NameLTE"`
 }
 
-func (f *UserTableNameLTEForm) Query(q *UserQuery) {
+func (f UserTableNameLTEForm) Query(q *UserQuery) {
 	if f.NameLTE != nil {
 		q.Where(user.NameLTE(*f.NameLTE))
 	}
@@ -628,7 +656,7 @@ type UserTableNameContainsForm struct {
 	NameContains *string `form:"NameContains" json:"NameContains"`
 }
 
-func (f *UserTableNameContainsForm) Query(q *UserQuery) {
+func (f UserTableNameContainsForm) Query(q *UserQuery) {
 	if f.NameContains != nil {
 		q.Where(user.NameContains(*f.NameContains))
 	}
@@ -638,7 +666,7 @@ type UserTableNameHasPrefixForm struct {
 	NameHasPrefix *string `form:"NameHasPrefix" json:"NameHasPrefix"`
 }
 
-func (f *UserTableNameHasPrefixForm) Query(q *UserQuery) {
+func (f UserTableNameHasPrefixForm) Query(q *UserQuery) {
 	if f.NameHasPrefix != nil {
 		q.Where(user.NameHasPrefix(*f.NameHasPrefix))
 	}
@@ -648,7 +676,7 @@ type UserTableNameHasSuffixForm struct {
 	NameHasSuffix *string `form:"NameHasSuffix" json:"NameHasSuffix"`
 }
 
-func (f *UserTableNameHasSuffixForm) Query(q *UserQuery) {
+func (f UserTableNameHasSuffixForm) Query(q *UserQuery) {
 	if f.NameHasSuffix != nil {
 		q.Where(user.NameHasSuffix(*f.NameHasSuffix))
 	}
@@ -658,7 +686,7 @@ type UserTableNameEqualFoldForm struct {
 	NameEqualFold *string `form:"NameEqualFold" json:"NameEqualFold"`
 }
 
-func (f *UserTableNameEqualFoldForm) Query(q *UserQuery) {
+func (f UserTableNameEqualFoldForm) Query(q *UserQuery) {
 	if f.NameEqualFold != nil {
 		q.Where(user.NameEqualFold(*f.NameEqualFold))
 	}
@@ -668,7 +696,7 @@ type UserTableNameContainsFoldForm struct {
 	NameContainsFold *string `form:"NameContainsFold" json:"NameContainsFold"`
 }
 
-func (f *UserTableNameContainsFoldForm) Query(q *UserQuery) {
+func (f UserTableNameContainsFoldForm) Query(q *UserQuery) {
 	if f.NameContainsFold != nil {
 		q.Where(user.NameContainsFold(*f.NameContainsFold))
 	}

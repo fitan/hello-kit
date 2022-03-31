@@ -61,6 +61,7 @@ func {{$.Name}}FormDepValue(v reflect.Value, former reflect.Type, l *[]{{$.Name}
 
 {{range $f := $.Fields}}
 {{ range $op := $f.Ops }}
+{{if ne $op.Niladic true}}
 {{ $func := print $f.StructField $op.Name }}
 type {{$.Name}}Table{{ $func }}Form struct {
     {{ $func }} *{{if $op.Variadic}}[]{{end}}{{ $f.Type }} `form:"{{ $func }}" json:"{{ $func }}"`
@@ -70,6 +71,7 @@ func (f {{$.Name}}Table{{ $func }}Form) Query(q *{{$.Name}}Query) {
 		q.Where({{lower $.Name}}.{{ $func }}(*f.{{ $func }}{{ if $op.Variadic }}...{{end}}))
 	}
 }
+{{end}}
 
 {{end}}
 {{end}}

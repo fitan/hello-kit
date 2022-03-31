@@ -16,6 +16,7 @@ import (
 	"github.com/oklog/run"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/pyroscope-io/pyroscope/pkg/agent/profiler"
+	"github.com/swaggo/http-swagger"
 	"github.com/urfave/cli/v2"
 	"go-micro.dev/v4"
 	"go-micro.dev/v4/server"
@@ -29,6 +30,7 @@ import (
 	"go.uber.org/zap/zapcore"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	_ "hello/cmd/docs"
 	"hello/pkg/ent"
 	"hello/pkg/repository"
 	"hello/pkg/services"
@@ -90,7 +92,7 @@ func initEnt(conf *conf.MyConf) (*ent.Client, error) {
 		return nil, err
 	}
 
-	return ent.NewClient(ent.Driver(drv)), nil
+	return ent.NewClient(ent.Driver(drv)).Debug(), nil
 }
 
 func initDb(conf *conf.MyConf) (*gorm.DB, error) {
@@ -188,6 +190,8 @@ type InitMetricsEndpoint struct {
 }
 
 func initMetricsEndpoint(g *run.Group, conf *conf.MyConf) InitMetricsEndpoint {
+	http.DefaultServeMux.Handle("/swagger/*", httpSwagger.Handler())
+
 	http.DefaultServeMux.Handle("/metrics", promhttp.Handler())
 	debugListener, err := net.Listen("tcp", conf.Debug.Addr)
 	if err != nil {

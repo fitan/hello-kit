@@ -5,9 +5,10 @@ package user
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"context"
 	"hello/pkg/ent"
 	"time"
+
+	"context"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -52,7 +53,7 @@ func (_d UserServiceWithPrometheus) GetById(ctx context.Context, req GetByIdReq)
 }
 
 // GetList implements UserService
-func (_d UserServiceWithPrometheus) GetList(ctx context.Context, req GetListReq) (upa1 []*ent.User, err error) {
+func (_d UserServiceWithPrometheus) GetList(ctx context.Context, req GetListReq) (g1 GetListRes, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
