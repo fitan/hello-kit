@@ -50,9 +50,16 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops) HttpHandler
 	return HttpHandler{}
 }
 
+type SwagResponse struct {
+	TraceId string      `json:"traceId"`
+	Data    interface{} `json:"data"`
+}
+
 // @Accept  json
-// @Param body body  true " "
+// @Tags HelloService
 // @Param id path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /foo/{id} [post]
 func makeFooHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.POST("/foo/:id", http.NewServer(endpoints.FooEndpoint, decodeFooRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
@@ -70,8 +77,10 @@ func decodeFooRequest(_ context.Context, ctx *gin.Context) (interface{}, error) 
 }
 
 // @Accept  json
-// @Param body body  true " "
+// @Tags HelloService
 // @Param id path string true " "
+// @Success 200 {object} SwagResponse{data=types.SayRes}
+// @Router /say/{id} [put]
 func makeSayHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.PUT("/say/:id", http.NewServer(endpoints.SayEndpoint, decodeSayRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
@@ -89,8 +98,10 @@ func decodeSayRequest(_ context.Context, ctx *gin.Context) (interface{}, error) 
 }
 
 // @Accept  json
-// @Param body body  true " "
+// @Tags HelloService
 // @Param id path string true " "
+// @Success 200 {object} SwagResponse{data=types.SayRes}
+// @Router /say1/{id} [delete]
 func makeSay1Handler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.DELETE("/say1/:id", http.NewServer(endpoints.Say1Endpoint, decodeSay1Request, http.EncodeJSONResponse, options...).ServeHTTP)
 }
@@ -108,8 +119,10 @@ func decodeSay1Request(_ context.Context, ctx *gin.Context) (interface{}, error)
 }
 
 // @Accept  json
-// @Param body body  true " "
+// @Tags HelloService
 // @Param id path string true " "
+// @Success 200 {object} SwagResponse{data=types.SayRes}
+// @Router /sayhello/{id} [get]
 func makeSayHelloHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.GET("/sayhello/:id", http.NewServer(endpoints.SayHelloEndpoint, decodeSayHelloRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
@@ -127,8 +140,10 @@ func decodeSayHelloRequest(_ context.Context, ctx *gin.Context) (interface{}, er
 }
 
 // @Accept  json
-// @Param body body  true " "
+// @Tags HelloService
 // @Param id path string true " "
+// @Success 200 {object} SwagResponse{data=[]ent.User}
+// @Router /sayhello1/{id} [get]
 func makeSayHello1Handler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.GET("/sayhello1/:id", http.NewServer(endpoints.SayHello1Endpoint, decodeSayHello1Request, http.EncodeJSONResponse, options...).ServeHTTP)
 }

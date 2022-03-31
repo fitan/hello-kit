@@ -33,3 +33,6 @@ tasks:
     dir: "./pkg/repository/dao"
     cmds:
       - gowrap gen -init {{.CLI_ARGS}}
+  swag:
+    cmds:
+      - swag init -g cmd/main.go  -d ./

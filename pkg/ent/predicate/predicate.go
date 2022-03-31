@@ -9,6 +9,9 @@ import (
 // Pod is the predicate function for pod builders.
 type Pod func(*sql.Selector)
 
+// Project is the predicate function for project builders.
+type Project func(*sql.Selector)
+
 // SpiderDevTblServicetree is the predicate function for spiderdevtblservicetree builders.
 type SpiderDevTblServicetree func(*sql.Selector)
 

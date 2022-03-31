@@ -16,7 +16,8 @@ import (
 	"github.com/oklog/run"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/pyroscope-io/pyroscope/pkg/agent/profiler"
-	"github.com/swaggo/http-swagger"
+	swaggerFiles "github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger" // gin-swagger middleware
 	"github.com/urfave/cli/v2"
 	"go-micro.dev/v4"
 	"go-micro.dev/v4/server"
@@ -30,7 +31,7 @@ import (
 	"go.uber.org/zap/zapcore"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	_ "hello/cmd/docs"
+	_ "hello/docs"
 	"hello/pkg/ent"
 	"hello/pkg/repository"
 	"hello/pkg/services"
@@ -190,16 +191,18 @@ type InitMetricsEndpoint struct {
 }
 
 func initMetricsEndpoint(g *run.Group, conf *conf.MyConf) InitMetricsEndpoint {
-	http.DefaultServeMux.Handle("/swagger/*", httpSwagger.Handler())
+	r := gin.Default()
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	http.DefaultServeMux.Handle("/metrics", promhttp.Handler())
+	//http.DefaultServeMux.Handle("/metrics", promhttp.Handler())
 	debugListener, err := net.Listen("tcp", conf.Debug.Addr)
 	if err != nil {
 		logger.Errorw("net.Listen", "transport", "debug/HTTP", "during", "Listen", "err", err.Error())
 	}
 	g.Add(func() error {
 		logger.Infow("init metrics", "transport", "debug/HTTP", "addr", conf.Debug.Addr)
-		return http.Serve(debugListener, http.DefaultServeMux)
+		return r.RunListener(debugListener)
 	}, func(error) {
 		debugListener.Close()
 	})

@@ -42,6 +42,18 @@ var (
 			},
 		},
 	}
+	// ProjectsColumns holds the columns for the "projects" table.
+	ProjectsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "alias", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Default: "unknown"},
+	}
+	// ProjectsTable holds the schema information for the "projects" table.
+	ProjectsTable = &schema.Table{
+		Name:       "projects",
+		Columns:    ProjectsColumns,
+		PrimaryKey: []*schema.Column{ProjectsColumns[0]},
+	}
 	// TblServicetreeColumns holds the columns for the "tbl_servicetree" table.
 	TblServicetreeColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt32, Increment: true, SchemaType: map[string]string{"mysql": "int"}},
@@ -73,6 +85,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		PodsTable,
+		ProjectsTable,
 		TblServicetreeTable,
 		UsersTable,
 	}

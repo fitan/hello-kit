@@ -6,8 +6,8 @@ package casbin
 
 import (
 	"context"
-	"hello/utils/log"
 
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
@@ -28,7 +28,7 @@ func NewCasbinServiceWithLog(base CasbinService, log *zap.SugaredLogger) CasbinS
 // BindPermission implements CasbinService
 func (_d CasbinServiceWithLog) BindPermission(ctx context.Context, userId int, roleId int, resourceId int) (err error) {
 
-	_log := _d._log.With(log.TraceId(ctx))
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
 	defer func() {
 		_log.Debugw("CasbinServiceWithLog calling BindPermission", "params", map[string]interface{}{
@@ -51,7 +51,7 @@ func (_d CasbinServiceWithLog) BindPermission(ctx context.Context, userId int, r
 // UnBindPermission implements CasbinService
 func (_d CasbinServiceWithLog) UnBindPermission(ctx context.Context, userId int, roleId int, resourceId int) (err error) {
 
-	_log := _d._log.With(log.TraceId(ctx))
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
 	defer func() {
 		_log.Debugw("CasbinServiceWithLog calling UnBindPermission", "params", map[string]interface{}{

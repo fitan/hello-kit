@@ -47,6 +47,7 @@ require (
 
 require (
 	github.com/pkg/errors v0.9.1
+	github.com/swaggo/http-swagger v1.2.5
 	github.com/urfave/cli/v2 v2.3.0
 )
 
@@ -142,7 +143,6 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
-	github.com/swaggo/http-swagger v1.2.5 // indirect
 	github.com/tklauser/go-sysconf v0.3.6 // indirect
 	github.com/tklauser/numcpus v0.2.2 // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect

@@ -10,6 +10,7 @@ import (
 	"hello/pkg/ent/migrate"
 
 	"hello/pkg/ent/pod"
+	"hello/pkg/ent/project"
 	"hello/pkg/ent/spiderdevtblservicetree"
 	"hello/pkg/ent/user"
 
@@ -25,6 +26,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Pod is the client for interacting with the Pod builders.
 	Pod *PodClient
+	// Project is the client for interacting with the Project builders.
+	Project *ProjectClient
 	// SpiderDevTblServicetree is the client for interacting with the SpiderDevTblServicetree builders.
 	SpiderDevTblServicetree *SpiderDevTblServicetreeClient
 	// User is the client for interacting with the User builders.
@@ -43,6 +46,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Pod = NewPodClient(c.config)
+	c.Project = NewProjectClient(c.config)
 	c.SpiderDevTblServicetree = NewSpiderDevTblServicetreeClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -79,6 +83,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:                     ctx,
 		config:                  cfg,
 		Pod:                     NewPodClient(cfg),
+		Project:                 NewProjectClient(cfg),
 		SpiderDevTblServicetree: NewSpiderDevTblServicetreeClient(cfg),
 		User:                    NewUserClient(cfg),
 	}, nil
@@ -101,6 +106,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:                     ctx,
 		config:                  cfg,
 		Pod:                     NewPodClient(cfg),
+		Project:                 NewProjectClient(cfg),
 		SpiderDevTblServicetree: NewSpiderDevTblServicetreeClient(cfg),
 		User:                    NewUserClient(cfg),
 	}, nil
@@ -133,6 +139,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Pod.Use(hooks...)
+	c.Project.Use(hooks...)
 	c.SpiderDevTblServicetree.Use(hooks...)
 	c.User.Use(hooks...)
 }
@@ -241,6 +248,96 @@ func (c *PodClient) QueryServicetree(po *Pod) *SpiderDevTblServicetreeQuery {
 // Hooks returns the client hooks.
 func (c *PodClient) Hooks() []Hook {
 	return c.hooks.Pod
+}
+
+// ProjectClient is a client for the Project schema.
+type ProjectClient struct {
+	config
+}
+
+// NewProjectClient returns a client for the Project from the given config.
+func NewProjectClient(c config) *ProjectClient {
+	return &ProjectClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `project.Hooks(f(g(h())))`.
+func (c *ProjectClient) Use(hooks ...Hook) {
+	c.hooks.Project = append(c.hooks.Project, hooks...)
+}
+
+// Create returns a create builder for Project.
+func (c *ProjectClient) Create() *ProjectCreate {
+	mutation := newProjectMutation(c.config, OpCreate)
+	return &ProjectCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Project entities.
+func (c *ProjectClient) CreateBulk(builders ...*ProjectCreate) *ProjectCreateBulk {
+	return &ProjectCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Project.
+func (c *ProjectClient) Update() *ProjectUpdate {
+	mutation := newProjectMutation(c.config, OpUpdate)
+	return &ProjectUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProjectClient) UpdateOne(pr *Project) *ProjectUpdateOne {
+	mutation := newProjectMutation(c.config, OpUpdateOne, withProject(pr))
+	return &ProjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProjectClient) UpdateOneID(id int) *ProjectUpdateOne {
+	mutation := newProjectMutation(c.config, OpUpdateOne, withProjectID(id))
+	return &ProjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Project.
+func (c *ProjectClient) Delete() *ProjectDelete {
+	mutation := newProjectMutation(c.config, OpDelete)
+	return &ProjectDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ProjectClient) DeleteOne(pr *Project) *ProjectDeleteOne {
+	return c.DeleteOneID(pr.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ProjectClient) DeleteOneID(id int) *ProjectDeleteOne {
+	builder := c.Delete().Where(project.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProjectDeleteOne{builder}
+}
+
+// Query returns a query builder for Project.
+func (c *ProjectClient) Query() *ProjectQuery {
+	return &ProjectQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Project entity by its id.
+func (c *ProjectClient) Get(ctx context.Context, id int) (*Project, error) {
+	return c.Query().Where(project.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProjectClient) GetX(ctx context.Context, id int) *Project {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ProjectClient) Hooks() []Hook {
+	return c.hooks.Project
 }
 
 // SpiderDevTblServicetreeClient is a client for the SpiderDevTblServicetree schema.

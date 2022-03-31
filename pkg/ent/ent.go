@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"hello/pkg/ent/pod"
+	"hello/pkg/ent/project"
 	"hello/pkg/ent/spiderdevtblservicetree"
 	"hello/pkg/ent/user"
 
@@ -32,6 +33,7 @@ type OrderFunc func(*sql.Selector)
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		pod.Table:                     pod.ValidColumn,
+		project.Table:                 project.ValidColumn,
 		spiderdevtblservicetree.Table: spiderdevtblservicetree.ValidColumn,
 		user.Table:                    user.ValidColumn,
 	}

@@ -5,8 +5,9 @@ package casbin
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"context"
 	"time"
+
+	"context"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"

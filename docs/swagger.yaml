@@ -1,0 +1,376 @@
+basePath: /
+definitions:
+  ent.Pod:
+    properties:
+      cluster_name:
+        description: |-
+          ClusterName holds the value of the "cluster_name" field.
+          集群标识
+        type: string
+      created_at:
+        description: CreatedAt holds the value of the "created_at" field.
+        type: string
+      detail:
+        description: |-
+          Detail holds the value of the "detail" field.
+          详细内容
+        type: string
+      edges:
+        $ref: '#/definitions/ent.PodEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the PodQuery when eager-loading is set.
+      host_ip:
+        description: |-
+          HostIP holds the value of the "host_ip" field.
+          主机IP
+        type: string
+      id:
+        description: ID of the ent.
+        type: integer
+      message:
+        description: |-
+          Message holds the value of the "message" field.
+          消息
+        type: string
+      namespace:
+        description: |-
+          Namespace holds the value of the "namespace" field.
+          所属项目空间
+        type: string
+      phase:
+        description: |-
+          Phase holds the value of the "phase" field.
+          阶段
+        type: string
+      pod_ip:
+        description: |-
+          PodIP holds the value of the "pod_ip" field.
+          PodIP
+        type: string
+      pod_name:
+        description: |-
+          PodName holds the value of the "pod_name" field.
+          pod名称
+        type: string
+      reason:
+        description: |-
+          Reason holds the value of the "reason" field.
+          原因
+        type: string
+      resource_version:
+        description: |-
+          ResourceVersion holds the value of the "resource_version" field.
+          资源版本号
+        type: string
+      service_name:
+        description: |-
+          ServiceName holds the value of the "service_name" field.
+          应用名称
+        type: string
+      start_time:
+        description: |-
+          StartTime holds the value of the "start_time" field.
+          启动时间
+        type: string
+      updated_at:
+        description: UpdatedAt holds the value of the "updated_at" field.
+        type: string
+    type: object
+  ent.PodEdges:
+    properties:
+      servicetree:
+        $ref: '#/definitions/ent.SpiderDevTblServicetree'
+        description: Servicetree holds the value of the servicetree edge.
+    type: object
+  ent.SpiderDevTblServicetree:
+    properties:
+      aname:
+        description: Aname holds the value of the "aname" field.
+        type: string
+      id:
+        description: ID of the ent.
+        type: integer
+      key:
+        description: Key holds the value of the "key" field.
+        type: string
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
+      origin:
+        description: Origin holds the value of the "origin" field.
+        type: string
+      pnode:
+        description: Pnode holds the value of the "pnode" field.
+        type: integer
+      type:
+        description: Type holds the value of the "type" field.
+        type: integer
+    type: object
+  ent.User:
+    properties:
+      age:
+        description: Age holds the value of the "age" field.
+        type: integer
+      id:
+        description: ID of the ent.
+        type: integer
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
+    type: object
+  hello.SwagResponse:
+    properties:
+      data: {}
+      traceId:
+        type: string
+    type: object
+  types.SayRes:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  user.GetListBodySwag:
+    properties:
+      age:
+        description: Age holds the value of the "age" field.
+        type: integer
+      id:
+        description: ID of the ent.
+        type: integer
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
+    type: object
+  user.GetListRes:
+    properties:
+      count:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/ent.Pod'
+        type: array
+    type: object
+  user.SwagResponse:
+    properties:
+      data: {}
+      traceId:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server celler server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /foo/{id}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/hello.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - HelloService
+  /say/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/hello.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/types.SayRes'
+              type: object
+      tags:
+      - HelloService
+  /say1/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/hello.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/types.SayRes'
+              type: object
+      tags:
+      - HelloService
+  /sayhello/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/hello.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/types.SayRes'
+              type: object
+      tags:
+      - HelloService
+  /sayhello1/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/hello.SwagResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/ent.User'
+                  type: array
+              type: object
+      tags:
+      - HelloService
+  /user:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.GetListBodySwag'
+      - in: query
+        name: HostIPEQ
+        type: string
+      - in: query
+        name: NamespaceEQ
+        type: string
+      - in: query
+        name: ServiceNameEQ
+        type: string
+      - collectionFormat: multi
+        in: query
+        items:
+          type: string
+        name: ServiceNameIn
+        type: array
+      - in: query
+        name: _limit
+        type: integer
+      - in: query
+        name: _page
+        type: integer
+      - enum:
+        - acs
+        - desc
+        in: query
+        name: order
+        type: string
+      - in: query
+        name: sortBy
+        type: string
+      - description: ' '
+        in: header
+        name: project
+        type: string
+      - description: ' '
+        in: header
+        name: service
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.GetListRes'
+              type: object
+      tags:
+      - UserService
+  /user/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.User'
+              type: object
+      tags:
+      - UserService
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

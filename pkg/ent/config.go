@@ -25,6 +25,7 @@ type config struct {
 // hooks per client, for fast access.
 type hooks struct {
 	Pod                     []ent.Hook
+	Project                 []ent.Hook
 	SpiderDevTblServicetree []ent.Hook
 	User                    []ent.Hook
 }

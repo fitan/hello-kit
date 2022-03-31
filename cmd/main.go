@@ -28,6 +28,7 @@ var (
 // @host      localhost:8080
 // @BasePath  /
 
+// @query.collection.format multi
 // @securityDefinitions.basic  BasicAuth
 
 func main() {

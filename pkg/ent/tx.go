@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Pod is the client for interacting with the Pod builders.
 	Pod *PodClient
+	// Project is the client for interacting with the Project builders.
+	Project *ProjectClient
 	// SpiderDevTblServicetree is the client for interacting with the SpiderDevTblServicetree builders.
 	SpiderDevTblServicetree *SpiderDevTblServicetreeClient
 	// User is the client for interacting with the User builders.
@@ -154,6 +156,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Pod = NewPodClient(tx.config)
+	tx.Project = NewProjectClient(tx.config)
 	tx.SpiderDevTblServicetree = NewSpiderDevTblServicetreeClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }

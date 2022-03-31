@@ -44,11 +44,9 @@ type SwagResponse struct {
 }
 
 // @Accept  json
+// @Tags UserService
 // @Param id path string true " "
-// @Success 200 {object} SwagResponse{data=*ent.User}
-// @Failure 400 {object} httputil.HTTPError
-// @Failure 404 {object} httputil.HTTPError
-// @Failure 500 {object} httputil.HTTPError
+// @Success 200 {object} SwagResponse{data=ent.User}
 // @Router /user/{id} [get]
 func makeGetByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.GET("/user/:id", http.NewServer(endpoints.GetByIdEndpoint, decodeGetByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
@@ -84,9 +82,6 @@ type GetListBodySwag ent.User
 // @Param project header string false " "
 // @Param service header string false " "
 // @Success 200 {object} SwagResponse{data=GetListRes}
-// @Failure 400 {object} httputil.HTTPError
-// @Failure 404 {object} httputil.HTTPError
-// @Failure 500 {object} httputil.HTTPError
 // @Router /user [get]
 func makeGetListHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.GET("/user", http.NewServer(endpoints.GetListEndpoint, decodeGetListRequest, http.EncodeJSONResponse, options...).ServeHTTP)

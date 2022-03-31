@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"hello/pkg/ent/project"
 	"hello/pkg/ent/schema"
 	"hello/pkg/ent/user"
 )
@@ -11,6 +12,12 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	projectFields := schema.Project{}.Fields()
+	_ = projectFields
+	// projectDescName is the schema descriptor for name field.
+	projectDescName := projectFields[1].Descriptor()
+	// project.DefaultName holds the default value on creation for the name field.
+	project.DefaultName = projectDescName.Default.(string)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescAge is the schema descriptor for age field.
