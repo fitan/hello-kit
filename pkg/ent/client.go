@@ -144,6 +144,178 @@ func (c *Client) Use(hooks ...Hook) {
 	c.User.Use(hooks...)
 }
 
+type PodBaseInterface interface {
+	Create(ctx context.Context, v Pod) (res *Pod, err error)
+	GetById(ctx context.Context, id int64) (res *Pod, err error)
+	ByQueries(ctx context.Context, i interface{}) (res Pods, count int, err error)
+	UpdateById(ctx context.Context, id int64, v *Pod) (*Pod, error)
+	DeleteById(ctx context.Context, id int64) error
+}
+
+type PodBase struct {
+	client *PodClient
+}
+
+func (c *PodBase) Create(ctx context.Context, v Pod) (res *Pod, err error) {
+	return c.client.Create().
+		SetClusterName(v.ClusterName).
+		SetNamespace(v.Namespace).
+		SetServiceName(v.ServiceName).
+		SetPodName(v.PodName).
+		SetResourceVersion(v.ResourceVersion).
+		SetPodIP(v.PodIP).
+		SetHostIP(v.HostIP).
+		SetStartTime(v.StartTime).
+		SetPhase(v.Phase).
+		SetReason(v.Reason).
+		SetMessage(v.Message).
+		SetDetail(v.Detail).
+		SetCreatedAt(v.CreatedAt).
+		SetUpdatedAt(v.UpdatedAt).Save(ctx)
+}
+
+func (c *PodBase) GetById(ctx context.Context, id int64) (res *Pod, err error) {
+	return c.client.Get(ctx, id)
+}
+
+func (c *PodBase) ByQueries(ctx context.Context, i interface{}) (res Pods, count int, err error) {
+	res, count, err = c.client.Query().ByQueries(ctx, i)
+	return
+}
+
+func (c *PodBase) UpdateById(ctx context.Context, id int64, v *Pod) (*Pod, error) {
+	return c.client.UpdateOne(v).Save(ctx)
+}
+
+func (c *PodBase) DeleteById(ctx context.Context, id int64) error {
+	return c.client.DeleteOneID(id).Exec(ctx)
+}
+
+func NewPodBase(client *PodClient) PodBaseInterface {
+	return &PodBase{client: client}
+}
+
+type ProjectBaseInterface interface {
+	Create(ctx context.Context, v Project) (res *Project, err error)
+	GetById(ctx context.Context, id int) (res *Project, err error)
+	ByQueries(ctx context.Context, i interface{}) (res Projects, count int, err error)
+	UpdateById(ctx context.Context, id int, v *Project) (*Project, error)
+	DeleteById(ctx context.Context, id int) error
+}
+
+type ProjectBase struct {
+	client *ProjectClient
+}
+
+func (c *ProjectBase) Create(ctx context.Context, v Project) (res *Project, err error) {
+	return c.client.Create().
+		SetAlias(v.Alias).
+		SetName(v.Name).Save(ctx)
+}
+
+func (c *ProjectBase) GetById(ctx context.Context, id int) (res *Project, err error) {
+	return c.client.Get(ctx, id)
+}
+
+func (c *ProjectBase) ByQueries(ctx context.Context, i interface{}) (res Projects, count int, err error) {
+	res, count, err = c.client.Query().ByQueries(ctx, i)
+	return
+}
+
+func (c *ProjectBase) UpdateById(ctx context.Context, id int, v *Project) (*Project, error) {
+	return c.client.UpdateOne(v).Save(ctx)
+}
+
+func (c *ProjectBase) DeleteById(ctx context.Context, id int) error {
+	return c.client.DeleteOneID(id).Exec(ctx)
+}
+
+func NewProjectBase(client *ProjectClient) ProjectBaseInterface {
+	return &ProjectBase{client: client}
+}
+
+type SpiderDevTblServicetreeBaseInterface interface {
+	Create(ctx context.Context, v SpiderDevTblServicetree) (res *SpiderDevTblServicetree, err error)
+	GetById(ctx context.Context, id int32) (res *SpiderDevTblServicetree, err error)
+	ByQueries(ctx context.Context, i interface{}) (res SpiderDevTblServicetrees, count int, err error)
+	UpdateById(ctx context.Context, id int32, v *SpiderDevTblServicetree) (*SpiderDevTblServicetree, error)
+	DeleteById(ctx context.Context, id int32) error
+}
+
+type SpiderDevTblServicetreeBase struct {
+	client *SpiderDevTblServicetreeClient
+}
+
+func (c *SpiderDevTblServicetreeBase) Create(ctx context.Context, v SpiderDevTblServicetree) (res *SpiderDevTblServicetree, err error) {
+	return c.client.Create().
+		SetName(v.Name).
+		SetAname(v.Aname).
+		SetPnode(v.Pnode).
+		SetType(v.Type).
+		SetKey(v.Key).
+		SetOrigin(v.Origin).Save(ctx)
+}
+
+func (c *SpiderDevTblServicetreeBase) GetById(ctx context.Context, id int32) (res *SpiderDevTblServicetree, err error) {
+	return c.client.Get(ctx, id)
+}
+
+func (c *SpiderDevTblServicetreeBase) ByQueries(ctx context.Context, i interface{}) (res SpiderDevTblServicetrees, count int, err error) {
+	res, count, err = c.client.Query().ByQueries(ctx, i)
+	return
+}
+
+func (c *SpiderDevTblServicetreeBase) UpdateById(ctx context.Context, id int32, v *SpiderDevTblServicetree) (*SpiderDevTblServicetree, error) {
+	return c.client.UpdateOne(v).Save(ctx)
+}
+
+func (c *SpiderDevTblServicetreeBase) DeleteById(ctx context.Context, id int32) error {
+	return c.client.DeleteOneID(id).Exec(ctx)
+}
+
+func NewSpiderDevTblServicetreeBase(client *SpiderDevTblServicetreeClient) SpiderDevTblServicetreeBaseInterface {
+	return &SpiderDevTblServicetreeBase{client: client}
+}
+
+type UserBaseInterface interface {
+	Create(ctx context.Context, v User) (res *User, err error)
+	GetById(ctx context.Context, id int) (res *User, err error)
+	ByQueries(ctx context.Context, i interface{}) (res Users, count int, err error)
+	UpdateById(ctx context.Context, id int, v *User) (*User, error)
+	DeleteById(ctx context.Context, id int) error
+}
+
+type UserBase struct {
+	client *UserClient
+}
+
+func (c *UserBase) Create(ctx context.Context, v User) (res *User, err error) {
+	return c.client.Create().
+		SetAge(v.Age).
+		SetName(v.Name).Save(ctx)
+}
+
+func (c *UserBase) GetById(ctx context.Context, id int) (res *User, err error) {
+	return c.client.Get(ctx, id)
+}
+
+func (c *UserBase) ByQueries(ctx context.Context, i interface{}) (res Users, count int, err error) {
+	res, count, err = c.client.Query().ByQueries(ctx, i)
+	return
+}
+
+func (c *UserBase) UpdateById(ctx context.Context, id int, v *User) (*User, error) {
+	return c.client.UpdateOne(v).Save(ctx)
+}
+
+func (c *UserBase) DeleteById(ctx context.Context, id int) error {
+	return c.client.DeleteOneID(id).Exec(ctx)
+}
+
+func NewUserBase(client *UserClient) UserBaseInterface {
+	return &UserBase{client: client}
+}
+
 // PodClient is a client for the Pod schema.
 type PodClient struct {
 	config

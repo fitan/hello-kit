@@ -134,18 +134,6 @@ definitions:
       name:
         type: string
     type: object
-  user.GetListBodySwag:
-    properties:
-      age:
-        description: Age holds the value of the "age" field.
-        type: integer
-      id:
-        description: ID of the ent.
-        type: integer
-      name:
-        description: Name holds the value of the "name" field.
-        type: string
-    type: object
   user.GetListRes:
     properties:
       count:
@@ -292,12 +280,6 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: ' '
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/user.GetListBodySwag'
       - in: query
         name: HostIPEQ
         type: string
@@ -327,14 +309,6 @@ paths:
         type: string
       - in: query
         name: sortBy
-        type: string
-      - description: ' '
-        in: header
-        name: project
-        type: string
-      - description: ' '
-        in: header
-        name: service
         type: string
       responses:
         "200":

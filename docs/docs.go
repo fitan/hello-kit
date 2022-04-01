@@ -233,15 +233,6 @@ const docTemplate = `{
                 ],
                 "parameters": [
                     {
-                        "description": " ",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/user.GetListBodySwag"
-                        }
-                    },
-                    {
                         "type": "string",
                         "name": "HostIPEQ",
                         "in": "query"
@@ -288,18 +279,6 @@ const docTemplate = `{
                         "type": "string",
                         "name": "sortBy",
                         "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": " ",
-                        "name": "project",
-                        "in": "header"
-                    },
-                    {
-                        "type": "string",
-                        "description": " ",
-                        "name": "service",
-                        "in": "header"
                     }
                 ],
                 "responses": {
@@ -512,23 +491,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "user.GetListBodySwag": {
-            "type": "object",
-            "properties": {
-                "age": {
-                    "description": "Age holds the value of the \"age\" field.",
-                    "type": "integer"
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "Name holds the value of the \"name\" field.",
                     "type": "string"
                 }
             }

@@ -513,6 +513,16 @@ func (pq *PodQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
+func (pq *PodQuery) ByQueries(ctx context.Context, i interface{}) (res Pods, count int, err error) {
+	SetPodFormQueries(i, pq)
+	count, err = pq.Count(ctx)
+	if err != nil {
+		return
+	}
+	res, err = pq.All(ctx)
+	return
+}
+
 type PodTableFormer interface {
 	Query(q *PodQuery)
 }

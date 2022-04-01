@@ -73,14 +73,9 @@ type GetListQuerySwag struct {
 	*ent.PodTableHostIPEQForm
 }
 
-type GetListBodySwag ent.User
-
 // @Accept  json
 // @Tags UserService
-// @Param body body GetListBodySwag true " "
 // @Param query query GetListQuerySwag false " "
-// @Param project header string false " "
-// @Param service header string false " "
 // @Success 200 {object} SwagResponse{data=GetListRes}
 // @Router /user [get]
 func makeGetListHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
@@ -92,16 +87,6 @@ func decodeGetListRequest(_ context.Context, ctx *gin.Context) (interface{}, err
 	var err error
 
 	err = ctx.ShouldBindQuery(&req.Query)
-	if err != nil {
-		return nil, err
-	}
-
-	err = ctx.ShouldBindHeader(&req.Header)
-	if err != nil {
-		return nil, err
-	}
-
-	err = ctx.ShouldBindJSON(&req.Body)
 	if err != nil {
 		return nil, err
 	}

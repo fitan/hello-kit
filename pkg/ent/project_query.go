@@ -433,6 +433,16 @@ func (pq *ProjectQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
+func (pq *ProjectQuery) ByQueries(ctx context.Context, i interface{}) (res Projects, count int, err error) {
+	SetPodFormQueries(i, pq)
+	count, err = pq.Count(ctx)
+	if err != nil {
+		return
+	}
+	res, err = pq.All(ctx)
+	return
+}
+
 type ProjectTableFormer interface {
 	Query(q *ProjectQuery)
 }

@@ -5,9 +5,10 @@ package user
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"context"
 	"hello/pkg/ent"
 	"time"
+
+	"context"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -22,8 +23,8 @@ type UserServiceWithPrometheus struct {
 
 var userserviceDurationSummaryVec = promauto.NewSummaryVec(
 	prometheus.SummaryOpts{
-		Name:       "user_duration_seconds",
-		Help:       "user runtime duration and result",
+		Name:       "userservice_duration_seconds",
+		Help:       "userservice runtime duration and result",
 		MaxAge:     time.Minute,
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 	},
@@ -35,6 +36,34 @@ func NewUserServiceWithPrometheus(base UserService, instanceName string) UserSer
 		base:         base,
 		instanceName: instanceName,
 	}
+}
+
+// ByQueries implements UserService
+func (_d UserServiceWithPrometheus) ByQueries(ctx context.Context, i interface{}) (res ent.Users, count int, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ByQueries", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.ByQueries(ctx, i)
+}
+
+// Create implements UserService
+func (_d UserServiceWithPrometheus) Create(ctx context.Context, v ent.User) (res *ent.User, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "Create", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.Create(ctx, v)
 }
 
 // DeleteById implements UserService
@@ -52,7 +81,7 @@ func (_d UserServiceWithPrometheus) DeleteById(ctx context.Context, id int) (err
 }
 
 // GetById implements UserService
-func (_d UserServiceWithPrometheus) GetById(ctx context.Context, id int) (up1 *ent.User, err error) {
+func (_d UserServiceWithPrometheus) GetById(ctx context.Context, id int) (res *ent.User, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -65,8 +94,8 @@ func (_d UserServiceWithPrometheus) GetById(ctx context.Context, id int) (up1 *e
 	return _d.base.GetById(ctx, id)
 }
 
-// GetList implements UserService
-func (_d UserServiceWithPrometheus) GetList(ctx context.Context) (upa1 []*ent.User, err error) {
+// UpdateById implements UserService
+func (_d UserServiceWithPrometheus) UpdateById(ctx context.Context, id int, v *ent.User) (up1 *ent.User, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -74,21 +103,7 @@ func (_d UserServiceWithPrometheus) GetList(ctx context.Context) (upa1 []*ent.Us
 			result = "error"
 		}
 
-		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetList", result).Observe(time.Since(_since).Seconds())
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UpdateById", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.GetList(ctx)
-}
-
-// Update implements UserService
-func (_d UserServiceWithPrometheus) Update(ctx context.Context, u *ent.User) (up1 *ent.User, err error) {
-	_since := time.Now()
-	defer func() {
-		result := "ok"
-		if err != nil {
-			result = "error"
-		}
-
-		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "Update", result).Observe(time.Since(_since).Seconds())
-	}()
-	return _d.base.Update(ctx, u)
+	return _d.base.UpdateById(ctx, id, v)
 }

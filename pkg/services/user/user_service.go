@@ -41,11 +41,6 @@ type GetListReq struct {
 		*ent.PodTableOrderForm
 		*ent.PodTableHostIPEQForm
 	} `json:"query"`
-	Header struct{
-		Project string `header:"project" json:"project"`
-		Service string `header:"service" json:"service"`
-	} `json:"header"`
-	Body ent.User `json:"body"`
 }
 
 type GetListRes struct {
@@ -54,20 +49,7 @@ type GetListRes struct {
 }
 
 func (s *basicUserService) GetList(ctx context.Context, req GetListReq) (res GetListRes,err error) {
-	q := s.db.Pod.Query()
-	ent.SetPodFormQueries(req, q)
-
-	count, err := q.Count(ctx)
-	if err != nil {
-		return
-	}
-	list, err := q.All(ctx)
-	if err != nil {
-		return
-	}
-
-	res.List = list
-	res.Count = count
+	res.List, res.Count, err = s.db.Pod.Query().ByQueries(ctx, req)
 	return
 	//ent.SetUserFormQueries(req, q)
 }

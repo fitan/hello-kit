@@ -1,6 +1,18 @@
 {{/* gotype: entgo.io/ent/entc/gen.Type */}}
 
 {{  define "query/additional/form" }}
+{{ $builder := $.QueryName }}
+{{ $receiver := receiver $builder }}
+func ({{ $receiver }} *{{ $builder }}) ByQueries(ctx context.Context, i interface{}) (res {{plural .Name}},count int, err error) {
+	SetPodFormQueries(i, {{ $receiver }})
+	count,err = {{ $receiver }}.Count(ctx)
+	if err != nil {
+		return
+	}
+	res,err = {{ $receiver }}.All(ctx)
+	return
+}
+
 type {{$.Name}}TableFormer interface {
 	Query(q *{{$.Name}}Query)
 }
@@ -57,7 +69,7 @@ func {{$.Name}}FormDepValue(v reflect.Value, former reflect.Type, l *[]{{$.Name}
 			{{$.Name}}FormDepValue(f, former, l)
 		}
 	}
-}	
+}
 
 {{range $f := $.Fields}}
 {{ range $op := $f.Ops }}
@@ -76,19 +88,53 @@ func (f {{$.Name}}Table{{ $func }}Form) Query(q *{{$.Name}}Query) {
 {{end}}
 {{end}}
 
-{{/*    */}}{{/* Add the base header for the generated file */}}
-{{/*    {{ $pkg := base $.Config.Package }}*/}}
-{{/*    {{ template "header" $ }}*/}}
-
-{{/*    */}}{{/* Loop over all nodes and implement the "GoStringer" interface */}}
-{{/*    {{ range $n := $.Nodes }}*/}}
-{{/*        {{ $receiver := $n.Receiver }}*/}}
-{{/*        func ({{ $receiver }} *{{ $n.Name }}) GoString() string {*/}}
-{{/*        if {{ $receiver }} == nil {*/}}
-{{/*        return fmt.Sprintf("{{ $n.Name }}(nil)")*/}}
-{{/*        }*/}}
-{{/*        return {{ $receiver }}.String()*/}}
-{{/*        }*/}}
-{{/*    {{ end }}*/}}
 
 {{ end }}
+
+
+{{ define "client/additional/interface" }}
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
+{{range $n := $.Nodes}}
+{{$structName := print $n.Name "Base"}}
+{{$interfaceName := print $structName "Interface"}}
+type {{$interfaceName}} interface {
+	Create(ctx context.Context, v {{$n.Name}}) (res *{{$n.Name}},err error )
+	GetById(ctx context.Context, id {{$n.ID.Type.String}}) (res *{{$n.Name}},err error)
+	ByQueries(ctx context.Context, i interface{}) (res {{plural $n.Name}}, count int,err error)
+	UpdateById(ctx context.Context,id {{$n.ID.Type.String}}, v *{{$n.Name}}) (*{{$n.Name}}, error)
+	DeleteById(ctx context.Context, id {{$n.ID.Type.String}}) error
+}
+
+type {{$structName}} struct {
+	client *{{$n.Name}}Client
+}
+
+func (c *{{$structName}}) Create(ctx context.Context, v {{$n.Name}}) (res *{{$n.Name}}, err error) {
+	return c.client.Create().
+		{{- range $f := $n.Fields}}{{ $func := print "Set" $f.StructField }}
+			{{$func}}(v.{{$f.StructField}}).{{- end}}Save(ctx)
+}
+
+func (c *{{$structName}}) GetById(ctx context.Context, id {{$n.ID.Type.String}}) (res *{{$n.Name}}, err error) {
+	return c.client.Get(ctx, id)
+}
+
+func (c *{{$structName}}) ByQueries(ctx context.Context, i interface{}) (res {{plural $n.Name}}, count int, err error) {
+	res, count, err = c.client.Query().ByQueries(ctx,i)
+	return
+}
+
+func (c *{{$structName}}) UpdateById(ctx context.Context, id {{$n.ID.Type.String}}, v *{{$n.Name}}) (*{{$n.Name}}, error) {
+	return c.client.UpdateOne(v).Save(ctx)
+}
+
+func (c *{{$structName}}) DeleteById(ctx context.Context, id {{$n.ID.Type.String}}) error {
+	return c.client.DeleteOneID(id).Exec(ctx)
+}
+
+func New{{$structName}}(client *{{$n.Name}}Client) {{$structName}}Interface {
+	return &{{$structName}}{client: client}
+}
+{{end}}
+{{end}}

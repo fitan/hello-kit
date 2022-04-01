@@ -433,6 +433,16 @@ func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
+func (uq *UserQuery) ByQueries(ctx context.Context, i interface{}) (res Users, count int, err error) {
+	SetPodFormQueries(i, uq)
+	count, err = uq.Count(ctx)
+	if err != nil {
+		return
+	}
+	res, err = uq.All(ctx)
+	return
+}
+
 type UserTableFormer interface {
 	Query(q *UserQuery)
 }

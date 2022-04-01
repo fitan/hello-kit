@@ -165,6 +165,7 @@ require (
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
+	github.com/gin-contrib/cors v1.3.1
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.11.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect

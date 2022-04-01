@@ -10,6 +10,8 @@ import (
 	"github.com/casbin/casbin/v2"
 	entadapter "github.com/casbin/ent-adapter"
 	"github.com/chenjiandongx/ginprom"
+	"github.com/gin-contrib/cors"
+
 	ginkHttp "github.com/fitan/gink/transport/http"
 	"github.com/gin-gonic/gin"
 	"github.com/go-kit/kit/endpoint"
@@ -79,6 +81,14 @@ func RunApp() {
 
 	r := gin.Default()
 	r.Use(ginprom.PromMiddleware(nil))
+	r.Use(cors.New(cors.Config{
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "X-Total-Count"},
+		ExposeHeaders:    []string{"X-Total-Count"},
+		AllowCredentials: false,
+		MaxAge:           12 * time.Hour,
+		AllowAllOrigins:  true,
+	}))
 	g := &run.Group{}
 	app, err := InitApp(r, g, ConfName(*confName))
 	if err != nil {

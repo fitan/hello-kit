@@ -433,6 +433,16 @@ func (sdtsq *SpiderDevTblServicetreeQuery) sqlQuery(ctx context.Context) *sql.Se
 	return selector
 }
 
+func (sdtsq *SpiderDevTblServicetreeQuery) ByQueries(ctx context.Context, i interface{}) (res SpiderDevTblServicetrees, count int, err error) {
+	SetPodFormQueries(i, sdtsq)
+	count, err = sdtsq.Count(ctx)
+	if err != nil {
+		return
+	}
+	res, err = sdtsq.All(ctx)
+	return
+}
+
 type SpiderDevTblServicetreeTableFormer interface {
 	Query(q *SpiderDevTblServicetreeQuery)
 }
