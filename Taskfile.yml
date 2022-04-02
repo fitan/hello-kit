@@ -16,23 +16,44 @@ tasks:
       - wire
   run:
     cmds:
+      - task: swag
       - go run cmd/main.go {{.CLI_ARGS}}
   conf:
     cmds:
       - vim conf/dev.conf.yaml
     interactive: true
-  gen:s:
+  init:k:
     dir: "./pkg/services"
     cmds:
-      - gowrap gen -init {{.CLI_ARGS}}
+      - gowrap gen -init kit -n {{.CLI_ARGS}}
+  init:s:
+    dir: "./pkg/services"
+    cmds:
+      - gowrap gen -init service -n {{.CLI_ARGS}}
+  init:a:
+    dir: "./pkg/repository/api"
+    cmds:
+      - gowrap gen -init service -n {{.CLI_ARGS}}
+  init:d:
+    dir: "./pkg/repository/dao"
+    cmds:
+      - gowrap gen -init service -n {{.CLI_ARGS}}
+  gen:k:
+    dir: "./pkg/services/"
+    cmds:
+      - go generate ./{{.CLI_ARGS}}
+  gen:s:
+    dir: "./pkg/services/"
+    cmds:
+      - go generate ./{{.CLI_ARGS}}
   gen:a:
     dir: "./pkg/repository/api"
     cmds:
-      - gowrap gen -init {{.CLI_ARGS}}
+      - go generate ./{{.CLI_ARGS}}
   gen:d:
     dir: "./pkg/repository/dao"
     cmds:
-      - gowrap gen -init {{.CLI_ARGS}}
+      - go generate ./{{.CLI_ARGS}}
   swag:
     cmds:
       - swag init -g cmd/main.go  -d ./

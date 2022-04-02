@@ -25,124 +25,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/foo/{id}": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "HelloService"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": " ",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/hello.SwagResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/say/{id}": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "HelloService"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": " ",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/hello.SwagResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/types.SayRes"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/say1/{id}": {
-            "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "HelloService"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": " ",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/hello.SwagResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/types.SayRes"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/sayhello/{id}": {
+        "/hello/{id}": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -171,7 +54,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/types.SayRes"
+                                            "$ref": "#/definitions/ent.Pod"
                                         }
                                     }
                                 }
@@ -181,13 +64,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/sayhello1/{id}": {
+        "/say1pod/{id}": {
             "get": {
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
-                    "HelloService"
+                    "Say1Service"
                 ],
                 "parameters": [
                     {
@@ -204,16 +87,52 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/hello.SwagResponse"
+                                    "$ref": "#/definitions/say1.SwagResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/ent.User"
-                                            }
+                                            "$ref": "#/definitions/ent.Pod"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/saypod/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SayService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/say.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.Pod"
                                         }
                                     }
                                 }
@@ -481,16 +400,20 @@ const docTemplate = `{
                 }
             }
         },
-        "types.SayRes": {
+        "say.SwagResponse": {
             "type": "object",
             "properties": {
-                "email": {
+                "data": {},
+                "traceId": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
+                }
+            }
+        },
+        "say1.SwagResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "traceId": {
                     "type": "string"
                 }
             }

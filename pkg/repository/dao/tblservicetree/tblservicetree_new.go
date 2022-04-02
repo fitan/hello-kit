@@ -8,7 +8,7 @@ func NewServiceMiddleware(logger *zap.SugaredLogger) (mw []Middleware) {
 	mw = []Middleware{}
 	// Append your middleware here
 	mw = append(mw, func(TblservicetreeService TblservicetreeService) TblservicetreeService {
-		return NewTblservicetreeServiceWithPrometheus(TblservicetreeService, "repo.dao")
+		return NewTblservicetreeServiceWithPrometheus(TblservicetreeService)
 	})
 	mw = append(mw, func(TblservicetreeService TblservicetreeService) TblservicetreeService {
 		return NewTblservicetreeServiceWithLog(TblservicetreeService, logger)

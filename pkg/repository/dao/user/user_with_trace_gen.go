@@ -31,6 +31,7 @@ func NewUserServiceWithTracing(base UserService) UserService {
 
 // ByQueries implements UserService
 func (_d UserServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (res ent.Users, count int, err error) {
+
 	var name = "UserService.ByQueries"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -49,11 +50,13 @@ func (_d UserServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (
 		}
 		span.End()
 	}()
+
 	return _d.UserService.ByQueries(ctx, i)
 }
 
 // Create implements UserService
 func (_d UserServiceWithTracing) Create(ctx context.Context, v ent.User) (res *ent.User, err error) {
+
 	var name = "UserService.Create"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -71,11 +74,13 @@ func (_d UserServiceWithTracing) Create(ctx context.Context, v ent.User) (res *e
 		}
 		span.End()
 	}()
+
 	return _d.UserService.Create(ctx, v)
 }
 
 // DeleteById implements UserService
 func (_d UserServiceWithTracing) DeleteById(ctx context.Context, id int) (err error) {
+
 	var name = "UserService.DeleteById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -92,11 +97,13 @@ func (_d UserServiceWithTracing) DeleteById(ctx context.Context, id int) (err er
 		}
 		span.End()
 	}()
+
 	return _d.UserService.DeleteById(ctx, id)
 }
 
 // GetById implements UserService
 func (_d UserServiceWithTracing) GetById(ctx context.Context, id int) (res *ent.User, err error) {
+
 	var name = "UserService.GetById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -114,11 +121,13 @@ func (_d UserServiceWithTracing) GetById(ctx context.Context, id int) (res *ent.
 		}
 		span.End()
 	}()
+
 	return _d.UserService.GetById(ctx, id)
 }
 
 // UpdateById implements UserService
 func (_d UserServiceWithTracing) UpdateById(ctx context.Context, id int, v *ent.User) (up1 *ent.User, err error) {
+
 	var name = "UserService.UpdateById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -137,5 +146,6 @@ func (_d UserServiceWithTracing) UpdateById(ctx context.Context, id int, v *ent.
 		}
 		span.End()
 	}()
+
 	return _d.UserService.UpdateById(ctx, id, v)
 }

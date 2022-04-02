@@ -7,7 +7,7 @@ package say
 import (
 	"context"
 	"encoding/json"
-	"hello/pkg/services/hello/types"
+	"hello/pkg/ent"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
@@ -29,9 +29,10 @@ func NewSayServiceWithTracing(base SayService) SayService {
 	return d
 }
 
-// Say implements SayService
-func (_d SayServiceWithTracing) Say(ctx context.Context, req types.SayReq) (res types.SayRes, err error) {
-	var name = "SayService.Say"
+// SayPod implements SayService
+func (_d SayServiceWithTracing) SayPod(ctx context.Context, req SayPodReq) (pp1 *ent.Pod, err error) {
+
+	var name = "SayService.SayPod"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -39,7 +40,7 @@ func (_d SayServiceWithTracing) Say(ctx context.Context, req types.SayReq) (res 
 				"params": map[string]interface{}{
 					"req": req},
 				"result": map[string]interface{}{
-					"res": res,
+					"pp1": pp1,
 					"err": err},
 			}
 			s, _ := json.Marshal(l)
@@ -48,5 +49,6 @@ func (_d SayServiceWithTracing) Say(ctx context.Context, req types.SayReq) (res 
 		}
 		span.End()
 	}()
-	return _d.SayService.Say(ctx, req)
+
+	return _d.SayService.SayPod(ctx, req)
 }

@@ -434,7 +434,7 @@ func (sdtsq *SpiderDevTblServicetreeQuery) sqlQuery(ctx context.Context) *sql.Se
 }
 
 func (sdtsq *SpiderDevTblServicetreeQuery) ByQueries(ctx context.Context, i interface{}) (res SpiderDevTblServicetrees, count int, err error) {
-	SetPodFormQueries(i, sdtsq)
+	SetSpiderDevTblServicetreeFormQueries(i, sdtsq)
 	count, err = sdtsq.Count(ctx)
 	if err != nil {
 		return

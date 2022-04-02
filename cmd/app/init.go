@@ -80,7 +80,11 @@ func RunApp() {
 	fs.Parse(os.Args[1:])
 
 	r := gin.Default()
-	r.Use(ginprom.PromMiddleware(nil))
+	opts := ginprom.NewDefaultOpts()
+	opts.EndpointLabelMappingFn = func(c *gin.Context) string {
+		return c.FullPath()
+	}
+	r.Use(ginprom.PromMiddleware(opts))
 	r.Use(cors.New(cors.Config{
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "X-Total-Count"},

@@ -5,7 +5,7 @@ package say
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"hello/pkg/services/hello/types"
+	"hello/pkg/ent"
 	"time"
 
 	"context"
@@ -23,7 +23,7 @@ type SayServiceWithPrometheus struct {
 
 var sayserviceDurationSummaryVec = promauto.NewSummaryVec(
 	prometheus.SummaryOpts{
-		Name:       "sayservice_duration_seconds",
+		Name:       "services_say_duration_seconds",
 		Help:       "sayservice runtime duration and result",
 		MaxAge:     time.Minute,
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
@@ -31,15 +31,15 @@ var sayserviceDurationSummaryVec = promauto.NewSummaryVec(
 	[]string{"instance_name", "method", "result"})
 
 // NewSayServiceWithPrometheus returns an instance of the SayService decorated with prometheus summary metric
-func NewSayServiceWithPrometheus(base SayService, instanceName string) SayServiceWithPrometheus {
+func NewSayServiceWithPrometheus(base SayService) SayServiceWithPrometheus {
 	return SayServiceWithPrometheus{
 		base:         base,
-		instanceName: instanceName,
+		instanceName: "(down .Interface.Name)",
 	}
 }
 
-// Say implements SayService
-func (_d SayServiceWithPrometheus) Say(ctx context.Context, req types.SayReq) (res types.SayRes, err error) {
+// SayPod implements SayService
+func (_d SayServiceWithPrometheus) SayPod(ctx context.Context, req SayPodReq) (pp1 *ent.Pod, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -47,7 +47,7 @@ func (_d SayServiceWithPrometheus) Say(ctx context.Context, req types.SayReq) (r
 			result = "error"
 		}
 
-		sayserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "Say", result).Observe(time.Since(_since).Seconds())
+		sayserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "SayPod", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.Say(ctx, req)
+	return _d.base.SayPod(ctx, req)
 }

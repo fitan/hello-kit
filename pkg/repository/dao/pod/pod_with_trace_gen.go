@@ -31,6 +31,7 @@ func NewPodServiceWithTracing(base PodService) PodService {
 
 // ByQueries implements PodService
 func (_d PodServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (res ent.Pods, count int, err error) {
+
 	var name = "PodService.ByQueries"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -49,11 +50,13 @@ func (_d PodServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (r
 		}
 		span.End()
 	}()
+
 	return _d.PodService.ByQueries(ctx, i)
 }
 
 // Create implements PodService
 func (_d PodServiceWithTracing) Create(ctx context.Context, v ent.Pod) (res *ent.Pod, err error) {
+
 	var name = "PodService.Create"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -71,11 +74,13 @@ func (_d PodServiceWithTracing) Create(ctx context.Context, v ent.Pod) (res *ent
 		}
 		span.End()
 	}()
+
 	return _d.PodService.Create(ctx, v)
 }
 
 // DeleteById implements PodService
 func (_d PodServiceWithTracing) DeleteById(ctx context.Context, id int64) (err error) {
+
 	var name = "PodService.DeleteById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -92,11 +97,13 @@ func (_d PodServiceWithTracing) DeleteById(ctx context.Context, id int64) (err e
 		}
 		span.End()
 	}()
+
 	return _d.PodService.DeleteById(ctx, id)
 }
 
 // GetById implements PodService
 func (_d PodServiceWithTracing) GetById(ctx context.Context, id int64) (res *ent.Pod, err error) {
+
 	var name = "PodService.GetById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -114,11 +121,13 @@ func (_d PodServiceWithTracing) GetById(ctx context.Context, id int64) (res *ent
 		}
 		span.End()
 	}()
+
 	return _d.PodService.GetById(ctx, id)
 }
 
 // UpdateById implements PodService
 func (_d PodServiceWithTracing) UpdateById(ctx context.Context, id int64, v *ent.Pod) (pp1 *ent.Pod, err error) {
+
 	var name = "PodService.UpdateById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -137,5 +146,6 @@ func (_d PodServiceWithTracing) UpdateById(ctx context.Context, id int64, v *ent
 		}
 		span.End()
 	}()
+
 	return _d.PodService.UpdateById(ctx, id, v)
 }

@@ -6,7 +6,7 @@ package say
 
 import (
 	"context"
-	"hello/pkg/services/hello/types"
+	"hello/pkg/ent"
 
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
@@ -26,23 +26,23 @@ func NewSayServiceWithLog(base SayService, log *zap.SugaredLogger) SayServiceWit
 	}
 }
 
-// Say implements SayService
-func (_d SayServiceWithLog) Say(ctx context.Context, req types.SayReq) (res types.SayRes, err error) {
+// SayPod implements SayService
+func (_d SayServiceWithLog) SayPod(ctx context.Context, req SayPodReq) (pp1 *ent.Pod, err error) {
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
 	defer func() {
-		_log.Debugw("SayServiceWithLog calling Say", "params", map[string]interface{}{
+		_log.Debugw("SayServiceWithLog calling SayPod", "params", map[string]interface{}{
 			"req": req}, "results", map[string]interface{}{
-			"res": res,
+			"pp1": pp1,
 			"err": err})
 		if err != nil {
 			_log.Errorw("with_log", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
-				"res": res,
+				"pp1": pp1,
 				"err": err})
 		}
 
 	}()
-	return _d._base.Say(ctx, req)
+	return _d._base.SayPod(ctx, req)
 }

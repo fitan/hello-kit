@@ -23,7 +23,7 @@ type HelloServiceWithPrometheus struct {
 
 var helloserviceDurationSummaryVec = promauto.NewSummaryVec(
 	prometheus.SummaryOpts{
-		Name:       "helloservice_duration_seconds",
+		Name:       "services_hello_duration_seconds",
 		Help:       "helloservice runtime duration and result",
 		MaxAge:     time.Minute,
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
@@ -31,15 +31,15 @@ var helloserviceDurationSummaryVec = promauto.NewSummaryVec(
 	[]string{"instance_name", "method", "result"})
 
 // NewHelloServiceWithPrometheus returns an instance of the HelloService decorated with prometheus summary metric
-func NewHelloServiceWithPrometheus(base HelloService, instanceName string) HelloServiceWithPrometheus {
+func NewHelloServiceWithPrometheus(base HelloService) HelloServiceWithPrometheus {
 	return HelloServiceWithPrometheus{
 		base:         base,
-		instanceName: instanceName,
+		instanceName: "(down .Interface.Name)",
 	}
 }
 
-// Say implements HelloService
-func (_d HelloServiceWithPrometheus) Say(ctx context.Context, req SayReq) (up1 *ent.User, err error) {
+// GetUser implements HelloService
+func (_d HelloServiceWithPrometheus) GetUser(ctx context.Context, req GetUserReq) (pp1 *ent.Pod, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -47,7 +47,7 @@ func (_d HelloServiceWithPrometheus) Say(ctx context.Context, req SayReq) (up1 *
 			result = "error"
 		}
 
-		helloserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "Say", result).Observe(time.Since(_since).Seconds())
+		helloserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetUser", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.Say(ctx, req)
+	return _d.base.GetUser(ctx, req)
 }
