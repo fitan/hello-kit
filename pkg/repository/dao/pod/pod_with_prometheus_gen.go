@@ -23,7 +23,7 @@ type PodServiceWithPrometheus struct {
 
 var podserviceDurationSummaryVec = promauto.NewSummaryVec(
 	prometheus.SummaryOpts{
-		Name:       "podservice_duration_seconds",
+		Name:       "dao_pod_duration_seconds",
 		Help:       "podservice runtime duration and result",
 		MaxAge:     time.Minute,
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
@@ -31,10 +31,10 @@ var podserviceDurationSummaryVec = promauto.NewSummaryVec(
 	[]string{"instance_name", "method", "result"})
 
 // NewPodServiceWithPrometheus returns an instance of the PodService decorated with prometheus summary metric
-func NewPodServiceWithPrometheus(base PodService, instanceName string) PodServiceWithPrometheus {
+func NewPodServiceWithPrometheus(base PodService) PodServiceWithPrometheus {
 	return PodServiceWithPrometheus{
 		base:         base,
-		instanceName: instanceName,
+		instanceName: "(down .Interface.Name)",
 	}
 }
 

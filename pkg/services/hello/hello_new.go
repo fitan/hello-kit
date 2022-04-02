@@ -1,4 +1,4 @@
-package user
+package hello
 
 import (
 	"github.com/fitan/gink/transport/http"
@@ -7,21 +7,30 @@ import (
 	"go.uber.org/zap"
 )
 
-type Middleware func(UserService) UserService
+type Middleware func(HelloService) HelloService
 
 func NewServiceMiddleware(logger *zap.SugaredLogger) (mw []Middleware) {
 	mw = []Middleware{}
 	// Append your middleware here
-	mw = append(mw, func(UserService UserService) UserService {
-		return NewUserServiceWithPrometheus(UserService)
+	mw = append(mw, func(HelloService HelloService) HelloService {
+		return NewHelloServiceWithPrometheus(HelloService)
 	})
-	mw = append(mw, func(UserService UserService) UserService {
-		return NewUserServiceWithLog(UserService, logger)
+	mw = append(mw, func(HelloService HelloService) HelloService {
+		return NewHelloServiceWithLog(HelloService, logger)
 	})
-	mw = append(mw, func(UserService UserService) UserService {
-		return NewUserServiceWithTracing(UserService)
+	mw = append(mw, func(HelloService HelloService) HelloService {
+		return NewHelloServiceWithTracing(HelloService)
 	})
 	return
+}
+
+// New returns a HelloService with all of the expected middleware wired in.
+func NewService(svc BaseService, middleware []Middleware) HelloService {
+
+	for _, m := range middleware {
+		svc = m(svc)
+	}
+	return svc
 }
 
 func NewEndpointMiddleware(logger *zap.SugaredLogger, ep []endpoint.Middleware) Mws {
@@ -33,8 +42,8 @@ func NewEndpointMiddleware(logger *zap.SugaredLogger, ep []endpoint.Middleware) 
 	//logEMW := func(n string) endpoint.Middleware {
 	//	return mid.LoggingMiddleware(logger)
 	//}
-
 	AddEndpointMiddlewareToAllMethodsWithMethodName(mws, otelkitEMW)
+	//AddEndpointMiddlewareToAllMethodsWithMethodName(mw, logEMW)
 	for _, e := range ep {
 		AddEndpointMiddlewareToAllMethods(mws, e)
 	}
@@ -48,13 +57,4 @@ func NewServiceOption(op []http.ServerOption) Ops {
 		AddHttpOptionToAllMethods(ops, o)
 	}
 	return ops
-}
-
-// New returns a UserService with all of the expected middleware wired in.
-func NewService(svc BaseService, middleware []Middleware) UserService {
-
-	for _, m := range middleware {
-		svc = m(svc)
-	}
-	return svc
 }

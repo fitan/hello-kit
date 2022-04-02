@@ -30,6 +30,7 @@ func NewCasbinServiceWithTracing(base CasbinService) CasbinService {
 
 // BindPermission implements CasbinService
 func (_d CasbinServiceWithTracing) BindPermission(ctx context.Context, userId int, roleId int, resourceId int) (err error) {
+
 	var name = "CasbinService.BindPermission"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -48,11 +49,13 @@ func (_d CasbinServiceWithTracing) BindPermission(ctx context.Context, userId in
 		}
 		span.End()
 	}()
+
 	return _d.CasbinService.BindPermission(ctx, userId, roleId, resourceId)
 }
 
 // UnBindPermission implements CasbinService
 func (_d CasbinServiceWithTracing) UnBindPermission(ctx context.Context, userId int, roleId int, resourceId int) (err error) {
+
 	var name = "CasbinService.UnBindPermission"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -71,5 +74,6 @@ func (_d CasbinServiceWithTracing) UnBindPermission(ctx context.Context, userId 
 		}
 		span.End()
 	}()
+
 	return _d.CasbinService.UnBindPermission(ctx, userId, roleId, resourceId)
 }

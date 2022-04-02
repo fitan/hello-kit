@@ -22,7 +22,7 @@ type CasbinServiceWithPrometheus struct {
 
 var casbinserviceDurationSummaryVec = promauto.NewSummaryVec(
 	prometheus.SummaryOpts{
-		Name:       "casbinservice_duration_seconds",
+		Name:       "services_casbin_duration_seconds",
 		Help:       "casbinservice runtime duration and result",
 		MaxAge:     time.Minute,
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
@@ -30,10 +30,10 @@ var casbinserviceDurationSummaryVec = promauto.NewSummaryVec(
 	[]string{"instance_name", "method", "result"})
 
 // NewCasbinServiceWithPrometheus returns an instance of the CasbinService decorated with prometheus summary metric
-func NewCasbinServiceWithPrometheus(base CasbinService, instanceName string) CasbinServiceWithPrometheus {
+func NewCasbinServiceWithPrometheus(base CasbinService) CasbinServiceWithPrometheus {
 	return CasbinServiceWithPrometheus{
 		base:         base,
-		instanceName: instanceName,
+		instanceName: "(down .Interface.Name)",
 	}
 }
 

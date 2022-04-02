@@ -29,8 +29,8 @@ var pyroscopeSet = wire.NewSet(initPyroscope)
 var casbinSet = wire.NewSet(initCasbin)
 
 // repo.api.service
-var baiduHttpSet = wire.NewSet(baidu.NewBaiduApi, baidu.NewBase, baidu.NewBaiduApiMiddleware)
-var taobaoHttpSet = wire.NewSet(taobao.NewTaoApi, taobao.NewBase, taobao.NewTaobaoApiMiddleware)
+var baiduHttpSet = wire.NewSet(baidu.NewBasicService, baidu.NewServiceMiddleware, baidu.NewService)
+var taobaoHttpSet = wire.NewSet(taobao.NewBasicService, taobao.NewServiceMiddleware, taobao.NewService)
 
 // repo.dao.service
 var userDaoSet = wire.NewSet(userD.NewBasicService, userD.NewServiceMiddleware, userD.NewService)
@@ -46,7 +46,7 @@ var repoSet = wire.NewSet(podDaoSet,projectDaoSet,tblservicetreeDaoSet,userDaoSe
 // http service
 var casbinServiceSet = wire.NewSet(casbin.NewBasicService, casbin.NewService, casbin.NewServiceMiddleware)
 
-var helloServiceSet = wire.NewSet(hello.NewBasicHelloService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)
+var helloServiceSet = wire.NewSet(hello.NewBasicService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)
 var userServiceSet = wire.NewSet(user.NewBasicService, user.NewService, user.NewEndpointMiddleware, user.NewServiceMiddleware, user.NewEndpoints, user.NewServiceOption, user.NewHTTPHandler)
 var servicesSet = wire.NewSet(casbinServiceSet,userServiceSet,helloServiceSet, wire.Struct(new(services.Services), "*"))
 

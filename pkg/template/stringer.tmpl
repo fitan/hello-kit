@@ -4,7 +4,7 @@
 {{ $builder := $.QueryName }}
 {{ $receiver := receiver $builder }}
 func ({{ $receiver }} *{{ $builder }}) ByQueries(ctx context.Context, i interface{}) (res {{plural .Name}},count int, err error) {
-	SetPodFormQueries(i, {{ $receiver }})
+	Set{{.Name}}FormQueries(i, {{ $receiver }})
 	count,err = {{ $receiver }}.Count(ctx)
 	if err != nil {
 		return

@@ -125,15 +125,6 @@ definitions:
       traceId:
         type: string
     type: object
-  types.SayRes:
-    properties:
-      email:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-    type: object
   user.GetListRes:
     properties:
       count:
@@ -163,73 +154,7 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
-  /foo/{id}:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: ' '
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/hello.SwagResponse'
-            - properties:
-                data:
-                  type: string
-              type: object
-      tags:
-      - HelloService
-  /say/{id}:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: ' '
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/hello.SwagResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/types.SayRes'
-              type: object
-      tags:
-      - HelloService
-  /say1/{id}:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: ' '
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/hello.SwagResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/types.SayRes'
-              type: object
-      tags:
-      - HelloService
-  /sayhello/{id}:
+  /hello/{id}:
     get:
       consumes:
       - application/json
@@ -247,31 +172,7 @@ paths:
             - $ref: '#/definitions/hello.SwagResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/types.SayRes'
-              type: object
-      tags:
-      - HelloService
-  /sayhello1/{id}:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: ' '
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/hello.SwagResponse'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/ent.User'
-                  type: array
+                  $ref: '#/definitions/ent.Pod'
               type: object
       tags:
       - HelloService

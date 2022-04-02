@@ -31,6 +31,7 @@ func NewTblservicetreeServiceWithTracing(base TblservicetreeService) Tblservicet
 
 // ByQueries implements TblservicetreeService
 func (_d TblservicetreeServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (res ent.SpiderDevTblServicetrees, count int, err error) {
+
 	var name = "TblservicetreeService.ByQueries"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -49,11 +50,13 @@ func (_d TblservicetreeServiceWithTracing) ByQueries(ctx context.Context, i inte
 		}
 		span.End()
 	}()
+
 	return _d.TblservicetreeService.ByQueries(ctx, i)
 }
 
 // Create implements TblservicetreeService
 func (_d TblservicetreeServiceWithTracing) Create(ctx context.Context, v ent.SpiderDevTblServicetree) (res *ent.SpiderDevTblServicetree, err error) {
+
 	var name = "TblservicetreeService.Create"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -71,11 +74,13 @@ func (_d TblservicetreeServiceWithTracing) Create(ctx context.Context, v ent.Spi
 		}
 		span.End()
 	}()
+
 	return _d.TblservicetreeService.Create(ctx, v)
 }
 
 // DeleteById implements TblservicetreeService
 func (_d TblservicetreeServiceWithTracing) DeleteById(ctx context.Context, id int32) (err error) {
+
 	var name = "TblservicetreeService.DeleteById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -92,11 +97,13 @@ func (_d TblservicetreeServiceWithTracing) DeleteById(ctx context.Context, id in
 		}
 		span.End()
 	}()
+
 	return _d.TblservicetreeService.DeleteById(ctx, id)
 }
 
 // GetById implements TblservicetreeService
 func (_d TblservicetreeServiceWithTracing) GetById(ctx context.Context, id int32) (res *ent.SpiderDevTblServicetree, err error) {
+
 	var name = "TblservicetreeService.GetById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -114,11 +121,13 @@ func (_d TblservicetreeServiceWithTracing) GetById(ctx context.Context, id int32
 		}
 		span.End()
 	}()
+
 	return _d.TblservicetreeService.GetById(ctx, id)
 }
 
 // UpdateById implements TblservicetreeService
 func (_d TblservicetreeServiceWithTracing) UpdateById(ctx context.Context, id int32, v *ent.SpiderDevTblServicetree) (sp1 *ent.SpiderDevTblServicetree, err error) {
+
 	var name = "TblservicetreeService.UpdateById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -137,5 +146,6 @@ func (_d TblservicetreeServiceWithTracing) UpdateById(ctx context.Context, id in
 		}
 		span.End()
 	}()
+
 	return _d.TblservicetreeService.UpdateById(ctx, id, v)
 }

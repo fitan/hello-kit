@@ -23,7 +23,7 @@ type ProjectServiceWithPrometheus struct {
 
 var projectserviceDurationSummaryVec = promauto.NewSummaryVec(
 	prometheus.SummaryOpts{
-		Name:       "projectservice_duration_seconds",
+		Name:       "dao_project_duration_seconds",
 		Help:       "projectservice runtime duration and result",
 		MaxAge:     time.Minute,
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
@@ -31,10 +31,10 @@ var projectserviceDurationSummaryVec = promauto.NewSummaryVec(
 	[]string{"instance_name", "method", "result"})
 
 // NewProjectServiceWithPrometheus returns an instance of the ProjectService decorated with prometheus summary metric
-func NewProjectServiceWithPrometheus(base ProjectService, instanceName string) ProjectServiceWithPrometheus {
+func NewProjectServiceWithPrometheus(base ProjectService) ProjectServiceWithPrometheus {
 	return ProjectServiceWithPrometheus{
 		base:         base,
-		instanceName: instanceName,
+		instanceName: "(down .Interface.Name)",
 	}
 }
 

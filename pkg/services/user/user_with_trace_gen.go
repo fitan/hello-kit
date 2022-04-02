@@ -31,6 +31,7 @@ func NewUserServiceWithTracing(base UserService) UserService {
 
 // GetById implements UserService
 func (_d UserServiceWithTracing) GetById(ctx context.Context, req GetByIdReq) (up1 *ent.User, err error) {
+
 	var name = "UserService.GetById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -48,11 +49,13 @@ func (_d UserServiceWithTracing) GetById(ctx context.Context, req GetByIdReq) (u
 		}
 		span.End()
 	}()
+
 	return _d.UserService.GetById(ctx, req)
 }
 
 // GetList implements UserService
 func (_d UserServiceWithTracing) GetList(ctx context.Context, req GetListReq) (g1 GetListRes, err error) {
+
 	var name = "UserService.GetList"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -70,5 +73,6 @@ func (_d UserServiceWithTracing) GetList(ctx context.Context, req GetListReq) (g
 		}
 		span.End()
 	}()
+
 	return _d.UserService.GetList(ctx, req)
 }

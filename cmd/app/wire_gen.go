@@ -13,11 +13,18 @@ import (
 	"hello/pkg/repository"
 	"hello/pkg/repository/api/baidu"
 	"hello/pkg/repository/api/taobao"
+	"hello/pkg/repository/dao/pod"
+	"hello/pkg/repository/dao/project"
+	"hello/pkg/repository/dao/tblservicetree"
 	"hello/pkg/repository/dao/user"
 	"hello/pkg/services"
 	"hello/pkg/services/casbin"
 	"hello/pkg/services/hello"
 	user2 "hello/pkg/services/user"
+)
+
+import (
+	_ "hello/docs"
 )
 
 // Injectors from wire.go:
@@ -28,49 +35,64 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 	if err != nil {
 		return App{}, err
 	}
-	base := baidu.NewBase(myConf)
+	baseService := baidu.NewBasicService(myConf)
 	sugaredLogger := initLog(myConf)
-	v := baidu.NewBaiduApiMiddleware(sugaredLogger)
-	baiduApi := baidu.NewBaiduApi(base, v)
-	taobaoBase := taobao.NewBase(myConf)
-	v2 := taobao.NewTaobaoApiMiddleware(sugaredLogger)
-	taobaoApi := taobao.NewTaoApi(taobaoBase, v2)
+	v := baidu.NewServiceMiddleware(sugaredLogger)
+	baiduService := baidu.NewService(baseService, v)
+	taobaoBaseService := taobao.NewBasicService(myConf)
+	v2 := taobao.NewServiceMiddleware(sugaredLogger)
+	taobaoService := taobao.NewService(taobaoBaseService, v2)
 	client, err := initEnt(myConf)
 	if err != nil {
 		return App{}, err
 	}
-	baseService := user.NewBasicService(client)
+	userBaseService := user.NewBasicService(client)
 	v3 := user.NewServiceMiddleware(sugaredLogger)
-	userService := user.NewService(baseService, v3)
+	userService := user.NewService(userBaseService, v3)
+	podBaseService := pod.NewBasicService(client)
+	v4 := pod.NewServiceMiddleware(sugaredLogger)
+	podService := pod.NewService(podBaseService, v4)
+	projectBaseService := project.NewBasicService(client)
+	v5 := project.NewServiceMiddleware(sugaredLogger)
+	projectService := project.NewService(projectBaseService, v5)
+	tblservicetreeBaseService := tblservicetree.NewBasicService(client)
+	v6 := tblservicetree.NewServiceMiddleware(sugaredLogger)
+	tblservicetreeService := tblservicetree.NewService(tblservicetreeBaseService, v6)
 	repositoryRepository := &repository.Repository{
-		Baidu:  baiduApi,
-		Taobao: taobaoApi,
-		User:   userService,
+		Baidu:       baiduService,
+		Taobao:      taobaoService,
+		User:        userService,
+		Pod:         podService,
+		Project:     projectService,
+		ServiceTree: tblservicetreeService,
 	}
-	helloBaseService := hello.NewBasicHelloService(sugaredLogger, repositoryRepository)
-	v4 := hello.NewServiceMiddleware(sugaredLogger)
-	helloService := hello.NewService(helloBaseService, v4)
-	v5 := initEndpointMiddleware()
-	v6 := hello.NewEndpointMiddleware(sugaredLogger, v5)
-	endpoints := hello.NewEndpoints(helloService, v6)
-	v7 := initHttpServerOption()
-	v8 := hello.NewServiceOption(v7)
-	httpHandler := hello.NewHTTPHandler(r, endpoints, v8)
 	repository2 := repository.Repository{
-		Baidu:  baiduApi,
-		Taobao: taobaoApi,
-		User:   userService,
+		Baidu:       baiduService,
+		Taobao:      taobaoService,
+		User:        userService,
+		Pod:         podService,
+		Project:     projectService,
+		ServiceTree: tblservicetreeService,
 	}
+	helloBaseService := hello.NewBasicService(repository2)
+	v7 := hello.NewServiceMiddleware(sugaredLogger)
+	helloService := hello.NewService(helloBaseService, v7)
+	v8 := initEndpointMiddleware()
+	mws := hello.NewEndpointMiddleware(sugaredLogger, v8)
+	endpoints := hello.NewEndpoints(helloService, mws)
+	v9 := initHttpServerOption()
+	ops := hello.NewServiceOption(v9)
+	httpHandler := hello.NewHTTPHandler(r, endpoints, ops)
 	casbinBaseService := casbin.NewBasicService()
-	v9 := casbin.NewServiceMiddleware(sugaredLogger)
-	casbinService := casbin.NewService(casbinBaseService, v9)
-	userBaseService := user2.NewBasicService(repository2, casbinService, client)
-	v10 := user2.NewServiceMiddleware(sugaredLogger)
-	userUserService := user2.NewService(userBaseService, v10)
-	mws := user2.NewEndpointMiddleware(sugaredLogger, v5)
-	userEndpoints := user2.NewEndpoints(userUserService, mws)
-	ops := user2.NewServiceOption(v7)
-	userHttpHandler := user2.NewHTTPHandler(r, userEndpoints, ops)
+	v10 := casbin.NewServiceMiddleware(sugaredLogger)
+	casbinService := casbin.NewService(casbinBaseService, v10)
+	baseService2 := user2.NewBasicService(repository2, casbinService, client)
+	v11 := user2.NewServiceMiddleware(sugaredLogger)
+	userUserService := user2.NewService(baseService2, v11)
+	userMws := user2.NewEndpointMiddleware(sugaredLogger, v8)
+	userEndpoints := user2.NewEndpoints(userUserService, userMws)
+	userOps := user2.NewServiceOption(v9)
+	userHttpHandler := user2.NewHTTPHandler(r, userEndpoints, userOps)
 	servicesServices := &services.Services{
 		Hello: httpHandler,
 		User:  userHttpHandler,
@@ -130,19 +152,25 @@ var pyroscopeSet = wire.NewSet(initPyroscope)
 var casbinSet = wire.NewSet(initCasbin)
 
 // repo.api.service
-var baiduHttpSet = wire.NewSet(baidu.NewBaiduApi, baidu.NewBase, baidu.NewBaiduApiMiddleware)
+var baiduHttpSet = wire.NewSet(baidu.NewBasicService, baidu.NewServiceMiddleware, baidu.NewService)
 
-var taobaoHttpSet = wire.NewSet(taobao.NewTaoApi, taobao.NewBase, taobao.NewTaobaoApiMiddleware)
+var taobaoHttpSet = wire.NewSet(taobao.NewBasicService, taobao.NewServiceMiddleware, taobao.NewService)
 
 // repo.dao.service
 var userDaoSet = wire.NewSet(user.NewBasicService, user.NewServiceMiddleware, user.NewService)
 
-var repoSet = wire.NewSet(userDaoSet, baiduHttpSet, taobaoHttpSet, wire.Struct(new(repository.Repository), "*"))
+var podDaoSet = wire.NewSet(pod.NewBasicService, pod.NewServiceMiddleware, pod.NewService)
+
+var projectDaoSet = wire.NewSet(project.NewBasicService, project.NewServiceMiddleware, project.NewService)
+
+var tblservicetreeDaoSet = wire.NewSet(tblservicetree.NewBasicService, tblservicetree.NewServiceMiddleware, tblservicetree.NewService)
+
+var repoSet = wire.NewSet(podDaoSet, projectDaoSet, tblservicetreeDaoSet, userDaoSet, baiduHttpSet, taobaoHttpSet, wire.Struct(new(repository.Repository), "*"))
 
 // http service
 var casbinServiceSet = wire.NewSet(casbin.NewBasicService, casbin.NewService, casbin.NewServiceMiddleware)
 
-var helloServiceSet = wire.NewSet(hello.NewBasicHelloService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)
+var helloServiceSet = wire.NewSet(hello.NewBasicService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)
 
 var userServiceSet = wire.NewSet(user2.NewBasicService, user2.NewService, user2.NewEndpointMiddleware, user2.NewServiceMiddleware, user2.NewEndpoints, user2.NewServiceOption, user2.NewHTTPHandler)
 

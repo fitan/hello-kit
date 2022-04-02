@@ -8,7 +8,7 @@ func NewServiceMiddleware(logger *zap.SugaredLogger) (mw []Middleware) {
 	mw = []Middleware{}
 	// Append your middleware here
 	mw = append(mw, func(CasbinService CasbinService) CasbinService {
-		return NewCasbinServiceWithPrometheus(CasbinService, "pkg.services.Casbin")
+		return NewCasbinServiceWithPrometheus(CasbinService)
 	})
 	mw = append(mw, func(CasbinService CasbinService) CasbinService {
 		return NewCasbinServiceWithLog(CasbinService, logger)

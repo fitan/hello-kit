@@ -31,6 +31,7 @@ func NewProjectServiceWithTracing(base ProjectService) ProjectService {
 
 // ByQueries implements ProjectService
 func (_d ProjectServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (res ent.Projects, count int, err error) {
+
 	var name = "ProjectService.ByQueries"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -49,11 +50,13 @@ func (_d ProjectServiceWithTracing) ByQueries(ctx context.Context, i interface{}
 		}
 		span.End()
 	}()
+
 	return _d.ProjectService.ByQueries(ctx, i)
 }
 
 // Create implements ProjectService
 func (_d ProjectServiceWithTracing) Create(ctx context.Context, v ent.Project) (res *ent.Project, err error) {
+
 	var name = "ProjectService.Create"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -71,11 +74,13 @@ func (_d ProjectServiceWithTracing) Create(ctx context.Context, v ent.Project) (
 		}
 		span.End()
 	}()
+
 	return _d.ProjectService.Create(ctx, v)
 }
 
 // DeleteById implements ProjectService
 func (_d ProjectServiceWithTracing) DeleteById(ctx context.Context, id int) (err error) {
+
 	var name = "ProjectService.DeleteById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -92,11 +97,13 @@ func (_d ProjectServiceWithTracing) DeleteById(ctx context.Context, id int) (err
 		}
 		span.End()
 	}()
+
 	return _d.ProjectService.DeleteById(ctx, id)
 }
 
 // GetById implements ProjectService
 func (_d ProjectServiceWithTracing) GetById(ctx context.Context, id int) (res *ent.Project, err error) {
+
 	var name = "ProjectService.GetById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -114,11 +121,13 @@ func (_d ProjectServiceWithTracing) GetById(ctx context.Context, id int) (res *e
 		}
 		span.End()
 	}()
+
 	return _d.ProjectService.GetById(ctx, id)
 }
 
 // UpdateById implements ProjectService
 func (_d ProjectServiceWithTracing) UpdateById(ctx context.Context, id int, v *ent.Project) (pp1 *ent.Project, err error) {
+
 	var name = "ProjectService.UpdateById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
@@ -137,5 +146,6 @@ func (_d ProjectServiceWithTracing) UpdateById(ctx context.Context, id int, v *e
 		}
 		span.End()
 	}()
+
 	return _d.ProjectService.UpdateById(ctx, id, v)
 }

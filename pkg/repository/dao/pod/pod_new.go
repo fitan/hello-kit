@@ -8,7 +8,7 @@ func NewServiceMiddleware(logger *zap.SugaredLogger) (mw []Middleware) {
 	mw = []Middleware{}
 	// Append your middleware here
 	mw = append(mw, func(PodService PodService) PodService {
-		return NewPodServiceWithPrometheus(PodService, "repo.dao")
+		return NewPodServiceWithPrometheus(PodService)
 	})
 	mw = append(mw, func(PodService PodService) PodService {
 		return NewPodServiceWithLog(PodService, logger)

@@ -434,7 +434,7 @@ func (pq *ProjectQuery) sqlQuery(ctx context.Context) *sql.Selector {
 }
 
 func (pq *ProjectQuery) ByQueries(ctx context.Context, i interface{}) (res Projects, count int, err error) {
-	SetPodFormQueries(i, pq)
+	SetProjectFormQueries(i, pq)
 	count, err = pq.Count(ctx)
 	if err != nil {
 		return

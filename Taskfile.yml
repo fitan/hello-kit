@@ -21,18 +21,18 @@ tasks:
     cmds:
       - vim conf/dev.conf.yaml
     interactive: true
-  gen:s:
+  init:s:
     dir: "./pkg/services"
     cmds:
-      - gowrap gen -init {{.CLI_ARGS}}
-  gen:a:
+      - gowrap gen -init kit -n {{.CLI_ARGS}}
+  init:a:
     dir: "./pkg/repository/api"
     cmds:
-      - gowrap gen -init {{.CLI_ARGS}}
-  gen:d:
+      - gowrap gen -init service -n {{.CLI_ARGS}}
+  init:d:
     dir: "./pkg/repository/dao"
     cmds:
-      - gowrap gen -init {{.CLI_ARGS}}
+      - gowrap gen -init service -n {{.CLI_ARGS}}
   swag:
     cmds:
       - swag init -g cmd/main.go  -d ./

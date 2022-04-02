@@ -23,7 +23,7 @@ type TblservicetreeServiceWithPrometheus struct {
 
 var tblservicetreeserviceDurationSummaryVec = promauto.NewSummaryVec(
 	prometheus.SummaryOpts{
-		Name:       "tblservicetreeservice_duration_seconds",
+		Name:       "dao_tblservicetree_duration_seconds",
 		Help:       "tblservicetreeservice runtime duration and result",
 		MaxAge:     time.Minute,
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
@@ -31,10 +31,10 @@ var tblservicetreeserviceDurationSummaryVec = promauto.NewSummaryVec(
 	[]string{"instance_name", "method", "result"})
 
 // NewTblservicetreeServiceWithPrometheus returns an instance of the TblservicetreeService decorated with prometheus summary metric
-func NewTblservicetreeServiceWithPrometheus(base TblservicetreeService, instanceName string) TblservicetreeServiceWithPrometheus {
+func NewTblservicetreeServiceWithPrometheus(base TblservicetreeService) TblservicetreeServiceWithPrometheus {
 	return TblservicetreeServiceWithPrometheus{
 		base:         base,
-		instanceName: instanceName,
+		instanceName: "(down .Interface.Name)",
 	}
 }
 

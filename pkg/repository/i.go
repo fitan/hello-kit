@@ -10,8 +10,8 @@ import (
 )
 
 type Repository struct {
-	Baidu  baidu.BaiduApi
-	Taobao taobao.TaobaoApi
+	Baidu  baidu.BaiduService
+	Taobao taobao.TaobaoService
 	User   user.UserService
 	Pod pod.PodService
 	Project project.ProjectService
