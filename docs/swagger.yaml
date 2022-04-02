@@ -125,6 +125,18 @@ definitions:
       traceId:
         type: string
     type: object
+  say.SwagResponse:
+    properties:
+      data: {}
+      traceId:
+        type: string
+    type: object
+  say1.SwagResponse:
+    properties:
+      data: {}
+      traceId:
+        type: string
+    type: object
   user.GetListRes:
     properties:
       count:
@@ -176,6 +188,50 @@ paths:
               type: object
       tags:
       - HelloService
+  /say1pod/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/say1.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.Pod'
+              type: object
+      tags:
+      - Say1Service
+  /saypod/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/say.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.Pod'
+              type: object
+      tags:
+      - SayService
   /user:
     get:
       consumes:

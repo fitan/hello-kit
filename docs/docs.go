@@ -64,6 +64,84 @@ const docTemplate = `{
                 }
             }
         },
+        "/say1pod/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Say1Service"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/say1.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.Pod"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/saypod/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SayService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/say.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.Pod"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/user": {
             "get": {
                 "consumes": [
@@ -314,6 +392,24 @@ const docTemplate = `{
             }
         },
         "hello.SwagResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "traceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "say.SwagResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "traceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "say1.SwagResponse": {
             "type": "object",
             "properties": {
                 "data": {},

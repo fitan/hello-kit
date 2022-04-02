@@ -1,27 +1,37 @@
-package user
+package say1
 
 import (
 	"github.com/fitan/gink/transport/http"
 	"github.com/go-kit/kit/endpoint"
+	"github.com/google/wire"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/go-kit/kit/otelkit"
 	"go.uber.org/zap"
 )
 
-type Middleware func(UserService) UserService
+type Middleware func(Say1Service) Say1Service
 
 func NewServiceMiddleware(logger *zap.SugaredLogger) (mw []Middleware) {
 	mw = []Middleware{}
 	// Append your middleware here
-	mw = append(mw, func(UserService UserService) UserService {
-		return NewUserServiceWithPrometheus(UserService)
+	mw = append(mw, func(Say1Service Say1Service) Say1Service {
+		return NewSay1ServiceWithPrometheus(Say1Service)
 	})
-	mw = append(mw, func(UserService UserService) UserService {
-		return NewUserServiceWithLog(UserService, logger)
+	mw = append(mw, func(Say1Service Say1Service) Say1Service {
+		return NewSay1ServiceWithLog(Say1Service, logger)
 	})
-	mw = append(mw, func(UserService UserService) UserService {
-		return NewUserServiceWithTracing(UserService)
+	mw = append(mw, func(Say1Service Say1Service) Say1Service {
+		return NewSay1ServiceWithTracing(Say1Service)
 	})
 	return
+}
+
+// New returns a Say1Service with all of the expected middleware wired in.
+func NewService(svc BaseService, middleware []Middleware) Say1Service {
+
+	for _, m := range middleware {
+		svc = m(svc)
+	}
+	return svc
 }
 
 func NewEndpointMiddleware(logger *zap.SugaredLogger, ep []endpoint.Middleware) Mws {
@@ -30,9 +40,6 @@ func NewEndpointMiddleware(logger *zap.SugaredLogger, ep []endpoint.Middleware) 
 	otelkitEMW := func(n string) endpoint.Middleware {
 		return otelkit.EndpointMiddleware(otelkit.WithOperation(n))
 	}
-	//logEMW := func(n string) endpoint.Middleware {
-	//	return mid.LoggingMiddleware(logger)
-	//}
 
 	AddEndpointMiddlewareToAllMethodsWithMethodName(mws, otelkitEMW)
 	for _, e := range ep {
@@ -50,12 +57,4 @@ func NewServiceOption(op []http.ServerOption) Ops {
 	return ops
 }
 
-// New returns a UserService with all of the expected middleware wired in.
-func NewService(svc BaseService, middleware []Middleware) UserService {
-
-	for _, m := range middleware {
-		svc = m(svc)
-	}
-	return svc
-}
-
+var Say1KitSet = wire.NewSet(NewBasicService, NewService, NewEndpointMiddleware, NewServiceMiddleware, NewEndpoints, NewServiceOption, NewHTTPHandler)

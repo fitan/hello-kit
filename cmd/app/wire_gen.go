@@ -20,6 +20,8 @@ import (
 	"hello/pkg/services"
 	"hello/pkg/services/casbin"
 	"hello/pkg/services/hello"
+	"hello/pkg/services/say"
+	"hello/pkg/services/say1"
 	user2 "hello/pkg/services/user"
 )
 
@@ -93,9 +95,25 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 	userEndpoints := user2.NewEndpoints(userUserService, userMws)
 	userOps := user2.NewServiceOption(v9)
 	userHttpHandler := user2.NewHTTPHandler(r, userEndpoints, userOps)
+	sayBaseService := say.NewBasicService(repository2)
+	v12 := say.NewServiceMiddleware(sugaredLogger)
+	sayService := say.NewService(sayBaseService, v12)
+	sayMws := say.NewEndpointMiddleware(sugaredLogger, v8)
+	sayEndpoints := say.NewEndpoints(sayService, sayMws)
+	sayOps := say.NewServiceOption(v9)
+	sayHttpHandler := say.NewHTTPHandler(r, sayEndpoints, sayOps)
+	say1BaseService := say1.NewBasicService(repository2)
+	v13 := say1.NewServiceMiddleware(sugaredLogger)
+	say1Service := say1.NewService(say1BaseService, v13)
+	say1Mws := say1.NewEndpointMiddleware(sugaredLogger, v8)
+	say1Endpoints := say1.NewEndpoints(say1Service, say1Mws)
+	say1Ops := say1.NewServiceOption(v9)
+	say1HttpHandler := say1.NewHTTPHandler(r, say1Endpoints, say1Ops)
 	servicesServices := &services.Services{
 		Hello: httpHandler,
 		User:  userHttpHandler,
+		Say:   sayHttpHandler,
+		Say1:  say1HttpHandler,
 	}
 	tracerProvider := initTracer(myConf)
 	db, err := initDb(myConf)
@@ -172,9 +190,8 @@ var casbinServiceSet = wire.NewSet(casbin.NewBasicService, casbin.NewService, ca
 
 var helloServiceSet = wire.NewSet(hello.NewBasicService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)
 
-var userServiceSet = wire.NewSet(user2.NewBasicService, user2.NewService, user2.NewEndpointMiddleware, user2.NewServiceMiddleware, user2.NewEndpoints, user2.NewServiceOption, user2.NewHTTPHandler)
-
-var servicesSet = wire.NewSet(casbinServiceSet, userServiceSet, helloServiceSet, wire.Struct(new(services.Services), "*"))
+//var userServiceSet = wire.NewSet(user.NewBasicService, user.NewService, user.NewEndpointMiddleware, user.NewServiceMiddleware, user.NewEndpoints, user.NewServiceOption, user.NewHTTPHandler)
+var servicesSet = wire.NewSet(casbinServiceSet, say.SayKitSet, say1.Say1KitSet, user2.UserServiceSet, helloServiceSet, wire.Struct(new(services.Services), "*"))
 
 var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 
