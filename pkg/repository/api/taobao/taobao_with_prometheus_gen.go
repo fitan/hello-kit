@@ -33,7 +33,7 @@ var taobaoserviceDurationSummaryVec = promauto.NewSummaryVec(
 func NewTaobaoServiceWithPrometheus(base TaobaoService) TaobaoServiceWithPrometheus {
 	return TaobaoServiceWithPrometheus{
 		base:         base,
-		instanceName: "(down .Interface.Name)",
+		instanceName: "taobaoservice",
 	}
 }
 

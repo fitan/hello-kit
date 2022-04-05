@@ -34,7 +34,7 @@ var helloserviceDurationSummaryVec = promauto.NewSummaryVec(
 func NewHelloServiceWithPrometheus(base HelloService) HelloServiceWithPrometheus {
 	return HelloServiceWithPrometheus{
 		base:         base,
-		instanceName: "(down .Interface.Name)",
+		instanceName: "helloservice",
 	}
 }
 

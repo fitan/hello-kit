@@ -33,7 +33,7 @@ var casbinserviceDurationSummaryVec = promauto.NewSummaryVec(
 func NewCasbinServiceWithPrometheus(base CasbinService) CasbinServiceWithPrometheus {
 	return CasbinServiceWithPrometheus{
 		base:         base,
-		instanceName: "(down .Interface.Name)",
+		instanceName: "casbinservice",
 	}
 }
 

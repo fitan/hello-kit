@@ -33,7 +33,7 @@ var baiduserviceDurationSummaryVec = promauto.NewSummaryVec(
 func NewBaiduServiceWithPrometheus(base BaiduService) BaiduServiceWithPrometheus {
 	return BaiduServiceWithPrometheus{
 		base:         base,
-		instanceName: "(down .Interface.Name)",
+		instanceName: "baiduservice",
 	}
 }
 

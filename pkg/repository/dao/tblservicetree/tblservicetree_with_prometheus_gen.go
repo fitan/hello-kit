@@ -34,7 +34,7 @@ var tblservicetreeserviceDurationSummaryVec = promauto.NewSummaryVec(
 func NewTblservicetreeServiceWithPrometheus(base TblservicetreeService) TblservicetreeServiceWithPrometheus {
 	return TblservicetreeServiceWithPrometheus{
 		base:         base,
-		instanceName: "(down .Interface.Name)",
+		instanceName: "tblservicetreeservice",
 	}
 }
 

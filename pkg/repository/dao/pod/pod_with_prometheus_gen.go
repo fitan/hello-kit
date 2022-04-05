@@ -34,7 +34,7 @@ var podserviceDurationSummaryVec = promauto.NewSummaryVec(
 func NewPodServiceWithPrometheus(base PodService) PodServiceWithPrometheus {
 	return PodServiceWithPrometheus{
 		base:         base,
-		instanceName: "(down .Interface.Name)",
+		instanceName: "podservice",
 	}
 }
 

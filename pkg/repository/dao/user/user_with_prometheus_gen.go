@@ -34,7 +34,7 @@ var userserviceDurationSummaryVec = promauto.NewSummaryVec(
 func NewUserServiceWithPrometheus(base UserService) UserServiceWithPrometheus {
 	return UserServiceWithPrometheus{
 		base:         base,
-		instanceName: "(down .Interface.Name)",
+		instanceName: "userservice",
 	}
 }
 

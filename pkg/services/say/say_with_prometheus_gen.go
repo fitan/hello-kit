@@ -34,7 +34,7 @@ var sayserviceDurationSummaryVec = promauto.NewSummaryVec(
 func NewSayServiceWithPrometheus(base SayService) SayServiceWithPrometheus {
 	return SayServiceWithPrometheus{
 		base:         base,
-		instanceName: "(down .Interface.Name)",
+		instanceName: "sayservice",
 	}
 }
 

@@ -34,7 +34,7 @@ var projectserviceDurationSummaryVec = promauto.NewSummaryVec(
 func NewProjectServiceWithPrometheus(base ProjectService) ProjectServiceWithPrometheus {
 	return ProjectServiceWithPrometheus{
 		base:         base,
-		instanceName: "(down .Interface.Name)",
+		instanceName: "projectservice",
 	}
 }
 
