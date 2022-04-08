@@ -91,6 +91,11 @@ func (Pod) Fields() []ent.Field {
 // Edges of the Pod.
 func (Pod) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("servicetree", SpiderDevTblServicetree.Type).StorageKey(edge.Symbol("service_name"),edge.Column("aname")).Unique(),
+		edge.To("servicetree", SpiderDevTblServicetree.Type).StorageKey(edge.Symbol("service_name"),edge.Column("aname")).Unique().Annotations(NodeAnnotation{
+			Create: true,
+			Update: false,
+			Read:   false,
+			Delete: false,
+		}),
 	}
 }

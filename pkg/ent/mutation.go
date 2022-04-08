@@ -2539,6 +2539,9 @@ type UserMutation struct {
 	addage        *int
 	name          *string
 	clearedFields map[string]struct{}
+	pods          map[int64]struct{}
+	removedpods   map[int64]struct{}
+	clearedpods   bool
 	done          bool
 	oldValue      func(context.Context) (*User, error)
 	predicates    []predicate.User
@@ -2734,6 +2737,60 @@ func (m *UserMutation) ResetName() {
 	m.name = nil
 }
 
+// AddPodIDs adds the "pods" edge to the Pod entity by ids.
+func (m *UserMutation) AddPodIDs(ids ...int64) {
+	if m.pods == nil {
+		m.pods = make(map[int64]struct{})
+	}
+	for i := range ids {
+		m.pods[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPods clears the "pods" edge to the Pod entity.
+func (m *UserMutation) ClearPods() {
+	m.clearedpods = true
+}
+
+// PodsCleared reports if the "pods" edge to the Pod entity was cleared.
+func (m *UserMutation) PodsCleared() bool {
+	return m.clearedpods
+}
+
+// RemovePodIDs removes the "pods" edge to the Pod entity by IDs.
+func (m *UserMutation) RemovePodIDs(ids ...int64) {
+	if m.removedpods == nil {
+		m.removedpods = make(map[int64]struct{})
+	}
+	for i := range ids {
+		delete(m.pods, ids[i])
+		m.removedpods[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPods returns the removed IDs of the "pods" edge to the Pod entity.
+func (m *UserMutation) RemovedPodsIDs() (ids []int64) {
+	for id := range m.removedpods {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PodsIDs returns the "pods" edge IDs in the mutation.
+func (m *UserMutation) PodsIDs() (ids []int64) {
+	for id := range m.pods {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPods resets all changes to the "pods" edge.
+func (m *UserMutation) ResetPods() {
+	m.pods = nil
+	m.clearedpods = false
+	m.removedpods = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -2884,48 +2941,84 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.pods != nil {
+		edges = append(edges, user.EdgePods)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case user.EdgePods:
+		ids := make([]ent.Value, 0, len(m.pods))
+		for id := range m.pods {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedpods != nil {
+		edges = append(edges, user.EdgePods)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case user.EdgePods:
+		ids := make([]ent.Value, 0, len(m.removedpods))
+		for id := range m.removedpods {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedpods {
+		edges = append(edges, user.EdgePods)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
+	switch name {
+	case user.EdgePods:
+		return m.clearedpods
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *UserMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown User unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
+	switch name {
+	case user.EdgePods:
+		m.ResetPods()
+		return nil
+	}
 	return fmt.Errorf("unknown User edge %s", name)
 }

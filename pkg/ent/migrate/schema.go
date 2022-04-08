@@ -27,6 +27,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"mysql": "datetime"}},
 		{Name: "updated_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"mysql": "datetime"}},
 		{Name: "aname", Type: field.TypeInt32, Nullable: true, SchemaType: map[string]string{"mysql": "int"}},
+		{Name: "user_pods", Type: field.TypeInt, Nullable: true},
 	}
 	// PodsTable holds the schema information for the "pods" table.
 	PodsTable = &schema.Table{
@@ -38,6 +39,12 @@ var (
 				Symbol:     "service_name",
 				Columns:    []*schema.Column{PodsColumns[15]},
 				RefColumns: []*schema.Column{TblServicetreeColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "pods_users_pods",
+				Columns:    []*schema.Column{PodsColumns[16]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -93,6 +100,7 @@ var (
 
 func init() {
 	PodsTable.ForeignKeys[0].RefTable = TblServicetreeTable
+	PodsTable.ForeignKeys[1].RefTable = UsersTable
 	PodsTable.Annotation = &entsql.Annotation{
 		Table: "pods",
 	}

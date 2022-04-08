@@ -59,8 +59,9 @@ type Pod struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PodQuery when eager-loading is set.
-	Edges PodEdges `json:"edges"`
-	aname *int32
+	Edges     PodEdges `json:"edges"`
+	aname     *int32
+	user_pods *int
 }
 
 // PodEdges holds the relations/edges for other nodes in the graph.
@@ -98,6 +99,8 @@ func (*Pod) scanValues(columns []string) ([]interface{}, error) {
 		case pod.FieldStartTime, pod.FieldCreatedAt, pod.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case pod.ForeignKeys[0]: // aname
+			values[i] = new(sql.NullInt64)
+		case pod.ForeignKeys[1]: // user_pods
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Pod", columns[i])
@@ -210,6 +213,13 @@ func (po *Pod) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				po.aname = new(int32)
 				*po.aname = int32(value.Int64)
+			}
+		case pod.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_pods", value)
+			} else if value.Valid {
+				po.user_pods = new(int)
+				*po.user_pods = int(value.Int64)
 			}
 		}
 	}

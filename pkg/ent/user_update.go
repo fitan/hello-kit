@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"hello/pkg/ent/pod"
 	"hello/pkg/ent/predicate"
 	"hello/pkg/ent/user"
 
@@ -54,9 +55,45 @@ func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
 	return uu
 }
 
+// AddPodIDs adds the "pods" edge to the Pod entity by IDs.
+func (uu *UserUpdate) AddPodIDs(ids ...int64) *UserUpdate {
+	uu.mutation.AddPodIDs(ids...)
+	return uu
+}
+
+// AddPods adds the "pods" edges to the Pod entity.
+func (uu *UserUpdate) AddPods(p ...*Pod) *UserUpdate {
+	ids := make([]int64, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uu.AddPodIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
+}
+
+// ClearPods clears all "pods" edges to the Pod entity.
+func (uu *UserUpdate) ClearPods() *UserUpdate {
+	uu.mutation.ClearPods()
+	return uu
+}
+
+// RemovePodIDs removes the "pods" edge to Pod entities by IDs.
+func (uu *UserUpdate) RemovePodIDs(ids ...int64) *UserUpdate {
+	uu.mutation.RemovePodIDs(ids...)
+	return uu
+}
+
+// RemovePods removes "pods" edges to Pod entities.
+func (uu *UserUpdate) RemovePods(p ...*Pod) *UserUpdate {
+	ids := make([]int64, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uu.RemovePodIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -168,6 +205,60 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldName,
 		})
 	}
+	if uu.mutation.PodsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PodsTable,
+			Columns: []string{user.PodsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: pod.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedPodsIDs(); len(nodes) > 0 && !uu.mutation.PodsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PodsTable,
+			Columns: []string{user.PodsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: pod.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.PodsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PodsTable,
+			Columns: []string{user.PodsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: pod.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -214,9 +305,45 @@ func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
 	return uuo
 }
 
+// AddPodIDs adds the "pods" edge to the Pod entity by IDs.
+func (uuo *UserUpdateOne) AddPodIDs(ids ...int64) *UserUpdateOne {
+	uuo.mutation.AddPodIDs(ids...)
+	return uuo
+}
+
+// AddPods adds the "pods" edges to the Pod entity.
+func (uuo *UserUpdateOne) AddPods(p ...*Pod) *UserUpdateOne {
+	ids := make([]int64, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uuo.AddPodIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
+}
+
+// ClearPods clears all "pods" edges to the Pod entity.
+func (uuo *UserUpdateOne) ClearPods() *UserUpdateOne {
+	uuo.mutation.ClearPods()
+	return uuo
+}
+
+// RemovePodIDs removes the "pods" edge to Pod entities by IDs.
+func (uuo *UserUpdateOne) RemovePodIDs(ids ...int64) *UserUpdateOne {
+	uuo.mutation.RemovePodIDs(ids...)
+	return uuo
+}
+
+// RemovePods removes "pods" edges to Pod entities.
+func (uuo *UserUpdateOne) RemovePods(p ...*Pod) *UserUpdateOne {
+	ids := make([]int64, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uuo.RemovePodIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -351,6 +478,60 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Value:  value,
 			Column: user.FieldName,
 		})
+	}
+	if uuo.mutation.PodsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PodsTable,
+			Columns: []string{user.PodsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: pod.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedPodsIDs(); len(nodes) > 0 && !uuo.mutation.PodsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PodsTable,
+			Columns: []string{user.PodsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: pod.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.PodsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PodsTable,
+			Columns: []string{user.PodsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: pod.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues

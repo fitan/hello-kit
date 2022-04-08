@@ -146,18 +146,24 @@ func (c *Client) Use(hooks ...Hook) {
 
 type PodBaseInterface interface {
 	Create(ctx context.Context, v Pod) (res *Pod, err error)
+	CreateMany(ctx context.Context, vs Pods) (Pods, error)
 	GetById(ctx context.Context, id int64) (res *Pod, err error)
 	ByQueries(ctx context.Context, i interface{}) (res Pods, count int, err error)
 	UpdateById(ctx context.Context, id int64, v *Pod) (*Pod, error)
+	UpdateMany(ctx context.Context, vs Pods) (err error)
 	DeleteById(ctx context.Context, id int64) error
+	DeleteMany(ctx context.Context, ids []int64) (err error)
+
+	CreateServicetreeByPodId(ctx context.Context, id int64, v *SpiderDevTblServicetree) (res *Pod, err error)
+	GetServicetreeByPodId(ctx context.Context, id int64) (res *SpiderDevTblServicetree, err error)
 }
 
 type PodBase struct {
-	client *PodClient
+	client *Client
 }
 
 func (c *PodBase) Create(ctx context.Context, v Pod) (res *Pod, err error) {
-	return c.client.Create().
+	return c.client.Pod.Create().
 		SetClusterName(v.ClusterName).
 		SetNamespace(v.Namespace).
 		SetServiceName(v.ServiceName).
@@ -174,80 +180,205 @@ func (c *PodBase) Create(ctx context.Context, v Pod) (res *Pod, err error) {
 		SetUpdatedAt(v.UpdatedAt).Save(ctx)
 }
 
+func (c *PodBase) CreateMany(ctx context.Context, vs Pods) (Pods, error) {
+	bulk := make([]*PodCreate, len(vs))
+	for i, v := range vs {
+		bulk[i] = c.client.Pod.Create().
+			SetClusterName(v.ClusterName).
+			SetNamespace(v.Namespace).
+			SetServiceName(v.ServiceName).
+			SetPodName(v.PodName).
+			SetResourceVersion(v.ResourceVersion).
+			SetPodIP(v.PodIP).
+			SetHostIP(v.HostIP).
+			SetStartTime(v.StartTime).
+			SetPhase(v.Phase).
+			SetReason(v.Reason).
+			SetMessage(v.Message).
+			SetDetail(v.Detail).
+			SetCreatedAt(v.CreatedAt).
+			SetUpdatedAt(v.UpdatedAt)
+	}
+	return c.client.Pod.CreateBulk(bulk...).Save(ctx)
+}
+
 func (c *PodBase) GetById(ctx context.Context, id int64) (res *Pod, err error) {
-	return c.client.Get(ctx, id)
+	return c.client.Pod.Get(ctx, id)
 }
 
 func (c *PodBase) ByQueries(ctx context.Context, i interface{}) (res Pods, count int, err error) {
-	res, count, err = c.client.Query().ByQueries(ctx, i)
+	res, count, err = c.client.Pod.Query().ByQueries(ctx, i)
 	return
 }
 
 func (c *PodBase) UpdateById(ctx context.Context, id int64, v *Pod) (*Pod, error) {
-	return c.client.UpdateOne(v).Save(ctx)
+	return c.client.Pod.UpdateOne(v).Save(ctx)
+}
+
+func (c *PodBase) UpdateMany(ctx context.Context, vs Pods) (err error) {
+	tx, err := c.client.Tx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+
+		err = tx.Commit()
+	}()
+
+	for _, v := range vs {
+		_, err = tx.Pod.UpdateOneID(v.ID).
+			SetClusterName(v.ClusterName).
+			SetNamespace(v.Namespace).
+			SetServiceName(v.ServiceName).
+			SetPodName(v.PodName).
+			SetResourceVersion(v.ResourceVersion).
+			SetPodIP(v.PodIP).
+			SetHostIP(v.HostIP).
+			SetStartTime(v.StartTime).
+			SetPhase(v.Phase).
+			SetReason(v.Reason).
+			SetMessage(v.Message).
+			SetDetail(v.Detail).
+			SetCreatedAt(v.CreatedAt).
+			SetUpdatedAt(v.UpdatedAt).Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (c *PodBase) DeleteById(ctx context.Context, id int64) error {
-	return c.client.DeleteOneID(id).Exec(ctx)
+	return c.client.Pod.DeleteOneID(id).Exec(ctx)
 }
 
-func NewPodBase(client *PodClient) PodBaseInterface {
+func (c *PodBase) DeleteMany(ctx context.Context, ids []int64) error {
+	_, err := c.client.Pod.Delete().Where(pod.IDIn(ids...)).Exec(ctx)
+	return err
+}
+
+func (c *PodBase) CreateServicetreeByPodId(ctx context.Context, id int64, v *SpiderDevTblServicetree) (res *Pod, err error) {
+	return c.client.Pod.UpdateOneID(id).SetServicetree(v).Save(ctx)
+}
+func (c *PodBase) GetServicetreeByPodId(ctx context.Context, id int64) (res *SpiderDevTblServicetree, err error) {
+	return c.client.Pod.Query().Where(pod.ID(id)).QueryServicetree().First(ctx)
+}
+
+func NewPodBase(client *Client) PodBaseInterface {
 	return &PodBase{client: client}
 }
 
 type ProjectBaseInterface interface {
 	Create(ctx context.Context, v Project) (res *Project, err error)
+	CreateMany(ctx context.Context, vs Projects) (Projects, error)
 	GetById(ctx context.Context, id int) (res *Project, err error)
 	ByQueries(ctx context.Context, i interface{}) (res Projects, count int, err error)
 	UpdateById(ctx context.Context, id int, v *Project) (*Project, error)
+	UpdateMany(ctx context.Context, vs Projects) (err error)
 	DeleteById(ctx context.Context, id int) error
+	DeleteMany(ctx context.Context, ids []int) (err error)
 }
 
 type ProjectBase struct {
-	client *ProjectClient
+	client *Client
 }
 
 func (c *ProjectBase) Create(ctx context.Context, v Project) (res *Project, err error) {
-	return c.client.Create().
+	return c.client.Project.Create().
 		SetAlias(v.Alias).
 		SetName(v.Name).Save(ctx)
 }
 
+func (c *ProjectBase) CreateMany(ctx context.Context, vs Projects) (Projects, error) {
+	bulk := make([]*ProjectCreate, len(vs))
+	for i, v := range vs {
+		bulk[i] = c.client.Project.Create().
+			SetAlias(v.Alias).
+			SetName(v.Name)
+	}
+	return c.client.Project.CreateBulk(bulk...).Save(ctx)
+}
+
 func (c *ProjectBase) GetById(ctx context.Context, id int) (res *Project, err error) {
-	return c.client.Get(ctx, id)
+	return c.client.Project.Get(ctx, id)
 }
 
 func (c *ProjectBase) ByQueries(ctx context.Context, i interface{}) (res Projects, count int, err error) {
-	res, count, err = c.client.Query().ByQueries(ctx, i)
+	res, count, err = c.client.Project.Query().ByQueries(ctx, i)
 	return
 }
 
 func (c *ProjectBase) UpdateById(ctx context.Context, id int, v *Project) (*Project, error) {
-	return c.client.UpdateOne(v).Save(ctx)
+	return c.client.Project.UpdateOne(v).Save(ctx)
+}
+
+func (c *ProjectBase) UpdateMany(ctx context.Context, vs Projects) (err error) {
+	tx, err := c.client.Tx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+
+		err = tx.Commit()
+	}()
+
+	for _, v := range vs {
+		_, err = tx.Project.UpdateOneID(v.ID).
+			SetAlias(v.Alias).
+			SetName(v.Name).Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (c *ProjectBase) DeleteById(ctx context.Context, id int) error {
-	return c.client.DeleteOneID(id).Exec(ctx)
+	return c.client.Project.DeleteOneID(id).Exec(ctx)
 }
 
-func NewProjectBase(client *ProjectClient) ProjectBaseInterface {
+func (c *ProjectBase) DeleteMany(ctx context.Context, ids []int) error {
+	_, err := c.client.Project.Delete().Where(project.IDIn(ids...)).Exec(ctx)
+	return err
+}
+
+func NewProjectBase(client *Client) ProjectBaseInterface {
 	return &ProjectBase{client: client}
 }
 
 type SpiderDevTblServicetreeBaseInterface interface {
 	Create(ctx context.Context, v SpiderDevTblServicetree) (res *SpiderDevTblServicetree, err error)
+	CreateMany(ctx context.Context, vs SpiderDevTblServicetrees) (SpiderDevTblServicetrees, error)
 	GetById(ctx context.Context, id int32) (res *SpiderDevTblServicetree, err error)
 	ByQueries(ctx context.Context, i interface{}) (res SpiderDevTblServicetrees, count int, err error)
 	UpdateById(ctx context.Context, id int32, v *SpiderDevTblServicetree) (*SpiderDevTblServicetree, error)
+	UpdateMany(ctx context.Context, vs SpiderDevTblServicetrees) (err error)
 	DeleteById(ctx context.Context, id int32) error
+	DeleteMany(ctx context.Context, ids []int32) (err error)
 }
 
 type SpiderDevTblServicetreeBase struct {
-	client *SpiderDevTblServicetreeClient
+	client *Client
 }
 
 func (c *SpiderDevTblServicetreeBase) Create(ctx context.Context, v SpiderDevTblServicetree) (res *SpiderDevTblServicetree, err error) {
-	return c.client.Create().
+	return c.client.SpiderDevTblServicetree.Create().
 		SetName(v.Name).
 		SetAname(v.Aname).
 		SetPnode(v.Pnode).
@@ -256,63 +387,172 @@ func (c *SpiderDevTblServicetreeBase) Create(ctx context.Context, v SpiderDevTbl
 		SetOrigin(v.Origin).Save(ctx)
 }
 
+func (c *SpiderDevTblServicetreeBase) CreateMany(ctx context.Context, vs SpiderDevTblServicetrees) (SpiderDevTblServicetrees, error) {
+	bulk := make([]*SpiderDevTblServicetreeCreate, len(vs))
+	for i, v := range vs {
+		bulk[i] = c.client.SpiderDevTblServicetree.Create().
+			SetName(v.Name).
+			SetAname(v.Aname).
+			SetPnode(v.Pnode).
+			SetType(v.Type).
+			SetKey(v.Key).
+			SetOrigin(v.Origin)
+	}
+	return c.client.SpiderDevTblServicetree.CreateBulk(bulk...).Save(ctx)
+}
+
 func (c *SpiderDevTblServicetreeBase) GetById(ctx context.Context, id int32) (res *SpiderDevTblServicetree, err error) {
-	return c.client.Get(ctx, id)
+	return c.client.SpiderDevTblServicetree.Get(ctx, id)
 }
 
 func (c *SpiderDevTblServicetreeBase) ByQueries(ctx context.Context, i interface{}) (res SpiderDevTblServicetrees, count int, err error) {
-	res, count, err = c.client.Query().ByQueries(ctx, i)
+	res, count, err = c.client.SpiderDevTblServicetree.Query().ByQueries(ctx, i)
 	return
 }
 
 func (c *SpiderDevTblServicetreeBase) UpdateById(ctx context.Context, id int32, v *SpiderDevTblServicetree) (*SpiderDevTblServicetree, error) {
-	return c.client.UpdateOne(v).Save(ctx)
+	return c.client.SpiderDevTblServicetree.UpdateOne(v).Save(ctx)
+}
+
+func (c *SpiderDevTblServicetreeBase) UpdateMany(ctx context.Context, vs SpiderDevTblServicetrees) (err error) {
+	tx, err := c.client.Tx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+
+		err = tx.Commit()
+	}()
+
+	for _, v := range vs {
+		_, err = tx.SpiderDevTblServicetree.UpdateOneID(v.ID).
+			SetName(v.Name).
+			SetAname(v.Aname).
+			SetPnode(v.Pnode).
+			SetType(v.Type).
+			SetKey(v.Key).
+			SetOrigin(v.Origin).Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (c *SpiderDevTblServicetreeBase) DeleteById(ctx context.Context, id int32) error {
-	return c.client.DeleteOneID(id).Exec(ctx)
+	return c.client.SpiderDevTblServicetree.DeleteOneID(id).Exec(ctx)
 }
 
-func NewSpiderDevTblServicetreeBase(client *SpiderDevTblServicetreeClient) SpiderDevTblServicetreeBaseInterface {
+func (c *SpiderDevTblServicetreeBase) DeleteMany(ctx context.Context, ids []int32) error {
+	_, err := c.client.SpiderDevTblServicetree.Delete().Where(spiderdevtblservicetree.IDIn(ids...)).Exec(ctx)
+	return err
+}
+
+func NewSpiderDevTblServicetreeBase(client *Client) SpiderDevTblServicetreeBaseInterface {
 	return &SpiderDevTblServicetreeBase{client: client}
 }
 
 type UserBaseInterface interface {
 	Create(ctx context.Context, v User) (res *User, err error)
+	CreateMany(ctx context.Context, vs Users) (Users, error)
 	GetById(ctx context.Context, id int) (res *User, err error)
 	ByQueries(ctx context.Context, i interface{}) (res Users, count int, err error)
 	UpdateById(ctx context.Context, id int, v *User) (*User, error)
+	UpdateMany(ctx context.Context, vs Users) (err error)
 	DeleteById(ctx context.Context, id int) error
+	DeleteMany(ctx context.Context, ids []int) (err error)
+
+	CreatePodsSliceByUserId(ctx context.Context, id int, vs Pods) (res *User, err error)
+	GetPodsSliceByUserId(ctx context.Context, id int, i interface{}) (res Pods, count int, err error)
 }
 
 type UserBase struct {
-	client *UserClient
+	client *Client
 }
 
 func (c *UserBase) Create(ctx context.Context, v User) (res *User, err error) {
-	return c.client.Create().
+	return c.client.User.Create().
 		SetAge(v.Age).
 		SetName(v.Name).Save(ctx)
 }
 
+func (c *UserBase) CreateMany(ctx context.Context, vs Users) (Users, error) {
+	bulk := make([]*UserCreate, len(vs))
+	for i, v := range vs {
+		bulk[i] = c.client.User.Create().
+			SetAge(v.Age).
+			SetName(v.Name)
+	}
+	return c.client.User.CreateBulk(bulk...).Save(ctx)
+}
+
 func (c *UserBase) GetById(ctx context.Context, id int) (res *User, err error) {
-	return c.client.Get(ctx, id)
+	return c.client.User.Get(ctx, id)
 }
 
 func (c *UserBase) ByQueries(ctx context.Context, i interface{}) (res Users, count int, err error) {
-	res, count, err = c.client.Query().ByQueries(ctx, i)
+	res, count, err = c.client.User.Query().ByQueries(ctx, i)
 	return
 }
 
 func (c *UserBase) UpdateById(ctx context.Context, id int, v *User) (*User, error) {
-	return c.client.UpdateOne(v).Save(ctx)
+	return c.client.User.UpdateOne(v).Save(ctx)
+}
+
+func (c *UserBase) UpdateMany(ctx context.Context, vs Users) (err error) {
+	tx, err := c.client.Tx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+
+		err = tx.Commit()
+	}()
+
+	for _, v := range vs {
+		_, err = tx.User.UpdateOneID(v.ID).
+			SetAge(v.Age).
+			SetName(v.Name).Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (c *UserBase) DeleteById(ctx context.Context, id int) error {
-	return c.client.DeleteOneID(id).Exec(ctx)
+	return c.client.User.DeleteOneID(id).Exec(ctx)
 }
 
-func NewUserBase(client *UserClient) UserBaseInterface {
+func (c *UserBase) DeleteMany(ctx context.Context, ids []int) error {
+	_, err := c.client.User.Delete().Where(user.IDIn(ids...)).Exec(ctx)
+	return err
+}
+
+func (c *UserBase) CreatePodsSliceByUserId(ctx context.Context, id int, vs Pods) (res *User, err error) {
+	return c.client.User.UpdateOneID(id).AddPods(vs...).Save(ctx)
+}
+func (c *UserBase) GetPodsSliceByUserId(ctx context.Context, id int, i interface{}) (res Pods, count int, err error) {
+	return c.client.User.Query().Where(user.ID(id)).QueryPods().ByQueries(ctx, i)
+}
+
+func NewUserBase(client *Client) UserBaseInterface {
 	return &UserBase{client: client}
 }
 
@@ -685,6 +925,22 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryPods queries the pods edge of a User.
+func (c *UserClient) QueryPods(u *User) *PodQuery {
+	query := &PodQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(pod.Table, pod.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PodsTable, user.PodsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.

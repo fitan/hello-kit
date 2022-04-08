@@ -11,8 +11,17 @@ const (
 	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// EdgePods holds the string denoting the pods edge name in mutations.
+	EdgePods = "pods"
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// PodsTable is the table that holds the pods relation/edge.
+	PodsTable = "pods"
+	// PodsInverseTable is the table name for the Pod entity.
+	// It exists in this package in order to avoid circular dependency with the "pod" package.
+	PodsInverseTable = "pods"
+	// PodsColumn is the table column denoting the pods relation/edge.
+	PodsColumn = "user_pods"
 )
 
 // Columns holds all SQL columns for user fields.

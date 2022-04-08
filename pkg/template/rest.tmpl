@@ -100,40 +100,116 @@ func (f {{$.Name}}Table{{ $func }}Form) Query(q *{{$.Name}}Query) {
 {{$interfaceName := print $structName "Interface"}}
 type {{$interfaceName}} interface {
 	Create(ctx context.Context, v {{$n.Name}}) (res *{{$n.Name}},err error )
+	CreateMany(ctx context.Context, vs {{plural $n.Name}}) ({{plural $n.Name}}, error)
 	GetById(ctx context.Context, id {{$n.ID.Type.String}}) (res *{{$n.Name}},err error)
 	ByQueries(ctx context.Context, i interface{}) (res {{plural $n.Name}}, count int,err error)
 	UpdateById(ctx context.Context,id {{$n.ID.Type.String}}, v *{{$n.Name}}) (*{{$n.Name}}, error)
+	UpdateMany(ctx context.Context, vs {{plural $n.Name}}) (err error)
 	DeleteById(ctx context.Context, id {{$n.ID.Type.String}}) error
+	DeleteMany(ctx context.Context, ids []{{$n.ID.Type.String}}) (err error)
+	{{range $e := $n.Edges }}
+	{{if or $e.O2O $e.M2O}}
+	Create{{pascal $e.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},v *{{$e.Type.Name}}) (res *{{$n.Name}}, err error)
+	Get{{pascal $e.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}) (res *{{$e.Type.Name}}, err error)
+	{{end}}
+    {{if or $e.O2M $e.M2M}}
+	Create{{pascal (plural $e.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},vs {{plural $e.Type.Name}}) (res *{{$n.Name}}, err error)
+	Get{{plural (pascal $e.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}, i interface{}) (res {{plural $e.Type.Name}},count int,err error)
+    {{end}}
+    {{end}}
 }
 
 type {{$structName}} struct {
-	client *{{$n.Name}}Client
+	client *Client
 }
 
 func (c *{{$structName}}) Create(ctx context.Context, v {{$n.Name}}) (res *{{$n.Name}}, err error) {
-	return c.client.Create().
+	return c.client.{{$n.Name}}.Create().
 		{{- range $f := $n.Fields}}{{ $func := print "Set" $f.StructField }}
 			{{$func}}(v.{{$f.StructField}}).{{- end}}Save(ctx)
 }
 
+func (c *{{$structName}}) CreateMany(ctx context.Context, vs {{plural $n.Name}}) ({{plural $n.Name}}, error) {
+	bulk := make([]*{{$n.Name}}Create, len(vs))
+	for i, v := range vs {
+		bulk[i] = c.client.{{$n.Name}}.Create()
+			{{- range $f := $n.Fields}}.{{ $func := print "Set" $f.StructField }}
+				{{$func}}(v.{{$f.StructField}}){{- end}}
+	}
+	return c.client.{{$n.Name}}.CreateBulk(bulk...).Save(ctx)
+}
+
 func (c *{{$structName}}) GetById(ctx context.Context, id {{$n.ID.Type.String}}) (res *{{$n.Name}}, err error) {
-	return c.client.Get(ctx, id)
+	return c.client.{{$n.Name}}.Get(ctx, id)
 }
 
 func (c *{{$structName}}) ByQueries(ctx context.Context, i interface{}) (res {{plural $n.Name}}, count int, err error) {
-	res, count, err = c.client.Query().ByQueries(ctx,i)
+	res, count, err = c.client.{{$n.Name}}.Query().ByQueries(ctx,i)
 	return
 }
 
 func (c *{{$structName}}) UpdateById(ctx context.Context, id {{$n.ID.Type.String}}, v *{{$n.Name}}) (*{{$n.Name}}, error) {
-	return c.client.UpdateOne(v).Save(ctx)
+	return c.client.{{$n.Name}}.UpdateOne(v).Save(ctx)
+}
+
+func (c *{{$structName}}) UpdateMany(ctx context.Context, vs {{plural $n.Name}}) (err error) {
+	tx, err := c.client.Tx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+
+		err = tx.Commit()
+	}()
+
+	for _,v := range vs {
+		_, err = tx.{{$n.Name}}.UpdateOneID(v.{{$n.ID.StructField}}).
+			{{- range $f := $n.Fields}}{{ $func := print "Set" $f.StructField }}
+			{{$func}}(v.{{$f.StructField}}).{{- end}}Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (c *{{$structName}}) DeleteById(ctx context.Context, id {{$n.ID.Type.String}}) error {
-	return c.client.DeleteOneID(id).Exec(ctx)
+	return c.client.{{$n.Name}}.DeleteOneID(id).Exec(ctx)
 }
 
-func New{{$structName}}(client *{{$n.Name}}Client) {{$structName}}Interface {
+func (c *{{$structName}}) DeleteMany(ctx context.Context, ids []{{$n.ID.Type.String}}) error {
+	_,err := c.client.{{$n.Name}}.Delete().Where({{lower $n.Name}}.IDIn(ids...)).Exec(ctx)
+	return err
+}
+
+{{range $e := $n.Edges }}
+	{{if or $e.O2O $e.M2O}}
+func (c *{{$structName}}) Create{{pascal $e.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},v *{{$e.Type.Name}}) (res *{{$n.Name}}, err error) {
+	return c.client.{{$n.Name}}.UpdateOneID(id).Set{{pascal $e.Name}}(v).Save(ctx)
+}
+func (c *{{$structName}}) Get{{pascal $e.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}) (res *{{$e.Type.Name}}, err error) {
+	return c.client.{{$n.Name}}.Query().Where({{lower $n.Name}}.ID(id)).Query{{pascal $e.Name}}().First(ctx)
+}
+	{{end}}
+    {{if or $e.O2M $e.M2M}}
+func (c *{{$structName}}) Create{{pascal (plural $e.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},vs {{plural $e.Type.Name}}) (res *{{$n.Name}}, err error) {
+	return c.client.{{$n.Name}}.UpdateOneID(id).Add{{pascal $e.Name}}(vs...).Save(ctx)
+}
+func (c *{{$structName}}) Get{{plural (pascal $e.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}, i interface{}) (res {{plural $e.Type.Name}},count int,err error) {
+	return c.client.{{$n.Name}}.Query().Where({{lower $n.Name}}.ID(id)).Query{{pascal $e.Name}}().ByQueries(ctx, i)
+}
+    {{end}}
+{{end}}
+
+func New{{$structName}}(client *Client) {{$structName}}Interface {
 	return &{{$structName}}{client: client}
 }
 {{end}}

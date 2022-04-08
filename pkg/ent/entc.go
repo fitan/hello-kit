@@ -10,18 +10,18 @@ import (
 )
 
 func main() {
-	err := entc.Generate("./schema", &gen.Config{})
+	err := entc.Generate("./schema", &gen.Config{},entc.Extensions(&RestExtension{}))
 	if err != nil {
 		log.Fatal("running ent codegen:", err)
 	}
 }
 
 type RestExtension struct {
-	entc.Extension
+	entc.DefaultExtension
 }
 
 func (*RestExtension) Templates() []*gen.Template {
 	return []*gen.Template{
-		gen.MustParse(gen.NewTemplate("rest").ParseFiles("pkg/template/rest.tmpl")),
+		gen.MustParse(gen.NewTemplate("rest").ParseFiles("../template/rest.tmpl")),
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"hello/pkg/ent/pod"
 	"hello/pkg/ent/user"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -37,6 +38,21 @@ func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
 		uc.SetName(*s)
 	}
 	return uc
+}
+
+// AddPodIDs adds the "pods" edge to the Pod entity by IDs.
+func (uc *UserCreate) AddPodIDs(ids ...int64) *UserCreate {
+	uc.mutation.AddPodIDs(ids...)
+	return uc
+}
+
+// AddPods adds the "pods" edges to the Pod entity.
+func (uc *UserCreate) AddPods(p ...*Pod) *UserCreate {
+	ids := make([]int64, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uc.AddPodIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -171,6 +187,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldName,
 		})
 		_node.Name = value
+	}
+	if nodes := uc.mutation.PodsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PodsTable,
+			Columns: []string{user.PodsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt64,
+					Column: pod.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

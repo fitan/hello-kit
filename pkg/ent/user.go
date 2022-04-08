@@ -12,13 +12,34 @@ import (
 
 // User is the model entity for the User schema.
 type User struct {
-	config `json:"-"`
+	config `fake:"-" json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Age holds the value of the "age" field.
-	Age int `json:"age,omitempty"`
+	Age int `json:"age,omitempty" fake:"{number:0,150}"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges UserEdges `json:"edges"`
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// Pods holds the value of the pods edge.
+	Pods []*Pod `json:"pods,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// PodsOrErr returns the Pods value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) PodsOrErr() ([]*Pod, error) {
+	if e.loadedTypes[0] {
+		return e.Pods, nil
+	}
+	return nil, &NotLoadedError{edge: "pods"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -66,6 +87,11 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 		}
 	}
 	return nil
+}
+
+// QueryPods queries the "pods" edge of the User entity.
+func (u *User) QueryPods() *PodQuery {
+	return (&UserClient{config: u.config}).QueryPods(u)
 }
 
 // Update returns a builder for updating this User.
