@@ -5,9 +5,8 @@ package user
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"time"
-
 	"context"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"

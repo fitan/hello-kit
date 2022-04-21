@@ -5,10 +5,10 @@ package casbin
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"context"
-
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
+
+	"context"
 )
 
 // CasbinServiceWithLog implements CasbinService that is instrumented with logging

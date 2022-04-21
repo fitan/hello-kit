@@ -434,8 +434,15 @@ func (pq *ProjectQuery) sqlQuery(ctx context.Context) *sql.Selector {
 }
 
 func (pq *ProjectQuery) ByQueries(ctx context.Context, i interface{}) (res Projects, count int, err error) {
-	SetProjectFormQueries(i, pq)
-	count, err = pq.Count(ctx)
+	queryList, countList := SetProjectFormQueries(i)
+	countQ := pq.Clone()
+	for _, v := range queryList {
+		v.Query(pq)
+	}
+	for _, v := range countList {
+		v.Query(countQ)
+	}
+	count, err = countQ.Count(ctx)
 	if err != nil {
 		return
 	}
@@ -445,6 +452,7 @@ func (pq *ProjectQuery) ByQueries(ctx context.Context, i interface{}) (res Proje
 
 type ProjectTableFormer interface {
 	Query(q *ProjectQuery)
+	CountQuery() bool
 }
 
 type ProjectTablePagingForm struct {
@@ -456,6 +464,10 @@ func (f ProjectTablePagingForm) Query(q *ProjectQuery) {
 	if f.Limit != nil && f.Page != nil {
 		q.Limit(*f.Limit).Offset((*f.Page - 1) * *f.Limit)
 	}
+}
+
+func (f ProjectTablePagingForm) CountQuery() bool {
+	return false
 }
 
 type ProjectTableOrderForm struct {
@@ -474,30 +486,35 @@ func (f ProjectTableOrderForm) Query(q *ProjectQuery) {
 		}
 	}
 }
-
-func SetProjectFormQueries(o interface{}, q *ProjectQuery) []ProjectTableFormer {
-	l := make([]ProjectTableFormer, 0)
-	v := reflect.ValueOf(o)
-	former := reflect.TypeOf((*ProjectTableFormer)(nil)).Elem()
-	ProjectFormDepValue(v, former, &l)
-	for _, e := range l {
-		e.Query(q)
-	}
-	return l
+func (f ProjectTableOrderForm) CountQuery() bool {
+	return false
 }
 
-func ProjectFormDepValue(v reflect.Value, former reflect.Type, l *[]ProjectTableFormer) {
+func SetProjectFormQueries(o interface{}) ([]ProjectTableFormer, []ProjectTableFormer) {
+	queryList := make([]ProjectTableFormer, 0)
+	countList := make([]ProjectTableFormer, 0)
+	v := reflect.ValueOf(o)
+	former := reflect.TypeOf((*ProjectTableFormer)(nil)).Elem()
+	ProjectFormDepValue(v, former, &queryList, &countList)
+	return queryList, countList
+}
+
+func ProjectFormDepValue(v reflect.Value, former reflect.Type, queryList *[]ProjectTableFormer, countList *[]ProjectTableFormer) {
 	for i := 0; i < v.NumField(); i++ {
 		f := v.Field(i)
 		if f.IsZero() {
 			continue
 		}
 		if f.Type().Implements(former) {
-			*l = append(*l, f.Interface().(ProjectTableFormer))
+			former := f.Interface().(ProjectTableFormer)
+			*queryList = append(*queryList, former)
+			if former.CountQuery() {
+				*countList = append(*countList, former)
+			}
 			continue
 		}
 		if f.Type().Kind() == reflect.Struct {
-			ProjectFormDepValue(f, former, l)
+			ProjectFormDepValue(f, former, queryList, countList)
 		}
 	}
 }
@@ -514,6 +531,9 @@ func (f ProjectTableAliasEQForm) Query(q *ProjectQuery) {
 		q.Where(project.AliasEQ(*f.AliasEQ))
 	}
 }
+func (f ProjectTableAliasEQForm) CountQuery() bool {
+	return true
+}
 
 type ProjectTableAliasNEQForm struct {
 	AliasNEQ *string `form:"AliasNEQ" json:"AliasNEQ"`
@@ -523,6 +543,9 @@ func (f ProjectTableAliasNEQForm) Query(q *ProjectQuery) {
 	if f.AliasNEQ != nil {
 		q.Where(project.AliasNEQ(*f.AliasNEQ))
 	}
+}
+func (f ProjectTableAliasNEQForm) CountQuery() bool {
+	return true
 }
 
 type ProjectTableAliasInForm struct {
@@ -534,6 +557,9 @@ func (f ProjectTableAliasInForm) Query(q *ProjectQuery) {
 		q.Where(project.AliasIn(*f.AliasIn...))
 	}
 }
+func (f ProjectTableAliasInForm) CountQuery() bool {
+	return true
+}
 
 type ProjectTableAliasNotInForm struct {
 	AliasNotIn *[]string `form:"AliasNotIn" json:"AliasNotIn"`
@@ -543,6 +569,9 @@ func (f ProjectTableAliasNotInForm) Query(q *ProjectQuery) {
 	if f.AliasNotIn != nil {
 		q.Where(project.AliasNotIn(*f.AliasNotIn...))
 	}
+}
+func (f ProjectTableAliasNotInForm) CountQuery() bool {
+	return true
 }
 
 type ProjectTableAliasGTForm struct {
@@ -554,6 +583,9 @@ func (f ProjectTableAliasGTForm) Query(q *ProjectQuery) {
 		q.Where(project.AliasGT(*f.AliasGT))
 	}
 }
+func (f ProjectTableAliasGTForm) CountQuery() bool {
+	return true
+}
 
 type ProjectTableAliasGTEForm struct {
 	AliasGTE *string `form:"AliasGTE" json:"AliasGTE"`
@@ -563,6 +595,9 @@ func (f ProjectTableAliasGTEForm) Query(q *ProjectQuery) {
 	if f.AliasGTE != nil {
 		q.Where(project.AliasGTE(*f.AliasGTE))
 	}
+}
+func (f ProjectTableAliasGTEForm) CountQuery() bool {
+	return true
 }
 
 type ProjectTableAliasLTForm struct {
@@ -574,6 +609,9 @@ func (f ProjectTableAliasLTForm) Query(q *ProjectQuery) {
 		q.Where(project.AliasLT(*f.AliasLT))
 	}
 }
+func (f ProjectTableAliasLTForm) CountQuery() bool {
+	return true
+}
 
 type ProjectTableAliasLTEForm struct {
 	AliasLTE *string `form:"AliasLTE" json:"AliasLTE"`
@@ -583,6 +621,9 @@ func (f ProjectTableAliasLTEForm) Query(q *ProjectQuery) {
 	if f.AliasLTE != nil {
 		q.Where(project.AliasLTE(*f.AliasLTE))
 	}
+}
+func (f ProjectTableAliasLTEForm) CountQuery() bool {
+	return true
 }
 
 type ProjectTableAliasContainsForm struct {
@@ -594,6 +635,9 @@ func (f ProjectTableAliasContainsForm) Query(q *ProjectQuery) {
 		q.Where(project.AliasContains(*f.AliasContains))
 	}
 }
+func (f ProjectTableAliasContainsForm) CountQuery() bool {
+	return true
+}
 
 type ProjectTableAliasHasPrefixForm struct {
 	AliasHasPrefix *string `form:"AliasHasPrefix" json:"AliasHasPrefix"`
@@ -603,6 +647,9 @@ func (f ProjectTableAliasHasPrefixForm) Query(q *ProjectQuery) {
 	if f.AliasHasPrefix != nil {
 		q.Where(project.AliasHasPrefix(*f.AliasHasPrefix))
 	}
+}
+func (f ProjectTableAliasHasPrefixForm) CountQuery() bool {
+	return true
 }
 
 type ProjectTableAliasHasSuffixForm struct {
@@ -614,6 +661,9 @@ func (f ProjectTableAliasHasSuffixForm) Query(q *ProjectQuery) {
 		q.Where(project.AliasHasSuffix(*f.AliasHasSuffix))
 	}
 }
+func (f ProjectTableAliasHasSuffixForm) CountQuery() bool {
+	return true
+}
 
 type ProjectTableAliasEqualFoldForm struct {
 	AliasEqualFold *string `form:"AliasEqualFold" json:"AliasEqualFold"`
@@ -623,6 +673,9 @@ func (f ProjectTableAliasEqualFoldForm) Query(q *ProjectQuery) {
 	if f.AliasEqualFold != nil {
 		q.Where(project.AliasEqualFold(*f.AliasEqualFold))
 	}
+}
+func (f ProjectTableAliasEqualFoldForm) CountQuery() bool {
+	return true
 }
 
 type ProjectTableAliasContainsFoldForm struct {
@@ -634,6 +687,9 @@ func (f ProjectTableAliasContainsFoldForm) Query(q *ProjectQuery) {
 		q.Where(project.AliasContainsFold(*f.AliasContainsFold))
 	}
 }
+func (f ProjectTableAliasContainsFoldForm) CountQuery() bool {
+	return true
+}
 
 type ProjectTableNameEQForm struct {
 	NameEQ *string `form:"NameEQ" json:"NameEQ"`
@@ -643,6 +699,9 @@ func (f ProjectTableNameEQForm) Query(q *ProjectQuery) {
 	if f.NameEQ != nil {
 		q.Where(project.NameEQ(*f.NameEQ))
 	}
+}
+func (f ProjectTableNameEQForm) CountQuery() bool {
+	return true
 }
 
 type ProjectTableNameNEQForm struct {
@@ -654,6 +713,9 @@ func (f ProjectTableNameNEQForm) Query(q *ProjectQuery) {
 		q.Where(project.NameNEQ(*f.NameNEQ))
 	}
 }
+func (f ProjectTableNameNEQForm) CountQuery() bool {
+	return true
+}
 
 type ProjectTableNameInForm struct {
 	NameIn *[]string `form:"NameIn" json:"NameIn"`
@@ -663,6 +725,9 @@ func (f ProjectTableNameInForm) Query(q *ProjectQuery) {
 	if f.NameIn != nil {
 		q.Where(project.NameIn(*f.NameIn...))
 	}
+}
+func (f ProjectTableNameInForm) CountQuery() bool {
+	return true
 }
 
 type ProjectTableNameNotInForm struct {
@@ -674,6 +739,9 @@ func (f ProjectTableNameNotInForm) Query(q *ProjectQuery) {
 		q.Where(project.NameNotIn(*f.NameNotIn...))
 	}
 }
+func (f ProjectTableNameNotInForm) CountQuery() bool {
+	return true
+}
 
 type ProjectTableNameGTForm struct {
 	NameGT *string `form:"NameGT" json:"NameGT"`
@@ -683,6 +751,9 @@ func (f ProjectTableNameGTForm) Query(q *ProjectQuery) {
 	if f.NameGT != nil {
 		q.Where(project.NameGT(*f.NameGT))
 	}
+}
+func (f ProjectTableNameGTForm) CountQuery() bool {
+	return true
 }
 
 type ProjectTableNameGTEForm struct {
@@ -694,6 +765,9 @@ func (f ProjectTableNameGTEForm) Query(q *ProjectQuery) {
 		q.Where(project.NameGTE(*f.NameGTE))
 	}
 }
+func (f ProjectTableNameGTEForm) CountQuery() bool {
+	return true
+}
 
 type ProjectTableNameLTForm struct {
 	NameLT *string `form:"NameLT" json:"NameLT"`
@@ -703,6 +777,9 @@ func (f ProjectTableNameLTForm) Query(q *ProjectQuery) {
 	if f.NameLT != nil {
 		q.Where(project.NameLT(*f.NameLT))
 	}
+}
+func (f ProjectTableNameLTForm) CountQuery() bool {
+	return true
 }
 
 type ProjectTableNameLTEForm struct {
@@ -714,6 +791,9 @@ func (f ProjectTableNameLTEForm) Query(q *ProjectQuery) {
 		q.Where(project.NameLTE(*f.NameLTE))
 	}
 }
+func (f ProjectTableNameLTEForm) CountQuery() bool {
+	return true
+}
 
 type ProjectTableNameContainsForm struct {
 	NameContains *string `form:"NameContains" json:"NameContains"`
@@ -723,6 +803,9 @@ func (f ProjectTableNameContainsForm) Query(q *ProjectQuery) {
 	if f.NameContains != nil {
 		q.Where(project.NameContains(*f.NameContains))
 	}
+}
+func (f ProjectTableNameContainsForm) CountQuery() bool {
+	return true
 }
 
 type ProjectTableNameHasPrefixForm struct {
@@ -734,6 +817,9 @@ func (f ProjectTableNameHasPrefixForm) Query(q *ProjectQuery) {
 		q.Where(project.NameHasPrefix(*f.NameHasPrefix))
 	}
 }
+func (f ProjectTableNameHasPrefixForm) CountQuery() bool {
+	return true
+}
 
 type ProjectTableNameHasSuffixForm struct {
 	NameHasSuffix *string `form:"NameHasSuffix" json:"NameHasSuffix"`
@@ -743,6 +829,9 @@ func (f ProjectTableNameHasSuffixForm) Query(q *ProjectQuery) {
 	if f.NameHasSuffix != nil {
 		q.Where(project.NameHasSuffix(*f.NameHasSuffix))
 	}
+}
+func (f ProjectTableNameHasSuffixForm) CountQuery() bool {
+	return true
 }
 
 type ProjectTableNameEqualFoldForm struct {
@@ -754,6 +843,9 @@ func (f ProjectTableNameEqualFoldForm) Query(q *ProjectQuery) {
 		q.Where(project.NameEqualFold(*f.NameEqualFold))
 	}
 }
+func (f ProjectTableNameEqualFoldForm) CountQuery() bool {
+	return true
+}
 
 type ProjectTableNameContainsFoldForm struct {
 	NameContainsFold *string `form:"NameContainsFold" json:"NameContainsFold"`
@@ -763,6 +855,9 @@ func (f ProjectTableNameContainsFoldForm) Query(q *ProjectQuery) {
 	if f.NameContainsFold != nil {
 		q.Where(project.NameContainsFold(*f.NameContainsFold))
 	}
+}
+func (f ProjectTableNameContainsFoldForm) CountQuery() bool {
+	return true
 }
 
 // ProjectGroupBy is the group-by builder for Project entities.

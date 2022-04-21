@@ -56,7 +56,7 @@ func (_d PodServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (r
 }
 
 // Create implements PodService
-func (_d PodServiceWithTracing) Create(ctx context.Context, v ent.Pod) (res *ent.Pod, err error) {
+func (_d PodServiceWithTracing) Create(ctx context.Context, v *ent.Pod) (res *ent.Pod, err error) {
 
 	var name = "PodService.Create"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -154,7 +154,7 @@ func (_d PodServiceWithTracing) DeleteById(ctx context.Context, id int64) (err e
 // DeleteMany implements PodService
 func (_d PodServiceWithTracing) DeleteMany(ctx context.Context, ids []int64) (err error) {
 
-	var name = "PodService.UserRestDeleteMany"
+	var name = "PodService.DeleteMany"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {

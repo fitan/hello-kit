@@ -514,8 +514,15 @@ func (pq *PodQuery) sqlQuery(ctx context.Context) *sql.Selector {
 }
 
 func (pq *PodQuery) ByQueries(ctx context.Context, i interface{}) (res Pods, count int, err error) {
-	SetPodFormQueries(i, pq)
-	count, err = pq.Count(ctx)
+	queryList, countList := SetPodFormQueries(i)
+	countQ := pq.Clone()
+	for _, v := range queryList {
+		v.Query(pq)
+	}
+	for _, v := range countList {
+		v.Query(countQ)
+	}
+	count, err = countQ.Count(ctx)
 	if err != nil {
 		return
 	}
@@ -525,6 +532,7 @@ func (pq *PodQuery) ByQueries(ctx context.Context, i interface{}) (res Pods, cou
 
 type PodTableFormer interface {
 	Query(q *PodQuery)
+	CountQuery() bool
 }
 
 type PodTablePagingForm struct {
@@ -536,6 +544,10 @@ func (f PodTablePagingForm) Query(q *PodQuery) {
 	if f.Limit != nil && f.Page != nil {
 		q.Limit(*f.Limit).Offset((*f.Page - 1) * *f.Limit)
 	}
+}
+
+func (f PodTablePagingForm) CountQuery() bool {
+	return false
 }
 
 type PodTableOrderForm struct {
@@ -554,30 +566,35 @@ func (f PodTableOrderForm) Query(q *PodQuery) {
 		}
 	}
 }
-
-func SetPodFormQueries(o interface{}, q *PodQuery) []PodTableFormer {
-	l := make([]PodTableFormer, 0)
-	v := reflect.ValueOf(o)
-	former := reflect.TypeOf((*PodTableFormer)(nil)).Elem()
-	PodFormDepValue(v, former, &l)
-	for _, e := range l {
-		e.Query(q)
-	}
-	return l
+func (f PodTableOrderForm) CountQuery() bool {
+	return false
 }
 
-func PodFormDepValue(v reflect.Value, former reflect.Type, l *[]PodTableFormer) {
+func SetPodFormQueries(o interface{}) ([]PodTableFormer, []PodTableFormer) {
+	queryList := make([]PodTableFormer, 0)
+	countList := make([]PodTableFormer, 0)
+	v := reflect.ValueOf(o)
+	former := reflect.TypeOf((*PodTableFormer)(nil)).Elem()
+	PodFormDepValue(v, former, &queryList, &countList)
+	return queryList, countList
+}
+
+func PodFormDepValue(v reflect.Value, former reflect.Type, queryList *[]PodTableFormer, countList *[]PodTableFormer) {
 	for i := 0; i < v.NumField(); i++ {
 		f := v.Field(i)
 		if f.IsZero() {
 			continue
 		}
 		if f.Type().Implements(former) {
-			*l = append(*l, f.Interface().(PodTableFormer))
+			former := f.Interface().(PodTableFormer)
+			*queryList = append(*queryList, former)
+			if former.CountQuery() {
+				*countList = append(*countList, former)
+			}
 			continue
 		}
 		if f.Type().Kind() == reflect.Struct {
-			PodFormDepValue(f, former, l)
+			PodFormDepValue(f, former, queryList, countList)
 		}
 	}
 }
@@ -594,6 +611,9 @@ func (f PodTableClusterNameEQForm) Query(q *PodQuery) {
 		q.Where(pod.ClusterNameEQ(*f.ClusterNameEQ))
 	}
 }
+func (f PodTableClusterNameEQForm) CountQuery() bool {
+	return true
+}
 
 type PodTableClusterNameNEQForm struct {
 	ClusterNameNEQ *string `form:"ClusterNameNEQ" json:"ClusterNameNEQ"`
@@ -603,6 +623,9 @@ func (f PodTableClusterNameNEQForm) Query(q *PodQuery) {
 	if f.ClusterNameNEQ != nil {
 		q.Where(pod.ClusterNameNEQ(*f.ClusterNameNEQ))
 	}
+}
+func (f PodTableClusterNameNEQForm) CountQuery() bool {
+	return true
 }
 
 type PodTableClusterNameInForm struct {
@@ -614,6 +637,9 @@ func (f PodTableClusterNameInForm) Query(q *PodQuery) {
 		q.Where(pod.ClusterNameIn(*f.ClusterNameIn...))
 	}
 }
+func (f PodTableClusterNameInForm) CountQuery() bool {
+	return true
+}
 
 type PodTableClusterNameNotInForm struct {
 	ClusterNameNotIn *[]string `form:"ClusterNameNotIn" json:"ClusterNameNotIn"`
@@ -623,6 +649,9 @@ func (f PodTableClusterNameNotInForm) Query(q *PodQuery) {
 	if f.ClusterNameNotIn != nil {
 		q.Where(pod.ClusterNameNotIn(*f.ClusterNameNotIn...))
 	}
+}
+func (f PodTableClusterNameNotInForm) CountQuery() bool {
+	return true
 }
 
 type PodTableClusterNameGTForm struct {
@@ -634,6 +663,9 @@ func (f PodTableClusterNameGTForm) Query(q *PodQuery) {
 		q.Where(pod.ClusterNameGT(*f.ClusterNameGT))
 	}
 }
+func (f PodTableClusterNameGTForm) CountQuery() bool {
+	return true
+}
 
 type PodTableClusterNameGTEForm struct {
 	ClusterNameGTE *string `form:"ClusterNameGTE" json:"ClusterNameGTE"`
@@ -643,6 +675,9 @@ func (f PodTableClusterNameGTEForm) Query(q *PodQuery) {
 	if f.ClusterNameGTE != nil {
 		q.Where(pod.ClusterNameGTE(*f.ClusterNameGTE))
 	}
+}
+func (f PodTableClusterNameGTEForm) CountQuery() bool {
+	return true
 }
 
 type PodTableClusterNameLTForm struct {
@@ -654,6 +689,9 @@ func (f PodTableClusterNameLTForm) Query(q *PodQuery) {
 		q.Where(pod.ClusterNameLT(*f.ClusterNameLT))
 	}
 }
+func (f PodTableClusterNameLTForm) CountQuery() bool {
+	return true
+}
 
 type PodTableClusterNameLTEForm struct {
 	ClusterNameLTE *string `form:"ClusterNameLTE" json:"ClusterNameLTE"`
@@ -663,6 +701,9 @@ func (f PodTableClusterNameLTEForm) Query(q *PodQuery) {
 	if f.ClusterNameLTE != nil {
 		q.Where(pod.ClusterNameLTE(*f.ClusterNameLTE))
 	}
+}
+func (f PodTableClusterNameLTEForm) CountQuery() bool {
+	return true
 }
 
 type PodTableClusterNameContainsForm struct {
@@ -674,6 +715,9 @@ func (f PodTableClusterNameContainsForm) Query(q *PodQuery) {
 		q.Where(pod.ClusterNameContains(*f.ClusterNameContains))
 	}
 }
+func (f PodTableClusterNameContainsForm) CountQuery() bool {
+	return true
+}
 
 type PodTableClusterNameHasPrefixForm struct {
 	ClusterNameHasPrefix *string `form:"ClusterNameHasPrefix" json:"ClusterNameHasPrefix"`
@@ -683,6 +727,9 @@ func (f PodTableClusterNameHasPrefixForm) Query(q *PodQuery) {
 	if f.ClusterNameHasPrefix != nil {
 		q.Where(pod.ClusterNameHasPrefix(*f.ClusterNameHasPrefix))
 	}
+}
+func (f PodTableClusterNameHasPrefixForm) CountQuery() bool {
+	return true
 }
 
 type PodTableClusterNameHasSuffixForm struct {
@@ -694,6 +741,9 @@ func (f PodTableClusterNameHasSuffixForm) Query(q *PodQuery) {
 		q.Where(pod.ClusterNameHasSuffix(*f.ClusterNameHasSuffix))
 	}
 }
+func (f PodTableClusterNameHasSuffixForm) CountQuery() bool {
+	return true
+}
 
 type PodTableClusterNameEqualFoldForm struct {
 	ClusterNameEqualFold *string `form:"ClusterNameEqualFold" json:"ClusterNameEqualFold"`
@@ -703,6 +753,9 @@ func (f PodTableClusterNameEqualFoldForm) Query(q *PodQuery) {
 	if f.ClusterNameEqualFold != nil {
 		q.Where(pod.ClusterNameEqualFold(*f.ClusterNameEqualFold))
 	}
+}
+func (f PodTableClusterNameEqualFoldForm) CountQuery() bool {
+	return true
 }
 
 type PodTableClusterNameContainsFoldForm struct {
@@ -714,6 +767,9 @@ func (f PodTableClusterNameContainsFoldForm) Query(q *PodQuery) {
 		q.Where(pod.ClusterNameContainsFold(*f.ClusterNameContainsFold))
 	}
 }
+func (f PodTableClusterNameContainsFoldForm) CountQuery() bool {
+	return true
+}
 
 type PodTableNamespaceEQForm struct {
 	NamespaceEQ *string `form:"NamespaceEQ" json:"NamespaceEQ"`
@@ -723,6 +779,9 @@ func (f PodTableNamespaceEQForm) Query(q *PodQuery) {
 	if f.NamespaceEQ != nil {
 		q.Where(pod.NamespaceEQ(*f.NamespaceEQ))
 	}
+}
+func (f PodTableNamespaceEQForm) CountQuery() bool {
+	return true
 }
 
 type PodTableNamespaceNEQForm struct {
@@ -734,6 +793,9 @@ func (f PodTableNamespaceNEQForm) Query(q *PodQuery) {
 		q.Where(pod.NamespaceNEQ(*f.NamespaceNEQ))
 	}
 }
+func (f PodTableNamespaceNEQForm) CountQuery() bool {
+	return true
+}
 
 type PodTableNamespaceInForm struct {
 	NamespaceIn *[]string `form:"NamespaceIn" json:"NamespaceIn"`
@@ -743,6 +805,9 @@ func (f PodTableNamespaceInForm) Query(q *PodQuery) {
 	if f.NamespaceIn != nil {
 		q.Where(pod.NamespaceIn(*f.NamespaceIn...))
 	}
+}
+func (f PodTableNamespaceInForm) CountQuery() bool {
+	return true
 }
 
 type PodTableNamespaceNotInForm struct {
@@ -754,6 +819,9 @@ func (f PodTableNamespaceNotInForm) Query(q *PodQuery) {
 		q.Where(pod.NamespaceNotIn(*f.NamespaceNotIn...))
 	}
 }
+func (f PodTableNamespaceNotInForm) CountQuery() bool {
+	return true
+}
 
 type PodTableNamespaceGTForm struct {
 	NamespaceGT *string `form:"NamespaceGT" json:"NamespaceGT"`
@@ -763,6 +831,9 @@ func (f PodTableNamespaceGTForm) Query(q *PodQuery) {
 	if f.NamespaceGT != nil {
 		q.Where(pod.NamespaceGT(*f.NamespaceGT))
 	}
+}
+func (f PodTableNamespaceGTForm) CountQuery() bool {
+	return true
 }
 
 type PodTableNamespaceGTEForm struct {
@@ -774,6 +845,9 @@ func (f PodTableNamespaceGTEForm) Query(q *PodQuery) {
 		q.Where(pod.NamespaceGTE(*f.NamespaceGTE))
 	}
 }
+func (f PodTableNamespaceGTEForm) CountQuery() bool {
+	return true
+}
 
 type PodTableNamespaceLTForm struct {
 	NamespaceLT *string `form:"NamespaceLT" json:"NamespaceLT"`
@@ -783,6 +857,9 @@ func (f PodTableNamespaceLTForm) Query(q *PodQuery) {
 	if f.NamespaceLT != nil {
 		q.Where(pod.NamespaceLT(*f.NamespaceLT))
 	}
+}
+func (f PodTableNamespaceLTForm) CountQuery() bool {
+	return true
 }
 
 type PodTableNamespaceLTEForm struct {
@@ -794,6 +871,9 @@ func (f PodTableNamespaceLTEForm) Query(q *PodQuery) {
 		q.Where(pod.NamespaceLTE(*f.NamespaceLTE))
 	}
 }
+func (f PodTableNamespaceLTEForm) CountQuery() bool {
+	return true
+}
 
 type PodTableNamespaceContainsForm struct {
 	NamespaceContains *string `form:"NamespaceContains" json:"NamespaceContains"`
@@ -803,6 +883,9 @@ func (f PodTableNamespaceContainsForm) Query(q *PodQuery) {
 	if f.NamespaceContains != nil {
 		q.Where(pod.NamespaceContains(*f.NamespaceContains))
 	}
+}
+func (f PodTableNamespaceContainsForm) CountQuery() bool {
+	return true
 }
 
 type PodTableNamespaceHasPrefixForm struct {
@@ -814,6 +897,9 @@ func (f PodTableNamespaceHasPrefixForm) Query(q *PodQuery) {
 		q.Where(pod.NamespaceHasPrefix(*f.NamespaceHasPrefix))
 	}
 }
+func (f PodTableNamespaceHasPrefixForm) CountQuery() bool {
+	return true
+}
 
 type PodTableNamespaceHasSuffixForm struct {
 	NamespaceHasSuffix *string `form:"NamespaceHasSuffix" json:"NamespaceHasSuffix"`
@@ -823,6 +909,9 @@ func (f PodTableNamespaceHasSuffixForm) Query(q *PodQuery) {
 	if f.NamespaceHasSuffix != nil {
 		q.Where(pod.NamespaceHasSuffix(*f.NamespaceHasSuffix))
 	}
+}
+func (f PodTableNamespaceHasSuffixForm) CountQuery() bool {
+	return true
 }
 
 type PodTableNamespaceEqualFoldForm struct {
@@ -834,6 +923,9 @@ func (f PodTableNamespaceEqualFoldForm) Query(q *PodQuery) {
 		q.Where(pod.NamespaceEqualFold(*f.NamespaceEqualFold))
 	}
 }
+func (f PodTableNamespaceEqualFoldForm) CountQuery() bool {
+	return true
+}
 
 type PodTableNamespaceContainsFoldForm struct {
 	NamespaceContainsFold *string `form:"NamespaceContainsFold" json:"NamespaceContainsFold"`
@@ -843,6 +935,9 @@ func (f PodTableNamespaceContainsFoldForm) Query(q *PodQuery) {
 	if f.NamespaceContainsFold != nil {
 		q.Where(pod.NamespaceContainsFold(*f.NamespaceContainsFold))
 	}
+}
+func (f PodTableNamespaceContainsFoldForm) CountQuery() bool {
+	return true
 }
 
 type PodTableServiceNameEQForm struct {
@@ -854,6 +949,9 @@ func (f PodTableServiceNameEQForm) Query(q *PodQuery) {
 		q.Where(pod.ServiceNameEQ(*f.ServiceNameEQ))
 	}
 }
+func (f PodTableServiceNameEQForm) CountQuery() bool {
+	return true
+}
 
 type PodTableServiceNameNEQForm struct {
 	ServiceNameNEQ *string `form:"ServiceNameNEQ" json:"ServiceNameNEQ"`
@@ -863,6 +961,9 @@ func (f PodTableServiceNameNEQForm) Query(q *PodQuery) {
 	if f.ServiceNameNEQ != nil {
 		q.Where(pod.ServiceNameNEQ(*f.ServiceNameNEQ))
 	}
+}
+func (f PodTableServiceNameNEQForm) CountQuery() bool {
+	return true
 }
 
 type PodTableServiceNameInForm struct {
@@ -874,6 +975,9 @@ func (f PodTableServiceNameInForm) Query(q *PodQuery) {
 		q.Where(pod.ServiceNameIn(*f.ServiceNameIn...))
 	}
 }
+func (f PodTableServiceNameInForm) CountQuery() bool {
+	return true
+}
 
 type PodTableServiceNameNotInForm struct {
 	ServiceNameNotIn *[]string `form:"ServiceNameNotIn" json:"ServiceNameNotIn"`
@@ -883,6 +987,9 @@ func (f PodTableServiceNameNotInForm) Query(q *PodQuery) {
 	if f.ServiceNameNotIn != nil {
 		q.Where(pod.ServiceNameNotIn(*f.ServiceNameNotIn...))
 	}
+}
+func (f PodTableServiceNameNotInForm) CountQuery() bool {
+	return true
 }
 
 type PodTableServiceNameGTForm struct {
@@ -894,6 +1001,9 @@ func (f PodTableServiceNameGTForm) Query(q *PodQuery) {
 		q.Where(pod.ServiceNameGT(*f.ServiceNameGT))
 	}
 }
+func (f PodTableServiceNameGTForm) CountQuery() bool {
+	return true
+}
 
 type PodTableServiceNameGTEForm struct {
 	ServiceNameGTE *string `form:"ServiceNameGTE" json:"ServiceNameGTE"`
@@ -903,6 +1013,9 @@ func (f PodTableServiceNameGTEForm) Query(q *PodQuery) {
 	if f.ServiceNameGTE != nil {
 		q.Where(pod.ServiceNameGTE(*f.ServiceNameGTE))
 	}
+}
+func (f PodTableServiceNameGTEForm) CountQuery() bool {
+	return true
 }
 
 type PodTableServiceNameLTForm struct {
@@ -914,6 +1027,9 @@ func (f PodTableServiceNameLTForm) Query(q *PodQuery) {
 		q.Where(pod.ServiceNameLT(*f.ServiceNameLT))
 	}
 }
+func (f PodTableServiceNameLTForm) CountQuery() bool {
+	return true
+}
 
 type PodTableServiceNameLTEForm struct {
 	ServiceNameLTE *string `form:"ServiceNameLTE" json:"ServiceNameLTE"`
@@ -923,6 +1039,9 @@ func (f PodTableServiceNameLTEForm) Query(q *PodQuery) {
 	if f.ServiceNameLTE != nil {
 		q.Where(pod.ServiceNameLTE(*f.ServiceNameLTE))
 	}
+}
+func (f PodTableServiceNameLTEForm) CountQuery() bool {
+	return true
 }
 
 type PodTableServiceNameContainsForm struct {
@@ -934,6 +1053,9 @@ func (f PodTableServiceNameContainsForm) Query(q *PodQuery) {
 		q.Where(pod.ServiceNameContains(*f.ServiceNameContains))
 	}
 }
+func (f PodTableServiceNameContainsForm) CountQuery() bool {
+	return true
+}
 
 type PodTableServiceNameHasPrefixForm struct {
 	ServiceNameHasPrefix *string `form:"ServiceNameHasPrefix" json:"ServiceNameHasPrefix"`
@@ -943,6 +1065,9 @@ func (f PodTableServiceNameHasPrefixForm) Query(q *PodQuery) {
 	if f.ServiceNameHasPrefix != nil {
 		q.Where(pod.ServiceNameHasPrefix(*f.ServiceNameHasPrefix))
 	}
+}
+func (f PodTableServiceNameHasPrefixForm) CountQuery() bool {
+	return true
 }
 
 type PodTableServiceNameHasSuffixForm struct {
@@ -954,6 +1079,9 @@ func (f PodTableServiceNameHasSuffixForm) Query(q *PodQuery) {
 		q.Where(pod.ServiceNameHasSuffix(*f.ServiceNameHasSuffix))
 	}
 }
+func (f PodTableServiceNameHasSuffixForm) CountQuery() bool {
+	return true
+}
 
 type PodTableServiceNameEqualFoldForm struct {
 	ServiceNameEqualFold *string `form:"ServiceNameEqualFold" json:"ServiceNameEqualFold"`
@@ -963,6 +1091,9 @@ func (f PodTableServiceNameEqualFoldForm) Query(q *PodQuery) {
 	if f.ServiceNameEqualFold != nil {
 		q.Where(pod.ServiceNameEqualFold(*f.ServiceNameEqualFold))
 	}
+}
+func (f PodTableServiceNameEqualFoldForm) CountQuery() bool {
+	return true
 }
 
 type PodTableServiceNameContainsFoldForm struct {
@@ -974,6 +1105,9 @@ func (f PodTableServiceNameContainsFoldForm) Query(q *PodQuery) {
 		q.Where(pod.ServiceNameContainsFold(*f.ServiceNameContainsFold))
 	}
 }
+func (f PodTableServiceNameContainsFoldForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePodNameEQForm struct {
 	PodNameEQ *string `form:"PodNameEQ" json:"PodNameEQ"`
@@ -983,6 +1117,9 @@ func (f PodTablePodNameEQForm) Query(q *PodQuery) {
 	if f.PodNameEQ != nil {
 		q.Where(pod.PodNameEQ(*f.PodNameEQ))
 	}
+}
+func (f PodTablePodNameEQForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePodNameNEQForm struct {
@@ -994,6 +1131,9 @@ func (f PodTablePodNameNEQForm) Query(q *PodQuery) {
 		q.Where(pod.PodNameNEQ(*f.PodNameNEQ))
 	}
 }
+func (f PodTablePodNameNEQForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePodNameInForm struct {
 	PodNameIn *[]string `form:"PodNameIn" json:"PodNameIn"`
@@ -1003,6 +1143,9 @@ func (f PodTablePodNameInForm) Query(q *PodQuery) {
 	if f.PodNameIn != nil {
 		q.Where(pod.PodNameIn(*f.PodNameIn...))
 	}
+}
+func (f PodTablePodNameInForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePodNameNotInForm struct {
@@ -1014,6 +1157,9 @@ func (f PodTablePodNameNotInForm) Query(q *PodQuery) {
 		q.Where(pod.PodNameNotIn(*f.PodNameNotIn...))
 	}
 }
+func (f PodTablePodNameNotInForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePodNameGTForm struct {
 	PodNameGT *string `form:"PodNameGT" json:"PodNameGT"`
@@ -1023,6 +1169,9 @@ func (f PodTablePodNameGTForm) Query(q *PodQuery) {
 	if f.PodNameGT != nil {
 		q.Where(pod.PodNameGT(*f.PodNameGT))
 	}
+}
+func (f PodTablePodNameGTForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePodNameGTEForm struct {
@@ -1034,6 +1183,9 @@ func (f PodTablePodNameGTEForm) Query(q *PodQuery) {
 		q.Where(pod.PodNameGTE(*f.PodNameGTE))
 	}
 }
+func (f PodTablePodNameGTEForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePodNameLTForm struct {
 	PodNameLT *string `form:"PodNameLT" json:"PodNameLT"`
@@ -1043,6 +1195,9 @@ func (f PodTablePodNameLTForm) Query(q *PodQuery) {
 	if f.PodNameLT != nil {
 		q.Where(pod.PodNameLT(*f.PodNameLT))
 	}
+}
+func (f PodTablePodNameLTForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePodNameLTEForm struct {
@@ -1054,6 +1209,9 @@ func (f PodTablePodNameLTEForm) Query(q *PodQuery) {
 		q.Where(pod.PodNameLTE(*f.PodNameLTE))
 	}
 }
+func (f PodTablePodNameLTEForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePodNameContainsForm struct {
 	PodNameContains *string `form:"PodNameContains" json:"PodNameContains"`
@@ -1063,6 +1221,9 @@ func (f PodTablePodNameContainsForm) Query(q *PodQuery) {
 	if f.PodNameContains != nil {
 		q.Where(pod.PodNameContains(*f.PodNameContains))
 	}
+}
+func (f PodTablePodNameContainsForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePodNameHasPrefixForm struct {
@@ -1074,6 +1235,9 @@ func (f PodTablePodNameHasPrefixForm) Query(q *PodQuery) {
 		q.Where(pod.PodNameHasPrefix(*f.PodNameHasPrefix))
 	}
 }
+func (f PodTablePodNameHasPrefixForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePodNameHasSuffixForm struct {
 	PodNameHasSuffix *string `form:"PodNameHasSuffix" json:"PodNameHasSuffix"`
@@ -1083,6 +1247,9 @@ func (f PodTablePodNameHasSuffixForm) Query(q *PodQuery) {
 	if f.PodNameHasSuffix != nil {
 		q.Where(pod.PodNameHasSuffix(*f.PodNameHasSuffix))
 	}
+}
+func (f PodTablePodNameHasSuffixForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePodNameEqualFoldForm struct {
@@ -1094,6 +1261,9 @@ func (f PodTablePodNameEqualFoldForm) Query(q *PodQuery) {
 		q.Where(pod.PodNameEqualFold(*f.PodNameEqualFold))
 	}
 }
+func (f PodTablePodNameEqualFoldForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePodNameContainsFoldForm struct {
 	PodNameContainsFold *string `form:"PodNameContainsFold" json:"PodNameContainsFold"`
@@ -1103,6 +1273,9 @@ func (f PodTablePodNameContainsFoldForm) Query(q *PodQuery) {
 	if f.PodNameContainsFold != nil {
 		q.Where(pod.PodNameContainsFold(*f.PodNameContainsFold))
 	}
+}
+func (f PodTablePodNameContainsFoldForm) CountQuery() bool {
+	return true
 }
 
 type PodTableResourceVersionEQForm struct {
@@ -1114,6 +1287,9 @@ func (f PodTableResourceVersionEQForm) Query(q *PodQuery) {
 		q.Where(pod.ResourceVersionEQ(*f.ResourceVersionEQ))
 	}
 }
+func (f PodTableResourceVersionEQForm) CountQuery() bool {
+	return true
+}
 
 type PodTableResourceVersionNEQForm struct {
 	ResourceVersionNEQ *string `form:"ResourceVersionNEQ" json:"ResourceVersionNEQ"`
@@ -1123,6 +1299,9 @@ func (f PodTableResourceVersionNEQForm) Query(q *PodQuery) {
 	if f.ResourceVersionNEQ != nil {
 		q.Where(pod.ResourceVersionNEQ(*f.ResourceVersionNEQ))
 	}
+}
+func (f PodTableResourceVersionNEQForm) CountQuery() bool {
+	return true
 }
 
 type PodTableResourceVersionInForm struct {
@@ -1134,6 +1313,9 @@ func (f PodTableResourceVersionInForm) Query(q *PodQuery) {
 		q.Where(pod.ResourceVersionIn(*f.ResourceVersionIn...))
 	}
 }
+func (f PodTableResourceVersionInForm) CountQuery() bool {
+	return true
+}
 
 type PodTableResourceVersionNotInForm struct {
 	ResourceVersionNotIn *[]string `form:"ResourceVersionNotIn" json:"ResourceVersionNotIn"`
@@ -1143,6 +1325,9 @@ func (f PodTableResourceVersionNotInForm) Query(q *PodQuery) {
 	if f.ResourceVersionNotIn != nil {
 		q.Where(pod.ResourceVersionNotIn(*f.ResourceVersionNotIn...))
 	}
+}
+func (f PodTableResourceVersionNotInForm) CountQuery() bool {
+	return true
 }
 
 type PodTableResourceVersionGTForm struct {
@@ -1154,6 +1339,9 @@ func (f PodTableResourceVersionGTForm) Query(q *PodQuery) {
 		q.Where(pod.ResourceVersionGT(*f.ResourceVersionGT))
 	}
 }
+func (f PodTableResourceVersionGTForm) CountQuery() bool {
+	return true
+}
 
 type PodTableResourceVersionGTEForm struct {
 	ResourceVersionGTE *string `form:"ResourceVersionGTE" json:"ResourceVersionGTE"`
@@ -1163,6 +1351,9 @@ func (f PodTableResourceVersionGTEForm) Query(q *PodQuery) {
 	if f.ResourceVersionGTE != nil {
 		q.Where(pod.ResourceVersionGTE(*f.ResourceVersionGTE))
 	}
+}
+func (f PodTableResourceVersionGTEForm) CountQuery() bool {
+	return true
 }
 
 type PodTableResourceVersionLTForm struct {
@@ -1174,6 +1365,9 @@ func (f PodTableResourceVersionLTForm) Query(q *PodQuery) {
 		q.Where(pod.ResourceVersionLT(*f.ResourceVersionLT))
 	}
 }
+func (f PodTableResourceVersionLTForm) CountQuery() bool {
+	return true
+}
 
 type PodTableResourceVersionLTEForm struct {
 	ResourceVersionLTE *string `form:"ResourceVersionLTE" json:"ResourceVersionLTE"`
@@ -1183,6 +1377,9 @@ func (f PodTableResourceVersionLTEForm) Query(q *PodQuery) {
 	if f.ResourceVersionLTE != nil {
 		q.Where(pod.ResourceVersionLTE(*f.ResourceVersionLTE))
 	}
+}
+func (f PodTableResourceVersionLTEForm) CountQuery() bool {
+	return true
 }
 
 type PodTableResourceVersionContainsForm struct {
@@ -1194,6 +1391,9 @@ func (f PodTableResourceVersionContainsForm) Query(q *PodQuery) {
 		q.Where(pod.ResourceVersionContains(*f.ResourceVersionContains))
 	}
 }
+func (f PodTableResourceVersionContainsForm) CountQuery() bool {
+	return true
+}
 
 type PodTableResourceVersionHasPrefixForm struct {
 	ResourceVersionHasPrefix *string `form:"ResourceVersionHasPrefix" json:"ResourceVersionHasPrefix"`
@@ -1203,6 +1403,9 @@ func (f PodTableResourceVersionHasPrefixForm) Query(q *PodQuery) {
 	if f.ResourceVersionHasPrefix != nil {
 		q.Where(pod.ResourceVersionHasPrefix(*f.ResourceVersionHasPrefix))
 	}
+}
+func (f PodTableResourceVersionHasPrefixForm) CountQuery() bool {
+	return true
 }
 
 type PodTableResourceVersionHasSuffixForm struct {
@@ -1214,6 +1417,9 @@ func (f PodTableResourceVersionHasSuffixForm) Query(q *PodQuery) {
 		q.Where(pod.ResourceVersionHasSuffix(*f.ResourceVersionHasSuffix))
 	}
 }
+func (f PodTableResourceVersionHasSuffixForm) CountQuery() bool {
+	return true
+}
 
 type PodTableResourceVersionEqualFoldForm struct {
 	ResourceVersionEqualFold *string `form:"ResourceVersionEqualFold" json:"ResourceVersionEqualFold"`
@@ -1223,6 +1429,9 @@ func (f PodTableResourceVersionEqualFoldForm) Query(q *PodQuery) {
 	if f.ResourceVersionEqualFold != nil {
 		q.Where(pod.ResourceVersionEqualFold(*f.ResourceVersionEqualFold))
 	}
+}
+func (f PodTableResourceVersionEqualFoldForm) CountQuery() bool {
+	return true
 }
 
 type PodTableResourceVersionContainsFoldForm struct {
@@ -1234,6 +1443,9 @@ func (f PodTableResourceVersionContainsFoldForm) Query(q *PodQuery) {
 		q.Where(pod.ResourceVersionContainsFold(*f.ResourceVersionContainsFold))
 	}
 }
+func (f PodTableResourceVersionContainsFoldForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePodIPEQForm struct {
 	PodIPEQ *string `form:"PodIPEQ" json:"PodIPEQ"`
@@ -1243,6 +1455,9 @@ func (f PodTablePodIPEQForm) Query(q *PodQuery) {
 	if f.PodIPEQ != nil {
 		q.Where(pod.PodIPEQ(*f.PodIPEQ))
 	}
+}
+func (f PodTablePodIPEQForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePodIPNEQForm struct {
@@ -1254,6 +1469,9 @@ func (f PodTablePodIPNEQForm) Query(q *PodQuery) {
 		q.Where(pod.PodIPNEQ(*f.PodIPNEQ))
 	}
 }
+func (f PodTablePodIPNEQForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePodIPInForm struct {
 	PodIPIn *[]string `form:"PodIPIn" json:"PodIPIn"`
@@ -1263,6 +1481,9 @@ func (f PodTablePodIPInForm) Query(q *PodQuery) {
 	if f.PodIPIn != nil {
 		q.Where(pod.PodIPIn(*f.PodIPIn...))
 	}
+}
+func (f PodTablePodIPInForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePodIPNotInForm struct {
@@ -1274,6 +1495,9 @@ func (f PodTablePodIPNotInForm) Query(q *PodQuery) {
 		q.Where(pod.PodIPNotIn(*f.PodIPNotIn...))
 	}
 }
+func (f PodTablePodIPNotInForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePodIPGTForm struct {
 	PodIPGT *string `form:"PodIPGT" json:"PodIPGT"`
@@ -1283,6 +1507,9 @@ func (f PodTablePodIPGTForm) Query(q *PodQuery) {
 	if f.PodIPGT != nil {
 		q.Where(pod.PodIPGT(*f.PodIPGT))
 	}
+}
+func (f PodTablePodIPGTForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePodIPGTEForm struct {
@@ -1294,6 +1521,9 @@ func (f PodTablePodIPGTEForm) Query(q *PodQuery) {
 		q.Where(pod.PodIPGTE(*f.PodIPGTE))
 	}
 }
+func (f PodTablePodIPGTEForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePodIPLTForm struct {
 	PodIPLT *string `form:"PodIPLT" json:"PodIPLT"`
@@ -1303,6 +1533,9 @@ func (f PodTablePodIPLTForm) Query(q *PodQuery) {
 	if f.PodIPLT != nil {
 		q.Where(pod.PodIPLT(*f.PodIPLT))
 	}
+}
+func (f PodTablePodIPLTForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePodIPLTEForm struct {
@@ -1314,6 +1547,9 @@ func (f PodTablePodIPLTEForm) Query(q *PodQuery) {
 		q.Where(pod.PodIPLTE(*f.PodIPLTE))
 	}
 }
+func (f PodTablePodIPLTEForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePodIPContainsForm struct {
 	PodIPContains *string `form:"PodIPContains" json:"PodIPContains"`
@@ -1323,6 +1559,9 @@ func (f PodTablePodIPContainsForm) Query(q *PodQuery) {
 	if f.PodIPContains != nil {
 		q.Where(pod.PodIPContains(*f.PodIPContains))
 	}
+}
+func (f PodTablePodIPContainsForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePodIPHasPrefixForm struct {
@@ -1334,6 +1573,9 @@ func (f PodTablePodIPHasPrefixForm) Query(q *PodQuery) {
 		q.Where(pod.PodIPHasPrefix(*f.PodIPHasPrefix))
 	}
 }
+func (f PodTablePodIPHasPrefixForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePodIPHasSuffixForm struct {
 	PodIPHasSuffix *string `form:"PodIPHasSuffix" json:"PodIPHasSuffix"`
@@ -1343,6 +1585,9 @@ func (f PodTablePodIPHasSuffixForm) Query(q *PodQuery) {
 	if f.PodIPHasSuffix != nil {
 		q.Where(pod.PodIPHasSuffix(*f.PodIPHasSuffix))
 	}
+}
+func (f PodTablePodIPHasSuffixForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePodIPEqualFoldForm struct {
@@ -1354,6 +1599,9 @@ func (f PodTablePodIPEqualFoldForm) Query(q *PodQuery) {
 		q.Where(pod.PodIPEqualFold(*f.PodIPEqualFold))
 	}
 }
+func (f PodTablePodIPEqualFoldForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePodIPContainsFoldForm struct {
 	PodIPContainsFold *string `form:"PodIPContainsFold" json:"PodIPContainsFold"`
@@ -1363,6 +1611,9 @@ func (f PodTablePodIPContainsFoldForm) Query(q *PodQuery) {
 	if f.PodIPContainsFold != nil {
 		q.Where(pod.PodIPContainsFold(*f.PodIPContainsFold))
 	}
+}
+func (f PodTablePodIPContainsFoldForm) CountQuery() bool {
+	return true
 }
 
 type PodTableHostIPEQForm struct {
@@ -1374,6 +1625,9 @@ func (f PodTableHostIPEQForm) Query(q *PodQuery) {
 		q.Where(pod.HostIPEQ(*f.HostIPEQ))
 	}
 }
+func (f PodTableHostIPEQForm) CountQuery() bool {
+	return true
+}
 
 type PodTableHostIPNEQForm struct {
 	HostIPNEQ *string `form:"HostIPNEQ" json:"HostIPNEQ"`
@@ -1383,6 +1637,9 @@ func (f PodTableHostIPNEQForm) Query(q *PodQuery) {
 	if f.HostIPNEQ != nil {
 		q.Where(pod.HostIPNEQ(*f.HostIPNEQ))
 	}
+}
+func (f PodTableHostIPNEQForm) CountQuery() bool {
+	return true
 }
 
 type PodTableHostIPInForm struct {
@@ -1394,6 +1651,9 @@ func (f PodTableHostIPInForm) Query(q *PodQuery) {
 		q.Where(pod.HostIPIn(*f.HostIPIn...))
 	}
 }
+func (f PodTableHostIPInForm) CountQuery() bool {
+	return true
+}
 
 type PodTableHostIPNotInForm struct {
 	HostIPNotIn *[]string `form:"HostIPNotIn" json:"HostIPNotIn"`
@@ -1403,6 +1663,9 @@ func (f PodTableHostIPNotInForm) Query(q *PodQuery) {
 	if f.HostIPNotIn != nil {
 		q.Where(pod.HostIPNotIn(*f.HostIPNotIn...))
 	}
+}
+func (f PodTableHostIPNotInForm) CountQuery() bool {
+	return true
 }
 
 type PodTableHostIPGTForm struct {
@@ -1414,6 +1677,9 @@ func (f PodTableHostIPGTForm) Query(q *PodQuery) {
 		q.Where(pod.HostIPGT(*f.HostIPGT))
 	}
 }
+func (f PodTableHostIPGTForm) CountQuery() bool {
+	return true
+}
 
 type PodTableHostIPGTEForm struct {
 	HostIPGTE *string `form:"HostIPGTE" json:"HostIPGTE"`
@@ -1423,6 +1689,9 @@ func (f PodTableHostIPGTEForm) Query(q *PodQuery) {
 	if f.HostIPGTE != nil {
 		q.Where(pod.HostIPGTE(*f.HostIPGTE))
 	}
+}
+func (f PodTableHostIPGTEForm) CountQuery() bool {
+	return true
 }
 
 type PodTableHostIPLTForm struct {
@@ -1434,6 +1703,9 @@ func (f PodTableHostIPLTForm) Query(q *PodQuery) {
 		q.Where(pod.HostIPLT(*f.HostIPLT))
 	}
 }
+func (f PodTableHostIPLTForm) CountQuery() bool {
+	return true
+}
 
 type PodTableHostIPLTEForm struct {
 	HostIPLTE *string `form:"HostIPLTE" json:"HostIPLTE"`
@@ -1443,6 +1715,9 @@ func (f PodTableHostIPLTEForm) Query(q *PodQuery) {
 	if f.HostIPLTE != nil {
 		q.Where(pod.HostIPLTE(*f.HostIPLTE))
 	}
+}
+func (f PodTableHostIPLTEForm) CountQuery() bool {
+	return true
 }
 
 type PodTableHostIPContainsForm struct {
@@ -1454,6 +1729,9 @@ func (f PodTableHostIPContainsForm) Query(q *PodQuery) {
 		q.Where(pod.HostIPContains(*f.HostIPContains))
 	}
 }
+func (f PodTableHostIPContainsForm) CountQuery() bool {
+	return true
+}
 
 type PodTableHostIPHasPrefixForm struct {
 	HostIPHasPrefix *string `form:"HostIPHasPrefix" json:"HostIPHasPrefix"`
@@ -1463,6 +1741,9 @@ func (f PodTableHostIPHasPrefixForm) Query(q *PodQuery) {
 	if f.HostIPHasPrefix != nil {
 		q.Where(pod.HostIPHasPrefix(*f.HostIPHasPrefix))
 	}
+}
+func (f PodTableHostIPHasPrefixForm) CountQuery() bool {
+	return true
 }
 
 type PodTableHostIPHasSuffixForm struct {
@@ -1474,6 +1755,9 @@ func (f PodTableHostIPHasSuffixForm) Query(q *PodQuery) {
 		q.Where(pod.HostIPHasSuffix(*f.HostIPHasSuffix))
 	}
 }
+func (f PodTableHostIPHasSuffixForm) CountQuery() bool {
+	return true
+}
 
 type PodTableHostIPEqualFoldForm struct {
 	HostIPEqualFold *string `form:"HostIPEqualFold" json:"HostIPEqualFold"`
@@ -1483,6 +1767,9 @@ func (f PodTableHostIPEqualFoldForm) Query(q *PodQuery) {
 	if f.HostIPEqualFold != nil {
 		q.Where(pod.HostIPEqualFold(*f.HostIPEqualFold))
 	}
+}
+func (f PodTableHostIPEqualFoldForm) CountQuery() bool {
+	return true
 }
 
 type PodTableHostIPContainsFoldForm struct {
@@ -1494,6 +1781,9 @@ func (f PodTableHostIPContainsFoldForm) Query(q *PodQuery) {
 		q.Where(pod.HostIPContainsFold(*f.HostIPContainsFold))
 	}
 }
+func (f PodTableHostIPContainsFoldForm) CountQuery() bool {
+	return true
+}
 
 type PodTableStartTimeEQForm struct {
 	StartTimeEQ *time.Time `form:"StartTimeEQ" json:"StartTimeEQ"`
@@ -1503,6 +1793,9 @@ func (f PodTableStartTimeEQForm) Query(q *PodQuery) {
 	if f.StartTimeEQ != nil {
 		q.Where(pod.StartTimeEQ(*f.StartTimeEQ))
 	}
+}
+func (f PodTableStartTimeEQForm) CountQuery() bool {
+	return true
 }
 
 type PodTableStartTimeNEQForm struct {
@@ -1514,6 +1807,9 @@ func (f PodTableStartTimeNEQForm) Query(q *PodQuery) {
 		q.Where(pod.StartTimeNEQ(*f.StartTimeNEQ))
 	}
 }
+func (f PodTableStartTimeNEQForm) CountQuery() bool {
+	return true
+}
 
 type PodTableStartTimeInForm struct {
 	StartTimeIn *[]time.Time `form:"StartTimeIn" json:"StartTimeIn"`
@@ -1523,6 +1819,9 @@ func (f PodTableStartTimeInForm) Query(q *PodQuery) {
 	if f.StartTimeIn != nil {
 		q.Where(pod.StartTimeIn(*f.StartTimeIn...))
 	}
+}
+func (f PodTableStartTimeInForm) CountQuery() bool {
+	return true
 }
 
 type PodTableStartTimeNotInForm struct {
@@ -1534,6 +1833,9 @@ func (f PodTableStartTimeNotInForm) Query(q *PodQuery) {
 		q.Where(pod.StartTimeNotIn(*f.StartTimeNotIn...))
 	}
 }
+func (f PodTableStartTimeNotInForm) CountQuery() bool {
+	return true
+}
 
 type PodTableStartTimeGTForm struct {
 	StartTimeGT *time.Time `form:"StartTimeGT" json:"StartTimeGT"`
@@ -1543,6 +1845,9 @@ func (f PodTableStartTimeGTForm) Query(q *PodQuery) {
 	if f.StartTimeGT != nil {
 		q.Where(pod.StartTimeGT(*f.StartTimeGT))
 	}
+}
+func (f PodTableStartTimeGTForm) CountQuery() bool {
+	return true
 }
 
 type PodTableStartTimeGTEForm struct {
@@ -1554,6 +1859,9 @@ func (f PodTableStartTimeGTEForm) Query(q *PodQuery) {
 		q.Where(pod.StartTimeGTE(*f.StartTimeGTE))
 	}
 }
+func (f PodTableStartTimeGTEForm) CountQuery() bool {
+	return true
+}
 
 type PodTableStartTimeLTForm struct {
 	StartTimeLT *time.Time `form:"StartTimeLT" json:"StartTimeLT"`
@@ -1563,6 +1871,9 @@ func (f PodTableStartTimeLTForm) Query(q *PodQuery) {
 	if f.StartTimeLT != nil {
 		q.Where(pod.StartTimeLT(*f.StartTimeLT))
 	}
+}
+func (f PodTableStartTimeLTForm) CountQuery() bool {
+	return true
 }
 
 type PodTableStartTimeLTEForm struct {
@@ -1574,6 +1885,9 @@ func (f PodTableStartTimeLTEForm) Query(q *PodQuery) {
 		q.Where(pod.StartTimeLTE(*f.StartTimeLTE))
 	}
 }
+func (f PodTableStartTimeLTEForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePhaseEQForm struct {
 	PhaseEQ *string `form:"PhaseEQ" json:"PhaseEQ"`
@@ -1583,6 +1897,9 @@ func (f PodTablePhaseEQForm) Query(q *PodQuery) {
 	if f.PhaseEQ != nil {
 		q.Where(pod.PhaseEQ(*f.PhaseEQ))
 	}
+}
+func (f PodTablePhaseEQForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePhaseNEQForm struct {
@@ -1594,6 +1911,9 @@ func (f PodTablePhaseNEQForm) Query(q *PodQuery) {
 		q.Where(pod.PhaseNEQ(*f.PhaseNEQ))
 	}
 }
+func (f PodTablePhaseNEQForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePhaseInForm struct {
 	PhaseIn *[]string `form:"PhaseIn" json:"PhaseIn"`
@@ -1603,6 +1923,9 @@ func (f PodTablePhaseInForm) Query(q *PodQuery) {
 	if f.PhaseIn != nil {
 		q.Where(pod.PhaseIn(*f.PhaseIn...))
 	}
+}
+func (f PodTablePhaseInForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePhaseNotInForm struct {
@@ -1614,6 +1937,9 @@ func (f PodTablePhaseNotInForm) Query(q *PodQuery) {
 		q.Where(pod.PhaseNotIn(*f.PhaseNotIn...))
 	}
 }
+func (f PodTablePhaseNotInForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePhaseGTForm struct {
 	PhaseGT *string `form:"PhaseGT" json:"PhaseGT"`
@@ -1623,6 +1949,9 @@ func (f PodTablePhaseGTForm) Query(q *PodQuery) {
 	if f.PhaseGT != nil {
 		q.Where(pod.PhaseGT(*f.PhaseGT))
 	}
+}
+func (f PodTablePhaseGTForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePhaseGTEForm struct {
@@ -1634,6 +1963,9 @@ func (f PodTablePhaseGTEForm) Query(q *PodQuery) {
 		q.Where(pod.PhaseGTE(*f.PhaseGTE))
 	}
 }
+func (f PodTablePhaseGTEForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePhaseLTForm struct {
 	PhaseLT *string `form:"PhaseLT" json:"PhaseLT"`
@@ -1643,6 +1975,9 @@ func (f PodTablePhaseLTForm) Query(q *PodQuery) {
 	if f.PhaseLT != nil {
 		q.Where(pod.PhaseLT(*f.PhaseLT))
 	}
+}
+func (f PodTablePhaseLTForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePhaseLTEForm struct {
@@ -1654,6 +1989,9 @@ func (f PodTablePhaseLTEForm) Query(q *PodQuery) {
 		q.Where(pod.PhaseLTE(*f.PhaseLTE))
 	}
 }
+func (f PodTablePhaseLTEForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePhaseContainsForm struct {
 	PhaseContains *string `form:"PhaseContains" json:"PhaseContains"`
@@ -1663,6 +2001,9 @@ func (f PodTablePhaseContainsForm) Query(q *PodQuery) {
 	if f.PhaseContains != nil {
 		q.Where(pod.PhaseContains(*f.PhaseContains))
 	}
+}
+func (f PodTablePhaseContainsForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePhaseHasPrefixForm struct {
@@ -1674,6 +2015,9 @@ func (f PodTablePhaseHasPrefixForm) Query(q *PodQuery) {
 		q.Where(pod.PhaseHasPrefix(*f.PhaseHasPrefix))
 	}
 }
+func (f PodTablePhaseHasPrefixForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePhaseHasSuffixForm struct {
 	PhaseHasSuffix *string `form:"PhaseHasSuffix" json:"PhaseHasSuffix"`
@@ -1683,6 +2027,9 @@ func (f PodTablePhaseHasSuffixForm) Query(q *PodQuery) {
 	if f.PhaseHasSuffix != nil {
 		q.Where(pod.PhaseHasSuffix(*f.PhaseHasSuffix))
 	}
+}
+func (f PodTablePhaseHasSuffixForm) CountQuery() bool {
+	return true
 }
 
 type PodTablePhaseEqualFoldForm struct {
@@ -1694,6 +2041,9 @@ func (f PodTablePhaseEqualFoldForm) Query(q *PodQuery) {
 		q.Where(pod.PhaseEqualFold(*f.PhaseEqualFold))
 	}
 }
+func (f PodTablePhaseEqualFoldForm) CountQuery() bool {
+	return true
+}
 
 type PodTablePhaseContainsFoldForm struct {
 	PhaseContainsFold *string `form:"PhaseContainsFold" json:"PhaseContainsFold"`
@@ -1703,6 +2053,9 @@ func (f PodTablePhaseContainsFoldForm) Query(q *PodQuery) {
 	if f.PhaseContainsFold != nil {
 		q.Where(pod.PhaseContainsFold(*f.PhaseContainsFold))
 	}
+}
+func (f PodTablePhaseContainsFoldForm) CountQuery() bool {
+	return true
 }
 
 type PodTableReasonEQForm struct {
@@ -1714,6 +2067,9 @@ func (f PodTableReasonEQForm) Query(q *PodQuery) {
 		q.Where(pod.ReasonEQ(*f.ReasonEQ))
 	}
 }
+func (f PodTableReasonEQForm) CountQuery() bool {
+	return true
+}
 
 type PodTableReasonNEQForm struct {
 	ReasonNEQ *string `form:"ReasonNEQ" json:"ReasonNEQ"`
@@ -1723,6 +2079,9 @@ func (f PodTableReasonNEQForm) Query(q *PodQuery) {
 	if f.ReasonNEQ != nil {
 		q.Where(pod.ReasonNEQ(*f.ReasonNEQ))
 	}
+}
+func (f PodTableReasonNEQForm) CountQuery() bool {
+	return true
 }
 
 type PodTableReasonInForm struct {
@@ -1734,6 +2093,9 @@ func (f PodTableReasonInForm) Query(q *PodQuery) {
 		q.Where(pod.ReasonIn(*f.ReasonIn...))
 	}
 }
+func (f PodTableReasonInForm) CountQuery() bool {
+	return true
+}
 
 type PodTableReasonNotInForm struct {
 	ReasonNotIn *[]string `form:"ReasonNotIn" json:"ReasonNotIn"`
@@ -1743,6 +2105,9 @@ func (f PodTableReasonNotInForm) Query(q *PodQuery) {
 	if f.ReasonNotIn != nil {
 		q.Where(pod.ReasonNotIn(*f.ReasonNotIn...))
 	}
+}
+func (f PodTableReasonNotInForm) CountQuery() bool {
+	return true
 }
 
 type PodTableReasonGTForm struct {
@@ -1754,6 +2119,9 @@ func (f PodTableReasonGTForm) Query(q *PodQuery) {
 		q.Where(pod.ReasonGT(*f.ReasonGT))
 	}
 }
+func (f PodTableReasonGTForm) CountQuery() bool {
+	return true
+}
 
 type PodTableReasonGTEForm struct {
 	ReasonGTE *string `form:"ReasonGTE" json:"ReasonGTE"`
@@ -1763,6 +2131,9 @@ func (f PodTableReasonGTEForm) Query(q *PodQuery) {
 	if f.ReasonGTE != nil {
 		q.Where(pod.ReasonGTE(*f.ReasonGTE))
 	}
+}
+func (f PodTableReasonGTEForm) CountQuery() bool {
+	return true
 }
 
 type PodTableReasonLTForm struct {
@@ -1774,6 +2145,9 @@ func (f PodTableReasonLTForm) Query(q *PodQuery) {
 		q.Where(pod.ReasonLT(*f.ReasonLT))
 	}
 }
+func (f PodTableReasonLTForm) CountQuery() bool {
+	return true
+}
 
 type PodTableReasonLTEForm struct {
 	ReasonLTE *string `form:"ReasonLTE" json:"ReasonLTE"`
@@ -1783,6 +2157,9 @@ func (f PodTableReasonLTEForm) Query(q *PodQuery) {
 	if f.ReasonLTE != nil {
 		q.Where(pod.ReasonLTE(*f.ReasonLTE))
 	}
+}
+func (f PodTableReasonLTEForm) CountQuery() bool {
+	return true
 }
 
 type PodTableReasonContainsForm struct {
@@ -1794,6 +2171,9 @@ func (f PodTableReasonContainsForm) Query(q *PodQuery) {
 		q.Where(pod.ReasonContains(*f.ReasonContains))
 	}
 }
+func (f PodTableReasonContainsForm) CountQuery() bool {
+	return true
+}
 
 type PodTableReasonHasPrefixForm struct {
 	ReasonHasPrefix *string `form:"ReasonHasPrefix" json:"ReasonHasPrefix"`
@@ -1803,6 +2183,9 @@ func (f PodTableReasonHasPrefixForm) Query(q *PodQuery) {
 	if f.ReasonHasPrefix != nil {
 		q.Where(pod.ReasonHasPrefix(*f.ReasonHasPrefix))
 	}
+}
+func (f PodTableReasonHasPrefixForm) CountQuery() bool {
+	return true
 }
 
 type PodTableReasonHasSuffixForm struct {
@@ -1814,6 +2197,9 @@ func (f PodTableReasonHasSuffixForm) Query(q *PodQuery) {
 		q.Where(pod.ReasonHasSuffix(*f.ReasonHasSuffix))
 	}
 }
+func (f PodTableReasonHasSuffixForm) CountQuery() bool {
+	return true
+}
 
 type PodTableReasonEqualFoldForm struct {
 	ReasonEqualFold *string `form:"ReasonEqualFold" json:"ReasonEqualFold"`
@@ -1823,6 +2209,9 @@ func (f PodTableReasonEqualFoldForm) Query(q *PodQuery) {
 	if f.ReasonEqualFold != nil {
 		q.Where(pod.ReasonEqualFold(*f.ReasonEqualFold))
 	}
+}
+func (f PodTableReasonEqualFoldForm) CountQuery() bool {
+	return true
 }
 
 type PodTableReasonContainsFoldForm struct {
@@ -1834,6 +2223,9 @@ func (f PodTableReasonContainsFoldForm) Query(q *PodQuery) {
 		q.Where(pod.ReasonContainsFold(*f.ReasonContainsFold))
 	}
 }
+func (f PodTableReasonContainsFoldForm) CountQuery() bool {
+	return true
+}
 
 type PodTableMessageEQForm struct {
 	MessageEQ *string `form:"MessageEQ" json:"MessageEQ"`
@@ -1843,6 +2235,9 @@ func (f PodTableMessageEQForm) Query(q *PodQuery) {
 	if f.MessageEQ != nil {
 		q.Where(pod.MessageEQ(*f.MessageEQ))
 	}
+}
+func (f PodTableMessageEQForm) CountQuery() bool {
+	return true
 }
 
 type PodTableMessageNEQForm struct {
@@ -1854,6 +2249,9 @@ func (f PodTableMessageNEQForm) Query(q *PodQuery) {
 		q.Where(pod.MessageNEQ(*f.MessageNEQ))
 	}
 }
+func (f PodTableMessageNEQForm) CountQuery() bool {
+	return true
+}
 
 type PodTableMessageInForm struct {
 	MessageIn *[]string `form:"MessageIn" json:"MessageIn"`
@@ -1863,6 +2261,9 @@ func (f PodTableMessageInForm) Query(q *PodQuery) {
 	if f.MessageIn != nil {
 		q.Where(pod.MessageIn(*f.MessageIn...))
 	}
+}
+func (f PodTableMessageInForm) CountQuery() bool {
+	return true
 }
 
 type PodTableMessageNotInForm struct {
@@ -1874,6 +2275,9 @@ func (f PodTableMessageNotInForm) Query(q *PodQuery) {
 		q.Where(pod.MessageNotIn(*f.MessageNotIn...))
 	}
 }
+func (f PodTableMessageNotInForm) CountQuery() bool {
+	return true
+}
 
 type PodTableMessageGTForm struct {
 	MessageGT *string `form:"MessageGT" json:"MessageGT"`
@@ -1883,6 +2287,9 @@ func (f PodTableMessageGTForm) Query(q *PodQuery) {
 	if f.MessageGT != nil {
 		q.Where(pod.MessageGT(*f.MessageGT))
 	}
+}
+func (f PodTableMessageGTForm) CountQuery() bool {
+	return true
 }
 
 type PodTableMessageGTEForm struct {
@@ -1894,6 +2301,9 @@ func (f PodTableMessageGTEForm) Query(q *PodQuery) {
 		q.Where(pod.MessageGTE(*f.MessageGTE))
 	}
 }
+func (f PodTableMessageGTEForm) CountQuery() bool {
+	return true
+}
 
 type PodTableMessageLTForm struct {
 	MessageLT *string `form:"MessageLT" json:"MessageLT"`
@@ -1903,6 +2313,9 @@ func (f PodTableMessageLTForm) Query(q *PodQuery) {
 	if f.MessageLT != nil {
 		q.Where(pod.MessageLT(*f.MessageLT))
 	}
+}
+func (f PodTableMessageLTForm) CountQuery() bool {
+	return true
 }
 
 type PodTableMessageLTEForm struct {
@@ -1914,6 +2327,9 @@ func (f PodTableMessageLTEForm) Query(q *PodQuery) {
 		q.Where(pod.MessageLTE(*f.MessageLTE))
 	}
 }
+func (f PodTableMessageLTEForm) CountQuery() bool {
+	return true
+}
 
 type PodTableMessageContainsForm struct {
 	MessageContains *string `form:"MessageContains" json:"MessageContains"`
@@ -1923,6 +2339,9 @@ func (f PodTableMessageContainsForm) Query(q *PodQuery) {
 	if f.MessageContains != nil {
 		q.Where(pod.MessageContains(*f.MessageContains))
 	}
+}
+func (f PodTableMessageContainsForm) CountQuery() bool {
+	return true
 }
 
 type PodTableMessageHasPrefixForm struct {
@@ -1934,6 +2353,9 @@ func (f PodTableMessageHasPrefixForm) Query(q *PodQuery) {
 		q.Where(pod.MessageHasPrefix(*f.MessageHasPrefix))
 	}
 }
+func (f PodTableMessageHasPrefixForm) CountQuery() bool {
+	return true
+}
 
 type PodTableMessageHasSuffixForm struct {
 	MessageHasSuffix *string `form:"MessageHasSuffix" json:"MessageHasSuffix"`
@@ -1943,6 +2365,9 @@ func (f PodTableMessageHasSuffixForm) Query(q *PodQuery) {
 	if f.MessageHasSuffix != nil {
 		q.Where(pod.MessageHasSuffix(*f.MessageHasSuffix))
 	}
+}
+func (f PodTableMessageHasSuffixForm) CountQuery() bool {
+	return true
 }
 
 type PodTableMessageEqualFoldForm struct {
@@ -1954,6 +2379,9 @@ func (f PodTableMessageEqualFoldForm) Query(q *PodQuery) {
 		q.Where(pod.MessageEqualFold(*f.MessageEqualFold))
 	}
 }
+func (f PodTableMessageEqualFoldForm) CountQuery() bool {
+	return true
+}
 
 type PodTableMessageContainsFoldForm struct {
 	MessageContainsFold *string `form:"MessageContainsFold" json:"MessageContainsFold"`
@@ -1963,6 +2391,9 @@ func (f PodTableMessageContainsFoldForm) Query(q *PodQuery) {
 	if f.MessageContainsFold != nil {
 		q.Where(pod.MessageContainsFold(*f.MessageContainsFold))
 	}
+}
+func (f PodTableMessageContainsFoldForm) CountQuery() bool {
+	return true
 }
 
 type PodTableDetailEQForm struct {
@@ -1974,6 +2405,9 @@ func (f PodTableDetailEQForm) Query(q *PodQuery) {
 		q.Where(pod.DetailEQ(*f.DetailEQ))
 	}
 }
+func (f PodTableDetailEQForm) CountQuery() bool {
+	return true
+}
 
 type PodTableDetailNEQForm struct {
 	DetailNEQ *string `form:"DetailNEQ" json:"DetailNEQ"`
@@ -1983,6 +2417,9 @@ func (f PodTableDetailNEQForm) Query(q *PodQuery) {
 	if f.DetailNEQ != nil {
 		q.Where(pod.DetailNEQ(*f.DetailNEQ))
 	}
+}
+func (f PodTableDetailNEQForm) CountQuery() bool {
+	return true
 }
 
 type PodTableDetailInForm struct {
@@ -1994,6 +2431,9 @@ func (f PodTableDetailInForm) Query(q *PodQuery) {
 		q.Where(pod.DetailIn(*f.DetailIn...))
 	}
 }
+func (f PodTableDetailInForm) CountQuery() bool {
+	return true
+}
 
 type PodTableDetailNotInForm struct {
 	DetailNotIn *[]string `form:"DetailNotIn" json:"DetailNotIn"`
@@ -2003,6 +2443,9 @@ func (f PodTableDetailNotInForm) Query(q *PodQuery) {
 	if f.DetailNotIn != nil {
 		q.Where(pod.DetailNotIn(*f.DetailNotIn...))
 	}
+}
+func (f PodTableDetailNotInForm) CountQuery() bool {
+	return true
 }
 
 type PodTableDetailGTForm struct {
@@ -2014,6 +2457,9 @@ func (f PodTableDetailGTForm) Query(q *PodQuery) {
 		q.Where(pod.DetailGT(*f.DetailGT))
 	}
 }
+func (f PodTableDetailGTForm) CountQuery() bool {
+	return true
+}
 
 type PodTableDetailGTEForm struct {
 	DetailGTE *string `form:"DetailGTE" json:"DetailGTE"`
@@ -2023,6 +2469,9 @@ func (f PodTableDetailGTEForm) Query(q *PodQuery) {
 	if f.DetailGTE != nil {
 		q.Where(pod.DetailGTE(*f.DetailGTE))
 	}
+}
+func (f PodTableDetailGTEForm) CountQuery() bool {
+	return true
 }
 
 type PodTableDetailLTForm struct {
@@ -2034,6 +2483,9 @@ func (f PodTableDetailLTForm) Query(q *PodQuery) {
 		q.Where(pod.DetailLT(*f.DetailLT))
 	}
 }
+func (f PodTableDetailLTForm) CountQuery() bool {
+	return true
+}
 
 type PodTableDetailLTEForm struct {
 	DetailLTE *string `form:"DetailLTE" json:"DetailLTE"`
@@ -2043,6 +2495,9 @@ func (f PodTableDetailLTEForm) Query(q *PodQuery) {
 	if f.DetailLTE != nil {
 		q.Where(pod.DetailLTE(*f.DetailLTE))
 	}
+}
+func (f PodTableDetailLTEForm) CountQuery() bool {
+	return true
 }
 
 type PodTableDetailContainsForm struct {
@@ -2054,6 +2509,9 @@ func (f PodTableDetailContainsForm) Query(q *PodQuery) {
 		q.Where(pod.DetailContains(*f.DetailContains))
 	}
 }
+func (f PodTableDetailContainsForm) CountQuery() bool {
+	return true
+}
 
 type PodTableDetailHasPrefixForm struct {
 	DetailHasPrefix *string `form:"DetailHasPrefix" json:"DetailHasPrefix"`
@@ -2063,6 +2521,9 @@ func (f PodTableDetailHasPrefixForm) Query(q *PodQuery) {
 	if f.DetailHasPrefix != nil {
 		q.Where(pod.DetailHasPrefix(*f.DetailHasPrefix))
 	}
+}
+func (f PodTableDetailHasPrefixForm) CountQuery() bool {
+	return true
 }
 
 type PodTableDetailHasSuffixForm struct {
@@ -2074,6 +2535,9 @@ func (f PodTableDetailHasSuffixForm) Query(q *PodQuery) {
 		q.Where(pod.DetailHasSuffix(*f.DetailHasSuffix))
 	}
 }
+func (f PodTableDetailHasSuffixForm) CountQuery() bool {
+	return true
+}
 
 type PodTableDetailEqualFoldForm struct {
 	DetailEqualFold *string `form:"DetailEqualFold" json:"DetailEqualFold"`
@@ -2083,6 +2547,9 @@ func (f PodTableDetailEqualFoldForm) Query(q *PodQuery) {
 	if f.DetailEqualFold != nil {
 		q.Where(pod.DetailEqualFold(*f.DetailEqualFold))
 	}
+}
+func (f PodTableDetailEqualFoldForm) CountQuery() bool {
+	return true
 }
 
 type PodTableDetailContainsFoldForm struct {
@@ -2094,6 +2561,9 @@ func (f PodTableDetailContainsFoldForm) Query(q *PodQuery) {
 		q.Where(pod.DetailContainsFold(*f.DetailContainsFold))
 	}
 }
+func (f PodTableDetailContainsFoldForm) CountQuery() bool {
+	return true
+}
 
 type PodTableCreatedAtEQForm struct {
 	CreatedAtEQ *time.Time `form:"CreatedAtEQ" json:"CreatedAtEQ"`
@@ -2103,6 +2573,9 @@ func (f PodTableCreatedAtEQForm) Query(q *PodQuery) {
 	if f.CreatedAtEQ != nil {
 		q.Where(pod.CreatedAtEQ(*f.CreatedAtEQ))
 	}
+}
+func (f PodTableCreatedAtEQForm) CountQuery() bool {
+	return true
 }
 
 type PodTableCreatedAtNEQForm struct {
@@ -2114,6 +2587,9 @@ func (f PodTableCreatedAtNEQForm) Query(q *PodQuery) {
 		q.Where(pod.CreatedAtNEQ(*f.CreatedAtNEQ))
 	}
 }
+func (f PodTableCreatedAtNEQForm) CountQuery() bool {
+	return true
+}
 
 type PodTableCreatedAtInForm struct {
 	CreatedAtIn *[]time.Time `form:"CreatedAtIn" json:"CreatedAtIn"`
@@ -2123,6 +2599,9 @@ func (f PodTableCreatedAtInForm) Query(q *PodQuery) {
 	if f.CreatedAtIn != nil {
 		q.Where(pod.CreatedAtIn(*f.CreatedAtIn...))
 	}
+}
+func (f PodTableCreatedAtInForm) CountQuery() bool {
+	return true
 }
 
 type PodTableCreatedAtNotInForm struct {
@@ -2134,6 +2613,9 @@ func (f PodTableCreatedAtNotInForm) Query(q *PodQuery) {
 		q.Where(pod.CreatedAtNotIn(*f.CreatedAtNotIn...))
 	}
 }
+func (f PodTableCreatedAtNotInForm) CountQuery() bool {
+	return true
+}
 
 type PodTableCreatedAtGTForm struct {
 	CreatedAtGT *time.Time `form:"CreatedAtGT" json:"CreatedAtGT"`
@@ -2143,6 +2625,9 @@ func (f PodTableCreatedAtGTForm) Query(q *PodQuery) {
 	if f.CreatedAtGT != nil {
 		q.Where(pod.CreatedAtGT(*f.CreatedAtGT))
 	}
+}
+func (f PodTableCreatedAtGTForm) CountQuery() bool {
+	return true
 }
 
 type PodTableCreatedAtGTEForm struct {
@@ -2154,6 +2639,9 @@ func (f PodTableCreatedAtGTEForm) Query(q *PodQuery) {
 		q.Where(pod.CreatedAtGTE(*f.CreatedAtGTE))
 	}
 }
+func (f PodTableCreatedAtGTEForm) CountQuery() bool {
+	return true
+}
 
 type PodTableCreatedAtLTForm struct {
 	CreatedAtLT *time.Time `form:"CreatedAtLT" json:"CreatedAtLT"`
@@ -2163,6 +2651,9 @@ func (f PodTableCreatedAtLTForm) Query(q *PodQuery) {
 	if f.CreatedAtLT != nil {
 		q.Where(pod.CreatedAtLT(*f.CreatedAtLT))
 	}
+}
+func (f PodTableCreatedAtLTForm) CountQuery() bool {
+	return true
 }
 
 type PodTableCreatedAtLTEForm struct {
@@ -2174,6 +2665,9 @@ func (f PodTableCreatedAtLTEForm) Query(q *PodQuery) {
 		q.Where(pod.CreatedAtLTE(*f.CreatedAtLTE))
 	}
 }
+func (f PodTableCreatedAtLTEForm) CountQuery() bool {
+	return true
+}
 
 type PodTableUpdatedAtEQForm struct {
 	UpdatedAtEQ *time.Time `form:"UpdatedAtEQ" json:"UpdatedAtEQ"`
@@ -2183,6 +2677,9 @@ func (f PodTableUpdatedAtEQForm) Query(q *PodQuery) {
 	if f.UpdatedAtEQ != nil {
 		q.Where(pod.UpdatedAtEQ(*f.UpdatedAtEQ))
 	}
+}
+func (f PodTableUpdatedAtEQForm) CountQuery() bool {
+	return true
 }
 
 type PodTableUpdatedAtNEQForm struct {
@@ -2194,6 +2691,9 @@ func (f PodTableUpdatedAtNEQForm) Query(q *PodQuery) {
 		q.Where(pod.UpdatedAtNEQ(*f.UpdatedAtNEQ))
 	}
 }
+func (f PodTableUpdatedAtNEQForm) CountQuery() bool {
+	return true
+}
 
 type PodTableUpdatedAtInForm struct {
 	UpdatedAtIn *[]time.Time `form:"UpdatedAtIn" json:"UpdatedAtIn"`
@@ -2203,6 +2703,9 @@ func (f PodTableUpdatedAtInForm) Query(q *PodQuery) {
 	if f.UpdatedAtIn != nil {
 		q.Where(pod.UpdatedAtIn(*f.UpdatedAtIn...))
 	}
+}
+func (f PodTableUpdatedAtInForm) CountQuery() bool {
+	return true
 }
 
 type PodTableUpdatedAtNotInForm struct {
@@ -2214,6 +2717,9 @@ func (f PodTableUpdatedAtNotInForm) Query(q *PodQuery) {
 		q.Where(pod.UpdatedAtNotIn(*f.UpdatedAtNotIn...))
 	}
 }
+func (f PodTableUpdatedAtNotInForm) CountQuery() bool {
+	return true
+}
 
 type PodTableUpdatedAtGTForm struct {
 	UpdatedAtGT *time.Time `form:"UpdatedAtGT" json:"UpdatedAtGT"`
@@ -2223,6 +2729,9 @@ func (f PodTableUpdatedAtGTForm) Query(q *PodQuery) {
 	if f.UpdatedAtGT != nil {
 		q.Where(pod.UpdatedAtGT(*f.UpdatedAtGT))
 	}
+}
+func (f PodTableUpdatedAtGTForm) CountQuery() bool {
+	return true
 }
 
 type PodTableUpdatedAtGTEForm struct {
@@ -2234,6 +2743,9 @@ func (f PodTableUpdatedAtGTEForm) Query(q *PodQuery) {
 		q.Where(pod.UpdatedAtGTE(*f.UpdatedAtGTE))
 	}
 }
+func (f PodTableUpdatedAtGTEForm) CountQuery() bool {
+	return true
+}
 
 type PodTableUpdatedAtLTForm struct {
 	UpdatedAtLT *time.Time `form:"UpdatedAtLT" json:"UpdatedAtLT"`
@@ -2244,6 +2756,9 @@ func (f PodTableUpdatedAtLTForm) Query(q *PodQuery) {
 		q.Where(pod.UpdatedAtLT(*f.UpdatedAtLT))
 	}
 }
+func (f PodTableUpdatedAtLTForm) CountQuery() bool {
+	return true
+}
 
 type PodTableUpdatedAtLTEForm struct {
 	UpdatedAtLTE *time.Time `form:"UpdatedAtLTE" json:"UpdatedAtLTE"`
@@ -2253,6 +2768,9 @@ func (f PodTableUpdatedAtLTEForm) Query(q *PodQuery) {
 	if f.UpdatedAtLTE != nil {
 		q.Where(pod.UpdatedAtLTE(*f.UpdatedAtLTE))
 	}
+}
+func (f PodTableUpdatedAtLTEForm) CountQuery() bool {
+	return true
 }
 
 // PodGroupBy is the group-by builder for Pod entities.

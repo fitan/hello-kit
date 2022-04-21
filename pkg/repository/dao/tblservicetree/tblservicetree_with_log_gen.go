@@ -51,7 +51,7 @@ func (_d TblservicetreeServiceWithLog) ByQueries(ctx context.Context, i interfac
 }
 
 // Create implements TblservicetreeService
-func (_d TblservicetreeServiceWithLog) Create(ctx context.Context, v ent.SpiderDevTblServicetree) (res *ent.SpiderDevTblServicetree, err error) {
+func (_d TblservicetreeServiceWithLog) Create(ctx context.Context, v *ent.SpiderDevTblServicetree) (res *ent.SpiderDevTblServicetree, err error) {
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
@@ -117,7 +117,7 @@ func (_d TblservicetreeServiceWithLog) DeleteMany(ctx context.Context, ids []int
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
 	defer func() {
-		_log.Debugw("TblservicetreeServiceWithLog calling UserRestDeleteMany", "params", map[string]interface{}{
+		_log.Debugw("TblservicetreeServiceWithLog calling DeleteMany", "params", map[string]interface{}{
 			"ids": ids}, "results", map[string]interface{}{
 			"err": err})
 		if err != nil {

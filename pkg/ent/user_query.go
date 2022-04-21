@@ -506,8 +506,15 @@ func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 }
 
 func (uq *UserQuery) ByQueries(ctx context.Context, i interface{}) (res Users, count int, err error) {
-	SetUserFormQueries(i, uq)
-	count, err = uq.Count(ctx)
+	queryList, countList := SetUserFormQueries(i)
+	countQ := uq.Clone()
+	for _, v := range queryList {
+		v.Query(uq)
+	}
+	for _, v := range countList {
+		v.Query(countQ)
+	}
+	count, err = countQ.Count(ctx)
 	if err != nil {
 		return
 	}
@@ -517,6 +524,7 @@ func (uq *UserQuery) ByQueries(ctx context.Context, i interface{}) (res Users, c
 
 type UserTableFormer interface {
 	Query(q *UserQuery)
+	CountQuery() bool
 }
 
 type UserTablePagingForm struct {
@@ -528,6 +536,10 @@ func (f UserTablePagingForm) Query(q *UserQuery) {
 	if f.Limit != nil && f.Page != nil {
 		q.Limit(*f.Limit).Offset((*f.Page - 1) * *f.Limit)
 	}
+}
+
+func (f UserTablePagingForm) CountQuery() bool {
+	return false
 }
 
 type UserTableOrderForm struct {
@@ -546,36 +558,41 @@ func (f UserTableOrderForm) Query(q *UserQuery) {
 		}
 	}
 }
-
-func SetUserFormQueries(o interface{}, q *UserQuery) []UserTableFormer {
-	l := make([]UserTableFormer, 0)
-	v := reflect.ValueOf(o)
-	former := reflect.TypeOf((*UserTableFormer)(nil)).Elem()
-	UserFormDepValue(v, former, &l)
-	for _, e := range l {
-		e.Query(q)
-	}
-	return l
+func (f UserTableOrderForm) CountQuery() bool {
+	return false
 }
 
-func UserFormDepValue(v reflect.Value, former reflect.Type, l *[]UserTableFormer) {
+func SetUserFormQueries(o interface{}) ([]UserTableFormer, []UserTableFormer) {
+	queryList := make([]UserTableFormer, 0)
+	countList := make([]UserTableFormer, 0)
+	v := reflect.ValueOf(o)
+	former := reflect.TypeOf((*UserTableFormer)(nil)).Elem()
+	UserFormDepValue(v, former, &queryList, &countList)
+	return queryList, countList
+}
+
+func UserFormDepValue(v reflect.Value, former reflect.Type, queryList *[]UserTableFormer, countList *[]UserTableFormer) {
 	for i := 0; i < v.NumField(); i++ {
 		f := v.Field(i)
 		if f.IsZero() {
 			continue
 		}
 		if f.Type().Implements(former) {
-			*l = append(*l, f.Interface().(UserTableFormer))
+			former := f.Interface().(UserTableFormer)
+			*queryList = append(*queryList, former)
+			if former.CountQuery() {
+				*countList = append(*countList, former)
+			}
 			continue
 		}
 		if f.Type().Kind() == reflect.Struct {
-			UserFormDepValue(f, former, l)
+			UserFormDepValue(f, former, queryList, countList)
 		}
 	}
 }
 
 type UserQueryOps struct {
-	Paging *UserTablePagingForm `binding:"required"`
+	*UserTablePagingForm `binding:"required"`
 	UserTableOrderForm
 
 	UserTableAgeEQForm
@@ -594,6 +611,9 @@ func (f UserTableAgeEQForm) Query(q *UserQuery) {
 		q.Where(user.AgeEQ(*f.AgeEQ))
 	}
 }
+func (f UserTableAgeEQForm) CountQuery() bool {
+	return true
+}
 
 type UserTableAgeNEQForm struct {
 	AgeNEQ *int `form:"AgeNEQ" json:"AgeNEQ"`
@@ -603,6 +623,9 @@ func (f UserTableAgeNEQForm) Query(q *UserQuery) {
 	if f.AgeNEQ != nil {
 		q.Where(user.AgeNEQ(*f.AgeNEQ))
 	}
+}
+func (f UserTableAgeNEQForm) CountQuery() bool {
+	return true
 }
 
 type UserTableAgeInForm struct {
@@ -614,6 +637,9 @@ func (f UserTableAgeInForm) Query(q *UserQuery) {
 		q.Where(user.AgeIn(*f.AgeIn...))
 	}
 }
+func (f UserTableAgeInForm) CountQuery() bool {
+	return true
+}
 
 type UserTableAgeNotInForm struct {
 	AgeNotIn *[]int `form:"AgeNotIn" json:"AgeNotIn"`
@@ -623,6 +649,9 @@ func (f UserTableAgeNotInForm) Query(q *UserQuery) {
 	if f.AgeNotIn != nil {
 		q.Where(user.AgeNotIn(*f.AgeNotIn...))
 	}
+}
+func (f UserTableAgeNotInForm) CountQuery() bool {
+	return true
 }
 
 type UserTableAgeGTForm struct {
@@ -634,6 +663,9 @@ func (f UserTableAgeGTForm) Query(q *UserQuery) {
 		q.Where(user.AgeGT(*f.AgeGT))
 	}
 }
+func (f UserTableAgeGTForm) CountQuery() bool {
+	return true
+}
 
 type UserTableAgeGTEForm struct {
 	AgeGTE *int `form:"AgeGTE" json:"AgeGTE"`
@@ -643,6 +675,9 @@ func (f UserTableAgeGTEForm) Query(q *UserQuery) {
 	if f.AgeGTE != nil {
 		q.Where(user.AgeGTE(*f.AgeGTE))
 	}
+}
+func (f UserTableAgeGTEForm) CountQuery() bool {
+	return true
 }
 
 type UserTableAgeLTForm struct {
@@ -654,6 +689,9 @@ func (f UserTableAgeLTForm) Query(q *UserQuery) {
 		q.Where(user.AgeLT(*f.AgeLT))
 	}
 }
+func (f UserTableAgeLTForm) CountQuery() bool {
+	return true
+}
 
 type UserTableAgeLTEForm struct {
 	AgeLTE *int `form:"AgeLTE" json:"AgeLTE"`
@@ -663,6 +701,9 @@ func (f UserTableAgeLTEForm) Query(q *UserQuery) {
 	if f.AgeLTE != nil {
 		q.Where(user.AgeLTE(*f.AgeLTE))
 	}
+}
+func (f UserTableAgeLTEForm) CountQuery() bool {
+	return true
 }
 
 type UserTableNameEQForm struct {
@@ -674,6 +715,9 @@ func (f UserTableNameEQForm) Query(q *UserQuery) {
 		q.Where(user.NameEQ(*f.NameEQ))
 	}
 }
+func (f UserTableNameEQForm) CountQuery() bool {
+	return true
+}
 
 type UserTableNameNEQForm struct {
 	NameNEQ *string `form:"NameNEQ" json:"NameNEQ"`
@@ -683,6 +727,9 @@ func (f UserTableNameNEQForm) Query(q *UserQuery) {
 	if f.NameNEQ != nil {
 		q.Where(user.NameNEQ(*f.NameNEQ))
 	}
+}
+func (f UserTableNameNEQForm) CountQuery() bool {
+	return true
 }
 
 type UserTableNameInForm struct {
@@ -694,6 +741,9 @@ func (f UserTableNameInForm) Query(q *UserQuery) {
 		q.Where(user.NameIn(*f.NameIn...))
 	}
 }
+func (f UserTableNameInForm) CountQuery() bool {
+	return true
+}
 
 type UserTableNameNotInForm struct {
 	NameNotIn *[]string `form:"NameNotIn" json:"NameNotIn"`
@@ -703,6 +753,9 @@ func (f UserTableNameNotInForm) Query(q *UserQuery) {
 	if f.NameNotIn != nil {
 		q.Where(user.NameNotIn(*f.NameNotIn...))
 	}
+}
+func (f UserTableNameNotInForm) CountQuery() bool {
+	return true
 }
 
 type UserTableNameGTForm struct {
@@ -714,6 +767,9 @@ func (f UserTableNameGTForm) Query(q *UserQuery) {
 		q.Where(user.NameGT(*f.NameGT))
 	}
 }
+func (f UserTableNameGTForm) CountQuery() bool {
+	return true
+}
 
 type UserTableNameGTEForm struct {
 	NameGTE *string `form:"NameGTE" json:"NameGTE"`
@@ -723,6 +779,9 @@ func (f UserTableNameGTEForm) Query(q *UserQuery) {
 	if f.NameGTE != nil {
 		q.Where(user.NameGTE(*f.NameGTE))
 	}
+}
+func (f UserTableNameGTEForm) CountQuery() bool {
+	return true
 }
 
 type UserTableNameLTForm struct {
@@ -734,6 +793,9 @@ func (f UserTableNameLTForm) Query(q *UserQuery) {
 		q.Where(user.NameLT(*f.NameLT))
 	}
 }
+func (f UserTableNameLTForm) CountQuery() bool {
+	return true
+}
 
 type UserTableNameLTEForm struct {
 	NameLTE *string `form:"NameLTE" json:"NameLTE"`
@@ -743,6 +805,9 @@ func (f UserTableNameLTEForm) Query(q *UserQuery) {
 	if f.NameLTE != nil {
 		q.Where(user.NameLTE(*f.NameLTE))
 	}
+}
+func (f UserTableNameLTEForm) CountQuery() bool {
+	return true
 }
 
 type UserTableNameContainsForm struct {
@@ -754,6 +819,9 @@ func (f UserTableNameContainsForm) Query(q *UserQuery) {
 		q.Where(user.NameContains(*f.NameContains))
 	}
 }
+func (f UserTableNameContainsForm) CountQuery() bool {
+	return true
+}
 
 type UserTableNameHasPrefixForm struct {
 	NameHasPrefix *string `form:"NameHasPrefix" json:"NameHasPrefix"`
@@ -763,6 +831,9 @@ func (f UserTableNameHasPrefixForm) Query(q *UserQuery) {
 	if f.NameHasPrefix != nil {
 		q.Where(user.NameHasPrefix(*f.NameHasPrefix))
 	}
+}
+func (f UserTableNameHasPrefixForm) CountQuery() bool {
+	return true
 }
 
 type UserTableNameHasSuffixForm struct {
@@ -774,6 +845,9 @@ func (f UserTableNameHasSuffixForm) Query(q *UserQuery) {
 		q.Where(user.NameHasSuffix(*f.NameHasSuffix))
 	}
 }
+func (f UserTableNameHasSuffixForm) CountQuery() bool {
+	return true
+}
 
 type UserTableNameEqualFoldForm struct {
 	NameEqualFold *string `form:"NameEqualFold" json:"NameEqualFold"`
@@ -784,6 +858,9 @@ func (f UserTableNameEqualFoldForm) Query(q *UserQuery) {
 		q.Where(user.NameEqualFold(*f.NameEqualFold))
 	}
 }
+func (f UserTableNameEqualFoldForm) CountQuery() bool {
+	return true
+}
 
 type UserTableNameContainsFoldForm struct {
 	NameContainsFold *string `form:"NameContainsFold" json:"NameContainsFold"`
@@ -793,6 +870,9 @@ func (f UserTableNameContainsFoldForm) Query(q *UserQuery) {
 	if f.NameContainsFold != nil {
 		q.Where(user.NameContainsFold(*f.NameContainsFold))
 	}
+}
+func (f UserTableNameContainsFoldForm) CountQuery() bool {
+	return true
 }
 
 // UserGroupBy is the group-by builder for User entities.

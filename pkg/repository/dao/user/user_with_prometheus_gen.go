@@ -54,7 +54,7 @@ func (_d UserServiceWithPrometheus) ByQueries(ctx context.Context, i interface{}
 }
 
 // Create implements UserService
-func (_d UserServiceWithPrometheus) Create(ctx context.Context, v ent.User) (res *ent.User, err error) {
+func (_d UserServiceWithPrometheus) Create(ctx context.Context, v *ent.User) (res *ent.User, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -118,7 +118,7 @@ func (_d UserServiceWithPrometheus) DeleteMany(ctx context.Context, ids []int) (
 			result = "error"
 		}
 
-		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UserRestDeleteMany", result).Observe(time.Since(_since).Seconds())
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "DeleteMany", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.DeleteMany(ctx, ids)
 }

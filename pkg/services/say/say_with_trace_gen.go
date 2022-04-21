@@ -5,14 +5,16 @@ package say
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"context"
 	"encoding/json"
-	"hello/pkg/ent"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
+
+	"context"
+
+	"hello/pkg/ent"
 )
 
 // SayServiceWithTracing implements SayService interface instrumented with opentracing spans

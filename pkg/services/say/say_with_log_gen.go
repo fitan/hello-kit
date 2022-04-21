@@ -5,11 +5,12 @@ package say
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"context"
-	"hello/pkg/ent"
-
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
+
+	"context"
+
+	"hello/pkg/ent"
 )
 
 // SayServiceWithLog implements SayService that is instrumented with logging

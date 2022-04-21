@@ -4,8 +4,15 @@
 {{ $builder := $.QueryName }}
 {{ $receiver := receiver $builder }}
 func ({{ $receiver }} *{{ $builder }}) ByQueries(ctx context.Context, i interface{}) (res {{plural .Name}},count int, err error) {
-	Set{{.Name}}FormQueries(i, {{ $receiver }})
-	count,err = {{ $receiver }}.Count(ctx)
+	queryList, countList := Set{{.Name}}FormQueries(i)
+	countQ := {{ $receiver }}.Clone()
+	for _,v := range queryList {
+		v.Query({{ $receiver }})
+	}
+	for _, v := range countList {
+		v.Query(countQ)
+	}
+	count,err = countQ.Count(ctx)
 	if err != nil {
 		return
 	}
@@ -15,16 +22,22 @@ func ({{ $receiver }} *{{ $builder }}) ByQueries(ctx context.Context, i interfac
 
 type {{$.Name}}TableFormer interface {
 	Query(q *{{$.Name}}Query)
+	CountQuery() bool
 }
 
 type {{$.Name}}TablePagingForm struct {
 	Limit *int `json:"_limit" form:"_limit" {{if and $.Annotations.rest (hasKey $.Annotations.rest "pagingLimitMax")}}{{$.Annotations.pagingLimitMax}}{{end}}`
 	Page *int `json:"_page" form:"_page"`
 }
+
 func (f {{$.Name}}TablePagingForm) Query(q *{{$.Name}}Query) {
 	if f.Limit != nil && f.Page != nil {
 		q.Limit(*f.Limit).Offset((*f.Page-1) * *f.Limit)
 	}
+}
+
+func (f {{$.Name}}TablePagingForm) CountQuery() bool {
+	return false
 }
 
 type {{$.Name}}TableOrderForm struct {
@@ -43,37 +56,42 @@ func (f {{$.Name}}TableOrderForm) Query(q *{{$.Name}}Query) {
 		}
 	}
 }
-	
-func Set{{$.Name}}FormQueries(o interface{}, q *{{$.Name}}Query) []{{$.Name}}TableFormer {
-	l := make([]{{$.Name}}TableFormer,0)
-	v := reflect.ValueOf(o)
-	former := reflect.TypeOf((*{{$.Name}}TableFormer)(nil)).Elem()
-	{{$.Name}}FormDepValue(v, former, &l)
-	for _, e := range l {
-		e.Query(q)
-	}
-	return l
+func (f {{$.Name}}TableOrderForm) CountQuery() bool {
+	return false
 }
 
-func {{$.Name}}FormDepValue(v reflect.Value, former reflect.Type, l *[]{{$.Name}}TableFormer)  {
+func Set{{$.Name}}FormQueries(o interface{}) ([]{{$.Name}}TableFormer,[]{{$.Name}}TableFormer) {
+	queryList := make([]{{$.Name}}TableFormer,0)
+	countList := make([]{{$.Name}}TableFormer,0)
+	v := reflect.ValueOf(o)
+	former := reflect.TypeOf((*{{$.Name}}TableFormer)(nil)).Elem()
+	{{$.Name}}FormDepValue(v, former, &queryList, &countList)
+	return queryList, countList
+}
+
+func {{$.Name}}FormDepValue(v reflect.Value, former reflect.Type, queryList *[]{{$.Name}}TableFormer, countList *[]{{$.Name}}TableFormer)  {
 	for i := 0; i < v.NumField(); i++ {
 		f := v.Field(i)
 		if f.IsZero() {
 			continue
 		}
 		if f.Type().Implements(former) {
-			*l = append(*l, f.Interface().({{$.Name}}TableFormer))
+			former := f.Interface().({{$.Name}}TableFormer)
+			*queryList = append(*queryList, former)
+			if former.CountQuery() {
+				*countList = append(*countList, former)
+			}
 			continue
 		}
 		if f.Type().Kind() == reflect.Struct {
-			{{$.Name}}FormDepValue(f, former, l)
+			{{$.Name}}FormDepValue(f, former, queryList, countList)
 		}
 	}
 }
 
 type {{$.Name}}QueryOps struct {
 {{if $.Annotations.rest}}
-	Paging *{{$.Name}}TablePagingForm {{if hasKey $.Annotations.rest "pagingMust"}}`binding:"required"`{{end}}
+	*{{$.Name}}TablePagingForm {{if hasKey $.Annotations.rest "pagingMust"}}`binding:"required"`{{end}}
     {{$.Name}}TableOrderForm
 {{end}}
 {{range $f := $.Fields}}
@@ -99,6 +117,9 @@ func (f {{$.Name}}Table{{ $func }}Form) Query(q *{{$.Name}}Query) {
 	if f.{{ $func }} != nil {
 		q.Where({{lower $.Name}}.{{ $func }}(*f.{{ $func }}{{ if $op.Variadic }}...{{end}}))
 	}
+}
+func (f {{$.Name}}Table{{ $func }}Form) CountQuery() bool {
+	return true
 }
 {{end}}
 {{end}}
@@ -284,7 +305,7 @@ type {{$interfaceName}} interface {
 	// @http-gin /{{$nodeHttpName}}/:id DELETE
 	{{- $funcName = "DeleteById"}} {{$req = print $structName $funcName "Req" }}
     DeleteById(ctx context.Context, req {{$req}}) (success bool,err error)
-	// @http-gin /{{$nodeHttpName}} GET
+	// @http-gin /{{$nodeHttpName}} DELETE
 	{{- $funcName = "DeleteMany"}} {{$req = print $structName $funcName "Req" }}
     DeleteMany(ctx context.Context, req {{$req}}) (success bool,err error)
 	{{range $e := $n.Edges }}

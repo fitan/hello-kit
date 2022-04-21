@@ -54,7 +54,7 @@ func (_d TblservicetreeServiceWithPrometheus) ByQueries(ctx context.Context, i i
 }
 
 // Create implements TblservicetreeService
-func (_d TblservicetreeServiceWithPrometheus) Create(ctx context.Context, v ent.SpiderDevTblServicetree) (res *ent.SpiderDevTblServicetree, err error) {
+func (_d TblservicetreeServiceWithPrometheus) Create(ctx context.Context, v *ent.SpiderDevTblServicetree) (res *ent.SpiderDevTblServicetree, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -104,7 +104,7 @@ func (_d TblservicetreeServiceWithPrometheus) DeleteMany(ctx context.Context, id
 			result = "error"
 		}
 
-		tblservicetreeserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UserRestDeleteMany", result).Observe(time.Since(_since).Seconds())
+		tblservicetreeserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "DeleteMany", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.DeleteMany(ctx, ids)
 }

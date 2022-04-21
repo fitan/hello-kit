@@ -203,9 +203,9 @@ type DeleteManyQuerySwag struct {
 // @Tags UserService
 // @Param query query DeleteManyQuerySwag false " "
 // @Success 200 {object} SwagResponse{data=bool}
-// @Router /users [get]
+// @Router /users [delete]
 func makeDeleteManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
-	r.GET("/users", http.NewServer(endpoints.DeleteManyEndpoint, decodeDeleteManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+	r.DELETE("/users", http.NewServer(endpoints.DeleteManyEndpoint, decodeDeleteManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
 func decodeDeleteManyRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {

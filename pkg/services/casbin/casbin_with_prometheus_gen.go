@@ -7,10 +7,10 @@ package casbin
 import (
 	"time"
 
-	"context"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+
+	"context"
 )
 
 // CasbinServiceWithPrometheus implements CasbinService interface with all methods wrapped

@@ -56,7 +56,7 @@ func (_d UserServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (
 }
 
 // Create implements UserService
-func (_d UserServiceWithTracing) Create(ctx context.Context, v ent.User) (res *ent.User, err error) {
+func (_d UserServiceWithTracing) Create(ctx context.Context, v *ent.User) (res *ent.User, err error) {
 
 	var name = "UserService.Create"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -154,7 +154,7 @@ func (_d UserServiceWithTracing) DeleteById(ctx context.Context, id int) (err er
 // DeleteMany implements UserService
 func (_d UserServiceWithTracing) DeleteMany(ctx context.Context, ids []int) (err error) {
 
-	var name = "UserService.UserRestDeleteMany"
+	var name = "UserService.DeleteMany"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {

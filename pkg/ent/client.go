@@ -611,7 +611,7 @@ type PodRestInterface interface {
 	UpdateMany(ctx context.Context, req PodRestUpdateManyReq) (success bool, err error)
 	// @http-gin /pods/:id DELETE
 	DeleteById(ctx context.Context, req PodRestDeleteByIdReq) (success bool, err error)
-	// @http-gin /pods GET
+	// @http-gin /pods DELETE
 	DeleteMany(ctx context.Context, req PodRestDeleteManyReq) (success bool, err error)
 
 	// @http-gin /pods/:id/servicetree POST
@@ -757,7 +757,7 @@ type ProjectRestInterface interface {
 	UpdateMany(ctx context.Context, req ProjectRestUpdateManyReq) (success bool, err error)
 	// @http-gin /projects/:id DELETE
 	DeleteById(ctx context.Context, req ProjectRestDeleteByIdReq) (success bool, err error)
-	// @http-gin /projects GET
+	// @http-gin /projects DELETE
 	DeleteMany(ctx context.Context, req ProjectRestDeleteManyReq) (success bool, err error)
 }
 
@@ -877,7 +877,7 @@ type SpiderDevTblServicetreeRestInterface interface {
 	UpdateMany(ctx context.Context, req SpiderDevTblServicetreeRestUpdateManyReq) (success bool, err error)
 	// @http-gin /spiderdevtblservicetrees/:id DELETE
 	DeleteById(ctx context.Context, req SpiderDevTblServicetreeRestDeleteByIdReq) (success bool, err error)
-	// @http-gin /spiderdevtblservicetrees GET
+	// @http-gin /spiderdevtblservicetrees DELETE
 	DeleteMany(ctx context.Context, req SpiderDevTblServicetreeRestDeleteManyReq) (success bool, err error)
 }
 
@@ -997,7 +997,7 @@ type UserRestInterface interface {
 	UpdateMany(ctx context.Context, req UserRestUpdateManyReq) (success bool, err error)
 	// @http-gin /users/:id DELETE
 	DeleteById(ctx context.Context, req UserRestDeleteByIdReq) (success bool, err error)
-	// @http-gin /users GET
+	// @http-gin /users DELETE
 	DeleteMany(ctx context.Context, req UserRestDeleteManyReq) (success bool, err error)
 
 	// @http-gin /users/:id/podsslice POST

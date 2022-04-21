@@ -46,6 +46,10 @@ tasks:
     dir: "./pkg/services/"
     cmds:
       - go generate ./{{.CLI_ARGS}}
+  gen:s:all:
+    dir: "./pkg/services/"
+    cmds:
+      - go generate ./...
   gen:a:
     dir: "./pkg/repository/api"
     cmds:

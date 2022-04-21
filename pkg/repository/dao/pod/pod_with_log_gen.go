@@ -51,7 +51,7 @@ func (_d PodServiceWithLog) ByQueries(ctx context.Context, i interface{}) (res e
 }
 
 // Create implements PodService
-func (_d PodServiceWithLog) Create(ctx context.Context, v ent.Pod) (res *ent.Pod, err error) {
+func (_d PodServiceWithLog) Create(ctx context.Context, v *ent.Pod) (res *ent.Pod, err error) {
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
@@ -140,7 +140,7 @@ func (_d PodServiceWithLog) DeleteMany(ctx context.Context, ids []int64) (err er
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
 	defer func() {
-		_log.Debugw("PodServiceWithLog calling UserRestDeleteMany", "params", map[string]interface{}{
+		_log.Debugw("PodServiceWithLog calling DeleteMany", "params", map[string]interface{}{
 			"ids": ids}, "results", map[string]interface{}{
 			"err": err})
 		if err != nil {

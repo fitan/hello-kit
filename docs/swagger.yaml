@@ -132,6 +132,24 @@ definitions:
           $ref: '#/definitions/ent.Pod'
         type: array
     type: object
+  ent.UserRestByQueriesRes:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/ent.User'
+        type: array
+      total:
+        type: integer
+    type: object
+  ent.UserRestGetPodsSliceByUserIdRes:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/ent.Pod'
+        type: array
+      total:
+        type: integer
+    type: object
   hello.SwagResponse:
     properties:
       data: {}
@@ -150,19 +168,44 @@ definitions:
       traceId:
         type: string
     type: object
-  user.GetListRes:
+  user.CreateBodySwag:
     properties:
-      count:
+      age:
+        description: Age holds the value of the "age" field.
         type: integer
-      data:
-        items:
-          $ref: '#/definitions/ent.Pod'
-        type: array
+      edges:
+        $ref: '#/definitions/ent.UserEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the UserQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: integer
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
     type: object
   user.SwagResponse:
     properties:
       data: {}
       traceId:
+        type: string
+    type: object
+  user.UpdateByIdBodySwag:
+    properties:
+      age:
+        description: Age holds the value of the "age" field.
+        type: integer
+      edges:
+        $ref: '#/definitions/ent.UserEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the UserQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: integer
+      name:
+        description: Name holds the value of the "name" field.
         type: string
     type: object
 host: localhost:8080
@@ -246,24 +289,66 @@ paths:
       tags:
       - SayService
   /user:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreateBodySwag'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.User'
+              type: object
+      tags:
+      - UserService
+  /users:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - collectionFormat: multi
+        in: query
+        items:
+          type: integer
+        name: ids
+        type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+      tags:
+      - UserService
     get:
       consumes:
       - application/json
       parameters:
       - in: query
-        name: HostIPEQ
-        type: string
+        name: AgeEQ
+        type: integer
       - in: query
-        name: NamespaceEQ
-        type: string
-      - in: query
-        name: ServiceNameEQ
+        name: NameEQ
         type: string
       - collectionFormat: multi
         in: query
         items:
           type: string
-        name: ServiceNameIn
+        name: NameNotIn
         type: array
       - in: query
         name: _limit
@@ -288,15 +373,163 @@ paths:
             - $ref: '#/definitions/user.SwagResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/user.GetListRes'
+                  $ref: '#/definitions/ent.UserRestByQueriesRes'
               type: object
       tags:
       - UserService
-  /user/{id}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/ent.User'
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/ent.User'
+                  type: array
+              type: object
+      tags:
+      - UserService
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - collectionFormat: multi
+        in: query
+        items:
+          type: integer
+        name: ids
+        type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+      tags:
+      - UserService
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+      tags:
+      - UserService
     get:
       consumes:
       - application/json
       parameters:
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.User'
+              type: object
+      tags:
+      - UserService
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateByIdBodySwag'
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.User'
+              type: object
+      tags:
+      - UserService
+  /users/{id}/pods:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.UserRestGetPodsSliceByUserIdRes'
+              type: object
+      tags:
+      - UserService
+  /users/{id}/podsslice:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/ent.Pod'
+          type: array
       - description: ' '
         in: path
         name: id

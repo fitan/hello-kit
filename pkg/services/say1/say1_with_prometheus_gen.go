@@ -5,13 +5,14 @@ package say1
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"hello/pkg/ent"
 	"time"
-
-	"context"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+
+	"context"
+
+	"hello/pkg/ent"
 )
 
 // Say1ServiceWithPrometheus implements Say1Service interface with all methods wrapped

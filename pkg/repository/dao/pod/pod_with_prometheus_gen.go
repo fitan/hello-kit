@@ -54,7 +54,7 @@ func (_d PodServiceWithPrometheus) ByQueries(ctx context.Context, i interface{})
 }
 
 // Create implements PodService
-func (_d PodServiceWithPrometheus) Create(ctx context.Context, v ent.Pod) (res *ent.Pod, err error) {
+func (_d PodServiceWithPrometheus) Create(ctx context.Context, v *ent.Pod) (res *ent.Pod, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -118,7 +118,7 @@ func (_d PodServiceWithPrometheus) DeleteMany(ctx context.Context, ids []int64) 
 			result = "error"
 		}
 
-		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UserRestDeleteMany", result).Observe(time.Since(_since).Seconds())
+		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "DeleteMany", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.DeleteMany(ctx, ids)
 }

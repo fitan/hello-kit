@@ -5,13 +5,14 @@ package casbin
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"context"
 	"encoding/json"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
+
+	"context"
 )
 
 // CasbinServiceWithTracing implements CasbinService interface instrumented with opentracing spans

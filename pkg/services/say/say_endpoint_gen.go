@@ -5,11 +5,11 @@ package say
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"context"
-
 	"go.opentelemetry.io/otel/trace"
 
 	endpoint "github.com/go-kit/kit/endpoint"
+
+	"context"
 )
 
 type Mws map[string][]endpoint.Middleware

@@ -434,8 +434,15 @@ func (sdtsq *SpiderDevTblServicetreeQuery) sqlQuery(ctx context.Context) *sql.Se
 }
 
 func (sdtsq *SpiderDevTblServicetreeQuery) ByQueries(ctx context.Context, i interface{}) (res SpiderDevTblServicetrees, count int, err error) {
-	SetSpiderDevTblServicetreeFormQueries(i, sdtsq)
-	count, err = sdtsq.Count(ctx)
+	queryList, countList := SetSpiderDevTblServicetreeFormQueries(i)
+	countQ := sdtsq.Clone()
+	for _, v := range queryList {
+		v.Query(sdtsq)
+	}
+	for _, v := range countList {
+		v.Query(countQ)
+	}
+	count, err = countQ.Count(ctx)
 	if err != nil {
 		return
 	}
@@ -445,6 +452,7 @@ func (sdtsq *SpiderDevTblServicetreeQuery) ByQueries(ctx context.Context, i inte
 
 type SpiderDevTblServicetreeTableFormer interface {
 	Query(q *SpiderDevTblServicetreeQuery)
+	CountQuery() bool
 }
 
 type SpiderDevTblServicetreeTablePagingForm struct {
@@ -456,6 +464,10 @@ func (f SpiderDevTblServicetreeTablePagingForm) Query(q *SpiderDevTblServicetree
 	if f.Limit != nil && f.Page != nil {
 		q.Limit(*f.Limit).Offset((*f.Page - 1) * *f.Limit)
 	}
+}
+
+func (f SpiderDevTblServicetreeTablePagingForm) CountQuery() bool {
+	return false
 }
 
 type SpiderDevTblServicetreeTableOrderForm struct {
@@ -474,30 +486,35 @@ func (f SpiderDevTblServicetreeTableOrderForm) Query(q *SpiderDevTblServicetreeQ
 		}
 	}
 }
-
-func SetSpiderDevTblServicetreeFormQueries(o interface{}, q *SpiderDevTblServicetreeQuery) []SpiderDevTblServicetreeTableFormer {
-	l := make([]SpiderDevTblServicetreeTableFormer, 0)
-	v := reflect.ValueOf(o)
-	former := reflect.TypeOf((*SpiderDevTblServicetreeTableFormer)(nil)).Elem()
-	SpiderDevTblServicetreeFormDepValue(v, former, &l)
-	for _, e := range l {
-		e.Query(q)
-	}
-	return l
+func (f SpiderDevTblServicetreeTableOrderForm) CountQuery() bool {
+	return false
 }
 
-func SpiderDevTblServicetreeFormDepValue(v reflect.Value, former reflect.Type, l *[]SpiderDevTblServicetreeTableFormer) {
+func SetSpiderDevTblServicetreeFormQueries(o interface{}) ([]SpiderDevTblServicetreeTableFormer, []SpiderDevTblServicetreeTableFormer) {
+	queryList := make([]SpiderDevTblServicetreeTableFormer, 0)
+	countList := make([]SpiderDevTblServicetreeTableFormer, 0)
+	v := reflect.ValueOf(o)
+	former := reflect.TypeOf((*SpiderDevTblServicetreeTableFormer)(nil)).Elem()
+	SpiderDevTblServicetreeFormDepValue(v, former, &queryList, &countList)
+	return queryList, countList
+}
+
+func SpiderDevTblServicetreeFormDepValue(v reflect.Value, former reflect.Type, queryList *[]SpiderDevTblServicetreeTableFormer, countList *[]SpiderDevTblServicetreeTableFormer) {
 	for i := 0; i < v.NumField(); i++ {
 		f := v.Field(i)
 		if f.IsZero() {
 			continue
 		}
 		if f.Type().Implements(former) {
-			*l = append(*l, f.Interface().(SpiderDevTblServicetreeTableFormer))
+			former := f.Interface().(SpiderDevTblServicetreeTableFormer)
+			*queryList = append(*queryList, former)
+			if former.CountQuery() {
+				*countList = append(*countList, former)
+			}
 			continue
 		}
 		if f.Type().Kind() == reflect.Struct {
-			SpiderDevTblServicetreeFormDepValue(f, former, l)
+			SpiderDevTblServicetreeFormDepValue(f, former, queryList, countList)
 		}
 	}
 }
@@ -514,6 +531,9 @@ func (f SpiderDevTblServicetreeTableNameEQForm) Query(q *SpiderDevTblServicetree
 		q.Where(spiderdevtblservicetree.NameEQ(*f.NameEQ))
 	}
 }
+func (f SpiderDevTblServicetreeTableNameEQForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableNameNEQForm struct {
 	NameNEQ *string `form:"NameNEQ" json:"NameNEQ"`
@@ -523,6 +543,9 @@ func (f SpiderDevTblServicetreeTableNameNEQForm) Query(q *SpiderDevTblServicetre
 	if f.NameNEQ != nil {
 		q.Where(spiderdevtblservicetree.NameNEQ(*f.NameNEQ))
 	}
+}
+func (f SpiderDevTblServicetreeTableNameNEQForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableNameInForm struct {
@@ -534,6 +557,9 @@ func (f SpiderDevTblServicetreeTableNameInForm) Query(q *SpiderDevTblServicetree
 		q.Where(spiderdevtblservicetree.NameIn(*f.NameIn...))
 	}
 }
+func (f SpiderDevTblServicetreeTableNameInForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableNameNotInForm struct {
 	NameNotIn *[]string `form:"NameNotIn" json:"NameNotIn"`
@@ -543,6 +569,9 @@ func (f SpiderDevTblServicetreeTableNameNotInForm) Query(q *SpiderDevTblServicet
 	if f.NameNotIn != nil {
 		q.Where(spiderdevtblservicetree.NameNotIn(*f.NameNotIn...))
 	}
+}
+func (f SpiderDevTblServicetreeTableNameNotInForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableNameGTForm struct {
@@ -554,6 +583,9 @@ func (f SpiderDevTblServicetreeTableNameGTForm) Query(q *SpiderDevTblServicetree
 		q.Where(spiderdevtblservicetree.NameGT(*f.NameGT))
 	}
 }
+func (f SpiderDevTblServicetreeTableNameGTForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableNameGTEForm struct {
 	NameGTE *string `form:"NameGTE" json:"NameGTE"`
@@ -563,6 +595,9 @@ func (f SpiderDevTblServicetreeTableNameGTEForm) Query(q *SpiderDevTblServicetre
 	if f.NameGTE != nil {
 		q.Where(spiderdevtblservicetree.NameGTE(*f.NameGTE))
 	}
+}
+func (f SpiderDevTblServicetreeTableNameGTEForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableNameLTForm struct {
@@ -574,6 +609,9 @@ func (f SpiderDevTblServicetreeTableNameLTForm) Query(q *SpiderDevTblServicetree
 		q.Where(spiderdevtblservicetree.NameLT(*f.NameLT))
 	}
 }
+func (f SpiderDevTblServicetreeTableNameLTForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableNameLTEForm struct {
 	NameLTE *string `form:"NameLTE" json:"NameLTE"`
@@ -583,6 +621,9 @@ func (f SpiderDevTblServicetreeTableNameLTEForm) Query(q *SpiderDevTblServicetre
 	if f.NameLTE != nil {
 		q.Where(spiderdevtblservicetree.NameLTE(*f.NameLTE))
 	}
+}
+func (f SpiderDevTblServicetreeTableNameLTEForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableNameContainsForm struct {
@@ -594,6 +635,9 @@ func (f SpiderDevTblServicetreeTableNameContainsForm) Query(q *SpiderDevTblServi
 		q.Where(spiderdevtblservicetree.NameContains(*f.NameContains))
 	}
 }
+func (f SpiderDevTblServicetreeTableNameContainsForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableNameHasPrefixForm struct {
 	NameHasPrefix *string `form:"NameHasPrefix" json:"NameHasPrefix"`
@@ -603,6 +647,9 @@ func (f SpiderDevTblServicetreeTableNameHasPrefixForm) Query(q *SpiderDevTblServ
 	if f.NameHasPrefix != nil {
 		q.Where(spiderdevtblservicetree.NameHasPrefix(*f.NameHasPrefix))
 	}
+}
+func (f SpiderDevTblServicetreeTableNameHasPrefixForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableNameHasSuffixForm struct {
@@ -614,6 +661,9 @@ func (f SpiderDevTblServicetreeTableNameHasSuffixForm) Query(q *SpiderDevTblServ
 		q.Where(spiderdevtblservicetree.NameHasSuffix(*f.NameHasSuffix))
 	}
 }
+func (f SpiderDevTblServicetreeTableNameHasSuffixForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableNameEqualFoldForm struct {
 	NameEqualFold *string `form:"NameEqualFold" json:"NameEqualFold"`
@@ -623,6 +673,9 @@ func (f SpiderDevTblServicetreeTableNameEqualFoldForm) Query(q *SpiderDevTblServ
 	if f.NameEqualFold != nil {
 		q.Where(spiderdevtblservicetree.NameEqualFold(*f.NameEqualFold))
 	}
+}
+func (f SpiderDevTblServicetreeTableNameEqualFoldForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableNameContainsFoldForm struct {
@@ -634,6 +687,9 @@ func (f SpiderDevTblServicetreeTableNameContainsFoldForm) Query(q *SpiderDevTblS
 		q.Where(spiderdevtblservicetree.NameContainsFold(*f.NameContainsFold))
 	}
 }
+func (f SpiderDevTblServicetreeTableNameContainsFoldForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableAnameEQForm struct {
 	AnameEQ *string `form:"AnameEQ" json:"AnameEQ"`
@@ -643,6 +699,9 @@ func (f SpiderDevTblServicetreeTableAnameEQForm) Query(q *SpiderDevTblServicetre
 	if f.AnameEQ != nil {
 		q.Where(spiderdevtblservicetree.AnameEQ(*f.AnameEQ))
 	}
+}
+func (f SpiderDevTblServicetreeTableAnameEQForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableAnameNEQForm struct {
@@ -654,6 +713,9 @@ func (f SpiderDevTblServicetreeTableAnameNEQForm) Query(q *SpiderDevTblServicetr
 		q.Where(spiderdevtblservicetree.AnameNEQ(*f.AnameNEQ))
 	}
 }
+func (f SpiderDevTblServicetreeTableAnameNEQForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableAnameInForm struct {
 	AnameIn *[]string `form:"AnameIn" json:"AnameIn"`
@@ -663,6 +725,9 @@ func (f SpiderDevTblServicetreeTableAnameInForm) Query(q *SpiderDevTblServicetre
 	if f.AnameIn != nil {
 		q.Where(spiderdevtblservicetree.AnameIn(*f.AnameIn...))
 	}
+}
+func (f SpiderDevTblServicetreeTableAnameInForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableAnameNotInForm struct {
@@ -674,6 +739,9 @@ func (f SpiderDevTblServicetreeTableAnameNotInForm) Query(q *SpiderDevTblService
 		q.Where(spiderdevtblservicetree.AnameNotIn(*f.AnameNotIn...))
 	}
 }
+func (f SpiderDevTblServicetreeTableAnameNotInForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableAnameGTForm struct {
 	AnameGT *string `form:"AnameGT" json:"AnameGT"`
@@ -683,6 +751,9 @@ func (f SpiderDevTblServicetreeTableAnameGTForm) Query(q *SpiderDevTblServicetre
 	if f.AnameGT != nil {
 		q.Where(spiderdevtblservicetree.AnameGT(*f.AnameGT))
 	}
+}
+func (f SpiderDevTblServicetreeTableAnameGTForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableAnameGTEForm struct {
@@ -694,6 +765,9 @@ func (f SpiderDevTblServicetreeTableAnameGTEForm) Query(q *SpiderDevTblServicetr
 		q.Where(spiderdevtblservicetree.AnameGTE(*f.AnameGTE))
 	}
 }
+func (f SpiderDevTblServicetreeTableAnameGTEForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableAnameLTForm struct {
 	AnameLT *string `form:"AnameLT" json:"AnameLT"`
@@ -703,6 +777,9 @@ func (f SpiderDevTblServicetreeTableAnameLTForm) Query(q *SpiderDevTblServicetre
 	if f.AnameLT != nil {
 		q.Where(spiderdevtblservicetree.AnameLT(*f.AnameLT))
 	}
+}
+func (f SpiderDevTblServicetreeTableAnameLTForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableAnameLTEForm struct {
@@ -714,6 +791,9 @@ func (f SpiderDevTblServicetreeTableAnameLTEForm) Query(q *SpiderDevTblServicetr
 		q.Where(spiderdevtblservicetree.AnameLTE(*f.AnameLTE))
 	}
 }
+func (f SpiderDevTblServicetreeTableAnameLTEForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableAnameContainsForm struct {
 	AnameContains *string `form:"AnameContains" json:"AnameContains"`
@@ -723,6 +803,9 @@ func (f SpiderDevTblServicetreeTableAnameContainsForm) Query(q *SpiderDevTblServ
 	if f.AnameContains != nil {
 		q.Where(spiderdevtblservicetree.AnameContains(*f.AnameContains))
 	}
+}
+func (f SpiderDevTblServicetreeTableAnameContainsForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableAnameHasPrefixForm struct {
@@ -734,6 +817,9 @@ func (f SpiderDevTblServicetreeTableAnameHasPrefixForm) Query(q *SpiderDevTblSer
 		q.Where(spiderdevtblservicetree.AnameHasPrefix(*f.AnameHasPrefix))
 	}
 }
+func (f SpiderDevTblServicetreeTableAnameHasPrefixForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableAnameHasSuffixForm struct {
 	AnameHasSuffix *string `form:"AnameHasSuffix" json:"AnameHasSuffix"`
@@ -743,6 +829,9 @@ func (f SpiderDevTblServicetreeTableAnameHasSuffixForm) Query(q *SpiderDevTblSer
 	if f.AnameHasSuffix != nil {
 		q.Where(spiderdevtblservicetree.AnameHasSuffix(*f.AnameHasSuffix))
 	}
+}
+func (f SpiderDevTblServicetreeTableAnameHasSuffixForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableAnameEqualFoldForm struct {
@@ -754,6 +843,9 @@ func (f SpiderDevTblServicetreeTableAnameEqualFoldForm) Query(q *SpiderDevTblSer
 		q.Where(spiderdevtblservicetree.AnameEqualFold(*f.AnameEqualFold))
 	}
 }
+func (f SpiderDevTblServicetreeTableAnameEqualFoldForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableAnameContainsFoldForm struct {
 	AnameContainsFold *string `form:"AnameContainsFold" json:"AnameContainsFold"`
@@ -763,6 +855,9 @@ func (f SpiderDevTblServicetreeTableAnameContainsFoldForm) Query(q *SpiderDevTbl
 	if f.AnameContainsFold != nil {
 		q.Where(spiderdevtblservicetree.AnameContainsFold(*f.AnameContainsFold))
 	}
+}
+func (f SpiderDevTblServicetreeTableAnameContainsFoldForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTablePnodeEQForm struct {
@@ -774,6 +869,9 @@ func (f SpiderDevTblServicetreeTablePnodeEQForm) Query(q *SpiderDevTblServicetre
 		q.Where(spiderdevtblservicetree.PnodeEQ(*f.PnodeEQ))
 	}
 }
+func (f SpiderDevTblServicetreeTablePnodeEQForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTablePnodeNEQForm struct {
 	PnodeNEQ *int32 `form:"PnodeNEQ" json:"PnodeNEQ"`
@@ -783,6 +881,9 @@ func (f SpiderDevTblServicetreeTablePnodeNEQForm) Query(q *SpiderDevTblServicetr
 	if f.PnodeNEQ != nil {
 		q.Where(spiderdevtblservicetree.PnodeNEQ(*f.PnodeNEQ))
 	}
+}
+func (f SpiderDevTblServicetreeTablePnodeNEQForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTablePnodeInForm struct {
@@ -794,6 +895,9 @@ func (f SpiderDevTblServicetreeTablePnodeInForm) Query(q *SpiderDevTblServicetre
 		q.Where(spiderdevtblservicetree.PnodeIn(*f.PnodeIn...))
 	}
 }
+func (f SpiderDevTblServicetreeTablePnodeInForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTablePnodeNotInForm struct {
 	PnodeNotIn *[]int32 `form:"PnodeNotIn" json:"PnodeNotIn"`
@@ -803,6 +907,9 @@ func (f SpiderDevTblServicetreeTablePnodeNotInForm) Query(q *SpiderDevTblService
 	if f.PnodeNotIn != nil {
 		q.Where(spiderdevtblservicetree.PnodeNotIn(*f.PnodeNotIn...))
 	}
+}
+func (f SpiderDevTblServicetreeTablePnodeNotInForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTablePnodeGTForm struct {
@@ -814,6 +921,9 @@ func (f SpiderDevTblServicetreeTablePnodeGTForm) Query(q *SpiderDevTblServicetre
 		q.Where(spiderdevtblservicetree.PnodeGT(*f.PnodeGT))
 	}
 }
+func (f SpiderDevTblServicetreeTablePnodeGTForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTablePnodeGTEForm struct {
 	PnodeGTE *int32 `form:"PnodeGTE" json:"PnodeGTE"`
@@ -823,6 +933,9 @@ func (f SpiderDevTblServicetreeTablePnodeGTEForm) Query(q *SpiderDevTblServicetr
 	if f.PnodeGTE != nil {
 		q.Where(spiderdevtblservicetree.PnodeGTE(*f.PnodeGTE))
 	}
+}
+func (f SpiderDevTblServicetreeTablePnodeGTEForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTablePnodeLTForm struct {
@@ -834,6 +947,9 @@ func (f SpiderDevTblServicetreeTablePnodeLTForm) Query(q *SpiderDevTblServicetre
 		q.Where(spiderdevtblservicetree.PnodeLT(*f.PnodeLT))
 	}
 }
+func (f SpiderDevTblServicetreeTablePnodeLTForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTablePnodeLTEForm struct {
 	PnodeLTE *int32 `form:"PnodeLTE" json:"PnodeLTE"`
@@ -843,6 +959,9 @@ func (f SpiderDevTblServicetreeTablePnodeLTEForm) Query(q *SpiderDevTblServicetr
 	if f.PnodeLTE != nil {
 		q.Where(spiderdevtblservicetree.PnodeLTE(*f.PnodeLTE))
 	}
+}
+func (f SpiderDevTblServicetreeTablePnodeLTEForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableTypeEQForm struct {
@@ -854,6 +973,9 @@ func (f SpiderDevTblServicetreeTableTypeEQForm) Query(q *SpiderDevTblServicetree
 		q.Where(spiderdevtblservicetree.TypeEQ(*f.TypeEQ))
 	}
 }
+func (f SpiderDevTblServicetreeTableTypeEQForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableTypeNEQForm struct {
 	TypeNEQ *int32 `form:"TypeNEQ" json:"TypeNEQ"`
@@ -863,6 +985,9 @@ func (f SpiderDevTblServicetreeTableTypeNEQForm) Query(q *SpiderDevTblServicetre
 	if f.TypeNEQ != nil {
 		q.Where(spiderdevtblservicetree.TypeNEQ(*f.TypeNEQ))
 	}
+}
+func (f SpiderDevTblServicetreeTableTypeNEQForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableTypeInForm struct {
@@ -874,6 +999,9 @@ func (f SpiderDevTblServicetreeTableTypeInForm) Query(q *SpiderDevTblServicetree
 		q.Where(spiderdevtblservicetree.TypeIn(*f.TypeIn...))
 	}
 }
+func (f SpiderDevTblServicetreeTableTypeInForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableTypeNotInForm struct {
 	TypeNotIn *[]int32 `form:"TypeNotIn" json:"TypeNotIn"`
@@ -883,6 +1011,9 @@ func (f SpiderDevTblServicetreeTableTypeNotInForm) Query(q *SpiderDevTblServicet
 	if f.TypeNotIn != nil {
 		q.Where(spiderdevtblservicetree.TypeNotIn(*f.TypeNotIn...))
 	}
+}
+func (f SpiderDevTblServicetreeTableTypeNotInForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableTypeGTForm struct {
@@ -894,6 +1025,9 @@ func (f SpiderDevTblServicetreeTableTypeGTForm) Query(q *SpiderDevTblServicetree
 		q.Where(spiderdevtblservicetree.TypeGT(*f.TypeGT))
 	}
 }
+func (f SpiderDevTblServicetreeTableTypeGTForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableTypeGTEForm struct {
 	TypeGTE *int32 `form:"TypeGTE" json:"TypeGTE"`
@@ -903,6 +1037,9 @@ func (f SpiderDevTblServicetreeTableTypeGTEForm) Query(q *SpiderDevTblServicetre
 	if f.TypeGTE != nil {
 		q.Where(spiderdevtblservicetree.TypeGTE(*f.TypeGTE))
 	}
+}
+func (f SpiderDevTblServicetreeTableTypeGTEForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableTypeLTForm struct {
@@ -914,6 +1051,9 @@ func (f SpiderDevTblServicetreeTableTypeLTForm) Query(q *SpiderDevTblServicetree
 		q.Where(spiderdevtblservicetree.TypeLT(*f.TypeLT))
 	}
 }
+func (f SpiderDevTblServicetreeTableTypeLTForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableTypeLTEForm struct {
 	TypeLTE *int32 `form:"TypeLTE" json:"TypeLTE"`
@@ -923,6 +1063,9 @@ func (f SpiderDevTblServicetreeTableTypeLTEForm) Query(q *SpiderDevTblServicetre
 	if f.TypeLTE != nil {
 		q.Where(spiderdevtblservicetree.TypeLTE(*f.TypeLTE))
 	}
+}
+func (f SpiderDevTblServicetreeTableTypeLTEForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableKeyEQForm struct {
@@ -934,6 +1077,9 @@ func (f SpiderDevTblServicetreeTableKeyEQForm) Query(q *SpiderDevTblServicetreeQ
 		q.Where(spiderdevtblservicetree.KeyEQ(*f.KeyEQ))
 	}
 }
+func (f SpiderDevTblServicetreeTableKeyEQForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableKeyNEQForm struct {
 	KeyNEQ *string `form:"KeyNEQ" json:"KeyNEQ"`
@@ -943,6 +1089,9 @@ func (f SpiderDevTblServicetreeTableKeyNEQForm) Query(q *SpiderDevTblServicetree
 	if f.KeyNEQ != nil {
 		q.Where(spiderdevtblservicetree.KeyNEQ(*f.KeyNEQ))
 	}
+}
+func (f SpiderDevTblServicetreeTableKeyNEQForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableKeyInForm struct {
@@ -954,6 +1103,9 @@ func (f SpiderDevTblServicetreeTableKeyInForm) Query(q *SpiderDevTblServicetreeQ
 		q.Where(spiderdevtblservicetree.KeyIn(*f.KeyIn...))
 	}
 }
+func (f SpiderDevTblServicetreeTableKeyInForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableKeyNotInForm struct {
 	KeyNotIn *[]string `form:"KeyNotIn" json:"KeyNotIn"`
@@ -963,6 +1115,9 @@ func (f SpiderDevTblServicetreeTableKeyNotInForm) Query(q *SpiderDevTblServicetr
 	if f.KeyNotIn != nil {
 		q.Where(spiderdevtblservicetree.KeyNotIn(*f.KeyNotIn...))
 	}
+}
+func (f SpiderDevTblServicetreeTableKeyNotInForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableKeyGTForm struct {
@@ -974,6 +1129,9 @@ func (f SpiderDevTblServicetreeTableKeyGTForm) Query(q *SpiderDevTblServicetreeQ
 		q.Where(spiderdevtblservicetree.KeyGT(*f.KeyGT))
 	}
 }
+func (f SpiderDevTblServicetreeTableKeyGTForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableKeyGTEForm struct {
 	KeyGTE *string `form:"KeyGTE" json:"KeyGTE"`
@@ -983,6 +1141,9 @@ func (f SpiderDevTblServicetreeTableKeyGTEForm) Query(q *SpiderDevTblServicetree
 	if f.KeyGTE != nil {
 		q.Where(spiderdevtblservicetree.KeyGTE(*f.KeyGTE))
 	}
+}
+func (f SpiderDevTblServicetreeTableKeyGTEForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableKeyLTForm struct {
@@ -994,6 +1155,9 @@ func (f SpiderDevTblServicetreeTableKeyLTForm) Query(q *SpiderDevTblServicetreeQ
 		q.Where(spiderdevtblservicetree.KeyLT(*f.KeyLT))
 	}
 }
+func (f SpiderDevTblServicetreeTableKeyLTForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableKeyLTEForm struct {
 	KeyLTE *string `form:"KeyLTE" json:"KeyLTE"`
@@ -1003,6 +1167,9 @@ func (f SpiderDevTblServicetreeTableKeyLTEForm) Query(q *SpiderDevTblServicetree
 	if f.KeyLTE != nil {
 		q.Where(spiderdevtblservicetree.KeyLTE(*f.KeyLTE))
 	}
+}
+func (f SpiderDevTblServicetreeTableKeyLTEForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableKeyContainsForm struct {
@@ -1014,6 +1181,9 @@ func (f SpiderDevTblServicetreeTableKeyContainsForm) Query(q *SpiderDevTblServic
 		q.Where(spiderdevtblservicetree.KeyContains(*f.KeyContains))
 	}
 }
+func (f SpiderDevTblServicetreeTableKeyContainsForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableKeyHasPrefixForm struct {
 	KeyHasPrefix *string `form:"KeyHasPrefix" json:"KeyHasPrefix"`
@@ -1023,6 +1193,9 @@ func (f SpiderDevTblServicetreeTableKeyHasPrefixForm) Query(q *SpiderDevTblServi
 	if f.KeyHasPrefix != nil {
 		q.Where(spiderdevtblservicetree.KeyHasPrefix(*f.KeyHasPrefix))
 	}
+}
+func (f SpiderDevTblServicetreeTableKeyHasPrefixForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableKeyHasSuffixForm struct {
@@ -1034,6 +1207,9 @@ func (f SpiderDevTblServicetreeTableKeyHasSuffixForm) Query(q *SpiderDevTblServi
 		q.Where(spiderdevtblservicetree.KeyHasSuffix(*f.KeyHasSuffix))
 	}
 }
+func (f SpiderDevTblServicetreeTableKeyHasSuffixForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableKeyEqualFoldForm struct {
 	KeyEqualFold *string `form:"KeyEqualFold" json:"KeyEqualFold"`
@@ -1043,6 +1219,9 @@ func (f SpiderDevTblServicetreeTableKeyEqualFoldForm) Query(q *SpiderDevTblServi
 	if f.KeyEqualFold != nil {
 		q.Where(spiderdevtblservicetree.KeyEqualFold(*f.KeyEqualFold))
 	}
+}
+func (f SpiderDevTblServicetreeTableKeyEqualFoldForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableKeyContainsFoldForm struct {
@@ -1054,6 +1233,9 @@ func (f SpiderDevTblServicetreeTableKeyContainsFoldForm) Query(q *SpiderDevTblSe
 		q.Where(spiderdevtblservicetree.KeyContainsFold(*f.KeyContainsFold))
 	}
 }
+func (f SpiderDevTblServicetreeTableKeyContainsFoldForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableOriginEQForm struct {
 	OriginEQ *string `form:"OriginEQ" json:"OriginEQ"`
@@ -1063,6 +1245,9 @@ func (f SpiderDevTblServicetreeTableOriginEQForm) Query(q *SpiderDevTblServicetr
 	if f.OriginEQ != nil {
 		q.Where(spiderdevtblservicetree.OriginEQ(*f.OriginEQ))
 	}
+}
+func (f SpiderDevTblServicetreeTableOriginEQForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableOriginNEQForm struct {
@@ -1074,6 +1259,9 @@ func (f SpiderDevTblServicetreeTableOriginNEQForm) Query(q *SpiderDevTblServicet
 		q.Where(spiderdevtblservicetree.OriginNEQ(*f.OriginNEQ))
 	}
 }
+func (f SpiderDevTblServicetreeTableOriginNEQForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableOriginInForm struct {
 	OriginIn *[]string `form:"OriginIn" json:"OriginIn"`
@@ -1083,6 +1271,9 @@ func (f SpiderDevTblServicetreeTableOriginInForm) Query(q *SpiderDevTblServicetr
 	if f.OriginIn != nil {
 		q.Where(spiderdevtblservicetree.OriginIn(*f.OriginIn...))
 	}
+}
+func (f SpiderDevTblServicetreeTableOriginInForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableOriginNotInForm struct {
@@ -1094,6 +1285,9 @@ func (f SpiderDevTblServicetreeTableOriginNotInForm) Query(q *SpiderDevTblServic
 		q.Where(spiderdevtblservicetree.OriginNotIn(*f.OriginNotIn...))
 	}
 }
+func (f SpiderDevTblServicetreeTableOriginNotInForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableOriginGTForm struct {
 	OriginGT *string `form:"OriginGT" json:"OriginGT"`
@@ -1103,6 +1297,9 @@ func (f SpiderDevTblServicetreeTableOriginGTForm) Query(q *SpiderDevTblServicetr
 	if f.OriginGT != nil {
 		q.Where(spiderdevtblservicetree.OriginGT(*f.OriginGT))
 	}
+}
+func (f SpiderDevTblServicetreeTableOriginGTForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableOriginGTEForm struct {
@@ -1114,6 +1311,9 @@ func (f SpiderDevTblServicetreeTableOriginGTEForm) Query(q *SpiderDevTblServicet
 		q.Where(spiderdevtblservicetree.OriginGTE(*f.OriginGTE))
 	}
 }
+func (f SpiderDevTblServicetreeTableOriginGTEForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableOriginLTForm struct {
 	OriginLT *string `form:"OriginLT" json:"OriginLT"`
@@ -1123,6 +1323,9 @@ func (f SpiderDevTblServicetreeTableOriginLTForm) Query(q *SpiderDevTblServicetr
 	if f.OriginLT != nil {
 		q.Where(spiderdevtblservicetree.OriginLT(*f.OriginLT))
 	}
+}
+func (f SpiderDevTblServicetreeTableOriginLTForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableOriginLTEForm struct {
@@ -1134,6 +1337,9 @@ func (f SpiderDevTblServicetreeTableOriginLTEForm) Query(q *SpiderDevTblServicet
 		q.Where(spiderdevtblservicetree.OriginLTE(*f.OriginLTE))
 	}
 }
+func (f SpiderDevTblServicetreeTableOriginLTEForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableOriginContainsForm struct {
 	OriginContains *string `form:"OriginContains" json:"OriginContains"`
@@ -1143,6 +1349,9 @@ func (f SpiderDevTblServicetreeTableOriginContainsForm) Query(q *SpiderDevTblSer
 	if f.OriginContains != nil {
 		q.Where(spiderdevtblservicetree.OriginContains(*f.OriginContains))
 	}
+}
+func (f SpiderDevTblServicetreeTableOriginContainsForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableOriginHasPrefixForm struct {
@@ -1154,6 +1363,9 @@ func (f SpiderDevTblServicetreeTableOriginHasPrefixForm) Query(q *SpiderDevTblSe
 		q.Where(spiderdevtblservicetree.OriginHasPrefix(*f.OriginHasPrefix))
 	}
 }
+func (f SpiderDevTblServicetreeTableOriginHasPrefixForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableOriginHasSuffixForm struct {
 	OriginHasSuffix *string `form:"OriginHasSuffix" json:"OriginHasSuffix"`
@@ -1163,6 +1375,9 @@ func (f SpiderDevTblServicetreeTableOriginHasSuffixForm) Query(q *SpiderDevTblSe
 	if f.OriginHasSuffix != nil {
 		q.Where(spiderdevtblservicetree.OriginHasSuffix(*f.OriginHasSuffix))
 	}
+}
+func (f SpiderDevTblServicetreeTableOriginHasSuffixForm) CountQuery() bool {
+	return true
 }
 
 type SpiderDevTblServicetreeTableOriginEqualFoldForm struct {
@@ -1174,6 +1389,9 @@ func (f SpiderDevTblServicetreeTableOriginEqualFoldForm) Query(q *SpiderDevTblSe
 		q.Where(spiderdevtblservicetree.OriginEqualFold(*f.OriginEqualFold))
 	}
 }
+func (f SpiderDevTblServicetreeTableOriginEqualFoldForm) CountQuery() bool {
+	return true
+}
 
 type SpiderDevTblServicetreeTableOriginContainsFoldForm struct {
 	OriginContainsFold *string `form:"OriginContainsFold" json:"OriginContainsFold"`
@@ -1183,6 +1401,9 @@ func (f SpiderDevTblServicetreeTableOriginContainsFoldForm) Query(q *SpiderDevTb
 	if f.OriginContainsFold != nil {
 		q.Where(spiderdevtblservicetree.OriginContainsFold(*f.OriginContainsFold))
 	}
+}
+func (f SpiderDevTblServicetreeTableOriginContainsFoldForm) CountQuery() bool {
+	return true
 }
 
 // SpiderDevTblServicetreeGroupBy is the group-by builder for SpiderDevTblServicetree entities.

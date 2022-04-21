@@ -56,7 +56,7 @@ func (_d TblservicetreeServiceWithTracing) ByQueries(ctx context.Context, i inte
 }
 
 // Create implements TblservicetreeService
-func (_d TblservicetreeServiceWithTracing) Create(ctx context.Context, v ent.SpiderDevTblServicetree) (res *ent.SpiderDevTblServicetree, err error) {
+func (_d TblservicetreeServiceWithTracing) Create(ctx context.Context, v *ent.SpiderDevTblServicetree) (res *ent.SpiderDevTblServicetree, err error) {
 
 	var name = "TblservicetreeService.Create"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -129,7 +129,7 @@ func (_d TblservicetreeServiceWithTracing) DeleteById(ctx context.Context, id in
 // DeleteMany implements TblservicetreeService
 func (_d TblservicetreeServiceWithTracing) DeleteMany(ctx context.Context, ids []int32) (err error) {
 
-	var name = "TblservicetreeService.UserRestDeleteMany"
+	var name = "TblservicetreeService.DeleteMany"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
