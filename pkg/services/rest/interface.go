@@ -1,6 +1,9 @@
 package rest
 
-import "context"
+import (
+	"context"
+	"hello/pkg/ent"
+)
 
 type RestService interface {
 	CreateUser(ctx context.Context, req CreateUserReq) (res CreateUserRes, err error)

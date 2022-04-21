@@ -9,20 +9,46 @@ import (
 //go:generate gowrap gen -ps=false -g -p ./ -i RestService -bt "prometheus:rest_with_prometheus_gen.go log:rest_with_log_gen.go opentracing:rest_with_trace_gen.go"
 
 type basicRestService struct {
+	db *ent.Client
 	userRepo ent.UserBaseInterface
 }
+
+func CreateCopy(o *ent.UserCreate,v ent.User) {
+	o.SetAge(v.Age).SetName(v.Name)
+}
+
+func ReadCopy(q *ent.UserQuery) {
+	q.Select()
+}
+
+func UpdateCopy(o *ent.UserUpdate,v ent.User) {
+	o.SetAge(v.Age)
+	o.SetName(v.Name)
+}
+
+func ResultOneCopy(user *ent.User) (res ent.User) {
+	return
+}
+
+func ResultListCopy(users ent.Users) (res ent.Users) {
+	return
+}
+
 
 type CreateUserReq struct {
 	Body ent.User
 }
 
-func (b *basicRestService) CreateUser(ctx context.Context, req CreateUserReq) (*ent.User, error) {
-	return b.userRepo.Create(ctx, req.Body)
+func (b *basicRestService) CreateUser(ctx context.Context, req CreateUserReq) (ent.User, error) {
+	c := b.db.User.Create()
+	CreateCopy(c, req.Body)
+	data, err := c.Save(ctx)
+	return ResultOneCopy(data), err
 }
 
 
 type CreateUsersReq struct {
-	Body []*ent.User
+	Body ent.Users
 }
 
 type CreateUsersRes struct {
@@ -30,6 +56,8 @@ type CreateUsersRes struct {
 }
 
 func (b *basicRestService) CreateUsers(ctx context.Context, req CreateUsersReq) (res CreateUsersRes, err error) {
+	b.userRepo.CreateMany(ctx, req.Body)
+
 }
 
 type UpdateUserIdReq struct {

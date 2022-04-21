@@ -5,13 +5,14 @@ package user
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"hello/pkg/ent"
 	"time"
 
 	"context"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+
+	"hello/pkg/ent"
 )
 
 // UserServiceWithPrometheus implements UserService interface with all methods wrapped
@@ -38,8 +39,92 @@ func NewUserServiceWithPrometheus(base UserService) UserServiceWithPrometheus {
 	}
 }
 
+// ByQueries implements UserService
+func (_d UserServiceWithPrometheus) ByQueries(ctx context.Context, req ent.UserRestByQueriesReq) (res ent.UserRestByQueriesRes, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ByQueries", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.ByQueries(ctx, req)
+}
+
+// Create implements UserService
+func (_d UserServiceWithPrometheus) Create(ctx context.Context, req ent.UserRestCreateReq) (res *ent.User, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "Create", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.Create(ctx, req)
+}
+
+// CreateMany implements UserService
+func (_d UserServiceWithPrometheus) CreateMany(ctx context.Context, req ent.UserRestCreateManyReq) (res ent.Users, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "CreateMany", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.CreateMany(ctx, req)
+}
+
+// CreatePodsSliceByUserId implements UserService
+func (_d UserServiceWithPrometheus) CreatePodsSliceByUserId(ctx context.Context, req ent.UserRestCreatePodsSliceByUserIdReq) (res *ent.User, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "CreatePodsSliceByUserId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.CreatePodsSliceByUserId(ctx, req)
+}
+
+// DeleteById implements UserService
+func (_d UserServiceWithPrometheus) DeleteById(ctx context.Context, req ent.UserRestDeleteByIdReq) (success bool, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "DeleteById", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.DeleteById(ctx, req)
+}
+
+// DeleteMany implements UserService
+func (_d UserServiceWithPrometheus) DeleteMany(ctx context.Context, req ent.UserRestDeleteManyReq) (success bool, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "DeleteMany", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.DeleteMany(ctx, req)
+}
+
 // GetById implements UserService
-func (_d UserServiceWithPrometheus) GetById(ctx context.Context, req GetByIdReq) (up1 *ent.User, err error) {
+func (_d UserServiceWithPrometheus) GetById(ctx context.Context, req ent.UserRestGetByIdReq) (res *ent.User, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -52,8 +137,8 @@ func (_d UserServiceWithPrometheus) GetById(ctx context.Context, req GetByIdReq)
 	return _d.base.GetById(ctx, req)
 }
 
-// GetList implements UserService
-func (_d UserServiceWithPrometheus) GetList(ctx context.Context, req GetListReq) (g1 GetListRes, err error) {
+// GetPodsSliceByUserId implements UserService
+func (_d UserServiceWithPrometheus) GetPodsSliceByUserId(ctx context.Context, req ent.UserRestGetPodsSliceByUserIdReq) (res ent.UserRestGetPodsSliceByUserIdRes, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -61,7 +146,35 @@ func (_d UserServiceWithPrometheus) GetList(ctx context.Context, req GetListReq)
 			result = "error"
 		}
 
-		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetList", result).Observe(time.Since(_since).Seconds())
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetPodsSliceByUserId", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.GetList(ctx, req)
+	return _d.base.GetPodsSliceByUserId(ctx, req)
+}
+
+// UpdateById implements UserService
+func (_d UserServiceWithPrometheus) UpdateById(ctx context.Context, req ent.UserRestUpdateByIdReq) (res *ent.User, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UpdateById", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.UpdateById(ctx, req)
+}
+
+// UpdateMany implements UserService
+func (_d UserServiceWithPrometheus) UpdateMany(ctx context.Context, req ent.UserRestUpdateManyReq) (success bool, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UpdateMany", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.UpdateMany(ctx, req)
 }

@@ -112,12 +112,25 @@ definitions:
       age:
         description: Age holds the value of the "age" field.
         type: integer
+      edges:
+        $ref: '#/definitions/ent.UserEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the UserQuery when eager-loading is set.
       id:
         description: ID of the ent.
         type: integer
       name:
         description: Name holds the value of the "name" field.
         type: string
+    type: object
+  ent.UserEdges:
+    properties:
+      pods:
+        description: Pods holds the value of the pods edge.
+        items:
+          $ref: '#/definitions/ent.Pod'
+        type: array
     type: object
   hello.SwagResponse:
     properties:

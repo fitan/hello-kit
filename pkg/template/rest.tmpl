@@ -18,7 +18,7 @@ type {{$.Name}}TableFormer interface {
 }
 
 type {{$.Name}}TablePagingForm struct {
-	Limit *int `json:"_limit" form:"_limit"`
+	Limit *int `json:"_limit" form:"_limit" {{if and $.Annotations.rest (hasKey $.Annotations.rest "pagingLimitMax")}}{{$.Annotations.pagingLimitMax}}{{end}}`
 	Page *int `json:"_page" form:"_page"`
 }
 func (f {{$.Name}}TablePagingForm) Query(q *{{$.Name}}Query) {
@@ -71,6 +71,23 @@ func {{$.Name}}FormDepValue(v reflect.Value, former reflect.Type, l *[]{{$.Name}
 	}
 }
 
+type {{$.Name}}QueryOps struct {
+{{if $.Annotations.rest}}
+	Paging *{{$.Name}}TablePagingForm {{if hasKey $.Annotations.rest "pagingMust"}}`binding:"required"`{{end}}
+    {{$.Name}}TableOrderForm
+{{end}}
+{{range $f := $.Fields}}
+{{if $f.Annotations.rest}}
+{{range $op := $f.Ops}}
+{{if (hasKey $f.Annotations.rest.queryOps $op.Name)}}
+{{ $func := print $f.StructField $op.Name }}
+	{{$.Name}}Table{{ $func }}Form
+{{end}}
+{{end}}
+{{end}}
+{{end}}
+}
+
 {{range $f := $.Fields}}
 {{ range $op := $f.Ops }}
 {{if ne $op.Niladic true}}
@@ -84,7 +101,6 @@ func (f {{$.Name}}Table{{ $func }}Form) Query(q *{{$.Name}}Query) {
 	}
 }
 {{end}}
-
 {{end}}
 {{end}}
 
@@ -99,7 +115,7 @@ func (f {{$.Name}}Table{{ $func }}Form) Query(q *{{$.Name}}Query) {
 {{$structName := print $n.Name "Base"}}
 {{$interfaceName := print $structName "Interface"}}
 type {{$interfaceName}} interface {
-	Create(ctx context.Context, v {{$n.Name}}) (res *{{$n.Name}},err error )
+	Create(ctx context.Context, v *{{$n.Name}}) (res *{{$n.Name}},err error )
 	CreateMany(ctx context.Context, vs {{plural $n.Name}}) ({{plural $n.Name}}, error)
 	GetById(ctx context.Context, id {{$n.ID.Type.String}}) (res *{{$n.Name}},err error)
 	ByQueries(ctx context.Context, i interface{}) (res {{plural $n.Name}}, count int,err error)
@@ -122,34 +138,59 @@ type {{$interfaceName}} interface {
 type {{$structName}} struct {
 	client *Client
 }
+func (c *{{$structName}}) CreateSet(create *{{$n.Name}}Create, v *{{$n.Name}}) *{{$n.Name}}Create {
+	return create
+		{{- range $f := $n.Fields}}{{if hasKey $f.Annotations "create"}}.{{ $func := print "Set" $f.StructField }}
+			{{$func}}(v.{{$f.StructField}}){{end}}{{- end}}
+}
 
-func (c *{{$structName}}) Create(ctx context.Context, v {{$n.Name}}) (res *{{$n.Name}}, err error) {
-	return c.client.{{$n.Name}}.Create().
-		{{- range $f := $n.Fields}}{{ $func := print "Set" $f.StructField }}
-			{{$func}}(v.{{$f.StructField}}).{{- end}}Save(ctx)
+func (c *{{$structName}}) Create(ctx context.Context, v *{{$n.Name}}) (res *{{$n.Name}}, err error) {
+	create := c.client.{{$n.Name}}.Create()
+	c.CreateSet(create, v)
+	return create.Save(ctx)
 }
 
 func (c *{{$structName}}) CreateMany(ctx context.Context, vs {{plural $n.Name}}) ({{plural $n.Name}}, error) {
 	bulk := make([]*{{$n.Name}}Create, len(vs))
 	for i, v := range vs {
-		bulk[i] = c.client.{{$n.Name}}.Create()
-			{{- range $f := $n.Fields}}.{{ $func := print "Set" $f.StructField }}
-				{{$func}}(v.{{$f.StructField}}){{- end}}
+		create := c.client.{{$n.Name}}.Create()
+		c.CreateSet(create, v)
+		bulk[i] = create
 	}
 	return c.client.{{$n.Name}}.CreateBulk(bulk...).Save(ctx)
 }
 
+func (c *{{$structName}}) GetSelect(query *{{$n.Name}}Query) *{{$n.Name}}Select {
+	{{$hasSelectAll := true }}
+	return query.Select({{range $f := $n.Fields}}
+	{{if hasKey $f.Annotations "read"}}{{$hasSelectAll = false}}{{camel $n.Name}}.Field{{pascal $f.Name}},{{end}}
+	{{- end}}{{- if $hasSelectAll}}{{camel $n.Name}}.Columns...{{end}}
+	)
+}
+
 func (c *{{$structName}}) GetById(ctx context.Context, id {{$n.ID.Type.String}}) (res *{{$n.Name}}, err error) {
-	return c.client.{{$n.Name}}.Get(ctx, id)
+	query := c.client.{{$n.Name}}.Query()
+	c.GetSelect(query)
+	return query.Where({{lower $n.Name}}.IDEQ(id)).First(ctx)
 }
 
 func (c *{{$structName}}) ByQueries(ctx context.Context, i interface{}) (res {{plural $n.Name}}, count int, err error) {
-	res, count, err = c.client.{{$n.Name}}.Query().ByQueries(ctx,i)
+	query := c.client.{{$n.Name}}.Query()
+	c.GetSelect(query)
+	res, count, err = query.ByQueries(ctx,i)
 	return
 }
 
+func (c *{{$structName}}) UpdateSet(update *{{$n.Name}}UpdateOne, v *{{$n.Name}}) *{{$n.Name}}UpdateOne  {
+	return update
+		{{- range $f := $n.Fields}}{{if hasKey $f.Annotations "update"}}.{{ $func := print "Set" $f.StructField }}
+			{{$func}}(v.{{$f.StructField}}){{end}}{{- end}}
+}
+
 func (c *{{$structName}}) UpdateById(ctx context.Context, id {{$n.ID.Type.String}}, v *{{$n.Name}}) (*{{$n.Name}}, error) {
-	return c.client.{{$n.Name}}.UpdateOne(v).Save(ctx)
+	update := c.client.{{$n.Name}}.UpdateOneID(id)
+	c.UpdateSet(update, v)
+	return update.Save(ctx)
 }
 
 func (c *{{$structName}}) UpdateMany(ctx context.Context, vs {{plural $n.Name}}) (err error) {
@@ -171,9 +212,9 @@ func (c *{{$structName}}) UpdateMany(ctx context.Context, vs {{plural $n.Name}})
 	}()
 
 	for _,v := range vs {
-		_, err = tx.{{$n.Name}}.UpdateOneID(v.{{$n.ID.StructField}}).
-			{{- range $f := $n.Fields}}{{ $func := print "Set" $f.StructField }}
-			{{$func}}(v.{{$f.StructField}}).{{- end}}Save(ctx)
+		update := tx.{{$n.Name}}.UpdateOneID(v.ID)
+		c.UpdateSet(update, v)
+		_, err = update.Save(ctx)
 		if err != nil {
 			return err
 		}
@@ -214,3 +255,221 @@ func New{{$structName}}(client *Client) {{$structName}}Interface {
 }
 {{end}}
 {{end}}
+
+{{ define "client/additional/rest" }}
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+{{range $n := $.Nodes}}
+{{$structName := print $n.Name "Rest"}}
+{{$interfaceName := print $structName "Interface"}}
+{{$nodeHttpName := lower (plural $n.Name)}}
+type {{$interfaceName}} interface {
+	// @http-gin /{{lower $n.Name}} POST
+	{{- $funcName := "Create"}} {{$req := print $structName $funcName "Req" }}
+	{{$funcName}}(ctx context.Context, req {{$req}}) (res *{{$n.Name}},err error )
+	// @http-gin /{{$nodeHttpName}} POST
+	{{- $funcName = "CreateMany"}} {{$req = print $structName $funcName "Req" }}
+	{{$funcName}}(ctx context.Context, req {{$req}}) (res {{plural $n.Name}},err error)
+	// @http-gin /{{$nodeHttpName}}/:id GET
+	{{- $funcName = "GetById"}} {{$req = print $structName $funcName "Req" }}
+    GetById(ctx context.Context, req {{$req}}) (res *{{$n.Name}},err error)
+	// @http-gin /{{$nodeHttpName}} GET
+	{{- $funcName = "ByQueries"}} {{$req = print $structName $funcName "Req" }} {{$res := print $structName $funcName "Res" }}
+    ByQueries(ctx context.Context, req {{$req}}) (res {{$res}},err error)
+	// @http-gin /{{$nodeHttpName}}/:id PUT
+	{{- $funcName = "UpdateById"}} {{$req = print $structName $funcName "Req" }}
+    UpdateById(ctx context.Context,req {{$req}}) (res *{{$n.Name}},err error)
+	// @http-gin /{{$nodeHttpName}} PUT
+	{{- $funcName = "UpdateMany"}} {{$req = print $structName $funcName "Req" }}
+    UpdateMany(ctx context.Context, req {{$req}}) (success bool,err error)
+	// @http-gin /{{$nodeHttpName}}/:id DELETE
+	{{- $funcName = "DeleteById"}} {{$req = print $structName $funcName "Req" }}
+    DeleteById(ctx context.Context, req {{$req}}) (success bool,err error)
+	// @http-gin /{{$nodeHttpName}} GET
+	{{- $funcName = "DeleteMany"}} {{$req = print $structName $funcName "Req" }}
+    DeleteMany(ctx context.Context, req {{$req}}) (success bool,err error)
+	{{range $e := $n.Edges }}
+	{{$edgeHttpName := lower (plural $e.Name)}}
+	{{if or $e.O2O $e.M2O}}
+		// @http-gin /{{$nodeHttpName}}/:id/{{lower $e.Name}} POST
+        {{- $funcName = print "Create" (pascal $e.Name) "By" $n.Name "Id"}} {{$req = print $structName $funcName "Req" }}
+		{{$funcName}}(ctx context.Context,req {{$req}}) (res *{{$n.Name}}, err error)
+		// @http-gin /{{$nodeHttpName}}/:id/{{lower $e.Name}} GET
+        {{- $funcName = print "Get" (pascal $e.Name) "By" $n.Name "Id"}} {{$req = print $structName $funcName "Req" }}
+		{{$funcName}}(ctx context.Context,req {{$req}}) (res *{{$e.Type.Name}}, err error)
+	{{end}}
+    {{if or $e.O2M $e.M2M}}
+	    // @http-gin /{{$nodeHttpName}}/:id/{{$edgeHttpName}} POST
+        {{- $funcName = print "Create" (pascal (plural $e.Name)) "By" $n.Name "Id"}} {{$req = print $structName $funcName "Req" }}
+	    {{$funcName}}(ctx context.Context,req {{$req}}) (res *{{$n.Name}}, err error)
+	    // @http-gin /{{$nodeHttpName}}/:id/{{lower $e.Name}} GET
+        {{- $funcName = print "Get" (plural (pascal $e.Name)) "By" $n.Name "Id"}} {{$req = print $structName $funcName "Req" }} {{$res = print $structName $funcName "Res" }}
+	    {{$funcName}}(ctx context.Context,req {{$req}}) (res {{$res}},err error)
+    {{end}}
+	{{end}}
+}
+func New{{$n.Name}}Rest(client *Client) {{$n.Name}}RestInterface  {
+	return &{{$n.Name}}Rest{repo: &{{$n.Name}}Base{client: client}}
+}
+
+type {{$structName}} struct {
+	repo {{print $n.Name "BaseInterface"}}
+}
+
+{{$funcName = "Create"}} {{$req = print $structName $funcName "Req" }}
+type {{$req}} struct {
+	Body {{$n.Name}} `json:"body"`
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res *{{$n.Name}}, err error) {
+	return rest.repo.Create(ctx, &req.Body)
+}
+{{$funcName = "CreateMany"}} {{$req = print $structName $funcName "Req" }}
+type {{$req}} struct {
+	Body {{plural $n.Name}} `json:"body"`
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res {{plural $n.Name}},err error) {
+	return rest.repo.CreateMany(ctx, req.Body)
+}
+{{$funcName = "GetById"}} {{$req = print $structName $funcName "Req" }}
+type {{$req}} struct {
+	Uri struct{
+		Id {{$n.ID.Type}} `json:"id" uri:"id"`
+	}
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res *{{$n.Name}}, err error) {
+	return rest.repo.GetById(ctx, req.Uri.Id)
+}
+{{$funcName = "ByQueries"}} {{$req = print $structName $funcName "Req" }} {{$res = print $structName $funcName "Res" }}
+type {{$req}} struct {
+	Query {{$n.Name}}QueryOps `json:"query"`
+}
+
+type {{$res}} struct {
+	List {{plural $n.Name}} `json:"list"`
+	Total int `json:"total"`
+}
+
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res {{$res}}, err error) {
+	list, total,err := rest.repo.ByQueries(ctx, req.Query)
+	return {{$res}}{List:list, Total:total},err
+}
+{{$funcName = "UpdateById"}} {{$req = print $structName $funcName "Req" }}
+type {{$req}} struct {
+	Uri struct{
+		Id {{$n.ID.Type}} `json:"id" uri:"id"`
+	} `json:"uri"`
+	Body {{$n.Name}} `json:"body"`
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res *{{$n.Name}},err error) {
+	return rest.repo.UpdateById(ctx, req.Uri.Id, &req.Body)
+}
+{{$funcName = "UpdateMany"}} {{$req = print $structName $funcName "Req" }}
+type {{$req}} struct {
+	Query struct{
+		Ids []{{$n.ID.Type}} `json:"ids" form:"ids"`
+	} `json:"query"`
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (success bool,err error) {
+	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+{{$funcName = "DeleteById"}} {{$req = print $structName $funcName "Req" }}
+type {{$req}} struct {
+	Uri struct{
+		Id {{$n.ID.Type}} `json:"id" uri:"id"`
+	} `json:"uri"`
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (success bool,err error) {
+	err = rest.repo.DeleteById(ctx, req.Uri.Id)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+{{$funcName = "DeleteMany"}} {{$req = print $structName $funcName "Req" }}
+type {{$req}} struct {
+	Query struct{
+		Ids []{{$n.ID.Type}} `json:"ids" form:"ids"`
+	} `json:"query"`
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (success bool,err error) {
+	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+{{range $e := $n.Edges }}
+    {{$edgeHttpName := lower (plural $e.Name)}}
+    {{if or $e.O2O $e.M2O}}
+    {{$funcName = print "Create" (pascal $e.Name) "By" $n.Name "Id"}} {{$req = print $structName $funcName "Req" }}
+type {{$req}} struct {
+	Uri struct{
+		Id {{$n.ID.Type}} `json:"id" uri:"id"`
+	}
+	Body {{$e.Type.Name}} `json:"body"`
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res *{{$n.Name}}, err error) {
+	return rest.repo.{{$funcName}}(ctx, req.Uri.Id, &req.Body)
+}
+    {{$funcName = print "Get" (pascal $e.Name) "By" $n.Name "Id"}} {{$req = print $structName $funcName "Req" }}
+type {{$req}} struct {
+	Uri struct{
+		Id {{$n.ID.Type}} `json:"id" uri:"id"`
+	} `json:"uri"`
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res *{{$e.Type.Name}}, err error) {
+	return rest.repo.{{$funcName}}(ctx, req.Uri.Id)
+}
+    {{end}}
+    {{if or $e.O2M $e.M2M}}
+    {{$funcName = print "Create" (pascal (plural $e.Name)) "By" $n.Name "Id"}} {{$req = print $structName $funcName "Req" }}
+type {{$req}} struct {
+	Uri struct{
+		Id {{$n.ID.Type}} `json:"id" uri:"id"`
+	}
+	Body {{plural $e.Type.Name}} `json:"body"`
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res *{{$n.Name}}, err error) {
+	return rest.repo.{{$funcName}}(ctx, req.Uri.Id, req.Body)
+}
+    {{$funcName = print "Get" (plural (pascal $e.Name)) "By" $n.Name "Id"}} {{$req = print $structName $funcName "Req" }} {{$res := print $structName $funcName "Res" }}
+type {{$req}} struct {
+	Uri struct{
+		Id {{$n.ID.Type}} `json:"id" uri:"id"`
+	} `json:"uri"`
+	Query {{$e.Type.Name}}QueryOps `json:"query"`
+}
+
+type {{$res}} struct {
+	List {{plural $e.Type.Name}} `json:"list"`
+	Total int `json:"total"`
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res {{$res}}, err error) {
+	list, total,err := rest.repo.{{$funcName}}(ctx, req.Uri.Id, req.Query)
+    return {{$res}}{List:list, Total:total},err
+}
+    {{end}}
+{{end}}
+
+
+
+
+{{end}}
+{{end}}
+
+

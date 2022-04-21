@@ -11,7 +11,6 @@ import (
 	"hello/pkg/repository/api/baidu"
 	"hello/pkg/repository/api/taobao"
 	podD "hello/pkg/repository/dao/pod"
-	projectD "hello/pkg/repository/dao/project"
 	tblservicetreeD "hello/pkg/repository/dao/tblservicetree"
 	userD "hello/pkg/repository/dao/user"
 	"hello/pkg/services"
@@ -37,13 +36,13 @@ var taobaoHttpSet = wire.NewSet(taobao.NewBasicService, taobao.NewServiceMiddlew
 // repo.dao.service
 var userDaoSet = wire.NewSet(userD.NewBasicService, userD.NewServiceMiddleware, userD.NewService)
 var podDaoSet = wire.NewSet(podD.NewBasicService, podD.NewServiceMiddleware, podD.NewService)
-var projectDaoSet = wire.NewSet(projectD.NewBasicService, projectD.NewServiceMiddleware, projectD.NewService)
+//var projectDaoSet = wire.NewSet(projectD.NewBasicService, projectD.NewServiceMiddleware, projectD.NewService)
 var tblservicetreeDaoSet = wire.NewSet(tblservicetreeD.NewBasicService, tblservicetreeD.NewServiceMiddleware, tblservicetreeD.NewService)
 
 
 
 
-var repoSet = wire.NewSet(podDaoSet,projectDaoSet,tblservicetreeDaoSet,userDaoSet, baiduHttpSet, taobaoHttpSet, wire.Struct(new(repository.Repository), "*"))
+var repoSet = wire.NewSet(podDaoSet,tblservicetreeDaoSet,userDaoSet, baiduHttpSet, taobaoHttpSet, wire.Struct(new(repository.Repository), "*"))
 
 // http service
 var casbinServiceSet = wire.NewSet(casbin.NewBasicService, casbin.NewService, casbin.NewServiceMiddleware)

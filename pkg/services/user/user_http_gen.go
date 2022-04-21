@@ -6,10 +6,11 @@ package user
 
 import (
 	"context"
-	"hello/pkg/ent"
 
 	"github.com/fitan/gink/transport/http"
 	"github.com/gin-gonic/gin"
+
+	"hello/pkg/ent"
 )
 
 type Ops map[string][]http.ServerOption
@@ -17,9 +18,25 @@ type Ops map[string][]http.ServerOption
 func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option http.ServerOption) {
 	methods := []string{
 
+		"ByQueries",
+
+		"Create",
+
+		"CreateMany",
+
+		"CreatePodsSliceByUserId",
+
+		"DeleteById",
+
+		"DeleteMany",
+
 		"GetById",
 
-		"GetList",
+		"GetPodsSliceByUserId",
+
+		"UpdateById",
+
+		"UpdateMany",
 	}
 	for _, v := range methods {
 		options[v] = append(options[v], option)
@@ -31,9 +48,25 @@ type HttpHandler struct {
 
 func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops) HttpHandler {
 
+	makeByQueriesHandler(r, endpoints, options["ByQueries"])
+
+	makeCreateHandler(r, endpoints, options["Create"])
+
+	makeCreateManyHandler(r, endpoints, options["CreateMany"])
+
+	makeCreatePodsSliceByUserIdHandler(r, endpoints, options["CreatePodsSliceByUserId"])
+
+	makeDeleteByIdHandler(r, endpoints, options["DeleteById"])
+
+	makeDeleteManyHandler(r, endpoints, options["DeleteMany"])
+
 	makeGetByIdHandler(r, endpoints, options["GetById"])
 
-	makeGetListHandler(r, endpoints, options["GetList"])
+	makeGetPodsSliceByUserIdHandler(r, endpoints, options["GetPodsSliceByUserId"])
+
+	makeUpdateByIdHandler(r, endpoints, options["UpdateById"])
+
+	makeUpdateManyHandler(r, endpoints, options["UpdateMany"])
 
 	return HttpHandler{}
 }
@@ -43,17 +76,115 @@ type SwagResponse struct {
 	Data    interface{} `json:"data"`
 }
 
+type ByQueriesQuerySwag ent.UserQueryOps
+
+// @Accept  json
+// @Tags UserService
+// @Param query query ByQueriesQuerySwag false " "
+// @Success 200 {object} SwagResponse{data=ent.UserRestByQueriesRes}
+// @Router /users [get]
+func makeByQueriesHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.GET("/users", http.NewServer(endpoints.ByQueriesEndpoint, decodeByQueriesRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeByQueriesRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestByQueriesReq
+	var err error
+
+	err = ctx.ShouldBindQuery(&req.Query)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+type CreateBodySwag ent.User
+
+// @Accept  json
+// @Tags UserService
+// @Param body body CreateBodySwag true " "
+// @Success 200 {object} SwagResponse{data=ent.User}
+// @Router /user [post]
+func makeCreateHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.POST("/user", http.NewServer(endpoints.CreateEndpoint, decodeCreateRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeCreateRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestCreateReq
+	var err error
+
+	err = ctx.ShouldBindJSON(&req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+type CreateManyBodySwag ent.Users
+
+// @Accept  json
+// @Tags UserService
+// @Param body body CreateManyBodySwag true " "
+// @Success 200 {object} SwagResponse{data=ent.Users}
+// @Router /users [post]
+func makeCreateManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.POST("/users", http.NewServer(endpoints.CreateManyEndpoint, decodeCreateManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeCreateManyRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestCreateManyReq
+	var err error
+
+	err = ctx.ShouldBindJSON(&req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+type CreatePodsSliceByUserIdBodySwag ent.Pods
+
+// @Accept  json
+// @Tags UserService
+// @Param body body CreatePodsSliceByUserIdBodySwag true " "
+// @Param id path string true " "
+// @Success 200 {object} SwagResponse{data=ent.User}
+// @Router /users/{id}/podsslice [post]
+func makeCreatePodsSliceByUserIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.POST("/users/:id/podsslice", http.NewServer(endpoints.CreatePodsSliceByUserIdEndpoint, decodeCreatePodsSliceByUserIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeCreatePodsSliceByUserIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestCreatePodsSliceByUserIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindJSON(&req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
 // @Accept  json
 // @Tags UserService
 // @Param id path string true " "
-// @Success 200 {object} SwagResponse{data=ent.User}
-// @Router /user/{id} [get]
-func makeGetByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
-	r.GET("/user/:id", http.NewServer(endpoints.GetByIdEndpoint, decodeGetByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+// @Success 200 {object} SwagResponse{data=bool}
+// @Router /users/{id} [delete]
+func makeDeleteByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.DELETE("/users/:id", http.NewServer(endpoints.DeleteByIdEndpoint, decodeDeleteByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
-func decodeGetByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
-	var req GetByIdReq
+func decodeDeleteByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestDeleteByIdReq
 	var err error
 
 	err = ctx.ShouldBindUri(&req.Uri)
@@ -64,26 +195,125 @@ func decodeGetByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, err
 	return req, err
 }
 
-type GetListQuerySwag struct {
-	*ent.PodTableServiceNameEQForm
-	*ent.PodTableNamespaceEQForm
-	*ent.PodTableServiceNameInForm
-	*ent.PodTablePagingForm `binding:"required"`
-	*ent.PodTableOrderForm
-	*ent.PodTableHostIPEQForm
+type DeleteManyQuerySwag struct {
+	Ids []int `json:"ids" form:"ids"`
 }
 
 // @Accept  json
 // @Tags UserService
-// @Param query query GetListQuerySwag false " "
-// @Success 200 {object} SwagResponse{data=GetListRes}
-// @Router /user [get]
-func makeGetListHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
-	r.GET("/user", http.NewServer(endpoints.GetListEndpoint, decodeGetListRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+// @Param query query DeleteManyQuerySwag false " "
+// @Success 200 {object} SwagResponse{data=bool}
+// @Router /users [get]
+func makeDeleteManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.GET("/users", http.NewServer(endpoints.DeleteManyEndpoint, decodeDeleteManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
-func decodeGetListRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
-	var req GetListReq
+func decodeDeleteManyRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestDeleteManyReq
+	var err error
+
+	err = ctx.ShouldBindQuery(&req.Query)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+// @Accept  json
+// @Tags UserService
+// @Param id path string true " "
+// @Success 200 {object} SwagResponse{data=ent.User}
+// @Router /users/{id} [get]
+func makeGetByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.GET("/users/:id", http.NewServer(endpoints.GetByIdEndpoint, decodeGetByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeGetByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestGetByIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+type GetPodsSliceByUserIdQuerySwag ent.PodQueryOps
+
+// @Accept  json
+// @Tags UserService
+// @Param query query GetPodsSliceByUserIdQuerySwag false " "
+// @Param id path string true " "
+// @Success 200 {object} SwagResponse{data=ent.UserRestGetPodsSliceByUserIdRes}
+// @Router /users/{id}/pods [get]
+func makeGetPodsSliceByUserIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.GET("/users/:id/pods", http.NewServer(endpoints.GetPodsSliceByUserIdEndpoint, decodeGetPodsSliceByUserIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeGetPodsSliceByUserIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestGetPodsSliceByUserIdReq
+	var err error
+
+	err = ctx.ShouldBindQuery(&req.Query)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+type UpdateByIdBodySwag ent.User
+
+// @Accept  json
+// @Tags UserService
+// @Param body body UpdateByIdBodySwag true " "
+// @Param id path string true " "
+// @Success 200 {object} SwagResponse{data=ent.User}
+// @Router /users/{id} [put]
+func makeUpdateByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/users/:id", http.NewServer(endpoints.UpdateByIdEndpoint, decodeUpdateByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeUpdateByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestUpdateByIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindJSON(&req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+type UpdateManyQuerySwag struct {
+	Ids []int `json:"ids" form:"ids"`
+}
+
+// @Accept  json
+// @Tags UserService
+// @Param query query UpdateManyQuerySwag false " "
+// @Success 200 {object} SwagResponse{data=bool}
+// @Router /users [put]
+func makeUpdateManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/users", http.NewServer(endpoints.UpdateManyEndpoint, decodeUpdateManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeUpdateManyRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestUpdateManyReq
 	var err error
 
 	err = ctx.ShouldBindQuery(&req.Query)

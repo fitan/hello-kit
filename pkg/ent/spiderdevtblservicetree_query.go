@@ -448,7 +448,7 @@ type SpiderDevTblServicetreeTableFormer interface {
 }
 
 type SpiderDevTblServicetreeTablePagingForm struct {
-	Limit *int `json:"_limit" form:"_limit"`
+	Limit *int `json:"_limit" form:"_limit" `
 	Page  *int `json:"_page" form:"_page"`
 }
 
@@ -500,6 +500,9 @@ func SpiderDevTblServicetreeFormDepValue(v reflect.Value, former reflect.Type, l
 			SpiderDevTblServicetreeFormDepValue(f, former, l)
 		}
 	}
+}
+
+type SpiderDevTblServicetreeQueryOps struct {
 }
 
 type SpiderDevTblServicetreeTableNameEQForm struct {

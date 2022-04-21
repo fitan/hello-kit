@@ -17,5 +17,5 @@ type BaseService PodService
 
 // NewBasicPodService returns a naive, stateless implementation of PodService.
 func NewBasicService(client *ent.Client) BaseService {
-	return &basicPodService{ent.NewPodBase(client.Pod)}
+	return &basicPodService{ent.NewPodBase(client)}
 }

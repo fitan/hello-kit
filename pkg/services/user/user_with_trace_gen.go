@@ -7,12 +7,13 @@ package user
 import (
 	"context"
 	"encoding/json"
-	"hello/pkg/ent"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
+
+	"hello/pkg/ent"
 )
 
 // UserServiceWithTracing implements UserService interface instrumented with opentracing spans
@@ -29,8 +30,152 @@ func NewUserServiceWithTracing(base UserService) UserService {
 	return d
 }
 
+// ByQueries implements UserService
+func (_d UserServiceWithTracing) ByQueries(ctx context.Context, req ent.UserRestByQueriesReq) (res ent.UserRestByQueriesRes, err error) {
+
+	var name = "UserService.ByQueries"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"req": req},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.ByQueries(ctx, req)
+}
+
+// Create implements UserService
+func (_d UserServiceWithTracing) Create(ctx context.Context, req ent.UserRestCreateReq) (res *ent.User, err error) {
+
+	var name = "UserService.Create"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"req": req},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.Create(ctx, req)
+}
+
+// CreateMany implements UserService
+func (_d UserServiceWithTracing) CreateMany(ctx context.Context, req ent.UserRestCreateManyReq) (res ent.Users, err error) {
+
+	var name = "UserService.CreateMany"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"req": req},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.CreateMany(ctx, req)
+}
+
+// CreatePodsSliceByUserId implements UserService
+func (_d UserServiceWithTracing) CreatePodsSliceByUserId(ctx context.Context, req ent.UserRestCreatePodsSliceByUserIdReq) (res *ent.User, err error) {
+
+	var name = "UserService.CreatePodsSliceByUserId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"req": req},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.CreatePodsSliceByUserId(ctx, req)
+}
+
+// DeleteById implements UserService
+func (_d UserServiceWithTracing) DeleteById(ctx context.Context, req ent.UserRestDeleteByIdReq) (success bool, err error) {
+
+	var name = "UserService.DeleteById"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"req": req},
+				"result": map[string]interface{}{
+					"success": success,
+					"err":     err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.DeleteById(ctx, req)
+}
+
+// DeleteMany implements UserService
+func (_d UserServiceWithTracing) DeleteMany(ctx context.Context, req ent.UserRestDeleteManyReq) (success bool, err error) {
+
+	var name = "UserService.DeleteMany"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"req": req},
+				"result": map[string]interface{}{
+					"success": success,
+					"err":     err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.DeleteMany(ctx, req)
+}
+
 // GetById implements UserService
-func (_d UserServiceWithTracing) GetById(ctx context.Context, req GetByIdReq) (up1 *ent.User, err error) {
+func (_d UserServiceWithTracing) GetById(ctx context.Context, req ent.UserRestGetByIdReq) (res *ent.User, err error) {
 
 	var name = "UserService.GetById"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -40,7 +185,7 @@ func (_d UserServiceWithTracing) GetById(ctx context.Context, req GetByIdReq) (u
 				"params": map[string]interface{}{
 					"req": req},
 				"result": map[string]interface{}{
-					"up1": up1,
+					"res": res,
 					"err": err},
 			}
 			s, _ := json.Marshal(l)
@@ -53,10 +198,10 @@ func (_d UserServiceWithTracing) GetById(ctx context.Context, req GetByIdReq) (u
 	return _d.UserService.GetById(ctx, req)
 }
 
-// GetList implements UserService
-func (_d UserServiceWithTracing) GetList(ctx context.Context, req GetListReq) (g1 GetListRes, err error) {
+// GetPodsSliceByUserId implements UserService
+func (_d UserServiceWithTracing) GetPodsSliceByUserId(ctx context.Context, req ent.UserRestGetPodsSliceByUserIdReq) (res ent.UserRestGetPodsSliceByUserIdRes, err error) {
 
-	var name = "UserService.GetList"
+	var name = "UserService.GetPodsSliceByUserId"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -64,7 +209,7 @@ func (_d UserServiceWithTracing) GetList(ctx context.Context, req GetListReq) (g
 				"params": map[string]interface{}{
 					"req": req},
 				"result": map[string]interface{}{
-					"g1":  g1,
+					"res": res,
 					"err": err},
 			}
 			s, _ := json.Marshal(l)
@@ -74,5 +219,53 @@ func (_d UserServiceWithTracing) GetList(ctx context.Context, req GetListReq) (g
 		span.End()
 	}()
 
-	return _d.UserService.GetList(ctx, req)
+	return _d.UserService.GetPodsSliceByUserId(ctx, req)
+}
+
+// UpdateById implements UserService
+func (_d UserServiceWithTracing) UpdateById(ctx context.Context, req ent.UserRestUpdateByIdReq) (res *ent.User, err error) {
+
+	var name = "UserService.UpdateById"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"req": req},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.UpdateById(ctx, req)
+}
+
+// UpdateMany implements UserService
+func (_d UserServiceWithTracing) UpdateMany(ctx context.Context, req ent.UserRestUpdateManyReq) (success bool, err error) {
+
+	var name = "UserService.UpdateMany"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"req": req},
+				"result": map[string]interface{}{
+					"success": success,
+					"err":     err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.UpdateMany(ctx, req)
 }

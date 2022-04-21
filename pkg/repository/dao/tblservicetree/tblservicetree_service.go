@@ -17,5 +17,5 @@ type BaseService TblservicetreeService
 
 // NewBasicTblservicetreeService returns a naive, stateless implementation of TblservicetreeService.
 func NewBasicService(client *ent.Client) BaseService {
-	return &basicTblservicetreeService{SpiderDevTblServicetreeBaseInterface:ent.NewSpiderDevTblServicetreeBase(client.SpiderDevTblServicetree)}
+	return &basicTblservicetreeService{SpiderDevTblServicetreeBaseInterface:ent.NewSpiderDevTblServicetreeBase(client)}
 }

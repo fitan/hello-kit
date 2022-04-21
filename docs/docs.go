@@ -381,6 +381,10 @@ const docTemplate = `{
                     "description": "Age holds the value of the \"age\" field.",
                     "type": "integer"
                 },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the UserQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.UserEdges"
+                },
                 "id": {
                     "description": "ID of the ent.",
                     "type": "integer"
@@ -388,6 +392,18 @@ const docTemplate = `{
                 "name": {
                     "description": "Name holds the value of the \"name\" field.",
                     "type": "string"
+                }
+            }
+        },
+        "ent.UserEdges": {
+            "type": "object",
+            "properties": {
+                "pods": {
+                    "description": "Pods holds the value of the pods edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Pod"
+                    }
                 }
             }
         },

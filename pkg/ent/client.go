@@ -145,7 +145,7 @@ func (c *Client) Use(hooks ...Hook) {
 }
 
 type PodBaseInterface interface {
-	Create(ctx context.Context, v Pod) (res *Pod, err error)
+	Create(ctx context.Context, v *Pod) (res *Pod, err error)
 	CreateMany(ctx context.Context, vs Pods) (Pods, error)
 	GetById(ctx context.Context, id int64) (res *Pod, err error)
 	ByQueries(ctx context.Context, i interface{}) (res Pods, count int, err error)
@@ -162,57 +162,55 @@ type PodBase struct {
 	client *Client
 }
 
-func (c *PodBase) Create(ctx context.Context, v Pod) (res *Pod, err error) {
-	return c.client.Pod.Create().
-		SetClusterName(v.ClusterName).
-		SetNamespace(v.Namespace).
-		SetServiceName(v.ServiceName).
-		SetPodName(v.PodName).
-		SetResourceVersion(v.ResourceVersion).
-		SetPodIP(v.PodIP).
-		SetHostIP(v.HostIP).
-		SetStartTime(v.StartTime).
-		SetPhase(v.Phase).
-		SetReason(v.Reason).
-		SetMessage(v.Message).
-		SetDetail(v.Detail).
-		SetCreatedAt(v.CreatedAt).
-		SetUpdatedAt(v.UpdatedAt).Save(ctx)
+func (c *PodBase) CreateSet(create *PodCreate, v *Pod) *PodCreate {
+	return create
+}
+
+func (c *PodBase) Create(ctx context.Context, v *Pod) (res *Pod, err error) {
+	create := c.client.Pod.Create()
+	c.CreateSet(create, v)
+	return create.Save(ctx)
 }
 
 func (c *PodBase) CreateMany(ctx context.Context, vs Pods) (Pods, error) {
 	bulk := make([]*PodCreate, len(vs))
 	for i, v := range vs {
-		bulk[i] = c.client.Pod.Create().
-			SetClusterName(v.ClusterName).
-			SetNamespace(v.Namespace).
-			SetServiceName(v.ServiceName).
-			SetPodName(v.PodName).
-			SetResourceVersion(v.ResourceVersion).
-			SetPodIP(v.PodIP).
-			SetHostIP(v.HostIP).
-			SetStartTime(v.StartTime).
-			SetPhase(v.Phase).
-			SetReason(v.Reason).
-			SetMessage(v.Message).
-			SetDetail(v.Detail).
-			SetCreatedAt(v.CreatedAt).
-			SetUpdatedAt(v.UpdatedAt)
+		create := c.client.Pod.Create()
+		c.CreateSet(create, v)
+		bulk[i] = create
 	}
 	return c.client.Pod.CreateBulk(bulk...).Save(ctx)
 }
 
+func (c *PodBase) GetSelect(query *PodQuery) *PodSelect {
+
+	return query.Select(
+
+		pod.Columns...,
+	)
+}
+
 func (c *PodBase) GetById(ctx context.Context, id int64) (res *Pod, err error) {
-	return c.client.Pod.Get(ctx, id)
+	query := c.client.Pod.Query()
+	c.GetSelect(query)
+	return query.Where(pod.IDEQ(id)).First(ctx)
 }
 
 func (c *PodBase) ByQueries(ctx context.Context, i interface{}) (res Pods, count int, err error) {
-	res, count, err = c.client.Pod.Query().ByQueries(ctx, i)
+	query := c.client.Pod.Query()
+	c.GetSelect(query)
+	res, count, err = query.ByQueries(ctx, i)
 	return
 }
 
+func (c *PodBase) UpdateSet(update *PodUpdateOne, v *Pod) *PodUpdateOne {
+	return update
+}
+
 func (c *PodBase) UpdateById(ctx context.Context, id int64, v *Pod) (*Pod, error) {
-	return c.client.Pod.UpdateOne(v).Save(ctx)
+	update := c.client.Pod.UpdateOneID(id)
+	c.UpdateSet(update, v)
+	return update.Save(ctx)
 }
 
 func (c *PodBase) UpdateMany(ctx context.Context, vs Pods) (err error) {
@@ -234,21 +232,9 @@ func (c *PodBase) UpdateMany(ctx context.Context, vs Pods) (err error) {
 	}()
 
 	for _, v := range vs {
-		_, err = tx.Pod.UpdateOneID(v.ID).
-			SetClusterName(v.ClusterName).
-			SetNamespace(v.Namespace).
-			SetServiceName(v.ServiceName).
-			SetPodName(v.PodName).
-			SetResourceVersion(v.ResourceVersion).
-			SetPodIP(v.PodIP).
-			SetHostIP(v.HostIP).
-			SetStartTime(v.StartTime).
-			SetPhase(v.Phase).
-			SetReason(v.Reason).
-			SetMessage(v.Message).
-			SetDetail(v.Detail).
-			SetCreatedAt(v.CreatedAt).
-			SetUpdatedAt(v.UpdatedAt).Save(ctx)
+		update := tx.Pod.UpdateOneID(v.ID)
+		c.UpdateSet(update, v)
+		_, err = update.Save(ctx)
 		if err != nil {
 			return err
 		}
@@ -277,7 +263,7 @@ func NewPodBase(client *Client) PodBaseInterface {
 }
 
 type ProjectBaseInterface interface {
-	Create(ctx context.Context, v Project) (res *Project, err error)
+	Create(ctx context.Context, v *Project) (res *Project, err error)
 	CreateMany(ctx context.Context, vs Projects) (Projects, error)
 	GetById(ctx context.Context, id int) (res *Project, err error)
 	ByQueries(ctx context.Context, i interface{}) (res Projects, count int, err error)
@@ -291,33 +277,55 @@ type ProjectBase struct {
 	client *Client
 }
 
-func (c *ProjectBase) Create(ctx context.Context, v Project) (res *Project, err error) {
-	return c.client.Project.Create().
-		SetAlias(v.Alias).
-		SetName(v.Name).Save(ctx)
+func (c *ProjectBase) CreateSet(create *ProjectCreate, v *Project) *ProjectCreate {
+	return create
+}
+
+func (c *ProjectBase) Create(ctx context.Context, v *Project) (res *Project, err error) {
+	create := c.client.Project.Create()
+	c.CreateSet(create, v)
+	return create.Save(ctx)
 }
 
 func (c *ProjectBase) CreateMany(ctx context.Context, vs Projects) (Projects, error) {
 	bulk := make([]*ProjectCreate, len(vs))
 	for i, v := range vs {
-		bulk[i] = c.client.Project.Create().
-			SetAlias(v.Alias).
-			SetName(v.Name)
+		create := c.client.Project.Create()
+		c.CreateSet(create, v)
+		bulk[i] = create
 	}
 	return c.client.Project.CreateBulk(bulk...).Save(ctx)
 }
 
+func (c *ProjectBase) GetSelect(query *ProjectQuery) *ProjectSelect {
+
+	return query.Select(
+
+		project.Columns...,
+	)
+}
+
 func (c *ProjectBase) GetById(ctx context.Context, id int) (res *Project, err error) {
-	return c.client.Project.Get(ctx, id)
+	query := c.client.Project.Query()
+	c.GetSelect(query)
+	return query.Where(project.IDEQ(id)).First(ctx)
 }
 
 func (c *ProjectBase) ByQueries(ctx context.Context, i interface{}) (res Projects, count int, err error) {
-	res, count, err = c.client.Project.Query().ByQueries(ctx, i)
+	query := c.client.Project.Query()
+	c.GetSelect(query)
+	res, count, err = query.ByQueries(ctx, i)
 	return
 }
 
+func (c *ProjectBase) UpdateSet(update *ProjectUpdateOne, v *Project) *ProjectUpdateOne {
+	return update
+}
+
 func (c *ProjectBase) UpdateById(ctx context.Context, id int, v *Project) (*Project, error) {
-	return c.client.Project.UpdateOne(v).Save(ctx)
+	update := c.client.Project.UpdateOneID(id)
+	c.UpdateSet(update, v)
+	return update.Save(ctx)
 }
 
 func (c *ProjectBase) UpdateMany(ctx context.Context, vs Projects) (err error) {
@@ -339,9 +347,9 @@ func (c *ProjectBase) UpdateMany(ctx context.Context, vs Projects) (err error) {
 	}()
 
 	for _, v := range vs {
-		_, err = tx.Project.UpdateOneID(v.ID).
-			SetAlias(v.Alias).
-			SetName(v.Name).Save(ctx)
+		update := tx.Project.UpdateOneID(v.ID)
+		c.UpdateSet(update, v)
+		_, err = update.Save(ctx)
 		if err != nil {
 			return err
 		}
@@ -363,7 +371,7 @@ func NewProjectBase(client *Client) ProjectBaseInterface {
 }
 
 type SpiderDevTblServicetreeBaseInterface interface {
-	Create(ctx context.Context, v SpiderDevTblServicetree) (res *SpiderDevTblServicetree, err error)
+	Create(ctx context.Context, v *SpiderDevTblServicetree) (res *SpiderDevTblServicetree, err error)
 	CreateMany(ctx context.Context, vs SpiderDevTblServicetrees) (SpiderDevTblServicetrees, error)
 	GetById(ctx context.Context, id int32) (res *SpiderDevTblServicetree, err error)
 	ByQueries(ctx context.Context, i interface{}) (res SpiderDevTblServicetrees, count int, err error)
@@ -377,41 +385,55 @@ type SpiderDevTblServicetreeBase struct {
 	client *Client
 }
 
-func (c *SpiderDevTblServicetreeBase) Create(ctx context.Context, v SpiderDevTblServicetree) (res *SpiderDevTblServicetree, err error) {
-	return c.client.SpiderDevTblServicetree.Create().
-		SetName(v.Name).
-		SetAname(v.Aname).
-		SetPnode(v.Pnode).
-		SetType(v.Type).
-		SetKey(v.Key).
-		SetOrigin(v.Origin).Save(ctx)
+func (c *SpiderDevTblServicetreeBase) CreateSet(create *SpiderDevTblServicetreeCreate, v *SpiderDevTblServicetree) *SpiderDevTblServicetreeCreate {
+	return create
+}
+
+func (c *SpiderDevTblServicetreeBase) Create(ctx context.Context, v *SpiderDevTblServicetree) (res *SpiderDevTblServicetree, err error) {
+	create := c.client.SpiderDevTblServicetree.Create()
+	c.CreateSet(create, v)
+	return create.Save(ctx)
 }
 
 func (c *SpiderDevTblServicetreeBase) CreateMany(ctx context.Context, vs SpiderDevTblServicetrees) (SpiderDevTblServicetrees, error) {
 	bulk := make([]*SpiderDevTblServicetreeCreate, len(vs))
 	for i, v := range vs {
-		bulk[i] = c.client.SpiderDevTblServicetree.Create().
-			SetName(v.Name).
-			SetAname(v.Aname).
-			SetPnode(v.Pnode).
-			SetType(v.Type).
-			SetKey(v.Key).
-			SetOrigin(v.Origin)
+		create := c.client.SpiderDevTblServicetree.Create()
+		c.CreateSet(create, v)
+		bulk[i] = create
 	}
 	return c.client.SpiderDevTblServicetree.CreateBulk(bulk...).Save(ctx)
 }
 
+func (c *SpiderDevTblServicetreeBase) GetSelect(query *SpiderDevTblServicetreeQuery) *SpiderDevTblServicetreeSelect {
+
+	return query.Select(
+
+		spiderdevtblservicetree.Columns...,
+	)
+}
+
 func (c *SpiderDevTblServicetreeBase) GetById(ctx context.Context, id int32) (res *SpiderDevTblServicetree, err error) {
-	return c.client.SpiderDevTblServicetree.Get(ctx, id)
+	query := c.client.SpiderDevTblServicetree.Query()
+	c.GetSelect(query)
+	return query.Where(spiderdevtblservicetree.IDEQ(id)).First(ctx)
 }
 
 func (c *SpiderDevTblServicetreeBase) ByQueries(ctx context.Context, i interface{}) (res SpiderDevTblServicetrees, count int, err error) {
-	res, count, err = c.client.SpiderDevTblServicetree.Query().ByQueries(ctx, i)
+	query := c.client.SpiderDevTblServicetree.Query()
+	c.GetSelect(query)
+	res, count, err = query.ByQueries(ctx, i)
 	return
 }
 
+func (c *SpiderDevTblServicetreeBase) UpdateSet(update *SpiderDevTblServicetreeUpdateOne, v *SpiderDevTblServicetree) *SpiderDevTblServicetreeUpdateOne {
+	return update
+}
+
 func (c *SpiderDevTblServicetreeBase) UpdateById(ctx context.Context, id int32, v *SpiderDevTblServicetree) (*SpiderDevTblServicetree, error) {
-	return c.client.SpiderDevTblServicetree.UpdateOne(v).Save(ctx)
+	update := c.client.SpiderDevTblServicetree.UpdateOneID(id)
+	c.UpdateSet(update, v)
+	return update.Save(ctx)
 }
 
 func (c *SpiderDevTblServicetreeBase) UpdateMany(ctx context.Context, vs SpiderDevTblServicetrees) (err error) {
@@ -433,13 +455,9 @@ func (c *SpiderDevTblServicetreeBase) UpdateMany(ctx context.Context, vs SpiderD
 	}()
 
 	for _, v := range vs {
-		_, err = tx.SpiderDevTblServicetree.UpdateOneID(v.ID).
-			SetName(v.Name).
-			SetAname(v.Aname).
-			SetPnode(v.Pnode).
-			SetType(v.Type).
-			SetKey(v.Key).
-			SetOrigin(v.Origin).Save(ctx)
+		update := tx.SpiderDevTblServicetree.UpdateOneID(v.ID)
+		c.UpdateSet(update, v)
+		_, err = update.Save(ctx)
 		if err != nil {
 			return err
 		}
@@ -461,7 +479,7 @@ func NewSpiderDevTblServicetreeBase(client *Client) SpiderDevTblServicetreeBaseI
 }
 
 type UserBaseInterface interface {
-	Create(ctx context.Context, v User) (res *User, err error)
+	Create(ctx context.Context, v *User) (res *User, err error)
 	CreateMany(ctx context.Context, vs Users) (Users, error)
 	GetById(ctx context.Context, id int) (res *User, err error)
 	ByQueries(ctx context.Context, i interface{}) (res Users, count int, err error)
@@ -478,33 +496,55 @@ type UserBase struct {
 	client *Client
 }
 
-func (c *UserBase) Create(ctx context.Context, v User) (res *User, err error) {
-	return c.client.User.Create().
-		SetAge(v.Age).
-		SetName(v.Name).Save(ctx)
+func (c *UserBase) CreateSet(create *UserCreate, v *User) *UserCreate {
+	return create
+}
+
+func (c *UserBase) Create(ctx context.Context, v *User) (res *User, err error) {
+	create := c.client.User.Create()
+	c.CreateSet(create, v)
+	return create.Save(ctx)
 }
 
 func (c *UserBase) CreateMany(ctx context.Context, vs Users) (Users, error) {
 	bulk := make([]*UserCreate, len(vs))
 	for i, v := range vs {
-		bulk[i] = c.client.User.Create().
-			SetAge(v.Age).
-			SetName(v.Name)
+		create := c.client.User.Create()
+		c.CreateSet(create, v)
+		bulk[i] = create
 	}
 	return c.client.User.CreateBulk(bulk...).Save(ctx)
 }
 
+func (c *UserBase) GetSelect(query *UserQuery) *UserSelect {
+
+	return query.Select(
+
+		user.Columns...,
+	)
+}
+
 func (c *UserBase) GetById(ctx context.Context, id int) (res *User, err error) {
-	return c.client.User.Get(ctx, id)
+	query := c.client.User.Query()
+	c.GetSelect(query)
+	return query.Where(user.IDEQ(id)).First(ctx)
 }
 
 func (c *UserBase) ByQueries(ctx context.Context, i interface{}) (res Users, count int, err error) {
-	res, count, err = c.client.User.Query().ByQueries(ctx, i)
+	query := c.client.User.Query()
+	c.GetSelect(query)
+	res, count, err = query.ByQueries(ctx, i)
 	return
 }
 
+func (c *UserBase) UpdateSet(update *UserUpdateOne, v *User) *UserUpdateOne {
+	return update
+}
+
 func (c *UserBase) UpdateById(ctx context.Context, id int, v *User) (*User, error) {
-	return c.client.User.UpdateOne(v).Save(ctx)
+	update := c.client.User.UpdateOneID(id)
+	c.UpdateSet(update, v)
+	return update.Save(ctx)
 }
 
 func (c *UserBase) UpdateMany(ctx context.Context, vs Users) (err error) {
@@ -526,9 +566,9 @@ func (c *UserBase) UpdateMany(ctx context.Context, vs Users) (err error) {
 	}()
 
 	for _, v := range vs {
-		_, err = tx.User.UpdateOneID(v.ID).
-			SetAge(v.Age).
-			SetName(v.Name).Save(ctx)
+		update := tx.User.UpdateOneID(v.ID)
+		c.UpdateSet(update, v)
+		_, err = update.Save(ctx)
 		if err != nil {
 			return err
 		}
@@ -554,6 +594,545 @@ func (c *UserBase) GetPodsSliceByUserId(ctx context.Context, id int, i interface
 
 func NewUserBase(client *Client) UserBaseInterface {
 	return &UserBase{client: client}
+}
+
+type PodRestInterface interface {
+	// @http-gin /pod POST
+	Create(ctx context.Context, req PodRestCreateReq) (res *Pod, err error)
+	// @http-gin /pods POST
+	CreateMany(ctx context.Context, req PodRestCreateManyReq) (res Pods, err error)
+	// @http-gin /pods/:id GET
+	GetById(ctx context.Context, req PodRestGetByIdReq) (res *Pod, err error)
+	// @http-gin /pods GET
+	ByQueries(ctx context.Context, req PodRestByQueriesReq) (res PodRestByQueriesRes, err error)
+	// @http-gin /pods/:id PUT
+	UpdateById(ctx context.Context, req PodRestUpdateByIdReq) (res *Pod, err error)
+	// @http-gin /pods PUT
+	UpdateMany(ctx context.Context, req PodRestUpdateManyReq) (success bool, err error)
+	// @http-gin /pods/:id DELETE
+	DeleteById(ctx context.Context, req PodRestDeleteByIdReq) (success bool, err error)
+	// @http-gin /pods GET
+	DeleteMany(ctx context.Context, req PodRestDeleteManyReq) (success bool, err error)
+
+	// @http-gin /pods/:id/servicetree POST
+	CreateServicetreeByPodId(ctx context.Context, req PodRestCreateServicetreeByPodIdReq) (res *Pod, err error)
+	// @http-gin /pods/:id/servicetree GET
+	GetServicetreeByPodId(ctx context.Context, req PodRestGetServicetreeByPodIdReq) (res *SpiderDevTblServicetree, err error)
+}
+
+func NewPodRest(client *Client) PodRestInterface {
+	return &PodRest{repo: &PodBase{client: client}}
+}
+
+type PodRest struct {
+	repo PodBaseInterface
+}
+
+type PodRestCreateReq struct {
+	Body Pod `json:"body"`
+}
+
+func (rest *PodRest) Create(ctx context.Context, req PodRestCreateReq) (res *Pod, err error) {
+	return rest.repo.Create(ctx, &req.Body)
+}
+
+type PodRestCreateManyReq struct {
+	Body Pods `json:"body"`
+}
+
+func (rest *PodRest) CreateMany(ctx context.Context, req PodRestCreateManyReq) (res Pods, err error) {
+	return rest.repo.CreateMany(ctx, req.Body)
+}
+
+type PodRestGetByIdReq struct {
+	Uri struct {
+		Id int64 `json:"id" uri:"id"`
+	}
+}
+
+func (rest *PodRest) GetById(ctx context.Context, req PodRestGetByIdReq) (res *Pod, err error) {
+	return rest.repo.GetById(ctx, req.Uri.Id)
+}
+
+type PodRestByQueriesReq struct {
+	Query PodQueryOps `json:"query"`
+}
+
+type PodRestByQueriesRes struct {
+	List  Pods `json:"list"`
+	Total int  `json:"total"`
+}
+
+func (rest *PodRest) ByQueries(ctx context.Context, req PodRestByQueriesReq) (res PodRestByQueriesRes, err error) {
+	list, total, err := rest.repo.ByQueries(ctx, req.Query)
+	return PodRestByQueriesRes{List: list, Total: total}, err
+}
+
+type PodRestUpdateByIdReq struct {
+	Uri struct {
+		Id int64 `json:"id" uri:"id"`
+	} `json:"uri"`
+	Body Pod `json:"body"`
+}
+
+func (rest *PodRest) UpdateById(ctx context.Context, req PodRestUpdateByIdReq) (res *Pod, err error) {
+	return rest.repo.UpdateById(ctx, req.Uri.Id, &req.Body)
+}
+
+type PodRestUpdateManyReq struct {
+	Query struct {
+		Ids []int64 `json:"ids" form:"ids"`
+	} `json:"query"`
+}
+
+func (rest *PodRest) UpdateMany(ctx context.Context, req PodRestUpdateManyReq) (success bool, err error) {
+	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+type PodRestDeleteByIdReq struct {
+	Uri struct {
+		Id int64 `json:"id" uri:"id"`
+	} `json:"uri"`
+}
+
+func (rest *PodRest) DeleteById(ctx context.Context, req PodRestDeleteByIdReq) (success bool, err error) {
+	err = rest.repo.DeleteById(ctx, req.Uri.Id)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+type PodRestDeleteManyReq struct {
+	Query struct {
+		Ids []int64 `json:"ids" form:"ids"`
+	} `json:"query"`
+}
+
+func (rest *PodRest) DeleteMany(ctx context.Context, req PodRestDeleteManyReq) (success bool, err error) {
+	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+type PodRestCreateServicetreeByPodIdReq struct {
+	Uri struct {
+		Id int64 `json:"id" uri:"id"`
+	}
+	Body SpiderDevTblServicetree `json:"body"`
+}
+
+func (rest *PodRest) CreateServicetreeByPodId(ctx context.Context, req PodRestCreateServicetreeByPodIdReq) (res *Pod, err error) {
+	return rest.repo.CreateServicetreeByPodId(ctx, req.Uri.Id, &req.Body)
+}
+
+type PodRestGetServicetreeByPodIdReq struct {
+	Uri struct {
+		Id int64 `json:"id" uri:"id"`
+	} `json:"uri"`
+}
+
+func (rest *PodRest) GetServicetreeByPodId(ctx context.Context, req PodRestGetServicetreeByPodIdReq) (res *SpiderDevTblServicetree, err error) {
+	return rest.repo.GetServicetreeByPodId(ctx, req.Uri.Id)
+}
+
+type ProjectRestInterface interface {
+	// @http-gin /project POST
+	Create(ctx context.Context, req ProjectRestCreateReq) (res *Project, err error)
+	// @http-gin /projects POST
+	CreateMany(ctx context.Context, req ProjectRestCreateManyReq) (res Projects, err error)
+	// @http-gin /projects/:id GET
+	GetById(ctx context.Context, req ProjectRestGetByIdReq) (res *Project, err error)
+	// @http-gin /projects GET
+	ByQueries(ctx context.Context, req ProjectRestByQueriesReq) (res ProjectRestByQueriesRes, err error)
+	// @http-gin /projects/:id PUT
+	UpdateById(ctx context.Context, req ProjectRestUpdateByIdReq) (res *Project, err error)
+	// @http-gin /projects PUT
+	UpdateMany(ctx context.Context, req ProjectRestUpdateManyReq) (success bool, err error)
+	// @http-gin /projects/:id DELETE
+	DeleteById(ctx context.Context, req ProjectRestDeleteByIdReq) (success bool, err error)
+	// @http-gin /projects GET
+	DeleteMany(ctx context.Context, req ProjectRestDeleteManyReq) (success bool, err error)
+}
+
+func NewProjectRest(client *Client) ProjectRestInterface {
+	return &ProjectRest{repo: &ProjectBase{client: client}}
+}
+
+type ProjectRest struct {
+	repo ProjectBaseInterface
+}
+
+type ProjectRestCreateReq struct {
+	Body Project `json:"body"`
+}
+
+func (rest *ProjectRest) Create(ctx context.Context, req ProjectRestCreateReq) (res *Project, err error) {
+	return rest.repo.Create(ctx, &req.Body)
+}
+
+type ProjectRestCreateManyReq struct {
+	Body Projects `json:"body"`
+}
+
+func (rest *ProjectRest) CreateMany(ctx context.Context, req ProjectRestCreateManyReq) (res Projects, err error) {
+	return rest.repo.CreateMany(ctx, req.Body)
+}
+
+type ProjectRestGetByIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"id"`
+	}
+}
+
+func (rest *ProjectRest) GetById(ctx context.Context, req ProjectRestGetByIdReq) (res *Project, err error) {
+	return rest.repo.GetById(ctx, req.Uri.Id)
+}
+
+type ProjectRestByQueriesReq struct {
+	Query ProjectQueryOps `json:"query"`
+}
+
+type ProjectRestByQueriesRes struct {
+	List  Projects `json:"list"`
+	Total int      `json:"total"`
+}
+
+func (rest *ProjectRest) ByQueries(ctx context.Context, req ProjectRestByQueriesReq) (res ProjectRestByQueriesRes, err error) {
+	list, total, err := rest.repo.ByQueries(ctx, req.Query)
+	return ProjectRestByQueriesRes{List: list, Total: total}, err
+}
+
+type ProjectRestUpdateByIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"id"`
+	} `json:"uri"`
+	Body Project `json:"body"`
+}
+
+func (rest *ProjectRest) UpdateById(ctx context.Context, req ProjectRestUpdateByIdReq) (res *Project, err error) {
+	return rest.repo.UpdateById(ctx, req.Uri.Id, &req.Body)
+}
+
+type ProjectRestUpdateManyReq struct {
+	Query struct {
+		Ids []int `json:"ids" form:"ids"`
+	} `json:"query"`
+}
+
+func (rest *ProjectRest) UpdateMany(ctx context.Context, req ProjectRestUpdateManyReq) (success bool, err error) {
+	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+type ProjectRestDeleteByIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"id"`
+	} `json:"uri"`
+}
+
+func (rest *ProjectRest) DeleteById(ctx context.Context, req ProjectRestDeleteByIdReq) (success bool, err error) {
+	err = rest.repo.DeleteById(ctx, req.Uri.Id)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+type ProjectRestDeleteManyReq struct {
+	Query struct {
+		Ids []int `json:"ids" form:"ids"`
+	} `json:"query"`
+}
+
+func (rest *ProjectRest) DeleteMany(ctx context.Context, req ProjectRestDeleteManyReq) (success bool, err error) {
+	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+type SpiderDevTblServicetreeRestInterface interface {
+	// @http-gin /spiderdevtblservicetree POST
+	Create(ctx context.Context, req SpiderDevTblServicetreeRestCreateReq) (res *SpiderDevTblServicetree, err error)
+	// @http-gin /spiderdevtblservicetrees POST
+	CreateMany(ctx context.Context, req SpiderDevTblServicetreeRestCreateManyReq) (res SpiderDevTblServicetrees, err error)
+	// @http-gin /spiderdevtblservicetrees/:id GET
+	GetById(ctx context.Context, req SpiderDevTblServicetreeRestGetByIdReq) (res *SpiderDevTblServicetree, err error)
+	// @http-gin /spiderdevtblservicetrees GET
+	ByQueries(ctx context.Context, req SpiderDevTblServicetreeRestByQueriesReq) (res SpiderDevTblServicetreeRestByQueriesRes, err error)
+	// @http-gin /spiderdevtblservicetrees/:id PUT
+	UpdateById(ctx context.Context, req SpiderDevTblServicetreeRestUpdateByIdReq) (res *SpiderDevTblServicetree, err error)
+	// @http-gin /spiderdevtblservicetrees PUT
+	UpdateMany(ctx context.Context, req SpiderDevTblServicetreeRestUpdateManyReq) (success bool, err error)
+	// @http-gin /spiderdevtblservicetrees/:id DELETE
+	DeleteById(ctx context.Context, req SpiderDevTblServicetreeRestDeleteByIdReq) (success bool, err error)
+	// @http-gin /spiderdevtblservicetrees GET
+	DeleteMany(ctx context.Context, req SpiderDevTblServicetreeRestDeleteManyReq) (success bool, err error)
+}
+
+func NewSpiderDevTblServicetreeRest(client *Client) SpiderDevTblServicetreeRestInterface {
+	return &SpiderDevTblServicetreeRest{repo: &SpiderDevTblServicetreeBase{client: client}}
+}
+
+type SpiderDevTblServicetreeRest struct {
+	repo SpiderDevTblServicetreeBaseInterface
+}
+
+type SpiderDevTblServicetreeRestCreateReq struct {
+	Body SpiderDevTblServicetree `json:"body"`
+}
+
+func (rest *SpiderDevTblServicetreeRest) Create(ctx context.Context, req SpiderDevTblServicetreeRestCreateReq) (res *SpiderDevTblServicetree, err error) {
+	return rest.repo.Create(ctx, &req.Body)
+}
+
+type SpiderDevTblServicetreeRestCreateManyReq struct {
+	Body SpiderDevTblServicetrees `json:"body"`
+}
+
+func (rest *SpiderDevTblServicetreeRest) CreateMany(ctx context.Context, req SpiderDevTblServicetreeRestCreateManyReq) (res SpiderDevTblServicetrees, err error) {
+	return rest.repo.CreateMany(ctx, req.Body)
+}
+
+type SpiderDevTblServicetreeRestGetByIdReq struct {
+	Uri struct {
+		Id int32 `json:"id" uri:"id"`
+	}
+}
+
+func (rest *SpiderDevTblServicetreeRest) GetById(ctx context.Context, req SpiderDevTblServicetreeRestGetByIdReq) (res *SpiderDevTblServicetree, err error) {
+	return rest.repo.GetById(ctx, req.Uri.Id)
+}
+
+type SpiderDevTblServicetreeRestByQueriesReq struct {
+	Query SpiderDevTblServicetreeQueryOps `json:"query"`
+}
+
+type SpiderDevTblServicetreeRestByQueriesRes struct {
+	List  SpiderDevTblServicetrees `json:"list"`
+	Total int                      `json:"total"`
+}
+
+func (rest *SpiderDevTblServicetreeRest) ByQueries(ctx context.Context, req SpiderDevTblServicetreeRestByQueriesReq) (res SpiderDevTblServicetreeRestByQueriesRes, err error) {
+	list, total, err := rest.repo.ByQueries(ctx, req.Query)
+	return SpiderDevTblServicetreeRestByQueriesRes{List: list, Total: total}, err
+}
+
+type SpiderDevTblServicetreeRestUpdateByIdReq struct {
+	Uri struct {
+		Id int32 `json:"id" uri:"id"`
+	} `json:"uri"`
+	Body SpiderDevTblServicetree `json:"body"`
+}
+
+func (rest *SpiderDevTblServicetreeRest) UpdateById(ctx context.Context, req SpiderDevTblServicetreeRestUpdateByIdReq) (res *SpiderDevTblServicetree, err error) {
+	return rest.repo.UpdateById(ctx, req.Uri.Id, &req.Body)
+}
+
+type SpiderDevTblServicetreeRestUpdateManyReq struct {
+	Query struct {
+		Ids []int32 `json:"ids" form:"ids"`
+	} `json:"query"`
+}
+
+func (rest *SpiderDevTblServicetreeRest) UpdateMany(ctx context.Context, req SpiderDevTblServicetreeRestUpdateManyReq) (success bool, err error) {
+	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+type SpiderDevTblServicetreeRestDeleteByIdReq struct {
+	Uri struct {
+		Id int32 `json:"id" uri:"id"`
+	} `json:"uri"`
+}
+
+func (rest *SpiderDevTblServicetreeRest) DeleteById(ctx context.Context, req SpiderDevTblServicetreeRestDeleteByIdReq) (success bool, err error) {
+	err = rest.repo.DeleteById(ctx, req.Uri.Id)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+type SpiderDevTblServicetreeRestDeleteManyReq struct {
+	Query struct {
+		Ids []int32 `json:"ids" form:"ids"`
+	} `json:"query"`
+}
+
+func (rest *SpiderDevTblServicetreeRest) DeleteMany(ctx context.Context, req SpiderDevTblServicetreeRestDeleteManyReq) (success bool, err error) {
+	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+type UserRestInterface interface {
+	// @http-gin /user POST
+	Create(ctx context.Context, req UserRestCreateReq) (res *User, err error)
+	// @http-gin /users POST
+	CreateMany(ctx context.Context, req UserRestCreateManyReq) (res Users, err error)
+	// @http-gin /users/:id GET
+	GetById(ctx context.Context, req UserRestGetByIdReq) (res *User, err error)
+	// @http-gin /users GET
+	ByQueries(ctx context.Context, req UserRestByQueriesReq) (res UserRestByQueriesRes, err error)
+	// @http-gin /users/:id PUT
+	UpdateById(ctx context.Context, req UserRestUpdateByIdReq) (res *User, err error)
+	// @http-gin /users PUT
+	UpdateMany(ctx context.Context, req UserRestUpdateManyReq) (success bool, err error)
+	// @http-gin /users/:id DELETE
+	DeleteById(ctx context.Context, req UserRestDeleteByIdReq) (success bool, err error)
+	// @http-gin /users GET
+	DeleteMany(ctx context.Context, req UserRestDeleteManyReq) (success bool, err error)
+
+	// @http-gin /users/:id/podsslice POST
+	CreatePodsSliceByUserId(ctx context.Context, req UserRestCreatePodsSliceByUserIdReq) (res *User, err error)
+	// @http-gin /users/:id/pods GET
+	GetPodsSliceByUserId(ctx context.Context, req UserRestGetPodsSliceByUserIdReq) (res UserRestGetPodsSliceByUserIdRes, err error)
+}
+
+func NewUserRest(client *Client) UserRestInterface {
+	return &UserRest{repo: &UserBase{client: client}}
+}
+
+type UserRest struct {
+	repo UserBaseInterface
+}
+
+type UserRestCreateReq struct {
+	Body User `json:"body"`
+}
+
+func (rest *UserRest) Create(ctx context.Context, req UserRestCreateReq) (res *User, err error) {
+	return rest.repo.Create(ctx, &req.Body)
+}
+
+type UserRestCreateManyReq struct {
+	Body Users `json:"body"`
+}
+
+func (rest *UserRest) CreateMany(ctx context.Context, req UserRestCreateManyReq) (res Users, err error) {
+	return rest.repo.CreateMany(ctx, req.Body)
+}
+
+type UserRestGetByIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"id"`
+	}
+}
+
+func (rest *UserRest) GetById(ctx context.Context, req UserRestGetByIdReq) (res *User, err error) {
+	return rest.repo.GetById(ctx, req.Uri.Id)
+}
+
+type UserRestByQueriesReq struct {
+	Query UserQueryOps `json:"query"`
+}
+
+type UserRestByQueriesRes struct {
+	List  Users `json:"list"`
+	Total int   `json:"total"`
+}
+
+func (rest *UserRest) ByQueries(ctx context.Context, req UserRestByQueriesReq) (res UserRestByQueriesRes, err error) {
+	list, total, err := rest.repo.ByQueries(ctx, req.Query)
+	return UserRestByQueriesRes{List: list, Total: total}, err
+}
+
+type UserRestUpdateByIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"id"`
+	} `json:"uri"`
+	Body User `json:"body"`
+}
+
+func (rest *UserRest) UpdateById(ctx context.Context, req UserRestUpdateByIdReq) (res *User, err error) {
+	return rest.repo.UpdateById(ctx, req.Uri.Id, &req.Body)
+}
+
+type UserRestUpdateManyReq struct {
+	Query struct {
+		Ids []int `json:"ids" form:"ids"`
+	} `json:"query"`
+}
+
+func (rest *UserRest) UpdateMany(ctx context.Context, req UserRestUpdateManyReq) (success bool, err error) {
+	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+type UserRestDeleteByIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"id"`
+	} `json:"uri"`
+}
+
+func (rest *UserRest) DeleteById(ctx context.Context, req UserRestDeleteByIdReq) (success bool, err error) {
+	err = rest.repo.DeleteById(ctx, req.Uri.Id)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+type UserRestDeleteManyReq struct {
+	Query struct {
+		Ids []int `json:"ids" form:"ids"`
+	} `json:"query"`
+}
+
+func (rest *UserRest) DeleteMany(ctx context.Context, req UserRestDeleteManyReq) (success bool, err error) {
+	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+type UserRestCreatePodsSliceByUserIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"id"`
+	}
+	Body Pods `json:"body"`
+}
+
+func (rest *UserRest) CreatePodsSliceByUserId(ctx context.Context, req UserRestCreatePodsSliceByUserIdReq) (res *User, err error) {
+	return rest.repo.CreatePodsSliceByUserId(ctx, req.Uri.Id, req.Body)
+}
+
+type UserRestGetPodsSliceByUserIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"id"`
+	} `json:"uri"`
+	Query PodQueryOps `json:"query"`
+}
+
+type UserRestGetPodsSliceByUserIdRes struct {
+	List  Pods `json:"list"`
+	Total int  `json:"total"`
+}
+
+func (rest *UserRest) GetPodsSliceByUserId(ctx context.Context, req UserRestGetPodsSliceByUserIdReq) (res UserRestGetPodsSliceByUserIdRes, err error) {
+	list, total, err := rest.repo.GetPodsSliceByUserId(ctx, req.Uri.Id, req.Query)
+	return UserRestGetPodsSliceByUserIdRes{List: list, Total: total}, err
 }
 
 // PodClient is a client for the Pod schema.

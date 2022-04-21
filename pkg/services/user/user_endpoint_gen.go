@@ -10,22 +10,56 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	endpoint "github.com/go-kit/kit/endpoint"
+
+	"hello/pkg/ent"
 )
 
 type Mws map[string][]endpoint.Middleware
 
 type Endpoints struct {
+	ByQueriesEndpoint endpoint.Endpoint
+
+	CreateEndpoint endpoint.Endpoint
+
+	CreateManyEndpoint endpoint.Endpoint
+
+	CreatePodsSliceByUserIdEndpoint endpoint.Endpoint
+
+	DeleteByIdEndpoint endpoint.Endpoint
+
+	DeleteManyEndpoint endpoint.Endpoint
+
 	GetByIdEndpoint endpoint.Endpoint
 
-	GetListEndpoint endpoint.Endpoint
+	GetPodsSliceByUserIdEndpoint endpoint.Endpoint
+
+	UpdateByIdEndpoint endpoint.Endpoint
+
+	UpdateManyEndpoint endpoint.Endpoint
 }
 
 func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m endpoint.Middleware) {
 	methods := []string{
 
+		"ByQueries",
+
+		"Create",
+
+		"CreateMany",
+
+		"CreatePodsSliceByUserId",
+
+		"DeleteById",
+
+		"DeleteMany",
+
 		"GetById",
 
-		"GetList",
+		"GetPodsSliceByUserId",
+
+		"UpdateById",
+
+		"UpdateMany",
 	}
 	for _, v := range methods {
 		mw[v] = append(mw[v], m)
@@ -35,9 +69,25 @@ func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m en
 func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Middleware, m func(n string) endpoint.Middleware) {
 	methods := []string{
 
+		"ByQueries",
+
+		"Create",
+
+		"CreateMany",
+
+		"CreatePodsSliceByUserId",
+
+		"DeleteById",
+
+		"DeleteMany",
+
 		"GetById",
 
-		"GetList",
+		"GetPodsSliceByUserId",
+
+		"UpdateById",
+
+		"UpdateMany",
 	}
 	for _, v := range methods {
 		mw[v] = append(mw[v], m(v))
@@ -49,25 +99,163 @@ func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Mi
 func NewEndpoints(s UserService, mdw Mws) Endpoints {
 	eps := Endpoints{
 
+		ByQueriesEndpoint: MakeByQueriesEndpoint(s),
+
+		CreateEndpoint: MakeCreateEndpoint(s),
+
+		CreateManyEndpoint: MakeCreateManyEndpoint(s),
+
+		CreatePodsSliceByUserIdEndpoint: MakeCreatePodsSliceByUserIdEndpoint(s),
+
+		DeleteByIdEndpoint: MakeDeleteByIdEndpoint(s),
+
+		DeleteManyEndpoint: MakeDeleteManyEndpoint(s),
+
 		GetByIdEndpoint: MakeGetByIdEndpoint(s),
 
-		GetListEndpoint: MakeGetListEndpoint(s),
+		GetPodsSliceByUserIdEndpoint: MakeGetPodsSliceByUserIdEndpoint(s),
+
+		UpdateByIdEndpoint: MakeUpdateByIdEndpoint(s),
+
+		UpdateManyEndpoint: MakeUpdateManyEndpoint(s),
+	}
+
+	for _, m := range mdw["ByQueries"] {
+		eps.ByQueriesEndpoint = m(eps.ByQueriesEndpoint)
+	}
+
+	for _, m := range mdw["Create"] {
+		eps.CreateEndpoint = m(eps.CreateEndpoint)
+	}
+
+	for _, m := range mdw["CreateMany"] {
+		eps.CreateManyEndpoint = m(eps.CreateManyEndpoint)
+	}
+
+	for _, m := range mdw["CreatePodsSliceByUserId"] {
+		eps.CreatePodsSliceByUserIdEndpoint = m(eps.CreatePodsSliceByUserIdEndpoint)
+	}
+
+	for _, m := range mdw["DeleteById"] {
+		eps.DeleteByIdEndpoint = m(eps.DeleteByIdEndpoint)
+	}
+
+	for _, m := range mdw["DeleteMany"] {
+		eps.DeleteManyEndpoint = m(eps.DeleteManyEndpoint)
 	}
 
 	for _, m := range mdw["GetById"] {
 		eps.GetByIdEndpoint = m(eps.GetByIdEndpoint)
 	}
 
-	for _, m := range mdw["GetList"] {
-		eps.GetListEndpoint = m(eps.GetListEndpoint)
+	for _, m := range mdw["GetPodsSliceByUserId"] {
+		eps.GetPodsSliceByUserIdEndpoint = m(eps.GetPodsSliceByUserIdEndpoint)
+	}
+
+	for _, m := range mdw["UpdateById"] {
+		eps.UpdateByIdEndpoint = m(eps.UpdateByIdEndpoint)
+	}
+
+	for _, m := range mdw["UpdateMany"] {
+		eps.UpdateManyEndpoint = m(eps.UpdateManyEndpoint)
 	}
 
 	return eps
 }
 
+func MakeByQueriesEndpoint(s UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(ent.UserRestByQueriesReq)
+		rs, err := s.ByQueries(ctx, req)
+		result := make(map[string]interface{}, 0)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeCreateEndpoint(s UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(ent.UserRestCreateReq)
+		rs, err := s.Create(ctx, req)
+		result := make(map[string]interface{}, 0)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeCreateManyEndpoint(s UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(ent.UserRestCreateManyReq)
+		rs, err := s.CreateMany(ctx, req)
+		result := make(map[string]interface{}, 0)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeCreatePodsSliceByUserIdEndpoint(s UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(ent.UserRestCreatePodsSliceByUserIdReq)
+		rs, err := s.CreatePodsSliceByUserId(ctx, req)
+		result := make(map[string]interface{}, 0)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeDeleteByIdEndpoint(s UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(ent.UserRestDeleteByIdReq)
+		rs, err := s.DeleteById(ctx, req)
+		result := make(map[string]interface{}, 0)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeDeleteManyEndpoint(s UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(ent.UserRestDeleteManyReq)
+		rs, err := s.DeleteMany(ctx, req)
+		result := make(map[string]interface{}, 0)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
 func MakeGetByIdEndpoint(s UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(GetByIdReq)
+		req := request.(ent.UserRestGetByIdReq)
 		rs, err := s.GetById(ctx, req)
 		result := make(map[string]interface{}, 0)
 		if err != nil {
@@ -80,10 +268,40 @@ func MakeGetByIdEndpoint(s UserService) endpoint.Endpoint {
 	}
 }
 
-func MakeGetListEndpoint(s UserService) endpoint.Endpoint {
+func MakeGetPodsSliceByUserIdEndpoint(s UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(GetListReq)
-		rs, err := s.GetList(ctx, req)
+		req := request.(ent.UserRestGetPodsSliceByUserIdReq)
+		rs, err := s.GetPodsSliceByUserId(ctx, req)
+		result := make(map[string]interface{}, 0)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeUpdateByIdEndpoint(s UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(ent.UserRestUpdateByIdReq)
+		rs, err := s.UpdateById(ctx, req)
+		result := make(map[string]interface{}, 0)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeUpdateManyEndpoint(s UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(ent.UserRestUpdateManyReq)
+		rs, err := s.UpdateMany(ctx, req)
 		result := make(map[string]interface{}, 0)
 		if err != nil {
 			result["err"] = err.Error()

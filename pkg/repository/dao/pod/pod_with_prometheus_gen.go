@@ -5,13 +5,14 @@ package pod
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"hello/pkg/ent"
 	"time"
 
 	"context"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+
+	"hello/pkg/ent"
 )
 
 // PodServiceWithPrometheus implements PodService interface with all methods wrapped
@@ -66,6 +67,34 @@ func (_d PodServiceWithPrometheus) Create(ctx context.Context, v ent.Pod) (res *
 	return _d.base.Create(ctx, v)
 }
 
+// CreateMany implements PodService
+func (_d PodServiceWithPrometheus) CreateMany(ctx context.Context, vs ent.Pods) (p1 ent.Pods, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "CreateMany", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.CreateMany(ctx, vs)
+}
+
+// CreateServicetreeByPodId implements PodService
+func (_d PodServiceWithPrometheus) CreateServicetreeByPodId(ctx context.Context, id int64, v *ent.SpiderDevTblServicetree) (res *ent.Pod, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "CreateServicetreeByPodId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.CreateServicetreeByPodId(ctx, id, v)
+}
+
 // DeleteById implements PodService
 func (_d PodServiceWithPrometheus) DeleteById(ctx context.Context, id int64) (err error) {
 	_since := time.Now()
@@ -78,6 +107,20 @@ func (_d PodServiceWithPrometheus) DeleteById(ctx context.Context, id int64) (er
 		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "DeleteById", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.DeleteById(ctx, id)
+}
+
+// DeleteMany implements PodService
+func (_d PodServiceWithPrometheus) DeleteMany(ctx context.Context, ids []int64) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UserRestDeleteMany", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.DeleteMany(ctx, ids)
 }
 
 // GetById implements PodService
@@ -94,6 +137,20 @@ func (_d PodServiceWithPrometheus) GetById(ctx context.Context, id int64) (res *
 	return _d.base.GetById(ctx, id)
 }
 
+// GetServicetreeByPodId implements PodService
+func (_d PodServiceWithPrometheus) GetServicetreeByPodId(ctx context.Context, id int64) (res *ent.SpiderDevTblServicetree, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetServicetreeByPodId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.GetServicetreeByPodId(ctx, id)
+}
+
 // UpdateById implements PodService
 func (_d PodServiceWithPrometheus) UpdateById(ctx context.Context, id int64, v *ent.Pod) (pp1 *ent.Pod, err error) {
 	_since := time.Now()
@@ -106,4 +163,18 @@ func (_d PodServiceWithPrometheus) UpdateById(ctx context.Context, id int64, v *
 		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UpdateById", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.UpdateById(ctx, id, v)
+}
+
+// UpdateMany implements PodService
+func (_d PodServiceWithPrometheus) UpdateMany(ctx context.Context, vs ent.Pods) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UpdateMany", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.UpdateMany(ctx, vs)
 }

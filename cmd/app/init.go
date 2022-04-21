@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"entgo.io/ent/dialect/sql"
-	"flag"
 	"fmt"
 	microConsul "github.com/asim/go-micro/plugins/registry/consul/v4"
 	httpServer "github.com/asim/go-micro/plugins/server/http/v4"
@@ -50,8 +49,6 @@ import (
 
 // Define our flags. Your service probably won't need to bind listeners for
 // all* supported transports, but we do it here for demonstration purposes.
-var fs = flag.NewFlagSet("hello", flag.ExitOnError)
-var confName = fs.String("conf", "dev", "open config")
 var logger *zap.SugaredLogger
 
 type App struct {
@@ -76,8 +73,8 @@ func (a *App) Run() error {
 	return a.g.Run()
 }
 
-func RunApp() {
-	fs.Parse(os.Args[1:])
+func RunApp(confName string) {
+	//fs.Parse(os.Args[1:])
 
 	r := gin.Default()
 	opts := ginprom.NewDefaultOpts()
@@ -94,7 +91,7 @@ func RunApp() {
 		AllowAllOrigins:  true,
 	}))
 	g := &run.Group{}
-	app, err := InitApp(r, g, ConfName(*confName))
+	app, err := InitApp(r, g, ConfName(confName))
 	if err != nil {
 		fmt.Printf("initapp error: %s", err.Error())
 		os.Exit(1)

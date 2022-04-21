@@ -22,5 +22,5 @@ type BaseService UserService
 
 // NewBasicUserService returns a naive, stateless implementation of UserService.
 func NewBasicService(client *ent.Client) BaseService {
-	return &basicUserService{client: client, UserBaseInterface: ent.NewUserBase(client.User)}
+	return &basicUserService{client: client, UserBaseInterface: ent.NewUserBase(client)}
 }

@@ -6,10 +6,11 @@ package pod
 
 import (
 	"context"
-	"hello/pkg/ent"
 
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
+
+	"hello/pkg/ent"
 )
 
 // PodServiceWithLog implements PodService that is instrumented with logging
@@ -70,6 +71,50 @@ func (_d PodServiceWithLog) Create(ctx context.Context, v ent.Pod) (res *ent.Pod
 	return _d._base.Create(ctx, v)
 }
 
+// CreateMany implements PodService
+func (_d PodServiceWithLog) CreateMany(ctx context.Context, vs ent.Pods) (p1 ent.Pods, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	defer func() {
+		_log.Debugw("PodServiceWithLog calling CreateMany", "params", map[string]interface{}{
+			"vs": vs}, "results", map[string]interface{}{
+			"p1":  p1,
+			"err": err})
+		if err != nil {
+			_log.Errorw("with_log", "params", map[string]interface{}{
+				"vs": vs}, "results", map[string]interface{}{
+				"p1":  p1,
+				"err": err})
+		}
+
+	}()
+	return _d._base.CreateMany(ctx, vs)
+}
+
+// CreateServicetreeByPodId implements PodService
+func (_d PodServiceWithLog) CreateServicetreeByPodId(ctx context.Context, id int64, v *ent.SpiderDevTblServicetree) (res *ent.Pod, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	defer func() {
+		_log.Debugw("PodServiceWithLog calling CreateServicetreeByPodId", "params", map[string]interface{}{
+			"id": id,
+			"v":  v}, "results", map[string]interface{}{
+			"res": res,
+			"err": err})
+		if err != nil {
+			_log.Errorw("with_log", "params", map[string]interface{}{
+				"id": id,
+				"v":  v}, "results", map[string]interface{}{
+				"res": res,
+				"err": err})
+		}
+
+	}()
+	return _d._base.CreateServicetreeByPodId(ctx, id, v)
+}
+
 // DeleteById implements PodService
 func (_d PodServiceWithLog) DeleteById(ctx context.Context, id int64) (err error) {
 
@@ -87,6 +132,25 @@ func (_d PodServiceWithLog) DeleteById(ctx context.Context, id int64) (err error
 
 	}()
 	return _d._base.DeleteById(ctx, id)
+}
+
+// DeleteMany implements PodService
+func (_d PodServiceWithLog) DeleteMany(ctx context.Context, ids []int64) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	defer func() {
+		_log.Debugw("PodServiceWithLog calling UserRestDeleteMany", "params", map[string]interface{}{
+			"ids": ids}, "results", map[string]interface{}{
+			"err": err})
+		if err != nil {
+			_log.Errorw("with_log", "params", map[string]interface{}{
+				"ids": ids}, "results", map[string]interface{}{
+				"err": err})
+		}
+
+	}()
+	return _d._base.DeleteMany(ctx, ids)
 }
 
 // GetById implements PodService
@@ -110,6 +174,27 @@ func (_d PodServiceWithLog) GetById(ctx context.Context, id int64) (res *ent.Pod
 	return _d._base.GetById(ctx, id)
 }
 
+// GetServicetreeByPodId implements PodService
+func (_d PodServiceWithLog) GetServicetreeByPodId(ctx context.Context, id int64) (res *ent.SpiderDevTblServicetree, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	defer func() {
+		_log.Debugw("PodServiceWithLog calling GetServicetreeByPodId", "params", map[string]interface{}{
+			"id": id}, "results", map[string]interface{}{
+			"res": res,
+			"err": err})
+		if err != nil {
+			_log.Errorw("with_log", "params", map[string]interface{}{
+				"id": id}, "results", map[string]interface{}{
+				"res": res,
+				"err": err})
+		}
+
+	}()
+	return _d._base.GetServicetreeByPodId(ctx, id)
+}
+
 // UpdateById implements PodService
 func (_d PodServiceWithLog) UpdateById(ctx context.Context, id int64, v *ent.Pod) (pp1 *ent.Pod, err error) {
 
@@ -131,4 +216,23 @@ func (_d PodServiceWithLog) UpdateById(ctx context.Context, id int64, v *ent.Pod
 
 	}()
 	return _d._base.UpdateById(ctx, id, v)
+}
+
+// UpdateMany implements PodService
+func (_d PodServiceWithLog) UpdateMany(ctx context.Context, vs ent.Pods) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	defer func() {
+		_log.Debugw("PodServiceWithLog calling UpdateMany", "params", map[string]interface{}{
+			"vs": vs}, "results", map[string]interface{}{
+			"err": err})
+		if err != nil {
+			_log.Errorw("with_log", "params", map[string]interface{}{
+				"vs": vs}, "results", map[string]interface{}{
+				"err": err})
+		}
+
+	}()
+	return _d._base.UpdateMany(ctx, vs)
 }

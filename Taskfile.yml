@@ -17,7 +17,7 @@ tasks:
   run:
     cmds:
       - task: swag
-      - go run cmd/main.go {{.CLI_ARGS}}
+      - go run main.go app {{.CLI_ARGS}}
   conf:
     cmds:
       - vim conf/dev.conf.yaml
@@ -54,6 +54,10 @@ tasks:
     dir: "./pkg/repository/dao"
     cmds:
       - go generate ./{{.CLI_ARGS}}
+  gen:d:all:
+    dir: "./pkg/repository/dao"
+    cmds:
+      - go generate ./...
   swag:
     cmds:
-      - swag init -g cmd/main.go  -d ./
+      - swag init -g cmd/app.go  -d ./

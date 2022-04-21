@@ -7,12 +7,13 @@ package tblservicetree
 import (
 	"context"
 	"encoding/json"
-	"hello/pkg/ent"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
+
+	"hello/pkg/ent"
 )
 
 // TblservicetreeServiceWithTracing implements TblservicetreeService interface instrumented with opentracing spans
@@ -78,6 +79,30 @@ func (_d TblservicetreeServiceWithTracing) Create(ctx context.Context, v ent.Spi
 	return _d.TblservicetreeService.Create(ctx, v)
 }
 
+// CreateMany implements TblservicetreeService
+func (_d TblservicetreeServiceWithTracing) CreateMany(ctx context.Context, vs ent.SpiderDevTblServicetrees) (s1 ent.SpiderDevTblServicetrees, err error) {
+
+	var name = "TblservicetreeService.CreateMany"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"vs": vs},
+				"result": map[string]interface{}{
+					"s1":  s1,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.TblservicetreeService.CreateMany(ctx, vs)
+}
+
 // DeleteById implements TblservicetreeService
 func (_d TblservicetreeServiceWithTracing) DeleteById(ctx context.Context, id int32) (err error) {
 
@@ -99,6 +124,29 @@ func (_d TblservicetreeServiceWithTracing) DeleteById(ctx context.Context, id in
 	}()
 
 	return _d.TblservicetreeService.DeleteById(ctx, id)
+}
+
+// DeleteMany implements TblservicetreeService
+func (_d TblservicetreeServiceWithTracing) DeleteMany(ctx context.Context, ids []int32) (err error) {
+
+	var name = "TblservicetreeService.UserRestDeleteMany"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"ids": ids},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.TblservicetreeService.DeleteMany(ctx, ids)
 }
 
 // GetById implements TblservicetreeService
@@ -148,4 +196,27 @@ func (_d TblservicetreeServiceWithTracing) UpdateById(ctx context.Context, id in
 	}()
 
 	return _d.TblservicetreeService.UpdateById(ctx, id, v)
+}
+
+// UpdateMany implements TblservicetreeService
+func (_d TblservicetreeServiceWithTracing) UpdateMany(ctx context.Context, vs ent.SpiderDevTblServicetrees) (err error) {
+
+	var name = "TblservicetreeService.UpdateMany"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"vs": vs},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.TblservicetreeService.UpdateMany(ctx, vs)
 }

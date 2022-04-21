@@ -448,7 +448,7 @@ type ProjectTableFormer interface {
 }
 
 type ProjectTablePagingForm struct {
-	Limit *int `json:"_limit" form:"_limit"`
+	Limit *int `json:"_limit" form:"_limit" `
 	Page  *int `json:"_page" form:"_page"`
 }
 
@@ -500,6 +500,9 @@ func ProjectFormDepValue(v reflect.Value, former reflect.Type, l *[]ProjectTable
 			ProjectFormDepValue(f, former, l)
 		}
 	}
+}
+
+type ProjectQueryOps struct {
 }
 
 type ProjectTableAliasEQForm struct {

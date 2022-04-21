@@ -528,7 +528,7 @@ type PodTableFormer interface {
 }
 
 type PodTablePagingForm struct {
-	Limit *int `json:"_limit" form:"_limit"`
+	Limit *int `json:"_limit" form:"_limit" `
 	Page  *int `json:"_page" form:"_page"`
 }
 
@@ -580,6 +580,9 @@ func PodFormDepValue(v reflect.Value, former reflect.Type, l *[]PodTableFormer) 
 			PodFormDepValue(f, former, l)
 		}
 	}
+}
+
+type PodQueryOps struct {
 }
 
 type PodTableClusterNameEQForm struct {

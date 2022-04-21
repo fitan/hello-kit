@@ -520,7 +520,7 @@ type UserTableFormer interface {
 }
 
 type UserTablePagingForm struct {
-	Limit *int `json:"_limit" form:"_limit"`
+	Limit *int `json:"_limit" form:"_limit" <no value>`
 	Page  *int `json:"_page" form:"_page"`
 }
 
@@ -572,6 +572,17 @@ func UserFormDepValue(v reflect.Value, former reflect.Type, l *[]UserTableFormer
 			UserFormDepValue(f, former, l)
 		}
 	}
+}
+
+type UserQueryOps struct {
+	Paging *UserTablePagingForm `binding:"required"`
+	UserTableOrderForm
+
+	UserTableAgeEQForm
+
+	UserTableNameEQForm
+
+	UserTableNameNotInForm
 }
 
 type UserTableAgeEQForm struct {

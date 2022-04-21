@@ -5,13 +5,14 @@ package tblservicetree
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"hello/pkg/ent"
 	"time"
 
 	"context"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+
+	"hello/pkg/ent"
 )
 
 // TblservicetreeServiceWithPrometheus implements TblservicetreeService interface with all methods wrapped
@@ -66,6 +67,20 @@ func (_d TblservicetreeServiceWithPrometheus) Create(ctx context.Context, v ent.
 	return _d.base.Create(ctx, v)
 }
 
+// CreateMany implements TblservicetreeService
+func (_d TblservicetreeServiceWithPrometheus) CreateMany(ctx context.Context, vs ent.SpiderDevTblServicetrees) (s1 ent.SpiderDevTblServicetrees, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		tblservicetreeserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "CreateMany", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.CreateMany(ctx, vs)
+}
+
 // DeleteById implements TblservicetreeService
 func (_d TblservicetreeServiceWithPrometheus) DeleteById(ctx context.Context, id int32) (err error) {
 	_since := time.Now()
@@ -78,6 +93,20 @@ func (_d TblservicetreeServiceWithPrometheus) DeleteById(ctx context.Context, id
 		tblservicetreeserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "DeleteById", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.DeleteById(ctx, id)
+}
+
+// DeleteMany implements TblservicetreeService
+func (_d TblservicetreeServiceWithPrometheus) DeleteMany(ctx context.Context, ids []int32) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		tblservicetreeserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UserRestDeleteMany", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.DeleteMany(ctx, ids)
 }
 
 // GetById implements TblservicetreeService
@@ -106,4 +135,18 @@ func (_d TblservicetreeServiceWithPrometheus) UpdateById(ctx context.Context, id
 		tblservicetreeserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UpdateById", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.UpdateById(ctx, id, v)
+}
+
+// UpdateMany implements TblservicetreeService
+func (_d TblservicetreeServiceWithPrometheus) UpdateMany(ctx context.Context, vs ent.SpiderDevTblServicetrees) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		tblservicetreeserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UpdateMany", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.UpdateMany(ctx, vs)
 }

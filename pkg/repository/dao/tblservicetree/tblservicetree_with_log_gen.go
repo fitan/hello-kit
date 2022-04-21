@@ -6,10 +6,11 @@ package tblservicetree
 
 import (
 	"context"
-	"hello/pkg/ent"
 
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
+
+	"hello/pkg/ent"
 )
 
 // TblservicetreeServiceWithLog implements TblservicetreeService that is instrumented with logging
@@ -70,6 +71,27 @@ func (_d TblservicetreeServiceWithLog) Create(ctx context.Context, v ent.SpiderD
 	return _d._base.Create(ctx, v)
 }
 
+// CreateMany implements TblservicetreeService
+func (_d TblservicetreeServiceWithLog) CreateMany(ctx context.Context, vs ent.SpiderDevTblServicetrees) (s1 ent.SpiderDevTblServicetrees, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	defer func() {
+		_log.Debugw("TblservicetreeServiceWithLog calling CreateMany", "params", map[string]interface{}{
+			"vs": vs}, "results", map[string]interface{}{
+			"s1":  s1,
+			"err": err})
+		if err != nil {
+			_log.Errorw("with_log", "params", map[string]interface{}{
+				"vs": vs}, "results", map[string]interface{}{
+				"s1":  s1,
+				"err": err})
+		}
+
+	}()
+	return _d._base.CreateMany(ctx, vs)
+}
+
 // DeleteById implements TblservicetreeService
 func (_d TblservicetreeServiceWithLog) DeleteById(ctx context.Context, id int32) (err error) {
 
@@ -87,6 +109,25 @@ func (_d TblservicetreeServiceWithLog) DeleteById(ctx context.Context, id int32)
 
 	}()
 	return _d._base.DeleteById(ctx, id)
+}
+
+// DeleteMany implements TblservicetreeService
+func (_d TblservicetreeServiceWithLog) DeleteMany(ctx context.Context, ids []int32) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	defer func() {
+		_log.Debugw("TblservicetreeServiceWithLog calling UserRestDeleteMany", "params", map[string]interface{}{
+			"ids": ids}, "results", map[string]interface{}{
+			"err": err})
+		if err != nil {
+			_log.Errorw("with_log", "params", map[string]interface{}{
+				"ids": ids}, "results", map[string]interface{}{
+				"err": err})
+		}
+
+	}()
+	return _d._base.DeleteMany(ctx, ids)
 }
 
 // GetById implements TblservicetreeService
@@ -131,4 +172,23 @@ func (_d TblservicetreeServiceWithLog) UpdateById(ctx context.Context, id int32,
 
 	}()
 	return _d._base.UpdateById(ctx, id, v)
+}
+
+// UpdateMany implements TblservicetreeService
+func (_d TblservicetreeServiceWithLog) UpdateMany(ctx context.Context, vs ent.SpiderDevTblServicetrees) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	defer func() {
+		_log.Debugw("TblservicetreeServiceWithLog calling UpdateMany", "params", map[string]interface{}{
+			"vs": vs}, "results", map[string]interface{}{
+			"err": err})
+		if err != nil {
+			_log.Errorw("with_log", "params", map[string]interface{}{
+				"vs": vs}, "results", map[string]interface{}{
+				"err": err})
+		}
+
+	}()
+	return _d._base.UpdateMany(ctx, vs)
 }
