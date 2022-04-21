@@ -299,13 +299,11 @@ func decodeUpdateByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, 
 	return req, err
 }
 
-type UpdateManyQuerySwag struct {
-	Ids []int `json:"ids" form:"ids"`
-}
+type UpdateManyBodySwag ent.Users
 
 // @Accept  json
 // @Tags UserService
-// @Param query query UpdateManyQuerySwag false " "
+// @Param body body UpdateManyBodySwag true " "
 // @Success 200 {object} SwagResponse{data=bool}
 // @Router /users [put]
 func makeUpdateManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
@@ -316,7 +314,7 @@ func decodeUpdateManyRequest(_ context.Context, ctx *gin.Context) (interface{}, 
 	var req ent.UserRestUpdateManyReq
 	var err error
 
-	err = ctx.ShouldBindQuery(&req.Query)
+	err = ctx.ShouldBindJSON(&req.Body)
 	if err != nil {
 		return nil, err
 	}

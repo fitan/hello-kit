@@ -31,7 +31,7 @@ func (User) Annotations() []schema.Annotation {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("age").StructTag(`fake:"{number:0,150}"`).Positive().Annotations(FieldAnnotation{
+		field.Int("age").StructTag(`fake:"{number:0,150}"`).Annotations(FieldAnnotation{
 			Create:  true,
 			Update:  true,
 			Read:    true,
@@ -47,9 +47,9 @@ func (User) Fields() []ent.Field {
 			},
 		}),
 		field.String("name").Default("unknown").Annotations(FieldAnnotation{
-			Create:   false,
-			Update:   false,
-			Read:     false,
+			Create:   true,
+			Update:   true,
+			Read:     true,
 			QueryOps: StringQueryOps{
 				EQ:        true,
 				NEQ:       false,

@@ -407,12 +407,14 @@ paths:
       consumes:
       - application/json
       parameters:
-      - collectionFormat: multi
-        in: query
-        items:
-          type: integer
-        name: ids
-        type: array
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/ent.User'
+          type: array
       responses:
         "200":
           description: OK

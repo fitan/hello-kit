@@ -161,7 +161,7 @@ type {{$structName}} struct {
 }
 func (c *{{$structName}}) CreateSet(create *{{$n.Name}}Create, v *{{$n.Name}}) *{{$n.Name}}Create {
 	return create
-		{{- range $f := $n.Fields}}{{if hasKey $f.Annotations "create"}}.{{ $func := print "Set" $f.StructField }}
+		{{- range $f := $n.Fields}}{{if hasKey $f.Annotations.rest "create"}}.{{ $func := print "Set" $f.StructField }}
 			{{$func}}(v.{{$f.StructField}}){{end}}{{- end}}
 }
 
@@ -184,7 +184,7 @@ func (c *{{$structName}}) CreateMany(ctx context.Context, vs {{plural $n.Name}})
 func (c *{{$structName}}) GetSelect(query *{{$n.Name}}Query) *{{$n.Name}}Select {
 	{{$hasSelectAll := true }}
 	return query.Select({{range $f := $n.Fields}}
-	{{if hasKey $f.Annotations "read"}}{{$hasSelectAll = false}}{{camel $n.Name}}.Field{{pascal $f.Name}},{{end}}
+	{{if hasKey $f.Annotations.rest "read"}}{{$hasSelectAll = false}}{{camel $n.Name}}.Field{{pascal $f.Name}},{{end}}
 	{{- end}}{{- if $hasSelectAll}}{{camel $n.Name}}.Columns...{{end}}
 	)
 }
@@ -204,7 +204,7 @@ func (c *{{$structName}}) ByQueries(ctx context.Context, i interface{}) (res {{p
 
 func (c *{{$structName}}) UpdateSet(update *{{$n.Name}}UpdateOne, v *{{$n.Name}}) *{{$n.Name}}UpdateOne  {
 	return update
-		{{- range $f := $n.Fields}}{{if hasKey $f.Annotations "update"}}.{{ $func := print "Set" $f.StructField }}
+		{{- range $f := $n.Fields}}{{if hasKey $f.Annotations.rest "update"}}.{{ $func := print "Set" $f.StructField }}
 			{{$func}}(v.{{$f.StructField}}){{end}}{{- end}}
 }
 
@@ -390,13 +390,11 @@ func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (r
 }
 {{$funcName = "UpdateMany"}} {{$req = print $structName $funcName "Req" }}
 type {{$req}} struct {
-	Query struct{
-		Ids []{{$n.ID.Type}} `json:"ids" form:"ids"`
-	} `json:"query"`
+	Body {{plural $n.Name}} `json:"body"`
 }
 
 func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (success bool,err error) {
-	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	err = rest.repo.UpdateMany(ctx, req.Body)
 	if err != nil {
 		return false, err
 	}

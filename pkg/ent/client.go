@@ -497,7 +497,9 @@ type UserBase struct {
 }
 
 func (c *UserBase) CreateSet(create *UserCreate, v *User) *UserCreate {
-	return create
+	return create.
+		SetAge(v.Age).
+		SetName(v.Name)
 }
 
 func (c *UserBase) Create(ctx context.Context, v *User) (res *User, err error) {
@@ -519,8 +521,8 @@ func (c *UserBase) CreateMany(ctx context.Context, vs Users) (Users, error) {
 func (c *UserBase) GetSelect(query *UserQuery) *UserSelect {
 
 	return query.Select(
-
-		user.Columns...,
+		user.FieldAge,
+		user.FieldName,
 	)
 }
 
@@ -538,7 +540,9 @@ func (c *UserBase) ByQueries(ctx context.Context, i interface{}) (res Users, cou
 }
 
 func (c *UserBase) UpdateSet(update *UserUpdateOne, v *User) *UserUpdateOne {
-	return update
+	return update.
+		SetAge(v.Age).
+		SetName(v.Name)
 }
 
 func (c *UserBase) UpdateById(ctx context.Context, id int, v *User) (*User, error) {
@@ -680,13 +684,11 @@ func (rest *PodRest) UpdateById(ctx context.Context, req PodRestUpdateByIdReq) (
 }
 
 type PodRestUpdateManyReq struct {
-	Query struct {
-		Ids []int64 `json:"ids" form:"ids"`
-	} `json:"query"`
+	Body Pods `json:"body"`
 }
 
 func (rest *PodRest) UpdateMany(ctx context.Context, req PodRestUpdateManyReq) (success bool, err error) {
-	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	err = rest.repo.UpdateMany(ctx, req.Body)
 	if err != nil {
 		return false, err
 	}
@@ -821,13 +823,11 @@ func (rest *ProjectRest) UpdateById(ctx context.Context, req ProjectRestUpdateBy
 }
 
 type ProjectRestUpdateManyReq struct {
-	Query struct {
-		Ids []int `json:"ids" form:"ids"`
-	} `json:"query"`
+	Body Projects `json:"body"`
 }
 
 func (rest *ProjectRest) UpdateMany(ctx context.Context, req ProjectRestUpdateManyReq) (success bool, err error) {
-	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	err = rest.repo.UpdateMany(ctx, req.Body)
 	if err != nil {
 		return false, err
 	}
@@ -941,13 +941,11 @@ func (rest *SpiderDevTblServicetreeRest) UpdateById(ctx context.Context, req Spi
 }
 
 type SpiderDevTblServicetreeRestUpdateManyReq struct {
-	Query struct {
-		Ids []int32 `json:"ids" form:"ids"`
-	} `json:"query"`
+	Body SpiderDevTblServicetrees `json:"body"`
 }
 
 func (rest *SpiderDevTblServicetreeRest) UpdateMany(ctx context.Context, req SpiderDevTblServicetreeRestUpdateManyReq) (success bool, err error) {
-	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	err = rest.repo.UpdateMany(ctx, req.Body)
 	if err != nil {
 		return false, err
 	}
@@ -1066,13 +1064,11 @@ func (rest *UserRest) UpdateById(ctx context.Context, req UserRestUpdateByIdReq)
 }
 
 type UserRestUpdateManyReq struct {
-	Query struct {
-		Ids []int `json:"ids" form:"ids"`
-	} `json:"query"`
+	Body Users `json:"body"`
 }
 
 func (rest *UserRest) UpdateMany(ctx context.Context, req UserRestUpdateManyReq) (success bool, err error) {
-	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	err = rest.repo.UpdateMany(ctx, req.Body)
 	if err != nil {
 		return false, err
 	}
