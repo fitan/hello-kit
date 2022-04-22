@@ -5,9 +5,8 @@ package user
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"time"
-
 	"context"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -40,7 +39,7 @@ func NewUserServiceWithPrometheus(base UserService) UserServiceWithPrometheus {
 }
 
 // ByQueries implements UserService
-func (_d UserServiceWithPrometheus) ByQueries(ctx context.Context, i interface{}) (res ent.Users, count int, err error) {
+func (_d UserServiceWithPrometheus) ByQueries(ctx context.Context, i interface{}) (res []ent.UserBaseGetRes, count int, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -54,7 +53,7 @@ func (_d UserServiceWithPrometheus) ByQueries(ctx context.Context, i interface{}
 }
 
 // Create implements UserService
-func (_d UserServiceWithPrometheus) Create(ctx context.Context, v *ent.User) (res *ent.User, err error) {
+func (_d UserServiceWithPrometheus) Create(ctx context.Context, v ent.UserBaseCreateReq) (res *ent.User, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -68,7 +67,7 @@ func (_d UserServiceWithPrometheus) Create(ctx context.Context, v *ent.User) (re
 }
 
 // CreateMany implements UserService
-func (_d UserServiceWithPrometheus) CreateMany(ctx context.Context, vs ent.Users) (u1 ent.Users, err error) {
+func (_d UserServiceWithPrometheus) CreateMany(ctx context.Context, vs []ent.UserBaseCreateReq) (u1 ent.Users, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -82,7 +81,7 @@ func (_d UserServiceWithPrometheus) CreateMany(ctx context.Context, vs ent.Users
 }
 
 // CreatePodsSliceByUserId implements UserService
-func (_d UserServiceWithPrometheus) CreatePodsSliceByUserId(ctx context.Context, id int, vs ent.Pods) (res *ent.User, err error) {
+func (_d UserServiceWithPrometheus) CreatePodsSliceByUserId(ctx context.Context, id int, vs []ent.PodBaseCreateReq) (res *ent.User, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -124,7 +123,7 @@ func (_d UserServiceWithPrometheus) DeleteMany(ctx context.Context, ids []int) (
 }
 
 // GetById implements UserService
-func (_d UserServiceWithPrometheus) GetById(ctx context.Context, id int) (res *ent.User, err error) {
+func (_d UserServiceWithPrometheus) GetById(ctx context.Context, id int) (res ent.UserBaseGetRes, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -138,7 +137,7 @@ func (_d UserServiceWithPrometheus) GetById(ctx context.Context, id int) (res *e
 }
 
 // GetPodsSliceByUserId implements UserService
-func (_d UserServiceWithPrometheus) GetPodsSliceByUserId(ctx context.Context, id int, i interface{}) (res ent.Pods, count int, err error) {
+func (_d UserServiceWithPrometheus) GetPodsSliceByUserId(ctx context.Context, id int, i interface{}) (res []ent.PodBaseGetRes, count int, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -152,7 +151,7 @@ func (_d UserServiceWithPrometheus) GetPodsSliceByUserId(ctx context.Context, id
 }
 
 // UpdateById implements UserService
-func (_d UserServiceWithPrometheus) UpdateById(ctx context.Context, id int, v *ent.User) (up1 *ent.User, err error) {
+func (_d UserServiceWithPrometheus) UpdateById(ctx context.Context, id int, v ent.UserBaseUpdateReq) (up1 *ent.User, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -166,7 +165,7 @@ func (_d UserServiceWithPrometheus) UpdateById(ctx context.Context, id int, v *e
 }
 
 // UpdateMany implements UserService
-func (_d UserServiceWithPrometheus) UpdateMany(ctx context.Context, vs ent.Users) (err error) {
+func (_d UserServiceWithPrometheus) UpdateMany(ctx context.Context, vs []ent.UserBaseUpdateReq) (err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"

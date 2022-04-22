@@ -5,9 +5,8 @@ package tblservicetree
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"time"
-
 	"context"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -40,7 +39,7 @@ func NewTblservicetreeServiceWithPrometheus(base TblservicetreeService) Tblservi
 }
 
 // ByQueries implements TblservicetreeService
-func (_d TblservicetreeServiceWithPrometheus) ByQueries(ctx context.Context, i interface{}) (res ent.SpiderDevTblServicetrees, count int, err error) {
+func (_d TblservicetreeServiceWithPrometheus) ByQueries(ctx context.Context, i interface{}) (res []ent.SpiderDevTblServicetreeBaseGetRes, count int, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -54,7 +53,7 @@ func (_d TblservicetreeServiceWithPrometheus) ByQueries(ctx context.Context, i i
 }
 
 // Create implements TblservicetreeService
-func (_d TblservicetreeServiceWithPrometheus) Create(ctx context.Context, v *ent.SpiderDevTblServicetree) (res *ent.SpiderDevTblServicetree, err error) {
+func (_d TblservicetreeServiceWithPrometheus) Create(ctx context.Context, v ent.SpiderDevTblServicetreeBaseCreateReq) (res *ent.SpiderDevTblServicetree, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -68,7 +67,7 @@ func (_d TblservicetreeServiceWithPrometheus) Create(ctx context.Context, v *ent
 }
 
 // CreateMany implements TblservicetreeService
-func (_d TblservicetreeServiceWithPrometheus) CreateMany(ctx context.Context, vs ent.SpiderDevTblServicetrees) (s1 ent.SpiderDevTblServicetrees, err error) {
+func (_d TblservicetreeServiceWithPrometheus) CreateMany(ctx context.Context, vs []ent.SpiderDevTblServicetreeBaseCreateReq) (s1 ent.SpiderDevTblServicetrees, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -110,7 +109,7 @@ func (_d TblservicetreeServiceWithPrometheus) DeleteMany(ctx context.Context, id
 }
 
 // GetById implements TblservicetreeService
-func (_d TblservicetreeServiceWithPrometheus) GetById(ctx context.Context, id int32) (res *ent.SpiderDevTblServicetree, err error) {
+func (_d TblservicetreeServiceWithPrometheus) GetById(ctx context.Context, id int32) (res ent.SpiderDevTblServicetreeBaseGetRes, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -124,7 +123,7 @@ func (_d TblservicetreeServiceWithPrometheus) GetById(ctx context.Context, id in
 }
 
 // UpdateById implements TblservicetreeService
-func (_d TblservicetreeServiceWithPrometheus) UpdateById(ctx context.Context, id int32, v *ent.SpiderDevTblServicetree) (sp1 *ent.SpiderDevTblServicetree, err error) {
+func (_d TblservicetreeServiceWithPrometheus) UpdateById(ctx context.Context, id int32, v ent.SpiderDevTblServicetreeBaseUpdateReq) (sp1 *ent.SpiderDevTblServicetree, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -138,7 +137,7 @@ func (_d TblservicetreeServiceWithPrometheus) UpdateById(ctx context.Context, id
 }
 
 // UpdateMany implements TblservicetreeService
-func (_d TblservicetreeServiceWithPrometheus) UpdateMany(ctx context.Context, vs ent.SpiderDevTblServicetrees) (err error) {
+func (_d TblservicetreeServiceWithPrometheus) UpdateMany(ctx context.Context, vs []ent.SpiderDevTblServicetreeBaseUpdateReq) (err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"

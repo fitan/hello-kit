@@ -77,11 +77,105 @@ definitions:
         description: UpdatedAt holds the value of the "updated_at" field.
         type: string
     type: object
+  ent.PodBaseCreateReq:
+    properties:
+      clusterName:
+        type: string
+      detail:
+        type: string
+      hostIP:
+        type: string
+      message:
+        type: string
+      namespace:
+        type: string
+      phase:
+        type: string
+      podIP:
+        type: string
+      podName:
+        type: string
+      reason:
+        type: string
+      resourceVersion:
+        type: string
+      serviceName:
+        type: string
+      startTime:
+        type: string
+    type: object
+  ent.PodBaseGetRes:
+    properties:
+      clusterName:
+        type: string
+      detail:
+        type: string
+      hostIP:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+      namespace:
+        type: string
+      phase:
+        type: string
+      podIP:
+        type: string
+      podName:
+        type: string
+      reason:
+        type: string
+      resourceVersion:
+        type: string
+      serviceName:
+        type: string
+      startTime:
+        type: string
+    type: object
+  ent.PodBaseUpdateReq:
+    properties:
+      clusterName:
+        type: string
+      detail:
+        type: string
+      hostIP:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+      namespace:
+        type: string
+      phase:
+        type: string
+      podIP:
+        type: string
+      podName:
+        type: string
+      reason:
+        type: string
+      resourceVersion:
+        type: string
+      serviceName:
+        type: string
+      startTime:
+        type: string
+    type: object
   ent.PodEdges:
     properties:
       servicetree:
         $ref: '#/definitions/ent.SpiderDevTblServicetree'
         description: Servicetree holds the value of the servicetree edge.
+    type: object
+  ent.PodRestByQueriesRes:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/ent.PodBaseGetRes'
+        type: array
+      total:
+        type: integer
     type: object
   ent.SpiderDevTblServicetree:
     properties:
@@ -107,6 +201,11 @@ definitions:
         description: Type holds the value of the "type" field.
         type: integer
     type: object
+  ent.SpiderDevTblServicetreeBaseGetRes:
+    properties:
+      id:
+        type: integer
+    type: object
   ent.User:
     properties:
       age:
@@ -124,6 +223,31 @@ definitions:
         description: Name holds the value of the "name" field.
         type: string
     type: object
+  ent.UserBaseCreateReq:
+    properties:
+      age:
+        type: integer
+      name:
+        type: string
+    type: object
+  ent.UserBaseGetRes:
+    properties:
+      age:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  ent.UserBaseUpdateReq:
+    properties:
+      age:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   ent.UserEdges:
     properties:
       pods:
@@ -136,7 +260,7 @@ definitions:
     properties:
       list:
         items:
-          $ref: '#/definitions/ent.User'
+          $ref: '#/definitions/ent.UserBaseGetRes'
         type: array
       total:
         type: integer
@@ -145,7 +269,7 @@ definitions:
     properties:
       list:
         items:
-          $ref: '#/definitions/ent.Pod'
+          $ref: '#/definitions/ent.PodBaseGetRes'
         type: array
       total:
         type: integer
@@ -154,6 +278,70 @@ definitions:
     properties:
       data: {}
       traceId:
+        type: string
+    type: object
+  pod.CreateBodySwag:
+    properties:
+      clusterName:
+        type: string
+      detail:
+        type: string
+      hostIP:
+        type: string
+      message:
+        type: string
+      namespace:
+        type: string
+      phase:
+        type: string
+      podIP:
+        type: string
+      podName:
+        type: string
+      reason:
+        type: string
+      resourceVersion:
+        type: string
+      serviceName:
+        type: string
+      startTime:
+        type: string
+    type: object
+  pod.CreateServicetreeByPodIdBodySwag:
+    type: object
+  pod.SwagResponse:
+    properties:
+      data: {}
+      traceId:
+        type: string
+    type: object
+  pod.UpdateByIdBodySwag:
+    properties:
+      clusterName:
+        type: string
+      detail:
+        type: string
+      hostIP:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+      namespace:
+        type: string
+      phase:
+        type: string
+      podIP:
+        type: string
+      podName:
+        type: string
+      reason:
+        type: string
+      resourceVersion:
+        type: string
+      serviceName:
+        type: string
+      startTime:
         type: string
     type: object
   say.SwagResponse:
@@ -171,18 +359,8 @@ definitions:
   user.CreateBodySwag:
     properties:
       age:
-        description: Age holds the value of the "age" field.
-        type: integer
-      edges:
-        $ref: '#/definitions/ent.UserEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the UserQuery when eager-loading is set.
-      id:
-        description: ID of the ent.
         type: integer
       name:
-        description: Name holds the value of the "name" field.
         type: string
     type: object
   user.SwagResponse:
@@ -194,18 +372,10 @@ definitions:
   user.UpdateByIdBodySwag:
     properties:
       age:
-        description: Age holds the value of the "age" field.
         type: integer
-      edges:
-        $ref: '#/definitions/ent.UserEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the UserQuery when eager-loading is set.
       id:
-        description: ID of the ent.
         type: integer
       name:
-        description: Name holds the value of the "name" field.
         type: string
     type: object
 host: localhost:8080
@@ -240,10 +410,292 @@ paths:
             - $ref: '#/definitions/hello.SwagResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/ent.Pod'
+                  $ref: '#/definitions/ent.PodBaseGetRes'
               type: object
       tags:
       - HelloService
+  /pod:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/pod.CreateBodySwag'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/pod.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.Pod'
+              type: object
+      tags:
+      - PodService
+  /pods:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - collectionFormat: multi
+        in: query
+        items:
+          type: integer
+        name: ids
+        type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/pod.SwagResponse'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+      tags:
+      - PodService
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: ClusterNameEQ
+        type: string
+      - in: query
+        name: DetailEQ
+        type: string
+      - in: query
+        name: HostIPEQ
+        type: string
+      - in: query
+        name: MessageEQ
+        type: string
+      - in: query
+        name: NamespaceEQ
+        type: string
+      - in: query
+        name: PhaseEQ
+        type: string
+      - in: query
+        name: PodIPEQ
+        type: string
+      - in: query
+        name: PodNameEQ
+        type: string
+      - in: query
+        name: ReasonEQ
+        type: string
+      - in: query
+        name: ResourceVersionEQ
+        type: string
+      - in: query
+        name: ServiceNameEQ
+        type: string
+      - in: query
+        name: StartTimeEQ
+        type: string
+      - in: query
+        name: _limit
+        type: integer
+      - in: query
+        name: _page
+        type: integer
+      - enum:
+        - acs
+        - desc
+        in: query
+        name: order
+        type: string
+      - in: query
+        name: sortBy
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/pod.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.PodRestByQueriesRes'
+              type: object
+      tags:
+      - PodService
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/ent.PodBaseCreateReq'
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/pod.SwagResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/ent.Pod'
+                  type: array
+              type: object
+      tags:
+      - PodService
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/ent.PodBaseUpdateReq'
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/pod.SwagResponse'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+      tags:
+      - PodService
+  /pods/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/pod.SwagResponse'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+      tags:
+      - PodService
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/pod.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.PodBaseGetRes'
+              type: object
+      tags:
+      - PodService
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/pod.UpdateByIdBodySwag'
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/pod.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.Pod'
+              type: object
+      tags:
+      - PodService
+  /pods/{id}/servicetree:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/pod.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.SpiderDevTblServicetreeBaseGetRes'
+              type: object
+      tags:
+      - PodService
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/pod.CreateServicetreeByPodIdBodySwag'
+      - description: ' '
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/pod.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.Pod'
+              type: object
+      tags:
+      - PodService
   /say1pod/{id}:
     get:
       consumes:
@@ -262,7 +714,7 @@ paths:
             - $ref: '#/definitions/say1.SwagResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/ent.Pod'
+                  $ref: '#/definitions/ent.PodBaseGetRes'
               type: object
       tags:
       - Say1Service
@@ -284,7 +736,7 @@ paths:
             - $ref: '#/definitions/say.SwagResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/ent.Pod'
+                  $ref: '#/definitions/ent.PodBaseGetRes'
               type: object
       tags:
       - SayService
@@ -387,7 +839,7 @@ paths:
         required: true
         schema:
           items:
-            $ref: '#/definitions/ent.User'
+            $ref: '#/definitions/ent.UserBaseCreateReq'
           type: array
       responses:
         "200":
@@ -413,7 +865,7 @@ paths:
         required: true
         schema:
           items:
-            $ref: '#/definitions/ent.User'
+            $ref: '#/definitions/ent.UserBaseUpdateReq'
           type: array
       responses:
         "200":
@@ -466,7 +918,7 @@ paths:
             - $ref: '#/definitions/user.SwagResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/ent.User'
+                  $ref: '#/definitions/ent.UserBaseGetRes'
               type: object
       tags:
       - UserService
@@ -502,6 +954,57 @@ paths:
       consumes:
       - application/json
       parameters:
+      - in: query
+        name: ClusterNameEQ
+        type: string
+      - in: query
+        name: DetailEQ
+        type: string
+      - in: query
+        name: HostIPEQ
+        type: string
+      - in: query
+        name: MessageEQ
+        type: string
+      - in: query
+        name: NamespaceEQ
+        type: string
+      - in: query
+        name: PhaseEQ
+        type: string
+      - in: query
+        name: PodIPEQ
+        type: string
+      - in: query
+        name: PodNameEQ
+        type: string
+      - in: query
+        name: ReasonEQ
+        type: string
+      - in: query
+        name: ResourceVersionEQ
+        type: string
+      - in: query
+        name: ServiceNameEQ
+        type: string
+      - in: query
+        name: StartTimeEQ
+        type: string
+      - in: query
+        name: _limit
+        type: integer
+      - in: query
+        name: _page
+        type: integer
+      - enum:
+        - acs
+        - desc
+        in: query
+        name: order
+        type: string
+      - in: query
+        name: sortBy
+        type: string
       - description: ' '
         in: path
         name: id
@@ -530,7 +1033,7 @@ paths:
         required: true
         schema:
           items:
-            $ref: '#/definitions/ent.Pod'
+            $ref: '#/definitions/ent.PodBaseCreateReq'
           type: array
       - description: ' '
         in: path

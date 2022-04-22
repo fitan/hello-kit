@@ -16,6 +16,7 @@ import (
 	"hello/pkg/services"
 	"hello/pkg/services/casbin"
 	"hello/pkg/services/hello"
+	"hello/pkg/services/pod"
 	"hello/pkg/services/say"
 	"hello/pkg/services/say1"
 	"hello/pkg/services/user"
@@ -49,7 +50,7 @@ var casbinServiceSet = wire.NewSet(casbin.NewBasicService, casbin.NewService, ca
 
 var helloServiceSet = wire.NewSet(hello.NewBasicService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)
 //var userServiceSet = wire.NewSet(user.NewBasicService, user.NewService, user.NewEndpointMiddleware, user.NewServiceMiddleware, user.NewEndpoints, user.NewServiceOption, user.NewHTTPHandler)
-var servicesSet = wire.NewSet(casbinServiceSet, say.SayKitSet,say1.Say1KitSet,user.UserServiceSet,helloServiceSet, wire.Struct(new(services.Services), "*"))
+var servicesSet = wire.NewSet(pod.PodKitSet,casbinServiceSet, say.SayKitSet,say1.Say1KitSet,user.UserServiceSet,helloServiceSet, wire.Struct(new(services.Services), "*"))
 
 var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 

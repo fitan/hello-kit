@@ -154,7 +154,7 @@ func (_d UserServiceWithLog) DeleteMany(ctx context.Context, req ent.UserRestDel
 }
 
 // GetById implements UserService
-func (_d UserServiceWithLog) GetById(ctx context.Context, req ent.UserRestGetByIdReq) (res *ent.User, err error) {
+func (_d UserServiceWithLog) GetById(ctx context.Context, req ent.UserRestGetByIdReq) (res ent.UserBaseGetRes, err error) {
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 

@@ -54,6 +54,496 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
+                                            "$ref": "#/definitions/ent.PodBaseGetRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/pod": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PodService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/pod.CreateBodySwag"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pod.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.Pod"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/pods": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PodService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "ClusterNameEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "DetailEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "HostIPEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "MessageEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "NamespaceEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "PhaseEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "PodIPEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "PodNameEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "ReasonEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "ResourceVersionEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "ServiceNameEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "StartTimeEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "_limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "_page",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "acs",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "name": "order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "sortBy",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pod.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.PodRestByQueriesRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PodService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.PodBaseUpdateReq"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pod.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PodService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.PodBaseCreateReq"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pod.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/ent.Pod"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PodService"
+                ],
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "multi",
+                        "name": "ids",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pod.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/pods/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PodService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pod.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.PodBaseGetRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PodService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/pod.UpdateByIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pod.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.Pod"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PodService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pod.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/pods/{id}/servicetree": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PodService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pod.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.SpiderDevTblServicetreeBaseGetRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PodService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/pod.CreateServicetreeByPodIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pod.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
                                             "$ref": "#/definitions/ent.Pod"
                                         }
                                     }
@@ -93,7 +583,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ent.Pod"
+                                            "$ref": "#/definitions/ent.PodBaseGetRes"
                                         }
                                     }
                                 }
@@ -132,7 +622,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ent.Pod"
+                                            "$ref": "#/definitions/ent.PodBaseGetRes"
                                         }
                                     }
                                 }
@@ -273,7 +763,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ent.User"
+                                "$ref": "#/definitions/ent.UserBaseUpdateReq"
                             }
                         }
                     }
@@ -315,7 +805,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ent.User"
+                                "$ref": "#/definitions/ent.UserBaseCreateReq"
                             }
                         }
                     }
@@ -413,7 +903,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ent.User"
+                                            "$ref": "#/definitions/ent.UserBaseGetRes"
                                         }
                                     }
                                 }
@@ -517,6 +1007,90 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "name": "ClusterNameEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "DetailEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "HostIPEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "MessageEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "NamespaceEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "PhaseEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "PodIPEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "PodNameEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "ReasonEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "ResourceVersionEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "ServiceNameEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "StartTimeEQ",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "_limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "_page",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "acs",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "name": "order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": " ",
                         "name": "id",
                         "in": "path",
@@ -562,7 +1136,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ent.Pod"
+                                "$ref": "#/definitions/ent.PodBaseCreateReq"
                             }
                         }
                     },
@@ -667,12 +1241,155 @@ const docTemplate = `{
                 }
             }
         },
+        "ent.PodBaseCreateReq": {
+            "type": "object",
+            "properties": {
+                "clusterName": {
+                    "type": "string"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "hostIP": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "phase": {
+                    "type": "string"
+                },
+                "podIP": {
+                    "type": "string"
+                },
+                "podName": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "resourceVersion": {
+                    "type": "string"
+                },
+                "serviceName": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "ent.PodBaseGetRes": {
+            "type": "object",
+            "properties": {
+                "clusterName": {
+                    "type": "string"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "hostIP": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "phase": {
+                    "type": "string"
+                },
+                "podIP": {
+                    "type": "string"
+                },
+                "podName": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "resourceVersion": {
+                    "type": "string"
+                },
+                "serviceName": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "ent.PodBaseUpdateReq": {
+            "type": "object",
+            "properties": {
+                "clusterName": {
+                    "type": "string"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "hostIP": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "phase": {
+                    "type": "string"
+                },
+                "podIP": {
+                    "type": "string"
+                },
+                "podName": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "resourceVersion": {
+                    "type": "string"
+                },
+                "serviceName": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                }
+            }
+        },
         "ent.PodEdges": {
             "type": "object",
             "properties": {
                 "servicetree": {
                     "description": "Servicetree holds the value of the servicetree edge.",
                     "$ref": "#/definitions/ent.SpiderDevTblServicetree"
+                }
+            }
+        },
+        "ent.PodRestByQueriesRes": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.PodBaseGetRes"
+                    }
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },
@@ -709,6 +1426,14 @@ const docTemplate = `{
                 }
             }
         },
+        "ent.SpiderDevTblServicetreeBaseGetRes": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
         "ent.User": {
             "type": "object",
             "properties": {
@@ -726,6 +1451,45 @@ const docTemplate = `{
                 },
                 "name": {
                     "description": "Name holds the value of the \"name\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.UserBaseCreateReq": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "ent.UserBaseGetRes": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "ent.UserBaseUpdateReq": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -748,7 +1512,7 @@ const docTemplate = `{
                 "list": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ent.User"
+                        "$ref": "#/definitions/ent.UserBaseGetRes"
                     }
                 },
                 "total": {
@@ -762,7 +1526,7 @@ const docTemplate = `{
                 "list": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ent.Pod"
+                        "$ref": "#/definitions/ent.PodBaseGetRes"
                     }
                 },
                 "total": {
@@ -775,6 +1539,103 @@ const docTemplate = `{
             "properties": {
                 "data": {},
                 "traceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "pod.CreateBodySwag": {
+            "type": "object",
+            "properties": {
+                "clusterName": {
+                    "type": "string"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "hostIP": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "phase": {
+                    "type": "string"
+                },
+                "podIP": {
+                    "type": "string"
+                },
+                "podName": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "resourceVersion": {
+                    "type": "string"
+                },
+                "serviceName": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "pod.CreateServicetreeByPodIdBodySwag": {
+            "type": "object"
+        },
+        "pod.SwagResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "traceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "pod.UpdateByIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "clusterName": {
+                    "type": "string"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "hostIP": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "phase": {
+                    "type": "string"
+                },
+                "podIP": {
+                    "type": "string"
+                },
+                "podName": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "resourceVersion": {
+                    "type": "string"
+                },
+                "serviceName": {
+                    "type": "string"
+                },
+                "startTime": {
                     "type": "string"
                 }
             }
@@ -801,19 +1662,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "age": {
-                    "description": "Age holds the value of the \"age\" field.",
-                    "type": "integer"
-                },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the UserQuery when eager-loading is set.",
-                    "$ref": "#/definitions/ent.UserEdges"
-                },
-                "id": {
-                    "description": "ID of the ent.",
                     "type": "integer"
                 },
                 "name": {
-                    "description": "Name holds the value of the \"name\" field.",
                     "type": "string"
                 }
             }
@@ -831,19 +1682,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "age": {
-                    "description": "Age holds the value of the \"age\" field.",
                     "type": "integer"
                 },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the UserQuery when eager-loading is set.",
-                    "$ref": "#/definitions/ent.UserEdges"
-                },
                 "id": {
-                    "description": "ID of the ent.",
                     "type": "integer"
                 },
                 "name": {
-                    "description": "Name holds the value of the \"name\" field.",
                     "type": "string"
                 }
             }

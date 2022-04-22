@@ -505,7 +505,7 @@ func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-func (uq *UserQuery) ByQueries(ctx context.Context, i interface{}) (res Users, count int, err error) {
+func (uq *UserQuery) ByQueries(ctx context.Context, i interface{}, vs interface{}) (count int, err error) {
 	queryList, countList := SetUserFormQueries(i)
 	countQ := uq.Clone()
 	for _, v := range queryList {
@@ -518,7 +518,7 @@ func (uq *UserQuery) ByQueries(ctx context.Context, i interface{}) (res Users, c
 	if err != nil {
 		return
 	}
-	res, err = uq.All(ctx)
+	err = uq.Select(user.Columns...).Scan(ctx, vs)
 	return
 }
 

@@ -28,19 +28,19 @@ func NewSay1ServiceWithLog(base Say1Service, log *zap.SugaredLogger) Say1Service
 }
 
 // SayPod implements Say1Service
-func (_d Say1ServiceWithLog) SayPod(ctx context.Context, req SayPodReq) (pp1 *ent.Pod, err error) {
+func (_d Say1ServiceWithLog) SayPod(ctx context.Context, req SayPodReq) (p1 ent.PodBaseGetRes, err error) {
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
 	defer func() {
 		_log.Debugw("Say1ServiceWithLog calling SayPod", "params", map[string]interface{}{
 			"req": req}, "results", map[string]interface{}{
-			"pp1": pp1,
+			"p1":  p1,
 			"err": err})
 		if err != nil {
 			_log.Errorw("with_log", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
-				"pp1": pp1,
+				"p1":  p1,
 				"err": err})
 		}
 

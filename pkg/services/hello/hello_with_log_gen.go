@@ -28,19 +28,19 @@ func NewHelloServiceWithLog(base HelloService, log *zap.SugaredLogger) HelloServ
 }
 
 // GetUser implements HelloService
-func (_d HelloServiceWithLog) GetUser(ctx context.Context, req GetUserReq) (pp1 *ent.Pod, err error) {
+func (_d HelloServiceWithLog) GetUser(ctx context.Context, req GetUserReq) (p1 ent.PodBaseGetRes, err error) {
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
 	defer func() {
 		_log.Debugw("HelloServiceWithLog calling GetUser", "params", map[string]interface{}{
 			"req": req}, "results", map[string]interface{}{
-			"pp1": pp1,
+			"p1":  p1,
 			"err": err})
 		if err != nil {
 			_log.Errorw("with_log", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
-				"pp1": pp1,
+				"p1":  p1,
 				"err": err})
 		}
 

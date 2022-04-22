@@ -28,7 +28,7 @@ func NewTblservicetreeServiceWithLog(base TblservicetreeService, log *zap.Sugare
 }
 
 // ByQueries implements TblservicetreeService
-func (_d TblservicetreeServiceWithLog) ByQueries(ctx context.Context, i interface{}) (res ent.SpiderDevTblServicetrees, count int, err error) {
+func (_d TblservicetreeServiceWithLog) ByQueries(ctx context.Context, i interface{}) (res []ent.SpiderDevTblServicetreeBaseGetRes, count int, err error) {
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
@@ -51,7 +51,7 @@ func (_d TblservicetreeServiceWithLog) ByQueries(ctx context.Context, i interfac
 }
 
 // Create implements TblservicetreeService
-func (_d TblservicetreeServiceWithLog) Create(ctx context.Context, v *ent.SpiderDevTblServicetree) (res *ent.SpiderDevTblServicetree, err error) {
+func (_d TblservicetreeServiceWithLog) Create(ctx context.Context, v ent.SpiderDevTblServicetreeBaseCreateReq) (res *ent.SpiderDevTblServicetree, err error) {
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
@@ -72,7 +72,7 @@ func (_d TblservicetreeServiceWithLog) Create(ctx context.Context, v *ent.Spider
 }
 
 // CreateMany implements TblservicetreeService
-func (_d TblservicetreeServiceWithLog) CreateMany(ctx context.Context, vs ent.SpiderDevTblServicetrees) (s1 ent.SpiderDevTblServicetrees, err error) {
+func (_d TblservicetreeServiceWithLog) CreateMany(ctx context.Context, vs []ent.SpiderDevTblServicetreeBaseCreateReq) (s1 ent.SpiderDevTblServicetrees, err error) {
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
@@ -131,7 +131,7 @@ func (_d TblservicetreeServiceWithLog) DeleteMany(ctx context.Context, ids []int
 }
 
 // GetById implements TblservicetreeService
-func (_d TblservicetreeServiceWithLog) GetById(ctx context.Context, id int32) (res *ent.SpiderDevTblServicetree, err error) {
+func (_d TblservicetreeServiceWithLog) GetById(ctx context.Context, id int32) (res ent.SpiderDevTblServicetreeBaseGetRes, err error) {
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
@@ -152,7 +152,7 @@ func (_d TblservicetreeServiceWithLog) GetById(ctx context.Context, id int32) (r
 }
 
 // UpdateById implements TblservicetreeService
-func (_d TblservicetreeServiceWithLog) UpdateById(ctx context.Context, id int32, v *ent.SpiderDevTblServicetree) (sp1 *ent.SpiderDevTblServicetree, err error) {
+func (_d TblservicetreeServiceWithLog) UpdateById(ctx context.Context, id int32, v ent.SpiderDevTblServicetreeBaseUpdateReq) (sp1 *ent.SpiderDevTblServicetree, err error) {
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
@@ -175,7 +175,7 @@ func (_d TblservicetreeServiceWithLog) UpdateById(ctx context.Context, id int32,
 }
 
 // UpdateMany implements TblservicetreeService
-func (_d TblservicetreeServiceWithLog) UpdateMany(ctx context.Context, vs ent.SpiderDevTblServicetrees) (err error) {
+func (_d TblservicetreeServiceWithLog) UpdateMany(ctx context.Context, vs []ent.SpiderDevTblServicetreeBaseUpdateReq) (err error) {
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 

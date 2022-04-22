@@ -19,6 +19,7 @@ import (
 	"hello/pkg/services"
 	"hello/pkg/services/casbin"
 	"hello/pkg/services/hello"
+	pod2 "hello/pkg/services/pod"
 	"hello/pkg/services/say"
 	"hello/pkg/services/say1"
 	user2 "hello/pkg/services/user"
@@ -103,11 +104,19 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 	say1Endpoints := say1.NewEndpoints(say1Service, say1Mws)
 	say1Ops := say1.NewServiceOption(v8)
 	say1HttpHandler := say1.NewHTTPHandler(r, say1Endpoints, say1Ops)
+	baseService3 := pod2.NewBasicService(client)
+	v13 := pod2.NewServiceMiddleware(sugaredLogger)
+	podPodService := pod2.NewService(baseService3, v13)
+	podMws := pod2.NewEndpointMiddleware(sugaredLogger, v7)
+	podEndpoints := pod2.NewEndpoints(podPodService, podMws)
+	podOps := pod2.NewServiceOption(v8)
+	podHttpHandler := pod2.NewHTTPHandler(r, podEndpoints, podOps)
 	servicesServices := &services.Services{
 		Hello: httpHandler,
 		User:  userHttpHandler,
 		Say:   sayHttpHandler,
 		Say1:  say1HttpHandler,
+		Pod:   podHttpHandler,
 	}
 	tracerProvider := initTracer(myConf)
 	db, err := initDb(myConf)
@@ -184,7 +193,7 @@ var casbinServiceSet = wire.NewSet(casbin.NewBasicService, casbin.NewService, ca
 var helloServiceSet = wire.NewSet(hello.NewBasicService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)
 
 //var userServiceSet = wire.NewSet(user.NewBasicService, user.NewService, user.NewEndpointMiddleware, user.NewServiceMiddleware, user.NewEndpoints, user.NewServiceOption, user.NewHTTPHandler)
-var servicesSet = wire.NewSet(casbinServiceSet, say.SayKitSet, say1.Say1KitSet, user2.UserServiceSet, helloServiceSet, wire.Struct(new(services.Services), "*"))
+var servicesSet = wire.NewSet(pod2.PodKitSet, casbinServiceSet, say.SayKitSet, say1.Say1KitSet, user2.UserServiceSet, helloServiceSet, wire.Struct(new(services.Services), "*"))
 
 var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 

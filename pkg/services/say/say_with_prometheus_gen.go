@@ -40,7 +40,7 @@ func NewSayServiceWithPrometheus(base SayService) SayServiceWithPrometheus {
 }
 
 // SayPod implements SayService
-func (_d SayServiceWithPrometheus) SayPod(ctx context.Context, req SayPodReq) (pp1 *ent.Pod, err error) {
+func (_d SayServiceWithPrometheus) SayPod(ctx context.Context, req SayPodReq) (p1 ent.PodBaseGetRes, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"

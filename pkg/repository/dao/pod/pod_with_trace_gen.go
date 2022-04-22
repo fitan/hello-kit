@@ -31,7 +31,7 @@ func NewPodServiceWithTracing(base PodService) PodService {
 }
 
 // ByQueries implements PodService
-func (_d PodServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (res ent.Pods, count int, err error) {
+func (_d PodServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (res []ent.PodBaseGetRes, count int, err error) {
 
 	var name = "PodService.ByQueries"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -56,7 +56,7 @@ func (_d PodServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (r
 }
 
 // Create implements PodService
-func (_d PodServiceWithTracing) Create(ctx context.Context, v *ent.Pod) (res *ent.Pod, err error) {
+func (_d PodServiceWithTracing) Create(ctx context.Context, v ent.PodBaseCreateReq) (res *ent.Pod, err error) {
 
 	var name = "PodService.Create"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -80,7 +80,7 @@ func (_d PodServiceWithTracing) Create(ctx context.Context, v *ent.Pod) (res *en
 }
 
 // CreateMany implements PodService
-func (_d PodServiceWithTracing) CreateMany(ctx context.Context, vs ent.Pods) (p1 ent.Pods, err error) {
+func (_d PodServiceWithTracing) CreateMany(ctx context.Context, vs []ent.PodBaseCreateReq) (p1 ent.Pods, err error) {
 
 	var name = "PodService.CreateMany"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -104,7 +104,7 @@ func (_d PodServiceWithTracing) CreateMany(ctx context.Context, vs ent.Pods) (p1
 }
 
 // CreateServicetreeByPodId implements PodService
-func (_d PodServiceWithTracing) CreateServicetreeByPodId(ctx context.Context, id int64, v *ent.SpiderDevTblServicetree) (res *ent.Pod, err error) {
+func (_d PodServiceWithTracing) CreateServicetreeByPodId(ctx context.Context, id int64, v ent.SpiderDevTblServicetreeBaseCreateReq) (res *ent.Pod, err error) {
 
 	var name = "PodService.CreateServicetreeByPodId"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -175,7 +175,7 @@ func (_d PodServiceWithTracing) DeleteMany(ctx context.Context, ids []int64) (er
 }
 
 // GetById implements PodService
-func (_d PodServiceWithTracing) GetById(ctx context.Context, id int64) (res *ent.Pod, err error) {
+func (_d PodServiceWithTracing) GetById(ctx context.Context, id int64) (res ent.PodBaseGetRes, err error) {
 
 	var name = "PodService.GetById"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -199,7 +199,7 @@ func (_d PodServiceWithTracing) GetById(ctx context.Context, id int64) (res *ent
 }
 
 // GetServicetreeByPodId implements PodService
-func (_d PodServiceWithTracing) GetServicetreeByPodId(ctx context.Context, id int64) (res *ent.SpiderDevTblServicetree, err error) {
+func (_d PodServiceWithTracing) GetServicetreeByPodId(ctx context.Context, id int64) (res ent.SpiderDevTblServicetreeBaseGetRes, err error) {
 
 	var name = "PodService.GetServicetreeByPodId"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -223,7 +223,7 @@ func (_d PodServiceWithTracing) GetServicetreeByPodId(ctx context.Context, id in
 }
 
 // UpdateById implements PodService
-func (_d PodServiceWithTracing) UpdateById(ctx context.Context, id int64, v *ent.Pod) (pp1 *ent.Pod, err error) {
+func (_d PodServiceWithTracing) UpdateById(ctx context.Context, id int64, v ent.PodBaseUpdateReq) (pp1 *ent.Pod, err error) {
 
 	var name = "PodService.UpdateById"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -248,7 +248,7 @@ func (_d PodServiceWithTracing) UpdateById(ctx context.Context, id int64, v *ent
 }
 
 // UpdateMany implements PodService
-func (_d PodServiceWithTracing) UpdateMany(ctx context.Context, vs ent.Pods) (err error) {
+func (_d PodServiceWithTracing) UpdateMany(ctx context.Context, vs []ent.PodBaseUpdateReq) (err error) {
 
 	var name = "PodService.UpdateMany"
 	_, span := otel.Tracer(name).Start(ctx, name)

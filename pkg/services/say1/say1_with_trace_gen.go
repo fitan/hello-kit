@@ -32,7 +32,7 @@ func NewSay1ServiceWithTracing(base Say1Service) Say1Service {
 }
 
 // SayPod implements Say1Service
-func (_d Say1ServiceWithTracing) SayPod(ctx context.Context, req SayPodReq) (pp1 *ent.Pod, err error) {
+func (_d Say1ServiceWithTracing) SayPod(ctx context.Context, req SayPodReq) (p1 ent.PodBaseGetRes, err error) {
 
 	var name = "Say1Service.SayPod"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -42,7 +42,7 @@ func (_d Say1ServiceWithTracing) SayPod(ctx context.Context, req SayPodReq) (pp1
 				"params": map[string]interface{}{
 					"req": req},
 				"result": map[string]interface{}{
-					"pp1": pp1,
+					"p1":  p1,
 					"err": err},
 			}
 			s, _ := json.Marshal(l)

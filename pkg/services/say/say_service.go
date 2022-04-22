@@ -10,7 +10,7 @@ import (
 //go:generate gowrap gen -g -p ./ -i SayService -bt "prometheus:say_with_prometheus_gen.go log:say_with_log_gen.go opentracing:say_with_trace_gen.go http-gin:say_http_gen.go endpoint:say_endpoint_gen.go"
 type SayService interface {
     // @http-gin /saypod/:id GET
-	SayPod(ctx context.Context, req SayPodReq) (*ent.Pod, error)
+	SayPod(ctx context.Context, req SayPodReq) (ent.PodBaseGetRes, error)
 }
 
 type basicSayService struct {
@@ -23,7 +23,7 @@ type SayPodReq struct {
 	}
 }
 
-func (b *basicSayService) SayPod(ctx context.Context, req SayPodReq) (*ent.Pod, error) {
+func (b *basicSayService) SayPod(ctx context.Context, req SayPodReq) (ent.PodBaseGetRes, error) {
 	return b.repo.Pod.GetById(ctx, req.Uri.Id)
 }
 

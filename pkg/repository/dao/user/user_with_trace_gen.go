@@ -31,7 +31,7 @@ func NewUserServiceWithTracing(base UserService) UserService {
 }
 
 // ByQueries implements UserService
-func (_d UserServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (res ent.Users, count int, err error) {
+func (_d UserServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (res []ent.UserBaseGetRes, count int, err error) {
 
 	var name = "UserService.ByQueries"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -56,7 +56,7 @@ func (_d UserServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (
 }
 
 // Create implements UserService
-func (_d UserServiceWithTracing) Create(ctx context.Context, v *ent.User) (res *ent.User, err error) {
+func (_d UserServiceWithTracing) Create(ctx context.Context, v ent.UserBaseCreateReq) (res *ent.User, err error) {
 
 	var name = "UserService.Create"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -80,7 +80,7 @@ func (_d UserServiceWithTracing) Create(ctx context.Context, v *ent.User) (res *
 }
 
 // CreateMany implements UserService
-func (_d UserServiceWithTracing) CreateMany(ctx context.Context, vs ent.Users) (u1 ent.Users, err error) {
+func (_d UserServiceWithTracing) CreateMany(ctx context.Context, vs []ent.UserBaseCreateReq) (u1 ent.Users, err error) {
 
 	var name = "UserService.CreateMany"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -104,7 +104,7 @@ func (_d UserServiceWithTracing) CreateMany(ctx context.Context, vs ent.Users) (
 }
 
 // CreatePodsSliceByUserId implements UserService
-func (_d UserServiceWithTracing) CreatePodsSliceByUserId(ctx context.Context, id int, vs ent.Pods) (res *ent.User, err error) {
+func (_d UserServiceWithTracing) CreatePodsSliceByUserId(ctx context.Context, id int, vs []ent.PodBaseCreateReq) (res *ent.User, err error) {
 
 	var name = "UserService.CreatePodsSliceByUserId"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -175,7 +175,7 @@ func (_d UserServiceWithTracing) DeleteMany(ctx context.Context, ids []int) (err
 }
 
 // GetById implements UserService
-func (_d UserServiceWithTracing) GetById(ctx context.Context, id int) (res *ent.User, err error) {
+func (_d UserServiceWithTracing) GetById(ctx context.Context, id int) (res ent.UserBaseGetRes, err error) {
 
 	var name = "UserService.GetById"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -199,7 +199,7 @@ func (_d UserServiceWithTracing) GetById(ctx context.Context, id int) (res *ent.
 }
 
 // GetPodsSliceByUserId implements UserService
-func (_d UserServiceWithTracing) GetPodsSliceByUserId(ctx context.Context, id int, i interface{}) (res ent.Pods, count int, err error) {
+func (_d UserServiceWithTracing) GetPodsSliceByUserId(ctx context.Context, id int, i interface{}) (res []ent.PodBaseGetRes, count int, err error) {
 
 	var name = "UserService.GetPodsSliceByUserId"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -225,7 +225,7 @@ func (_d UserServiceWithTracing) GetPodsSliceByUserId(ctx context.Context, id in
 }
 
 // UpdateById implements UserService
-func (_d UserServiceWithTracing) UpdateById(ctx context.Context, id int, v *ent.User) (up1 *ent.User, err error) {
+func (_d UserServiceWithTracing) UpdateById(ctx context.Context, id int, v ent.UserBaseUpdateReq) (up1 *ent.User, err error) {
 
 	var name = "UserService.UpdateById"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -250,7 +250,7 @@ func (_d UserServiceWithTracing) UpdateById(ctx context.Context, id int, v *ent.
 }
 
 // UpdateMany implements UserService
-func (_d UserServiceWithTracing) UpdateMany(ctx context.Context, vs ent.Users) (err error) {
+func (_d UserServiceWithTracing) UpdateMany(ctx context.Context, vs []ent.UserBaseUpdateReq) (err error) {
 
 	var name = "UserService.UpdateMany"
 	_, span := otel.Tracer(name).Start(ctx, name)

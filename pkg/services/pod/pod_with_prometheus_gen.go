@@ -23,7 +23,7 @@ type PodServiceWithPrometheus struct {
 
 var podserviceDurationSummaryVec = promauto.NewSummaryVec(
 	prometheus.SummaryOpts{
-		Name:       "dao_pod_duration_seconds",
+		Name:       "services_pod_duration_seconds",
 		Help:       "podservice runtime duration and result",
 		MaxAge:     time.Minute,
 		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
@@ -39,7 +39,7 @@ func NewPodServiceWithPrometheus(base PodService) PodServiceWithPrometheus {
 }
 
 // ByQueries implements PodService
-func (_d PodServiceWithPrometheus) ByQueries(ctx context.Context, i interface{}) (res []ent.PodBaseGetRes, count int, err error) {
+func (_d PodServiceWithPrometheus) ByQueries(ctx context.Context, req ent.PodRestByQueriesReq) (res ent.PodRestByQueriesRes, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -49,11 +49,11 @@ func (_d PodServiceWithPrometheus) ByQueries(ctx context.Context, i interface{})
 
 		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ByQueries", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.ByQueries(ctx, i)
+	return _d.base.ByQueries(ctx, req)
 }
 
 // Create implements PodService
-func (_d PodServiceWithPrometheus) Create(ctx context.Context, v ent.PodBaseCreateReq) (res *ent.Pod, err error) {
+func (_d PodServiceWithPrometheus) Create(ctx context.Context, req ent.PodRestCreateReq) (res *ent.Pod, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -63,11 +63,11 @@ func (_d PodServiceWithPrometheus) Create(ctx context.Context, v ent.PodBaseCrea
 
 		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "Create", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.Create(ctx, v)
+	return _d.base.Create(ctx, req)
 }
 
 // CreateMany implements PodService
-func (_d PodServiceWithPrometheus) CreateMany(ctx context.Context, vs []ent.PodBaseCreateReq) (p1 ent.Pods, err error) {
+func (_d PodServiceWithPrometheus) CreateMany(ctx context.Context, req ent.PodRestCreateManyReq) (res ent.Pods, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -77,11 +77,11 @@ func (_d PodServiceWithPrometheus) CreateMany(ctx context.Context, vs []ent.PodB
 
 		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "CreateMany", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.CreateMany(ctx, vs)
+	return _d.base.CreateMany(ctx, req)
 }
 
 // CreateServicetreeByPodId implements PodService
-func (_d PodServiceWithPrometheus) CreateServicetreeByPodId(ctx context.Context, id int64, v ent.SpiderDevTblServicetreeBaseCreateReq) (res *ent.Pod, err error) {
+func (_d PodServiceWithPrometheus) CreateServicetreeByPodId(ctx context.Context, req ent.PodRestCreateServicetreeByPodIdReq) (res *ent.Pod, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -91,11 +91,11 @@ func (_d PodServiceWithPrometheus) CreateServicetreeByPodId(ctx context.Context,
 
 		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "CreateServicetreeByPodId", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.CreateServicetreeByPodId(ctx, id, v)
+	return _d.base.CreateServicetreeByPodId(ctx, req)
 }
 
 // DeleteById implements PodService
-func (_d PodServiceWithPrometheus) DeleteById(ctx context.Context, id int64) (err error) {
+func (_d PodServiceWithPrometheus) DeleteById(ctx context.Context, req ent.PodRestDeleteByIdReq) (success bool, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -105,11 +105,11 @@ func (_d PodServiceWithPrometheus) DeleteById(ctx context.Context, id int64) (er
 
 		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "DeleteById", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.DeleteById(ctx, id)
+	return _d.base.DeleteById(ctx, req)
 }
 
 // DeleteMany implements PodService
-func (_d PodServiceWithPrometheus) DeleteMany(ctx context.Context, ids []int64) (err error) {
+func (_d PodServiceWithPrometheus) DeleteMany(ctx context.Context, req ent.PodRestDeleteManyReq) (success bool, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -119,11 +119,11 @@ func (_d PodServiceWithPrometheus) DeleteMany(ctx context.Context, ids []int64) 
 
 		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "DeleteMany", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.DeleteMany(ctx, ids)
+	return _d.base.DeleteMany(ctx, req)
 }
 
 // GetById implements PodService
-func (_d PodServiceWithPrometheus) GetById(ctx context.Context, id int64) (res ent.PodBaseGetRes, err error) {
+func (_d PodServiceWithPrometheus) GetById(ctx context.Context, req ent.PodRestGetByIdReq) (res ent.PodBaseGetRes, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -133,11 +133,11 @@ func (_d PodServiceWithPrometheus) GetById(ctx context.Context, id int64) (res e
 
 		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetById", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.GetById(ctx, id)
+	return _d.base.GetById(ctx, req)
 }
 
 // GetServicetreeByPodId implements PodService
-func (_d PodServiceWithPrometheus) GetServicetreeByPodId(ctx context.Context, id int64) (res ent.SpiderDevTblServicetreeBaseGetRes, err error) {
+func (_d PodServiceWithPrometheus) GetServicetreeByPodId(ctx context.Context, req ent.PodRestGetServicetreeByPodIdReq) (res ent.SpiderDevTblServicetreeBaseGetRes, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -147,11 +147,11 @@ func (_d PodServiceWithPrometheus) GetServicetreeByPodId(ctx context.Context, id
 
 		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetServicetreeByPodId", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.GetServicetreeByPodId(ctx, id)
+	return _d.base.GetServicetreeByPodId(ctx, req)
 }
 
 // UpdateById implements PodService
-func (_d PodServiceWithPrometheus) UpdateById(ctx context.Context, id int64, v ent.PodBaseUpdateReq) (pp1 *ent.Pod, err error) {
+func (_d PodServiceWithPrometheus) UpdateById(ctx context.Context, req ent.PodRestUpdateByIdReq) (res *ent.Pod, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -161,11 +161,11 @@ func (_d PodServiceWithPrometheus) UpdateById(ctx context.Context, id int64, v e
 
 		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UpdateById", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.UpdateById(ctx, id, v)
+	return _d.base.UpdateById(ctx, req)
 }
 
 // UpdateMany implements PodService
-func (_d PodServiceWithPrometheus) UpdateMany(ctx context.Context, vs []ent.PodBaseUpdateReq) (err error) {
+func (_d PodServiceWithPrometheus) UpdateMany(ctx context.Context, req ent.PodRestUpdateManyReq) (success bool, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -175,5 +175,5 @@ func (_d PodServiceWithPrometheus) UpdateMany(ctx context.Context, vs []ent.PodB
 
 		podserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UpdateMany", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.UpdateMany(ctx, vs)
+	return _d.base.UpdateMany(ctx, req)
 }

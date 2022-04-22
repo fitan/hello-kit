@@ -31,7 +31,7 @@ func NewTblservicetreeServiceWithTracing(base TblservicetreeService) Tblservicet
 }
 
 // ByQueries implements TblservicetreeService
-func (_d TblservicetreeServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (res ent.SpiderDevTblServicetrees, count int, err error) {
+func (_d TblservicetreeServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (res []ent.SpiderDevTblServicetreeBaseGetRes, count int, err error) {
 
 	var name = "TblservicetreeService.ByQueries"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -56,7 +56,7 @@ func (_d TblservicetreeServiceWithTracing) ByQueries(ctx context.Context, i inte
 }
 
 // Create implements TblservicetreeService
-func (_d TblservicetreeServiceWithTracing) Create(ctx context.Context, v *ent.SpiderDevTblServicetree) (res *ent.SpiderDevTblServicetree, err error) {
+func (_d TblservicetreeServiceWithTracing) Create(ctx context.Context, v ent.SpiderDevTblServicetreeBaseCreateReq) (res *ent.SpiderDevTblServicetree, err error) {
 
 	var name = "TblservicetreeService.Create"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -80,7 +80,7 @@ func (_d TblservicetreeServiceWithTracing) Create(ctx context.Context, v *ent.Sp
 }
 
 // CreateMany implements TblservicetreeService
-func (_d TblservicetreeServiceWithTracing) CreateMany(ctx context.Context, vs ent.SpiderDevTblServicetrees) (s1 ent.SpiderDevTblServicetrees, err error) {
+func (_d TblservicetreeServiceWithTracing) CreateMany(ctx context.Context, vs []ent.SpiderDevTblServicetreeBaseCreateReq) (s1 ent.SpiderDevTblServicetrees, err error) {
 
 	var name = "TblservicetreeService.CreateMany"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -150,7 +150,7 @@ func (_d TblservicetreeServiceWithTracing) DeleteMany(ctx context.Context, ids [
 }
 
 // GetById implements TblservicetreeService
-func (_d TblservicetreeServiceWithTracing) GetById(ctx context.Context, id int32) (res *ent.SpiderDevTblServicetree, err error) {
+func (_d TblservicetreeServiceWithTracing) GetById(ctx context.Context, id int32) (res ent.SpiderDevTblServicetreeBaseGetRes, err error) {
 
 	var name = "TblservicetreeService.GetById"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -174,7 +174,7 @@ func (_d TblservicetreeServiceWithTracing) GetById(ctx context.Context, id int32
 }
 
 // UpdateById implements TblservicetreeService
-func (_d TblservicetreeServiceWithTracing) UpdateById(ctx context.Context, id int32, v *ent.SpiderDevTblServicetree) (sp1 *ent.SpiderDevTblServicetree, err error) {
+func (_d TblservicetreeServiceWithTracing) UpdateById(ctx context.Context, id int32, v ent.SpiderDevTblServicetreeBaseUpdateReq) (sp1 *ent.SpiderDevTblServicetree, err error) {
 
 	var name = "TblservicetreeService.UpdateById"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -199,7 +199,7 @@ func (_d TblservicetreeServiceWithTracing) UpdateById(ctx context.Context, id in
 }
 
 // UpdateMany implements TblservicetreeService
-func (_d TblservicetreeServiceWithTracing) UpdateMany(ctx context.Context, vs ent.SpiderDevTblServicetrees) (err error) {
+func (_d TblservicetreeServiceWithTracing) UpdateMany(ctx context.Context, vs []ent.SpiderDevTblServicetreeBaseUpdateReq) (err error) {
 
 	var name = "TblservicetreeService.UpdateMany"
 	_, span := otel.Tracer(name).Start(ctx, name)

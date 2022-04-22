@@ -32,7 +32,7 @@ func NewHelloServiceWithTracing(base HelloService) HelloService {
 }
 
 // GetUser implements HelloService
-func (_d HelloServiceWithTracing) GetUser(ctx context.Context, req GetUserReq) (pp1 *ent.Pod, err error) {
+func (_d HelloServiceWithTracing) GetUser(ctx context.Context, req GetUserReq) (p1 ent.PodBaseGetRes, err error) {
 
 	var name = "HelloService.GetUser"
 	_, span := otel.Tracer(name).Start(ctx, name)
@@ -42,7 +42,7 @@ func (_d HelloServiceWithTracing) GetUser(ctx context.Context, req GetUserReq) (
 				"params": map[string]interface{}{
 					"req": req},
 				"result": map[string]interface{}{
-					"pp1": pp1,
+					"p1":  p1,
 					"err": err},
 			}
 			s, _ := json.Marshal(l)

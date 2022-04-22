@@ -513,7 +513,7 @@ func (pq *PodQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-func (pq *PodQuery) ByQueries(ctx context.Context, i interface{}) (res Pods, count int, err error) {
+func (pq *PodQuery) ByQueries(ctx context.Context, i interface{}, vs interface{}) (count int, err error) {
 	queryList, countList := SetPodFormQueries(i)
 	countQ := pq.Clone()
 	for _, v := range queryList {
@@ -526,7 +526,7 @@ func (pq *PodQuery) ByQueries(ctx context.Context, i interface{}) (res Pods, cou
 	if err != nil {
 		return
 	}
-	res, err = pq.All(ctx)
+	err = pq.Select(pod.Columns...).Scan(ctx, vs)
 	return
 }
 
@@ -536,7 +536,7 @@ type PodTableFormer interface {
 }
 
 type PodTablePagingForm struct {
-	Limit *int `json:"_limit" form:"_limit" `
+	Limit *int `json:"_limit" form:"_limit" <no value>`
 	Page  *int `json:"_page" form:"_page"`
 }
 
@@ -600,6 +600,32 @@ func PodFormDepValue(v reflect.Value, former reflect.Type, queryList *[]PodTable
 }
 
 type PodQueryOps struct {
+	*PodTablePagingForm
+	PodTableOrderForm
+
+	PodTableClusterNameEQForm
+
+	PodTableNamespaceEQForm
+
+	PodTableServiceNameEQForm
+
+	PodTablePodNameEQForm
+
+	PodTableResourceVersionEQForm
+
+	PodTablePodIPEQForm
+
+	PodTableHostIPEQForm
+
+	PodTableStartTimeEQForm
+
+	PodTablePhaseEQForm
+
+	PodTableReasonEQForm
+
+	PodTableMessageEQForm
+
+	PodTableDetailEQForm
 }
 
 type PodTableClusterNameEQForm struct {

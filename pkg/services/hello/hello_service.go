@@ -10,7 +10,7 @@ import (
 //go:generate gowrap gen -g -p ./ -i HelloService -bt "prometheus:hello_with_prometheus_gen.go log:hello_with_log_gen.go opentracing:hello_with_trace_gen.go http-gin:hello_http_gen.go endpoint:hello_endpoint_gen.go"
 type HelloService interface {
 	// @http-gin /hello/:id GET
-	GetUser(ctx context.Context, req GetUserReq) (*ent.Pod, error)
+	GetUser(ctx context.Context, req GetUserReq) (ent.PodBaseGetRes, error)
 }
 
 type basicHelloService struct {
@@ -23,7 +23,7 @@ type GetUserReq struct {
 	} `json:"uri"`
 }
 
-func (b *basicHelloService)GetUser(ctx context.Context, req GetUserReq) (*ent.Pod, error) {
+func (b *basicHelloService)GetUser(ctx context.Context, req GetUserReq) (ent.PodBaseGetRes, error) {
 	return b.repo.Pod.GetById(ctx, req.Uri.Id)
 }
 

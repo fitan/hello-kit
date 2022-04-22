@@ -40,7 +40,7 @@ func NewHelloServiceWithPrometheus(base HelloService) HelloServiceWithPrometheus
 }
 
 // GetUser implements HelloService
-func (_d HelloServiceWithPrometheus) GetUser(ctx context.Context, req GetUserReq) (pp1 *ent.Pod, err error) {
+func (_d HelloServiceWithPrometheus) GetUser(ctx context.Context, req GetUserReq) (p1 ent.PodBaseGetRes, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"

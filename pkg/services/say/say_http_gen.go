@@ -41,7 +41,7 @@ type SwagResponse struct {
 // @Accept  json
 // @Tags SayService
 // @Param id path string true " "
-// @Success 200 {object} SwagResponse{data=ent.Pod}
+// @Success 200 {object} SwagResponse{data=ent.PodBaseGetRes}
 // @Router /saypod/{id} [get]
 func makeSayPodHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.GET("/saypod/:id", http.NewServer(endpoints.SayPodEndpoint, decodeSayPodRequest, http.EncodeJSONResponse, options...).ServeHTTP)

@@ -41,7 +41,7 @@ type SwagResponse struct {
 // @Accept  json
 // @Tags HelloService
 // @Param id path string true " "
-// @Success 200 {object} SwagResponse{data=ent.Pod}
+// @Success 200 {object} SwagResponse{data=ent.PodBaseGetRes}
 // @Router /hello/{id} [get]
 func makeGetUserHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
 	r.GET("/hello/:id", http.NewServer(endpoints.GetUserEndpoint, decodeGetUserRequest, http.EncodeJSONResponse, options...).ServeHTTP)

@@ -433,7 +433,7 @@ func (sdtsq *SpiderDevTblServicetreeQuery) sqlQuery(ctx context.Context) *sql.Se
 	return selector
 }
 
-func (sdtsq *SpiderDevTblServicetreeQuery) ByQueries(ctx context.Context, i interface{}) (res SpiderDevTblServicetrees, count int, err error) {
+func (sdtsq *SpiderDevTblServicetreeQuery) ByQueries(ctx context.Context, i interface{}, vs interface{}) (count int, err error) {
 	queryList, countList := SetSpiderDevTblServicetreeFormQueries(i)
 	countQ := sdtsq.Clone()
 	for _, v := range queryList {
@@ -446,7 +446,7 @@ func (sdtsq *SpiderDevTblServicetreeQuery) ByQueries(ctx context.Context, i inte
 	if err != nil {
 		return
 	}
-	res, err = sdtsq.All(ctx)
+	err = sdtsq.Select(spiderdevtblservicetree.Columns...).Scan(ctx, vs)
 	return
 }
 

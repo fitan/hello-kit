@@ -433,7 +433,7 @@ func (pq *ProjectQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-func (pq *ProjectQuery) ByQueries(ctx context.Context, i interface{}) (res Projects, count int, err error) {
+func (pq *ProjectQuery) ByQueries(ctx context.Context, i interface{}, vs interface{}) (count int, err error) {
 	queryList, countList := SetProjectFormQueries(i)
 	countQ := pq.Clone()
 	for _, v := range queryList {
@@ -446,7 +446,7 @@ func (pq *ProjectQuery) ByQueries(ctx context.Context, i interface{}) (res Proje
 	if err != nil {
 		return
 	}
-	res, err = pq.All(ctx)
+	err = pq.Select(project.Columns...).Scan(ctx, vs)
 	return
 }
 

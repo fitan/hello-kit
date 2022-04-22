@@ -123,7 +123,7 @@ func (_d UserServiceWithPrometheus) DeleteMany(ctx context.Context, req ent.User
 }
 
 // GetById implements UserService
-func (_d UserServiceWithPrometheus) GetById(ctx context.Context, req ent.UserRestGetByIdReq) (res *ent.User, err error) {
+func (_d UserServiceWithPrometheus) GetById(ctx context.Context, req ent.UserRestGetByIdReq) (res ent.UserBaseGetRes, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
