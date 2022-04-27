@@ -807,6 +807,29 @@ func NewUserBase(client *Client) UserBaseInterface {
 	return &UserBase{client: client}
 }
 
+type rest struct {
+	PodRestInterface
+
+	ProjectRestInterface
+
+	SpiderDevTblServicetreeRestInterface
+
+	UserRestInterface
+}
+
+func NewRest(db *Client) *rest {
+	return &rest{
+
+		PodRestInterface: NewPodRest(db),
+
+		ProjectRestInterface: NewProjectRest(db),
+
+		SpiderDevTblServicetreeRestInterface: NewSpiderDevTblServicetreeRest(db),
+
+		UserRestInterface: NewUserRest(db),
+	}
+}
+
 type PodRestInterface interface {
 	// @http-gin /pod POST
 	Create(ctx context.Context, req PodRestCreateReq) (res *Pod, err error)

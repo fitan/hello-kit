@@ -348,6 +348,26 @@ func New{{$structName}}(client *Client) {{$structName}}Interface {
 
 {{ define "client/additional/rest" }}
 {{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+{{/*type RestInterface interface {*/}}
+{{/*{{range $n := $.Nodes}}*/}}
+{{/*	{{$n.Name}}RestInterface*/}}
+{{/*{{end}}*/}}
+{{/*}*/}}
+
+type rest struct {
+{{range $n := $.Nodes}}
+    {{$n.Name}}RestInterface
+{{end}}
+}
+
+func NewRest(db *Client) *rest {
+	return &rest {
+		{{range $n := $.Nodes}}
+        {{$n.Name}}RestInterface: New{{$n.Name}}Rest(db),
+		{{end}}
+	}
+}
+
 {{range $n := $.Nodes}}
 {{$structName := print $n.Name "Rest"}}
 {{$interfaceName := print $structName "Interface"}}
