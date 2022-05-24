@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"hello/pkg/ent/project"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 )
@@ -15,10 +16,37 @@ type Project struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Alias holds the value of the "alias" field.
-	Alias string `json:"alias,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Aname holds the value of the "aname" field.
+	Aname string `json:"aname,omitempty"`
+	// Comments holds the value of the "comments" field.
+	Comments string `json:"comments,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the ProjectQuery when eager-loading is set.
+	Edges ProjectEdges `json:"edges"`
+}
+
+// ProjectEdges holds the relations/edges for other nodes in the graph.
+type ProjectEdges struct {
+	// Services holds the value of the services edge.
+	Services []*Service `json:"services,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// ServicesOrErr returns the Services value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProjectEdges) ServicesOrErr() ([]*Service, error) {
+	if e.loadedTypes[0] {
+		return e.Services, nil
+	}
+	return nil, &NotLoadedError{edge: "services"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -28,8 +56,10 @@ func (*Project) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case project.FieldID:
 			values[i] = new(sql.NullInt64)
-		case project.FieldAlias, project.FieldName:
+		case project.FieldName, project.FieldAname, project.FieldComments:
 			values[i] = new(sql.NullString)
+		case project.FieldCreateTime, project.FieldUpdateTime:
+			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Project", columns[i])
 		}
@@ -51,11 +81,17 @@ func (pr *Project) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			pr.ID = int(value.Int64)
-		case project.FieldAlias:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field alias", values[i])
+		case project.FieldCreateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				pr.Alias = value.String
+				pr.CreateTime = value.Time
+			}
+		case project.FieldUpdateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+			} else if value.Valid {
+				pr.UpdateTime = value.Time
 			}
 		case project.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -63,9 +99,26 @@ func (pr *Project) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				pr.Name = value.String
 			}
+		case project.FieldAname:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field aname", values[i])
+			} else if value.Valid {
+				pr.Aname = value.String
+			}
+		case project.FieldComments:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field comments", values[i])
+			} else if value.Valid {
+				pr.Comments = value.String
+			}
 		}
 	}
 	return nil
+}
+
+// QueryServices queries the "services" edge of the Project entity.
+func (pr *Project) QueryServices() *ServiceQuery {
+	return (&ProjectClient{config: pr.config}).QueryServices(pr)
 }
 
 // Update returns a builder for updating this Project.
@@ -91,10 +144,16 @@ func (pr *Project) String() string {
 	var builder strings.Builder
 	builder.WriteString("Project(")
 	builder.WriteString(fmt.Sprintf("id=%v", pr.ID))
-	builder.WriteString(", alias=")
-	builder.WriteString(pr.Alias)
+	builder.WriteString(", create_time=")
+	builder.WriteString(pr.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", update_time=")
+	builder.WriteString(pr.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", name=")
 	builder.WriteString(pr.Name)
+	builder.WriteString(", aname=")
+	builder.WriteString(pr.Aname)
+	builder.WriteString(", comments=")
+	builder.WriteString(pr.Comments)
 	builder.WriteByte(')')
 	return builder.String()
 }
