@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"hello/pkg/ent/project"
+	"hello/pkg/ent/service"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -19,9 +21,31 @@ type ProjectCreate struct {
 	hooks    []Hook
 }
 
-// SetAlias sets the "alias" field.
-func (pc *ProjectCreate) SetAlias(s string) *ProjectCreate {
-	pc.mutation.SetAlias(s)
+// SetCreateTime sets the "create_time" field.
+func (pc *ProjectCreate) SetCreateTime(t time.Time) *ProjectCreate {
+	pc.mutation.SetCreateTime(t)
+	return pc
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (pc *ProjectCreate) SetNillableCreateTime(t *time.Time) *ProjectCreate {
+	if t != nil {
+		pc.SetCreateTime(*t)
+	}
+	return pc
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (pc *ProjectCreate) SetUpdateTime(t time.Time) *ProjectCreate {
+	pc.mutation.SetUpdateTime(t)
+	return pc
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (pc *ProjectCreate) SetNillableUpdateTime(t *time.Time) *ProjectCreate {
+	if t != nil {
+		pc.SetUpdateTime(*t)
+	}
 	return pc
 }
 
@@ -31,12 +55,31 @@ func (pc *ProjectCreate) SetName(s string) *ProjectCreate {
 	return pc
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (pc *ProjectCreate) SetNillableName(s *string) *ProjectCreate {
-	if s != nil {
-		pc.SetName(*s)
-	}
+// SetAname sets the "aname" field.
+func (pc *ProjectCreate) SetAname(s string) *ProjectCreate {
+	pc.mutation.SetAname(s)
 	return pc
+}
+
+// SetComments sets the "comments" field.
+func (pc *ProjectCreate) SetComments(s string) *ProjectCreate {
+	pc.mutation.SetComments(s)
+	return pc
+}
+
+// AddServiceIDs adds the "services" edge to the Service entity by IDs.
+func (pc *ProjectCreate) AddServiceIDs(ids ...int) *ProjectCreate {
+	pc.mutation.AddServiceIDs(ids...)
+	return pc
+}
+
+// AddServices adds the "services" edges to the Service entity.
+func (pc *ProjectCreate) AddServices(s ...*Service) *ProjectCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return pc.AddServiceIDs(ids...)
 }
 
 // Mutation returns the ProjectMutation object of the builder.
@@ -110,19 +153,32 @@ func (pc *ProjectCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (pc *ProjectCreate) defaults() {
-	if _, ok := pc.mutation.Name(); !ok {
-		v := project.DefaultName
-		pc.mutation.SetName(v)
+	if _, ok := pc.mutation.CreateTime(); !ok {
+		v := project.DefaultCreateTime()
+		pc.mutation.SetCreateTime(v)
+	}
+	if _, ok := pc.mutation.UpdateTime(); !ok {
+		v := project.DefaultUpdateTime()
+		pc.mutation.SetUpdateTime(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (pc *ProjectCreate) check() error {
-	if _, ok := pc.mutation.Alias(); !ok {
-		return &ValidationError{Name: "alias", err: errors.New(`ent: missing required field "Project.alias"`)}
+	if _, ok := pc.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Project.create_time"`)}
+	}
+	if _, ok := pc.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Project.update_time"`)}
 	}
 	if _, ok := pc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Project.name"`)}
+	}
+	if _, ok := pc.mutation.Aname(); !ok {
+		return &ValidationError{Name: "aname", err: errors.New(`ent: missing required field "Project.aname"`)}
+	}
+	if _, ok := pc.mutation.Comments(); !ok {
+		return &ValidationError{Name: "comments", err: errors.New(`ent: missing required field "Project.comments"`)}
 	}
 	return nil
 }
@@ -151,13 +207,21 @@ func (pc *ProjectCreate) createSpec() (*Project, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
-	if value, ok := pc.mutation.Alias(); ok {
+	if value, ok := pc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeTime,
 			Value:  value,
-			Column: project.FieldAlias,
+			Column: project.FieldCreateTime,
 		})
-		_node.Alias = value
+		_node.CreateTime = value
+	}
+	if value, ok := pc.mutation.UpdateTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: project.FieldUpdateTime,
+		})
+		_node.UpdateTime = value
 	}
 	if value, ok := pc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -166,6 +230,41 @@ func (pc *ProjectCreate) createSpec() (*Project, *sqlgraph.CreateSpec) {
 			Column: project.FieldName,
 		})
 		_node.Name = value
+	}
+	if value, ok := pc.mutation.Aname(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: project.FieldAname,
+		})
+		_node.Aname = value
+	}
+	if value, ok := pc.mutation.Comments(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: project.FieldComments,
+		})
+		_node.Comments = value
+	}
+	if nodes := pc.mutation.ServicesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   project.ServicesTable,
+			Columns: []string{project.ServicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: service.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

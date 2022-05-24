@@ -30,6 +30,7 @@ apis:
 
 mysql:
   url: root:123456@tcp(localhost:3306)/gteml?charset=utf8mb4&parseTime=True&loc=Local
+  autoCreate: true
   maxIdleConns: 10
   maxOpenConns: 100
   connMaxLifetime: 1h

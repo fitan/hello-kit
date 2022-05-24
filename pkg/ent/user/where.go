@@ -6,7 +6,6 @@ import (
 	"hello/pkg/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their ID field.
@@ -92,6 +91,27 @@ func IDLTE(id int) predicate.User {
 	})
 }
 
+// PassWord applies equality check predicate on the "pass_word" field. It's identical to PassWordEQ.
+func PassWord(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPassWord), v))
+	})
+}
+
+// Token applies equality check predicate on the "token" field. It's identical to TokenEQ.
+func Token(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldToken), v))
+	})
+}
+
+// Enable applies equality check predicate on the "enable" field. It's identical to EnableEQ.
+func Enable(v bool) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldEnable), v))
+	})
+}
+
 // Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
 func Age(v int) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -103,6 +123,242 @@ func Age(v int) predicate.User {
 func Name(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldName), v))
+	})
+}
+
+// PassWordEQ applies the EQ predicate on the "pass_word" field.
+func PassWordEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPassWord), v))
+	})
+}
+
+// PassWordNEQ applies the NEQ predicate on the "pass_word" field.
+func PassWordNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldPassWord), v))
+	})
+}
+
+// PassWordIn applies the In predicate on the "pass_word" field.
+func PassWordIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldPassWord), v...))
+	})
+}
+
+// PassWordNotIn applies the NotIn predicate on the "pass_word" field.
+func PassWordNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldPassWord), v...))
+	})
+}
+
+// PassWordGT applies the GT predicate on the "pass_word" field.
+func PassWordGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldPassWord), v))
+	})
+}
+
+// PassWordGTE applies the GTE predicate on the "pass_word" field.
+func PassWordGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldPassWord), v))
+	})
+}
+
+// PassWordLT applies the LT predicate on the "pass_word" field.
+func PassWordLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldPassWord), v))
+	})
+}
+
+// PassWordLTE applies the LTE predicate on the "pass_word" field.
+func PassWordLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldPassWord), v))
+	})
+}
+
+// PassWordContains applies the Contains predicate on the "pass_word" field.
+func PassWordContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldPassWord), v))
+	})
+}
+
+// PassWordHasPrefix applies the HasPrefix predicate on the "pass_word" field.
+func PassWordHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldPassWord), v))
+	})
+}
+
+// PassWordHasSuffix applies the HasSuffix predicate on the "pass_word" field.
+func PassWordHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldPassWord), v))
+	})
+}
+
+// PassWordEqualFold applies the EqualFold predicate on the "pass_word" field.
+func PassWordEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldPassWord), v))
+	})
+}
+
+// PassWordContainsFold applies the ContainsFold predicate on the "pass_word" field.
+func PassWordContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldPassWord), v))
+	})
+}
+
+// TokenEQ applies the EQ predicate on the "token" field.
+func TokenEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldToken), v))
+	})
+}
+
+// TokenNEQ applies the NEQ predicate on the "token" field.
+func TokenNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldToken), v))
+	})
+}
+
+// TokenIn applies the In predicate on the "token" field.
+func TokenIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldToken), v...))
+	})
+}
+
+// TokenNotIn applies the NotIn predicate on the "token" field.
+func TokenNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldToken), v...))
+	})
+}
+
+// TokenGT applies the GT predicate on the "token" field.
+func TokenGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldToken), v))
+	})
+}
+
+// TokenGTE applies the GTE predicate on the "token" field.
+func TokenGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldToken), v))
+	})
+}
+
+// TokenLT applies the LT predicate on the "token" field.
+func TokenLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldToken), v))
+	})
+}
+
+// TokenLTE applies the LTE predicate on the "token" field.
+func TokenLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldToken), v))
+	})
+}
+
+// TokenContains applies the Contains predicate on the "token" field.
+func TokenContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldToken), v))
+	})
+}
+
+// TokenHasPrefix applies the HasPrefix predicate on the "token" field.
+func TokenHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldToken), v))
+	})
+}
+
+// TokenHasSuffix applies the HasSuffix predicate on the "token" field.
+func TokenHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldToken), v))
+	})
+}
+
+// TokenEqualFold applies the EqualFold predicate on the "token" field.
+func TokenEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldToken), v))
+	})
+}
+
+// TokenContainsFold applies the ContainsFold predicate on the "token" field.
+func TokenContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldToken), v))
+	})
+}
+
+// EnableEQ applies the EQ predicate on the "enable" field.
+func EnableEQ(v bool) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldEnable), v))
+	})
+}
+
+// EnableNEQ applies the NEQ predicate on the "enable" field.
+func EnableNEQ(v bool) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldEnable), v))
 	})
 }
 
@@ -179,6 +435,20 @@ func AgeLT(v int) predicate.User {
 func AgeLTE(v int) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldAge), v))
+	})
+}
+
+// AgeIsNil applies the IsNil predicate on the "age" field.
+func AgeIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldAge)))
+	})
+}
+
+// AgeNotNil applies the NotNil predicate on the "age" field.
+func AgeNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldAge)))
 	})
 }
 
@@ -290,34 +560,6 @@ func NameEqualFold(v string) predicate.User {
 func NameContainsFold(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldName), v))
-	})
-}
-
-// HasPods applies the HasEdge predicate on the "pods" edge.
-func HasPods() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PodsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PodsTable, PodsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasPodsWith applies the HasEdge predicate on the "pods" edge with a given conditions (other predicates).
-func HasPodsWith(preds ...predicate.Pod) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PodsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PodsTable, PodsColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
 	})
 }
 

@@ -8,15 +8,15 @@ import (
 	"hello/pkg/ent"
 )
 
-// The PodFunc type is an adapter to allow the use of ordinary
-// function as Pod mutator.
-type PodFunc func(context.Context, *ent.PodMutation) (ent.Value, error)
+// The AuditFunc type is an adapter to allow the use of ordinary
+// function as Audit mutator.
+type AuditFunc func(context.Context, *ent.AuditMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f PodFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.PodMutation)
+func (f AuditFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.AuditMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PodMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AuditMutation", m)
 	}
 	return f(ctx, mv)
 }
@@ -30,6 +30,32 @@ func (f ProjectFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	mv, ok := m.(*ent.ProjectMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProjectMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The ResourceFunc type is an adapter to allow the use of ordinary
+// function as Resource mutator.
+type ResourceFunc func(context.Context, *ent.ResourceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ResourceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ResourceMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ResourceMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The ServiceFunc type is an adapter to allow the use of ordinary
+// function as Service mutator.
+type ServiceFunc func(context.Context, *ent.ServiceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ServiceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ServiceMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ServiceMutation", m)
 	}
 	return f(ctx, mv)
 }

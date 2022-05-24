@@ -74,6 +74,7 @@ type Taobao struct {
 type Mysql struct {
 	ConnMaxIdleTime string `yaml:"ConnMaxIdleTime"`
 	Url             string `yaml:"url"`
+	AutoCreate      bool   `yaml:"autoCreate"`
 	MaxIdleConns    int    `yaml:"maxIdleConns"`
 	MaxOpenConns    int    `yaml:"maxOpenConns"`
 	ConnMaxLifetime string `yaml:"connMaxLifetime"`

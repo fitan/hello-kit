@@ -30,10 +30,10 @@ func NewUserServiceWithTracing(base UserService) UserService {
 	return d
 }
 
-// ByQueries implements UserService
-func (_d UserServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (res []ent.UserBaseGetRes, count int, err error) {
+// ByQueriesAll implements UserService
+func (_d UserServiceWithTracing) ByQueriesAll(ctx context.Context, i interface{}) (res []ent.UserBaseGetRes, count int, err error) {
 
-	var name = "UserService.ByQueries"
+	var name = "UserService.ByQueriesAll"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -52,7 +52,7 @@ func (_d UserServiceWithTracing) ByQueries(ctx context.Context, i interface{}) (
 		span.End()
 	}()
 
-	return _d.UserService.ByQueries(ctx, i)
+	return _d.UserService.ByQueriesAll(ctx, i)
 }
 
 // Create implements UserService
@@ -101,31 +101,6 @@ func (_d UserServiceWithTracing) CreateMany(ctx context.Context, vs []ent.UserBa
 	}()
 
 	return _d.UserService.CreateMany(ctx, vs)
-}
-
-// CreatePodsSliceByUserId implements UserService
-func (_d UserServiceWithTracing) CreatePodsSliceByUserId(ctx context.Context, id int, vs []ent.PodBaseCreateReq) (res *ent.User, err error) {
-
-	var name = "UserService.CreatePodsSliceByUserId"
-	_, span := otel.Tracer(name).Start(ctx, name)
-	defer func() {
-		if err != nil {
-			l := map[string]interface{}{
-				"params": map[string]interface{}{
-					"id": id,
-					"vs": vs},
-				"result": map[string]interface{}{
-					"res": res,
-					"err": err},
-			}
-			s, _ := json.Marshal(l)
-			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
-			span.SetStatus(codes.Error, err.Error())
-		}
-		span.End()
-	}()
-
-	return _d.UserService.CreatePodsSliceByUserId(ctx, id, vs)
 }
 
 // DeleteById implements UserService
@@ -196,32 +171,6 @@ func (_d UserServiceWithTracing) GetById(ctx context.Context, id int) (res ent.U
 	}()
 
 	return _d.UserService.GetById(ctx, id)
-}
-
-// GetPodsSliceByUserId implements UserService
-func (_d UserServiceWithTracing) GetPodsSliceByUserId(ctx context.Context, id int, i interface{}) (res []ent.PodBaseGetRes, count int, err error) {
-
-	var name = "UserService.GetPodsSliceByUserId"
-	_, span := otel.Tracer(name).Start(ctx, name)
-	defer func() {
-		if err != nil {
-			l := map[string]interface{}{
-				"params": map[string]interface{}{
-					"id": id,
-					"i":  i},
-				"result": map[string]interface{}{
-					"res":   res,
-					"count": count,
-					"err":   err},
-			}
-			s, _ := json.Marshal(l)
-			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
-			span.SetStatus(codes.Error, err.Error())
-		}
-		span.End()
-	}()
-
-	return _d.UserService.GetPodsSliceByUserId(ctx, id, i)
 }
 
 // UpdateById implements UserService

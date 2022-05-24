@@ -38,8 +38,8 @@ func NewUserServiceWithPrometheus(base UserService) UserServiceWithPrometheus {
 	}
 }
 
-// ByQueries implements UserService
-func (_d UserServiceWithPrometheus) ByQueries(ctx context.Context, i interface{}) (res []ent.UserBaseGetRes, count int, err error) {
+// ByQueriesAll implements UserService
+func (_d UserServiceWithPrometheus) ByQueriesAll(ctx context.Context, i interface{}) (res []ent.UserBaseGetRes, count int, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -47,9 +47,9 @@ func (_d UserServiceWithPrometheus) ByQueries(ctx context.Context, i interface{}
 			result = "error"
 		}
 
-		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ByQueries", result).Observe(time.Since(_since).Seconds())
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ByQueriesAll", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.ByQueries(ctx, i)
+	return _d.base.ByQueriesAll(ctx, i)
 }
 
 // Create implements UserService
@@ -78,20 +78,6 @@ func (_d UserServiceWithPrometheus) CreateMany(ctx context.Context, vs []ent.Use
 		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "CreateMany", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.CreateMany(ctx, vs)
-}
-
-// CreatePodsSliceByUserId implements UserService
-func (_d UserServiceWithPrometheus) CreatePodsSliceByUserId(ctx context.Context, id int, vs []ent.PodBaseCreateReq) (res *ent.User, err error) {
-	_since := time.Now()
-	defer func() {
-		result := "ok"
-		if err != nil {
-			result = "error"
-		}
-
-		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "CreatePodsSliceByUserId", result).Observe(time.Since(_since).Seconds())
-	}()
-	return _d.base.CreatePodsSliceByUserId(ctx, id, vs)
 }
 
 // DeleteById implements UserService
@@ -134,20 +120,6 @@ func (_d UserServiceWithPrometheus) GetById(ctx context.Context, id int) (res en
 		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetById", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.GetById(ctx, id)
-}
-
-// GetPodsSliceByUserId implements UserService
-func (_d UserServiceWithPrometheus) GetPodsSliceByUserId(ctx context.Context, id int, i interface{}) (res []ent.PodBaseGetRes, count int, err error) {
-	_since := time.Now()
-	defer func() {
-		result := "ok"
-		if err != nil {
-			result = "error"
-		}
-
-		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetPodsSliceByUserId", result).Observe(time.Since(_since).Seconds())
-	}()
-	return _d.base.GetPodsSliceByUserId(ctx, id, i)
 }
 
 // UpdateById implements UserService

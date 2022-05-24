@@ -2,24 +2,46 @@
 
 package project
 
+import (
+	"time"
+)
+
 const (
 	// Label holds the string label denoting the project type in the database.
 	Label = "project"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldAlias holds the string denoting the alias field in the database.
-	FieldAlias = "alias"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
+	// FieldUpdateTime holds the string denoting the update_time field in the database.
+	FieldUpdateTime = "update_time"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldAname holds the string denoting the aname field in the database.
+	FieldAname = "aname"
+	// FieldComments holds the string denoting the comments field in the database.
+	FieldComments = "comments"
+	// EdgeServices holds the string denoting the services edge name in mutations.
+	EdgeServices = "services"
 	// Table holds the table name of the project in the database.
 	Table = "projects"
+	// ServicesTable is the table that holds the services relation/edge.
+	ServicesTable = "services"
+	// ServicesInverseTable is the table name for the Service entity.
+	// It exists in this package in order to avoid circular dependency with the "service" package.
+	ServicesInverseTable = "services"
+	// ServicesColumn is the table column denoting the services relation/edge.
+	ServicesColumn = "project_services"
 )
 
 // Columns holds all SQL columns for project fields.
 var Columns = []string{
 	FieldID,
-	FieldAlias,
+	FieldCreateTime,
+	FieldUpdateTime,
 	FieldName,
+	FieldAname,
+	FieldComments,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -33,6 +55,10 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultName holds the default value on creation for the "name" field.
-	DefaultName string
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
+	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
+	DefaultUpdateTime func() time.Time
+	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
+	UpdateDefaultUpdateTime func() time.Time
 )

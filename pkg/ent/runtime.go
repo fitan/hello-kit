@@ -3,25 +3,83 @@
 package ent
 
 import (
+	"hello/pkg/ent/audit"
 	"hello/pkg/ent/project"
+	"hello/pkg/ent/resource"
 	"hello/pkg/ent/schema"
+	"hello/pkg/ent/service"
 	"hello/pkg/ent/user"
+	"time"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	auditMixin := schema.Audit{}.Mixin()
+	auditMixinFields0 := auditMixin[0].Fields()
+	_ = auditMixinFields0
+	auditFields := schema.Audit{}.Fields()
+	_ = auditFields
+	// auditDescCreateTime is the schema descriptor for create_time field.
+	auditDescCreateTime := auditMixinFields0[0].Descriptor()
+	// audit.DefaultCreateTime holds the default value on creation for the create_time field.
+	audit.DefaultCreateTime = auditDescCreateTime.Default.(func() time.Time)
+	// auditDescUpdateTime is the schema descriptor for update_time field.
+	auditDescUpdateTime := auditMixinFields0[1].Descriptor()
+	// audit.DefaultUpdateTime holds the default value on creation for the update_time field.
+	audit.DefaultUpdateTime = auditDescUpdateTime.Default.(func() time.Time)
+	// audit.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	audit.UpdateDefaultUpdateTime = auditDescUpdateTime.UpdateDefault.(func() time.Time)
+	projectMixin := schema.Project{}.Mixin()
+	projectMixinFields0 := projectMixin[0].Fields()
+	_ = projectMixinFields0
 	projectFields := schema.Project{}.Fields()
 	_ = projectFields
-	// projectDescName is the schema descriptor for name field.
-	projectDescName := projectFields[1].Descriptor()
-	// project.DefaultName holds the default value on creation for the name field.
-	project.DefaultName = projectDescName.Default.(string)
+	// projectDescCreateTime is the schema descriptor for create_time field.
+	projectDescCreateTime := projectMixinFields0[0].Descriptor()
+	// project.DefaultCreateTime holds the default value on creation for the create_time field.
+	project.DefaultCreateTime = projectDescCreateTime.Default.(func() time.Time)
+	// projectDescUpdateTime is the schema descriptor for update_time field.
+	projectDescUpdateTime := projectMixinFields0[1].Descriptor()
+	// project.DefaultUpdateTime holds the default value on creation for the update_time field.
+	project.DefaultUpdateTime = projectDescUpdateTime.Default.(func() time.Time)
+	// project.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	project.UpdateDefaultUpdateTime = projectDescUpdateTime.UpdateDefault.(func() time.Time)
+	resourceMixin := schema.Resource{}.Mixin()
+	resourceMixinFields0 := resourceMixin[0].Fields()
+	_ = resourceMixinFields0
+	resourceFields := schema.Resource{}.Fields()
+	_ = resourceFields
+	// resourceDescCreateTime is the schema descriptor for create_time field.
+	resourceDescCreateTime := resourceMixinFields0[0].Descriptor()
+	// resource.DefaultCreateTime holds the default value on creation for the create_time field.
+	resource.DefaultCreateTime = resourceDescCreateTime.Default.(func() time.Time)
+	// resourceDescUpdateTime is the schema descriptor for update_time field.
+	resourceDescUpdateTime := resourceMixinFields0[1].Descriptor()
+	// resource.DefaultUpdateTime holds the default value on creation for the update_time field.
+	resource.DefaultUpdateTime = resourceDescUpdateTime.Default.(func() time.Time)
+	// resource.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	resource.UpdateDefaultUpdateTime = resourceDescUpdateTime.UpdateDefault.(func() time.Time)
+	serviceMixin := schema.Service{}.Mixin()
+	serviceMixinFields0 := serviceMixin[0].Fields()
+	_ = serviceMixinFields0
+	serviceFields := schema.Service{}.Fields()
+	_ = serviceFields
+	// serviceDescCreateTime is the schema descriptor for create_time field.
+	serviceDescCreateTime := serviceMixinFields0[0].Descriptor()
+	// service.DefaultCreateTime holds the default value on creation for the create_time field.
+	service.DefaultCreateTime = serviceDescCreateTime.Default.(func() time.Time)
+	// serviceDescUpdateTime is the schema descriptor for update_time field.
+	serviceDescUpdateTime := serviceMixinFields0[1].Descriptor()
+	// service.DefaultUpdateTime holds the default value on creation for the update_time field.
+	service.DefaultUpdateTime = serviceDescUpdateTime.Default.(func() time.Time)
+	// service.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	service.UpdateDefaultUpdateTime = serviceDescUpdateTime.UpdateDefault.(func() time.Time)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescName is the schema descriptor for name field.
-	userDescName := userFields[1].Descriptor()
+	userDescName := userFields[4].Descriptor()
 	// user.DefaultName holds the default value on creation for the name field.
 	user.DefaultName = userDescName.Default.(string)
 }

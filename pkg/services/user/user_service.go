@@ -52,6 +52,7 @@ type basicUserService struct {
 //}
 //
 type BaseService UserService
+
 //
 // NewBasicUserService returns a naive, stateless implementation of UserService.
 func NewBasicService(repo repository.Repository, casbin casbin.CasbinService, db *ent.Client) BaseService {

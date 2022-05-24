@@ -13,15 +13,15 @@ import (
 	"hello/pkg/repository"
 	"hello/pkg/repository/api/baidu"
 	"hello/pkg/repository/api/taobao"
-	"hello/pkg/repository/dao/pod"
-	"hello/pkg/repository/dao/tblservicetree"
+	"hello/pkg/repository/dao/audit"
+	"hello/pkg/repository/dao/project"
+	"hello/pkg/repository/dao/resource"
+	"hello/pkg/repository/dao/service"
 	"hello/pkg/repository/dao/user"
 	"hello/pkg/services"
+	audit2 "hello/pkg/services/audit"
 	"hello/pkg/services/casbin"
-	"hello/pkg/services/hello"
-	pod2 "hello/pkg/services/pod"
-	"hello/pkg/services/say"
-	"hello/pkg/services/say1"
+	project2 "hello/pkg/services/project"
 	user2 "hello/pkg/services/user"
 )
 
@@ -51,72 +51,74 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 	userBaseService := user.NewBasicService(client)
 	v3 := user.NewServiceMiddleware(sugaredLogger)
 	userService := user.NewService(userBaseService, v3)
-	podBaseService := pod.NewBasicService(client)
-	v4 := pod.NewServiceMiddleware(sugaredLogger)
-	podService := pod.NewService(podBaseService, v4)
-	tblservicetreeBaseService := tblservicetree.NewBasicService(client)
-	v5 := tblservicetree.NewServiceMiddleware(sugaredLogger)
-	tblservicetreeService := tblservicetree.NewService(tblservicetreeBaseService, v5)
+	auditBaseService := audit.NewBasicService(client)
+	v4 := audit.NewServiceMiddleware(sugaredLogger)
+	auditService := audit.NewService(auditBaseService, v4)
+	projectBaseService := project.NewBasicService(client)
+	v5 := project.NewServiceMiddleware(sugaredLogger)
+	projectService := project.NewService(projectBaseService, v5)
+	serviceBaseService := service.NewBasicService(client)
+	v6 := service.NewServiceMiddleware(sugaredLogger)
+	serviceService := service.NewService(serviceBaseService, v6)
+	resourceBaseService := resource.NewBasicService(client)
+	v7 := resource.NewServiceMiddleware(sugaredLogger)
+	resourceService := resource.NewService(resourceBaseService, v7)
 	repositoryRepository := &repository.Repository{
-		Baidu:       baiduService,
-		Taobao:      taobaoService,
-		User:        userService,
-		Pod:         podService,
-		ServiceTree: tblservicetreeService,
+		Baidu:    baiduService,
+		Taobao:   taobaoService,
+		User:     userService,
+		Audit:    auditService,
+		Project:  projectService,
+		Service:  serviceService,
+		Resource: resourceService,
 	}
+	appInitAuditMid := initAuditMid(r, repositoryRepository)
 	repository2 := repository.Repository{
-		Baidu:       baiduService,
-		Taobao:      taobaoService,
-		User:        userService,
-		Pod:         podService,
-		ServiceTree: tblservicetreeService,
+		Baidu:    baiduService,
+		Taobao:   taobaoService,
+		User:     userService,
+		Audit:    auditService,
+		Project:  projectService,
+		Service:  serviceService,
+		Resource: resourceService,
 	}
-	helloBaseService := hello.NewBasicService(repository2)
-	v6 := hello.NewServiceMiddleware(sugaredLogger)
-	helloService := hello.NewService(helloBaseService, v6)
-	v7 := initEndpointMiddleware()
-	mws := hello.NewEndpointMiddleware(sugaredLogger, v7)
-	endpoints := hello.NewEndpoints(helloService, mws)
-	v8 := initHttpServerOption()
-	ops := hello.NewServiceOption(v8)
-	httpHandler := hello.NewHTTPHandler(r, endpoints, ops)
 	casbinBaseService := casbin.NewBasicService()
-	v9 := casbin.NewServiceMiddleware(sugaredLogger)
-	casbinService := casbin.NewService(casbinBaseService, v9)
+	v8 := casbin.NewServiceMiddleware(sugaredLogger)
+	casbinService := casbin.NewService(casbinBaseService, v8)
 	baseService2 := user2.NewBasicService(repository2, casbinService, client)
-	v10 := user2.NewServiceMiddleware(sugaredLogger)
-	userUserService := user2.NewService(baseService2, v10)
-	userMws := user2.NewEndpointMiddleware(sugaredLogger, v7)
-	userEndpoints := user2.NewEndpoints(userUserService, userMws)
-	userOps := user2.NewServiceOption(v8)
-	userHttpHandler := user2.NewHTTPHandler(r, userEndpoints, userOps)
-	sayBaseService := say.NewBasicService(repository2)
-	v11 := say.NewServiceMiddleware(sugaredLogger)
-	sayService := say.NewService(sayBaseService, v11)
-	sayMws := say.NewEndpointMiddleware(sugaredLogger, v7)
-	sayEndpoints := say.NewEndpoints(sayService, sayMws)
-	sayOps := say.NewServiceOption(v8)
-	sayHttpHandler := say.NewHTTPHandler(r, sayEndpoints, sayOps)
-	say1BaseService := say1.NewBasicService(repository2)
-	v12 := say1.NewServiceMiddleware(sugaredLogger)
-	say1Service := say1.NewService(say1BaseService, v12)
-	say1Mws := say1.NewEndpointMiddleware(sugaredLogger, v7)
-	say1Endpoints := say1.NewEndpoints(say1Service, say1Mws)
-	say1Ops := say1.NewServiceOption(v8)
-	say1HttpHandler := say1.NewHTTPHandler(r, say1Endpoints, say1Ops)
-	baseService3 := pod2.NewBasicService(client)
-	v13 := pod2.NewServiceMiddleware(sugaredLogger)
-	podPodService := pod2.NewService(baseService3, v13)
-	podMws := pod2.NewEndpointMiddleware(sugaredLogger, v7)
-	podEndpoints := pod2.NewEndpoints(podPodService, podMws)
-	podOps := pod2.NewServiceOption(v8)
-	podHttpHandler := pod2.NewHTTPHandler(r, podEndpoints, podOps)
+	v9 := user2.NewServiceMiddleware(sugaredLogger)
+	userUserService := user2.NewService(baseService2, v9)
+	baseService3 := audit2.NewBasicService(client)
+	v10 := audit2.NewServiceMiddleware(sugaredLogger)
+	auditAuditService := audit2.NewService(baseService3, v10)
+	baseService4 := project2.NewBasicService(repository2, client)
+	v11 := project2.NewServiceMiddleware(sugaredLogger)
+	projectProjectService := project2.NewService(baseService4, v11)
 	servicesServices := &services.Services{
-		Hello: httpHandler,
-		User:  userHttpHandler,
-		Say:   sayHttpHandler,
-		Say1:  say1HttpHandler,
-		Pod:   podHttpHandler,
+		User:    userUserService,
+		Audit:   auditAuditService,
+		Project: projectProjectService,
+		Casbin:  casbinService,
+	}
+	v12 := initEndpointMiddleware(servicesServices, repository2)
+	mws := user2.NewEndpointMiddleware(sugaredLogger, v12)
+	endpoints := user2.NewEndpoints(userUserService, mws)
+	debugSwitch := initDebugSwitch()
+	v13 := initHttpServerOption(debugSwitch)
+	ops := user2.NewServiceOption(v13)
+	httpHandler := user2.NewHTTPHandler(r, endpoints, ops, debugSwitch)
+	auditMws := audit2.NewEndpointMiddleware(sugaredLogger, v12)
+	auditEndpoints := audit2.NewEndpoints(auditAuditService, auditMws)
+	auditOps := audit2.NewServiceOption(v13)
+	auditHttpHandler := audit2.NewHTTPHandler(r, auditEndpoints, auditOps, debugSwitch)
+	projectMws := project2.NewEndpointMiddleware(sugaredLogger, v12)
+	projectEndpoints := project2.NewEndpoints(projectProjectService, projectMws)
+	projectOps := project2.NewServiceOption(v13)
+	projectHttpHandler := project2.NewHTTPHandler(r, projectEndpoints, projectOps, debugSwitch)
+	servicesHttpHandler := &services.HttpHandler{
+		User:    httpHandler,
+		Audit:   auditHttpHandler,
+		Project: projectHttpHandler,
 	}
 	tracerProvider := initTracer(myConf)
 	db, err := initDb(myConf)
@@ -132,7 +134,7 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 		return App{}, err
 	}
 	appInitCancelInterrupt := initCancelInterrupt(g)
-	appInitMetricsEndpoint := initMetricsEndpoint(g, myConf)
+	appInitMetricsEndpoint := initMetricsEndpoint(g, myConf, debugSwitch)
 	appInitMicro, err := initMicro(g, r, myConf)
 	if err != nil {
 		return App{}, err
@@ -140,7 +142,8 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 	app := App{
 		r:                   r,
 		repository:          repositoryRepository,
-		services:            servicesServices,
+		InitAuditMid:        appInitAuditMid,
+		httpHandler:         servicesHttpHandler,
 		g:                   g,
 		conf:                myConf,
 		log:                 sugaredLogger,
@@ -172,6 +175,10 @@ var pyroscopeSet = wire.NewSet(initPyroscope)
 
 var casbinSet = wire.NewSet(initCasbin)
 
+var auditMidSet = wire.NewSet(initAuditMid)
+
+var debugSwitchSet = wire.NewSet(initDebugSwitch)
+
 // repo.api.service
 var baiduHttpSet = wire.NewSet(baidu.NewBasicService, baidu.NewServiceMiddleware, baidu.NewService)
 
@@ -180,20 +187,12 @@ var taobaoHttpSet = wire.NewSet(taobao.NewBasicService, taobao.NewServiceMiddlew
 // repo.dao.service
 var userDaoSet = wire.NewSet(user.NewBasicService, user.NewServiceMiddleware, user.NewService)
 
-var podDaoSet = wire.NewSet(pod.NewBasicService, pod.NewServiceMiddleware, pod.NewService)
-
-//var projectDaoSet = wire.NewSet(projectD.NewBasicService, projectD.NewServiceMiddleware, projectD.NewService)
-var tblservicetreeDaoSet = wire.NewSet(tblservicetree.NewBasicService, tblservicetree.NewServiceMiddleware, tblservicetree.NewService)
-
-var repoSet = wire.NewSet(podDaoSet, tblservicetreeDaoSet, userDaoSet, baiduHttpSet, taobaoHttpSet, wire.Struct(new(repository.Repository), "*"))
+var repoSet = wire.NewSet(resource.ResourceServiceSet, service.ServiceServiceSet, project.ProjectServiceSet, userDaoSet, baiduHttpSet, taobaoHttpSet, audit.AuditServiceSet, wire.Struct(new(repository.Repository), "*"))
 
 // http service
 var casbinServiceSet = wire.NewSet(casbin.NewBasicService, casbin.NewService, casbin.NewServiceMiddleware)
 
-var helloServiceSet = wire.NewSet(hello.NewBasicService, hello.NewService, hello.NewEndpointMiddleware, hello.NewServiceMiddleware, hello.NewEndpoints, hello.NewServiceOption, hello.NewHTTPHandler)
-
-//var userServiceSet = wire.NewSet(user.NewBasicService, user.NewService, user.NewEndpointMiddleware, user.NewServiceMiddleware, user.NewEndpoints, user.NewServiceOption, user.NewHTTPHandler)
-var servicesSet = wire.NewSet(pod2.PodKitSet, casbinServiceSet, say.SayKitSet, say1.Say1KitSet, user2.UserServiceSet, helloServiceSet, wire.Struct(new(services.Services), "*"))
+var servicesSet = wire.NewSet(project2.ProjectKitSet, audit2.AuditKitSet, casbinServiceSet, user2.UserServiceSet, wire.Struct(new(services.HttpHandler), "*"), wire.Struct(new(services.Services), "*"))
 
 var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 

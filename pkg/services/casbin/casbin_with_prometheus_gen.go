@@ -37,8 +37,22 @@ func NewCasbinServiceWithPrometheus(base CasbinService) CasbinServiceWithPrometh
 	}
 }
 
+// AddRoleAuthorization implements CasbinService
+func (_d CasbinServiceWithPrometheus) AddRoleAuthorization(ctx context.Context, role Role) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		casbinserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "AddRoleAuthorization", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.AddRoleAuthorization(ctx, role)
+}
+
 // BindPermission implements CasbinService
-func (_d CasbinServiceWithPrometheus) BindPermission(ctx context.Context, userId int, roleId int, resourceId int) (err error) {
+func (_d CasbinServiceWithPrometheus) BindPermission(ctx context.Context, permission Permission) (err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -48,11 +62,49 @@ func (_d CasbinServiceWithPrometheus) BindPermission(ctx context.Context, userId
 
 		casbinserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "BindPermission", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.BindPermission(ctx, userId, roleId, resourceId)
+	return _d.base.BindPermission(ctx, permission)
+}
+
+// CheckPermission implements CasbinService
+func (_d CasbinServiceWithPrometheus) CheckPermission(ctx context.Context, permission CheckPermission) (b1 bool, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		casbinserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "CheckPermission", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.CheckPermission(ctx, permission)
+}
+
+// DelRoleAuthorization implements CasbinService
+func (_d CasbinServiceWithPrometheus) DelRoleAuthorization(ctx context.Context, role Role) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		casbinserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "DelRoleAuthorization", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.DelRoleAuthorization(ctx, role)
+}
+
+// GetPermissionByUser implements CasbinService
+func (_d CasbinServiceWithPrometheus) GetPermissionByUser(ctx context.Context, permission Permission) (res []Permission) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		casbinserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetPermissionByUser", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.GetPermissionByUser(ctx, permission)
 }
 
 // UnBindPermission implements CasbinService
-func (_d CasbinServiceWithPrometheus) UnBindPermission(ctx context.Context, userId int, roleId int, resourceId int) (err error) {
+func (_d CasbinServiceWithPrometheus) UnBindPermission(ctx context.Context, permission Permission) (err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -62,5 +114,5 @@ func (_d CasbinServiceWithPrometheus) UnBindPermission(ctx context.Context, user
 
 		casbinserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UnBindPermission", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.UnBindPermission(ctx, userId, roleId, resourceId)
+	return _d.base.UnBindPermission(ctx, permission)
 }

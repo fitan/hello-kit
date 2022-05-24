@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"hello/pkg/ent/predicate"
 	"hello/pkg/ent/project"
+	"hello/pkg/ent/service"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -27,9 +29,9 @@ func (pu *ProjectUpdate) Where(ps ...predicate.Project) *ProjectUpdate {
 	return pu
 }
 
-// SetAlias sets the "alias" field.
-func (pu *ProjectUpdate) SetAlias(s string) *ProjectUpdate {
-	pu.mutation.SetAlias(s)
+// SetUpdateTime sets the "update_time" field.
+func (pu *ProjectUpdate) SetUpdateTime(t time.Time) *ProjectUpdate {
+	pu.mutation.SetUpdateTime(t)
 	return pu
 }
 
@@ -39,17 +41,57 @@ func (pu *ProjectUpdate) SetName(s string) *ProjectUpdate {
 	return pu
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (pu *ProjectUpdate) SetNillableName(s *string) *ProjectUpdate {
-	if s != nil {
-		pu.SetName(*s)
-	}
+// SetAname sets the "aname" field.
+func (pu *ProjectUpdate) SetAname(s string) *ProjectUpdate {
+	pu.mutation.SetAname(s)
 	return pu
+}
+
+// SetComments sets the "comments" field.
+func (pu *ProjectUpdate) SetComments(s string) *ProjectUpdate {
+	pu.mutation.SetComments(s)
+	return pu
+}
+
+// AddServiceIDs adds the "services" edge to the Service entity by IDs.
+func (pu *ProjectUpdate) AddServiceIDs(ids ...int) *ProjectUpdate {
+	pu.mutation.AddServiceIDs(ids...)
+	return pu
+}
+
+// AddServices adds the "services" edges to the Service entity.
+func (pu *ProjectUpdate) AddServices(s ...*Service) *ProjectUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return pu.AddServiceIDs(ids...)
 }
 
 // Mutation returns the ProjectMutation object of the builder.
 func (pu *ProjectUpdate) Mutation() *ProjectMutation {
 	return pu.mutation
+}
+
+// ClearServices clears all "services" edges to the Service entity.
+func (pu *ProjectUpdate) ClearServices() *ProjectUpdate {
+	pu.mutation.ClearServices()
+	return pu
+}
+
+// RemoveServiceIDs removes the "services" edge to Service entities by IDs.
+func (pu *ProjectUpdate) RemoveServiceIDs(ids ...int) *ProjectUpdate {
+	pu.mutation.RemoveServiceIDs(ids...)
+	return pu
+}
+
+// RemoveServices removes "services" edges to Service entities.
+func (pu *ProjectUpdate) RemoveServices(s ...*Service) *ProjectUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return pu.RemoveServiceIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -58,6 +100,7 @@ func (pu *ProjectUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	pu.defaults()
 	if len(pu.hooks) == 0 {
 		affected, err = pu.sqlSave(ctx)
 	} else {
@@ -106,6 +149,14 @@ func (pu *ProjectUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (pu *ProjectUpdate) defaults() {
+	if _, ok := pu.mutation.UpdateTime(); !ok {
+		v := project.UpdateDefaultUpdateTime()
+		pu.mutation.SetUpdateTime(v)
+	}
+}
+
 func (pu *ProjectUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -124,11 +175,11 @@ func (pu *ProjectUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := pu.mutation.Alias(); ok {
+	if value, ok := pu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeTime,
 			Value:  value,
-			Column: project.FieldAlias,
+			Column: project.FieldUpdateTime,
 		})
 	}
 	if value, ok := pu.mutation.Name(); ok {
@@ -137,6 +188,74 @@ func (pu *ProjectUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Value:  value,
 			Column: project.FieldName,
 		})
+	}
+	if value, ok := pu.mutation.Aname(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: project.FieldAname,
+		})
+	}
+	if value, ok := pu.mutation.Comments(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: project.FieldComments,
+		})
+	}
+	if pu.mutation.ServicesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   project.ServicesTable,
+			Columns: []string{project.ServicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: service.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.RemovedServicesIDs(); len(nodes) > 0 && !pu.mutation.ServicesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   project.ServicesTable,
+			Columns: []string{project.ServicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: service.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.ServicesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   project.ServicesTable,
+			Columns: []string{project.ServicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: service.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -157,9 +276,9 @@ type ProjectUpdateOne struct {
 	mutation *ProjectMutation
 }
 
-// SetAlias sets the "alias" field.
-func (puo *ProjectUpdateOne) SetAlias(s string) *ProjectUpdateOne {
-	puo.mutation.SetAlias(s)
+// SetUpdateTime sets the "update_time" field.
+func (puo *ProjectUpdateOne) SetUpdateTime(t time.Time) *ProjectUpdateOne {
+	puo.mutation.SetUpdateTime(t)
 	return puo
 }
 
@@ -169,17 +288,57 @@ func (puo *ProjectUpdateOne) SetName(s string) *ProjectUpdateOne {
 	return puo
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (puo *ProjectUpdateOne) SetNillableName(s *string) *ProjectUpdateOne {
-	if s != nil {
-		puo.SetName(*s)
-	}
+// SetAname sets the "aname" field.
+func (puo *ProjectUpdateOne) SetAname(s string) *ProjectUpdateOne {
+	puo.mutation.SetAname(s)
 	return puo
+}
+
+// SetComments sets the "comments" field.
+func (puo *ProjectUpdateOne) SetComments(s string) *ProjectUpdateOne {
+	puo.mutation.SetComments(s)
+	return puo
+}
+
+// AddServiceIDs adds the "services" edge to the Service entity by IDs.
+func (puo *ProjectUpdateOne) AddServiceIDs(ids ...int) *ProjectUpdateOne {
+	puo.mutation.AddServiceIDs(ids...)
+	return puo
+}
+
+// AddServices adds the "services" edges to the Service entity.
+func (puo *ProjectUpdateOne) AddServices(s ...*Service) *ProjectUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return puo.AddServiceIDs(ids...)
 }
 
 // Mutation returns the ProjectMutation object of the builder.
 func (puo *ProjectUpdateOne) Mutation() *ProjectMutation {
 	return puo.mutation
+}
+
+// ClearServices clears all "services" edges to the Service entity.
+func (puo *ProjectUpdateOne) ClearServices() *ProjectUpdateOne {
+	puo.mutation.ClearServices()
+	return puo
+}
+
+// RemoveServiceIDs removes the "services" edge to Service entities by IDs.
+func (puo *ProjectUpdateOne) RemoveServiceIDs(ids ...int) *ProjectUpdateOne {
+	puo.mutation.RemoveServiceIDs(ids...)
+	return puo
+}
+
+// RemoveServices removes "services" edges to Service entities.
+func (puo *ProjectUpdateOne) RemoveServices(s ...*Service) *ProjectUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return puo.RemoveServiceIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -195,6 +354,7 @@ func (puo *ProjectUpdateOne) Save(ctx context.Context) (*Project, error) {
 		err  error
 		node *Project
 	)
+	puo.defaults()
 	if len(puo.hooks) == 0 {
 		node, err = puo.sqlSave(ctx)
 	} else {
@@ -243,6 +403,14 @@ func (puo *ProjectUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (puo *ProjectUpdateOne) defaults() {
+	if _, ok := puo.mutation.UpdateTime(); !ok {
+		v := project.UpdateDefaultUpdateTime()
+		puo.mutation.SetUpdateTime(v)
+	}
+}
+
 func (puo *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -278,11 +446,11 @@ func (puo *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err e
 			}
 		}
 	}
-	if value, ok := puo.mutation.Alias(); ok {
+	if value, ok := puo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeTime,
 			Value:  value,
-			Column: project.FieldAlias,
+			Column: project.FieldUpdateTime,
 		})
 	}
 	if value, ok := puo.mutation.Name(); ok {
@@ -291,6 +459,74 @@ func (puo *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err e
 			Value:  value,
 			Column: project.FieldName,
 		})
+	}
+	if value, ok := puo.mutation.Aname(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: project.FieldAname,
+		})
+	}
+	if value, ok := puo.mutation.Comments(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: project.FieldComments,
+		})
+	}
+	if puo.mutation.ServicesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   project.ServicesTable,
+			Columns: []string{project.ServicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: service.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.RemovedServicesIDs(); len(nodes) > 0 && !puo.mutation.ServicesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   project.ServicesTable,
+			Columns: []string{project.ServicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: service.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.ServicesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   project.ServicesTable,
+			Columns: []string{project.ServicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: service.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Project{config: puo.config}
 	_spec.Assign = _node.assignValues

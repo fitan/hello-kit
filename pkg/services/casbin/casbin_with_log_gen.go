@@ -5,6 +5,7 @@ package casbin
 // gowrap: http://github.com/fitan/gowrap
 
 import (
+	ginkHttp "github.com/fitan/gink/transport/http"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
@@ -25,48 +26,208 @@ func NewCasbinServiceWithLog(base CasbinService, log *zap.SugaredLogger) CasbinS
 	}
 }
 
-// BindPermission implements CasbinService
-func (_d CasbinServiceWithLog) BindPermission(ctx context.Context, userId int, roleId int, resourceId int) (err error) {
+// AddRoleAuthorization implements CasbinService
+func (_d CasbinServiceWithLog) AddRoleAuthorization(ctx context.Context, role Role) (err error) {
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
 	defer func() {
-		_log.Debugw("CasbinServiceWithLog calling BindPermission", "params", map[string]interface{}{
-			"userId":     userId,
-			"roleId":     roleId,
-			"resourceId": resourceId}, "results", map[string]interface{}{
-			"err": err})
-		if err != nil {
-			_log.Errorw("with_log", "params", map[string]interface{}{
-				"userId":     userId,
-				"roleId":     roleId,
-				"resourceId": resourceId}, "results", map[string]interface{}{
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling AddRoleAuthorization", "params", map[string]interface{}{
+					"role": role}, "results", map[string]interface{}{
+					"err": err})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling AddRoleAuthorization", "params", map[string]interface{}{
+					"role": role}, "results", map[string]interface{}{
+					"err": err})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling AddRoleAuthorization", "params", map[string]interface{}{
+				"role": role}, "results", map[string]interface{}{
 				"err": err})
 		}
 
+		if err != nil && !debug {
+			_log.Errorw("with_log calling AddRoleAuthorization", "params", map[string]interface{}{
+				"role": role}, "results", map[string]interface{}{
+				"err": err})
+		}
 	}()
-	return _d._base.BindPermission(ctx, userId, roleId, resourceId)
+	return _d._base.AddRoleAuthorization(ctx, role)
+}
+
+// BindPermission implements CasbinService
+func (_d CasbinServiceWithLog) BindPermission(ctx context.Context, permission Permission) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling BindPermission", "params", map[string]interface{}{
+					"permission": permission}, "results", map[string]interface{}{
+					"err": err})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling BindPermission", "params", map[string]interface{}{
+					"permission": permission}, "results", map[string]interface{}{
+					"err": err})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling BindPermission", "params", map[string]interface{}{
+				"permission": permission}, "results", map[string]interface{}{
+				"err": err})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling BindPermission", "params", map[string]interface{}{
+				"permission": permission}, "results", map[string]interface{}{
+				"err": err})
+		}
+	}()
+	return _d._base.BindPermission(ctx, permission)
+}
+
+// CheckPermission implements CasbinService
+func (_d CasbinServiceWithLog) CheckPermission(ctx context.Context, permission CheckPermission) (b1 bool, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling CheckPermission", "params", map[string]interface{}{
+					"permission": permission}, "results", map[string]interface{}{
+					"b1":  b1,
+					"err": err})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling CheckPermission", "params", map[string]interface{}{
+					"permission": permission}, "results", map[string]interface{}{
+					"b1":  b1,
+					"err": err})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling CheckPermission", "params", map[string]interface{}{
+				"permission": permission}, "results", map[string]interface{}{
+				"b1":  b1,
+				"err": err})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling CheckPermission", "params", map[string]interface{}{
+				"permission": permission}, "results", map[string]interface{}{
+				"b1":  b1,
+				"err": err})
+		}
+	}()
+	return _d._base.CheckPermission(ctx, permission)
+}
+
+// DelRoleAuthorization implements CasbinService
+func (_d CasbinServiceWithLog) DelRoleAuthorization(ctx context.Context, role Role) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling DelRoleAuthorization", "params", map[string]interface{}{
+					"role": role}, "results", map[string]interface{}{
+					"err": err})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling DelRoleAuthorization", "params", map[string]interface{}{
+					"role": role}, "results", map[string]interface{}{
+					"err": err})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling DelRoleAuthorization", "params", map[string]interface{}{
+				"role": role}, "results", map[string]interface{}{
+				"err": err})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling DelRoleAuthorization", "params", map[string]interface{}{
+				"role": role}, "results", map[string]interface{}{
+				"err": err})
+		}
+	}()
+	return _d._base.DelRoleAuthorization(ctx, role)
+}
+
+// GetPermissionByUser implements CasbinService
+func (_d CasbinServiceWithLog) GetPermissionByUser(ctx context.Context, permission Permission) (res []Permission) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			_log.Infow("with_log calling GetPermissionByUser", "params", map[string]interface{}{
+				"permission": permission}, "results", map[string]interface{}{
+				"res": res})
+		}
+	}()
+	return _d._base.GetPermissionByUser(ctx, permission)
 }
 
 // UnBindPermission implements CasbinService
-func (_d CasbinServiceWithLog) UnBindPermission(ctx context.Context, userId int, roleId int, resourceId int) (err error) {
+func (_d CasbinServiceWithLog) UnBindPermission(ctx context.Context, permission Permission) (err error) {
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
 	defer func() {
-		_log.Debugw("CasbinServiceWithLog calling UnBindPermission", "params", map[string]interface{}{
-			"userId":     userId,
-			"roleId":     roleId,
-			"resourceId": resourceId}, "results", map[string]interface{}{
-			"err": err})
-		if err != nil {
-			_log.Errorw("with_log", "params", map[string]interface{}{
-				"userId":     userId,
-				"roleId":     roleId,
-				"resourceId": resourceId}, "results", map[string]interface{}{
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling UnBindPermission", "params", map[string]interface{}{
+					"permission": permission}, "results", map[string]interface{}{
+					"err": err})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling UnBindPermission", "params", map[string]interface{}{
+					"permission": permission}, "results", map[string]interface{}{
+					"err": err})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling UnBindPermission", "params", map[string]interface{}{
+				"permission": permission}, "results", map[string]interface{}{
 				"err": err})
 		}
 
+		if err != nil && !debug {
+			_log.Errorw("with_log calling UnBindPermission", "params", map[string]interface{}{
+				"permission": permission}, "results", map[string]interface{}{
+				"err": err})
+		}
 	}()
-	return _d._base.UnBindPermission(ctx, userId, roleId, resourceId)
+	return _d._base.UnBindPermission(ctx, permission)
 }

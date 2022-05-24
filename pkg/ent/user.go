@@ -15,31 +15,16 @@ type User struct {
 	config `fake:"-" json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// PassWord holds the value of the "pass_word" field.
+	PassWord string `json:"pass_word"`
+	// Token holds the value of the "token" field.
+	Token string `json:"token,omitempty"`
+	// Enable holds the value of the "enable" field.
+	Enable bool `json:"enable,omitempty"`
 	// Age holds the value of the "age" field.
 	Age int `json:"age,omitempty" fake:"{number:0,150}"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges UserEdges `json:"edges"`
-}
-
-// UserEdges holds the relations/edges for other nodes in the graph.
-type UserEdges struct {
-	// Pods holds the value of the pods edge.
-	Pods []*Pod `json:"pods,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-}
-
-// PodsOrErr returns the Pods value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) PodsOrErr() ([]*Pod, error) {
-	if e.loadedTypes[0] {
-		return e.Pods, nil
-	}
-	return nil, &NotLoadedError{edge: "pods"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -47,9 +32,11 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case user.FieldEnable:
+			values[i] = new(sql.NullBool)
 		case user.FieldID, user.FieldAge:
 			values[i] = new(sql.NullInt64)
-		case user.FieldName:
+		case user.FieldPassWord, user.FieldToken, user.FieldName:
 			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
@@ -72,6 +59,24 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			u.ID = int(value.Int64)
+		case user.FieldPassWord:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field pass_word", values[i])
+			} else if value.Valid {
+				u.PassWord = value.String
+			}
+		case user.FieldToken:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field token", values[i])
+			} else if value.Valid {
+				u.Token = value.String
+			}
+		case user.FieldEnable:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field enable", values[i])
+			} else if value.Valid {
+				u.Enable = value.Bool
+			}
 		case user.FieldAge:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field age", values[i])
@@ -87,11 +92,6 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 		}
 	}
 	return nil
-}
-
-// QueryPods queries the "pods" edge of the User entity.
-func (u *User) QueryPods() *PodQuery {
-	return (&UserClient{config: u.config}).QueryPods(u)
 }
 
 // Update returns a builder for updating this User.
@@ -117,6 +117,12 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
+	builder.WriteString(", pass_word=")
+	builder.WriteString(u.PassWord)
+	builder.WriteString(", token=")
+	builder.WriteString(u.Token)
+	builder.WriteString(", enable=")
+	builder.WriteString(fmt.Sprintf("%v", u.Enable))
 	builder.WriteString(", age=")
 	builder.WriteString(fmt.Sprintf("%v", u.Age))
 	builder.WriteString(", name=")

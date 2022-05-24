@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bytes"
 	"context"
 	"entgo.io/ent/dialect/sql"
 	"fmt"
@@ -9,9 +10,8 @@ import (
 	"github.com/casbin/casbin/v2"
 	entadapter "github.com/casbin/ent-adapter"
 	"github.com/chenjiandongx/ginprom"
-	"github.com/gin-contrib/cors"
-
 	ginkHttp "github.com/fitan/gink/transport/http"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/hashicorp/consul/api"
@@ -34,11 +34,14 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	_ "hello/docs"
+	"hello/pkg/debug"
 	"hello/pkg/ent"
+	"hello/pkg/middleware"
 	"hello/pkg/repository"
 	"hello/pkg/services"
 	"hello/utils/conf"
 	"hello/utils/log"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -54,15 +57,17 @@ var logger *zap.SugaredLogger
 type App struct {
 	r          *gin.Engine
 	repository *repository.Repository
-	services   *services.Services
-	g          *run.Group
-	conf       *conf.MyConf
-	log        *zap.SugaredLogger
-	tp         *sdktrace.TracerProvider
-	db         *gorm.DB
-	ent        *ent.Client
-	pyroscope  *profiler.Profiler
-	casbin     *casbin.Enforcer
+	InitAuditMid
+	//services   *services.Services
+	httpHandler *services.HttpHandler
+	g           *run.Group
+	conf        *conf.MyConf
+	log         *zap.SugaredLogger
+	tp          *sdktrace.TracerProvider
+	db          *gorm.DB
+	ent         *ent.Client
+	pyroscope   *profiler.Profiler
+	casbin      *casbin.Enforcer
 	InitCancelInterrupt
 	InitMetricsEndpoint
 	//InitHttpHandler
@@ -83,10 +88,11 @@ func RunApp(confName string) {
 	}
 	r.Use(ginprom.PromMiddleware(opts))
 	r.Use(cors.New(cors.Config{
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
-		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "X-Total-Count"},
-		ExposeHeaders:    []string{"X-Total-Count"},
-		AllowCredentials: false,
+		AllowMethods:  []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
+		AllowHeaders:  []string{"Origin", "Content-Length", "Content-Type", "X-Total-Count"},
+		ExposeHeaders: []string{"X-Total-Count"},
+		//AllowOrigins: []string{"http://localhost:8080","http://localhost:3000"},
+		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 		AllowAllOrigins:  true,
 	}))
@@ -97,7 +103,63 @@ func RunApp(confName string) {
 		os.Exit(1)
 
 	}
+	initAuditMid(r, app.repository)
 	logger.Errorw("exit", app.Run().Error())
+}
+
+type InitAuditMid struct {
+}
+
+type CustomResponseWriter struct {
+	gin.ResponseWriter
+	body *bytes.Buffer
+}
+
+func (w CustomResponseWriter) Write(b []byte) (int, error) {
+	w.body.Write(b)
+	return w.ResponseWriter.Write(b)
+}
+
+func (w CustomResponseWriter) WriteString(s string) (int, error) {
+	w.body.WriteString(s)
+	return w.ResponseWriter.WriteString(s)
+}
+
+func initAuditMid(r *gin.Engine, repository *repository.Repository) InitAuditMid {
+	r.Use(
+		func(c *gin.Context) {
+
+			startTime := time.Now()
+			blw := &CustomResponseWriter{body: bytes.NewBufferString(""), ResponseWriter: c.Writer}
+			c.Writer = blw
+
+			bodyB, _ := ioutil.ReadAll(c.Request.Body)
+			c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyB))
+
+			c.Next()
+
+			method := c.Request.Method
+			url := c.FullPath()
+			query := c.Request.URL.Query().Encode()
+			remoteIP := c.Request.RemoteAddr
+			response := blw.body.String()
+			statusCode := c.Writer.Status()
+
+			_, _ = repository.Audit.Create(c.Request.Context(), ent.AuditBaseCreateReq{
+				URL:        url,
+				Query:      query,
+				Method:     method,
+				Request:    string(bodyB),
+				Response:   string(response),
+				Header:     "",
+				StatusCode: statusCode,
+				RemoteIP:   remoteIP,
+				ClientIP:   c.ClientIP(),
+				CostTime:   fmt.Sprintf("%v", time.Now().Sub(startTime)),
+			})
+
+		})
+	return InitAuditMid{}
 }
 
 func initEnt(conf *conf.MyConf) (*ent.Client, error) {
@@ -105,8 +167,14 @@ func initEnt(conf *conf.MyConf) (*ent.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	client := ent.NewClient(ent.Driver(drv)).Debug()
+	if conf.Mysql.AutoCreate {
+		if err = client.Schema.Create(context.Background()); err != nil {
+			return nil, err
+		}
+	}
 
-	return ent.NewClient(ent.Driver(drv)).Debug(), nil
+	return ent.NewClient(ent.Driver(drv)), nil
 }
 
 func initDb(conf *conf.MyConf) (*gorm.DB, error) {
@@ -203,10 +271,34 @@ func initTracer(conf *conf.MyConf) *sdktrace.TracerProvider {
 type InitMetricsEndpoint struct {
 }
 
-func initMetricsEndpoint(g *run.Group, conf *conf.MyConf) InitMetricsEndpoint {
+func initMetricsEndpoint(g *run.Group, conf *conf.MyConf, debugSwitch *debug.DebugSwitch) InitMetricsEndpoint {
 	r := gin.Default()
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("/debug", func(c *gin.Context) {
+		c.JSON(http.StatusOK, debugSwitch.List())
+	})
+	type SetDebug struct {
+		Path   string `json:"path"`
+		Method string `json:"method"`
+		Enable bool   `json:"enable"`
+	}
+	r.POST("/debug", func(c *gin.Context) {
+		var s SetDebug
+		err := c.Bind(&s)
+		if err != nil {
+			c.JSON(http.StatusOK, err.Error())
+			return
+		}
+		c.JSON(http.StatusOK, debugSwitch.SetDebug(s.Path, s.Method, s.Enable))
+		return
+	})
+
+	r.POST("/debug/rest", func(c *gin.Context) {
+		debugSwitch.ResetDebug()
+		c.JSON(http.StatusOK, "")
+		return
+	})
 
 	//http.DefaultServeMux.Handle("/metrics", promhttp.Handler())
 	debugListener, err := net.Listen("tcp", conf.Debug.Addr)
@@ -220,6 +312,10 @@ func initMetricsEndpoint(g *run.Group, conf *conf.MyConf) InitMetricsEndpoint {
 		debugListener.Close()
 	})
 	return InitMetricsEndpoint{}
+}
+
+func initDebugSwitch() *debug.DebugSwitch {
+	return debug.NewDebugSwitch()
 }
 
 type InitCancelInterrupt struct {
@@ -242,13 +338,15 @@ func initCancelInterrupt(g *run.Group) InitCancelInterrupt {
 	return InitCancelInterrupt{}
 }
 
-func initEndpointMiddleware() []endpoint.Middleware {
+func initEndpointMiddleware(services *services.Services, repository repository.Repository) []endpoint.Middleware {
 	mw := make([]endpoint.Middleware, 0)
+	mw = append(mw, middleware.PermissionMiddleware(services, repository))
 	return mw
 }
 
-func initHttpServerOption() []ginkHttp.ServerOption {
+func initHttpServerOption(debugSwitch *debug.DebugSwitch) []ginkHttp.ServerOption {
 	so := make([]ginkHttp.ServerOption, 0)
+	so = append(so, ginkHttp.ServerBefore(ginkHttp.PopulateRequestContext, debug.DebugSwitchRequestContext(debugSwitch)))
 	return so
 }
 

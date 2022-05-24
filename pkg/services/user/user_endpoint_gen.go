@@ -14,52 +14,62 @@ import (
 	"hello/pkg/ent"
 )
 
+const (
+	UserRestByQueriesAllMethodName = "UserRestByQueriesAll"
+
+	UserRestCreateMethodName = "UserRestCreate"
+
+	UserRestCreateManyMethodName = "UserRestCreateMany"
+
+	UserRestDeleteByIdMethodName = "UserRestDeleteById"
+
+	UserRestDeleteManyMethodName = "UserRestDeleteMany"
+
+	UserRestGetByIdMethodName = "UserRestGetById"
+
+	UserRestUpdateByIdMethodName = "UserRestUpdateById"
+
+	UserRestUpdateManyMethodName = "UserRestUpdateMany"
+)
+
 type Mws map[string][]endpoint.Middleware
 
 type Endpoints struct {
-	ByQueriesEndpoint endpoint.Endpoint
+	UserRestByQueriesAllEndpoint endpoint.Endpoint
 
-	CreateEndpoint endpoint.Endpoint
+	UserRestCreateEndpoint endpoint.Endpoint
 
-	CreateManyEndpoint endpoint.Endpoint
+	UserRestCreateManyEndpoint endpoint.Endpoint
 
-	CreatePodsSliceByUserIdEndpoint endpoint.Endpoint
+	UserRestDeleteByIdEndpoint endpoint.Endpoint
 
-	DeleteByIdEndpoint endpoint.Endpoint
+	UserRestDeleteManyEndpoint endpoint.Endpoint
 
-	DeleteManyEndpoint endpoint.Endpoint
+	UserRestGetByIdEndpoint endpoint.Endpoint
 
-	GetByIdEndpoint endpoint.Endpoint
+	UserRestUpdateByIdEndpoint endpoint.Endpoint
 
-	GetPodsSliceByUserIdEndpoint endpoint.Endpoint
-
-	UpdateByIdEndpoint endpoint.Endpoint
-
-	UpdateManyEndpoint endpoint.Endpoint
+	UserRestUpdateManyEndpoint endpoint.Endpoint
 }
 
 func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m endpoint.Middleware) {
 	methods := []string{
 
-		"ByQueries",
+		UserRestByQueriesAllMethodName,
 
-		"Create",
+		UserRestCreateMethodName,
 
-		"CreateMany",
+		UserRestCreateManyMethodName,
 
-		"CreatePodsSliceByUserId",
+		UserRestDeleteByIdMethodName,
 
-		"DeleteById",
+		UserRestDeleteManyMethodName,
 
-		"DeleteMany",
+		UserRestGetByIdMethodName,
 
-		"GetById",
+		UserRestUpdateByIdMethodName,
 
-		"GetPodsSliceByUserId",
-
-		"UpdateById",
-
-		"UpdateMany",
+		UserRestUpdateManyMethodName,
 	}
 	for _, v := range methods {
 		mw[v] = append(mw[v], m)
@@ -69,25 +79,21 @@ func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m en
 func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Middleware, m func(n string) endpoint.Middleware) {
 	methods := []string{
 
-		"ByQueries",
+		UserRestByQueriesAllMethodName,
 
-		"Create",
+		UserRestCreateMethodName,
 
-		"CreateMany",
+		UserRestCreateManyMethodName,
 
-		"CreatePodsSliceByUserId",
+		UserRestDeleteByIdMethodName,
 
-		"DeleteById",
+		UserRestDeleteManyMethodName,
 
-		"DeleteMany",
+		UserRestGetByIdMethodName,
 
-		"GetById",
+		UserRestUpdateByIdMethodName,
 
-		"GetPodsSliceByUserId",
-
-		"UpdateById",
-
-		"UpdateMany",
+		UserRestUpdateManyMethodName,
 	}
 	for _, v := range methods {
 		mw[v] = append(mw[v], m(v))
@@ -99,75 +105,70 @@ func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Mi
 func NewEndpoints(s UserService, mdw Mws) Endpoints {
 	eps := Endpoints{
 
-		ByQueriesEndpoint: MakeByQueriesEndpoint(s),
+		UserRestByQueriesAllEndpoint: MakeUserRestByQueriesAllEndpoint(s),
 
-		CreateEndpoint: MakeCreateEndpoint(s),
+		UserRestCreateEndpoint: MakeUserRestCreateEndpoint(s),
 
-		CreateManyEndpoint: MakeCreateManyEndpoint(s),
+		UserRestCreateManyEndpoint: MakeUserRestCreateManyEndpoint(s),
 
-		CreatePodsSliceByUserIdEndpoint: MakeCreatePodsSliceByUserIdEndpoint(s),
+		UserRestDeleteByIdEndpoint: MakeUserRestDeleteByIdEndpoint(s),
 
-		DeleteByIdEndpoint: MakeDeleteByIdEndpoint(s),
+		UserRestDeleteManyEndpoint: MakeUserRestDeleteManyEndpoint(s),
 
-		DeleteManyEndpoint: MakeDeleteManyEndpoint(s),
+		UserRestGetByIdEndpoint: MakeUserRestGetByIdEndpoint(s),
 
-		GetByIdEndpoint: MakeGetByIdEndpoint(s),
+		UserRestUpdateByIdEndpoint: MakeUserRestUpdateByIdEndpoint(s),
 
-		GetPodsSliceByUserIdEndpoint: MakeGetPodsSliceByUserIdEndpoint(s),
-
-		UpdateByIdEndpoint: MakeUpdateByIdEndpoint(s),
-
-		UpdateManyEndpoint: MakeUpdateManyEndpoint(s),
+		UserRestUpdateManyEndpoint: MakeUserRestUpdateManyEndpoint(s),
 	}
 
-	for _, m := range mdw["ByQueries"] {
-		eps.ByQueriesEndpoint = m(eps.ByQueriesEndpoint)
+	for _, m := range mdw[UserRestByQueriesAllMethodName] {
+		eps.UserRestByQueriesAllEndpoint = m(eps.UserRestByQueriesAllEndpoint)
 	}
 
-	for _, m := range mdw["Create"] {
-		eps.CreateEndpoint = m(eps.CreateEndpoint)
+	for _, m := range mdw[UserRestCreateMethodName] {
+		eps.UserRestCreateEndpoint = m(eps.UserRestCreateEndpoint)
 	}
 
-	for _, m := range mdw["CreateMany"] {
-		eps.CreateManyEndpoint = m(eps.CreateManyEndpoint)
+	for _, m := range mdw[UserRestCreateManyMethodName] {
+		eps.UserRestCreateManyEndpoint = m(eps.UserRestCreateManyEndpoint)
 	}
 
-	for _, m := range mdw["CreatePodsSliceByUserId"] {
-		eps.CreatePodsSliceByUserIdEndpoint = m(eps.CreatePodsSliceByUserIdEndpoint)
+	for _, m := range mdw[UserRestDeleteByIdMethodName] {
+		eps.UserRestDeleteByIdEndpoint = m(eps.UserRestDeleteByIdEndpoint)
 	}
 
-	for _, m := range mdw["DeleteById"] {
-		eps.DeleteByIdEndpoint = m(eps.DeleteByIdEndpoint)
+	for _, m := range mdw[UserRestDeleteManyMethodName] {
+		eps.UserRestDeleteManyEndpoint = m(eps.UserRestDeleteManyEndpoint)
 	}
 
-	for _, m := range mdw["DeleteMany"] {
-		eps.DeleteManyEndpoint = m(eps.DeleteManyEndpoint)
+	for _, m := range mdw[UserRestGetByIdMethodName] {
+		eps.UserRestGetByIdEndpoint = m(eps.UserRestGetByIdEndpoint)
 	}
 
-	for _, m := range mdw["GetById"] {
-		eps.GetByIdEndpoint = m(eps.GetByIdEndpoint)
+	for _, m := range mdw[UserRestUpdateByIdMethodName] {
+		eps.UserRestUpdateByIdEndpoint = m(eps.UserRestUpdateByIdEndpoint)
 	}
 
-	for _, m := range mdw["GetPodsSliceByUserId"] {
-		eps.GetPodsSliceByUserIdEndpoint = m(eps.GetPodsSliceByUserIdEndpoint)
-	}
-
-	for _, m := range mdw["UpdateById"] {
-		eps.UpdateByIdEndpoint = m(eps.UpdateByIdEndpoint)
-	}
-
-	for _, m := range mdw["UpdateMany"] {
-		eps.UpdateManyEndpoint = m(eps.UpdateManyEndpoint)
+	for _, m := range mdw[UserRestUpdateManyMethodName] {
+		eps.UserRestUpdateManyEndpoint = m(eps.UserRestUpdateManyEndpoint)
 	}
 
 	return eps
 }
 
-func MakeByQueriesEndpoint(s UserService) endpoint.Endpoint {
+func MakeUserRestByQueriesAllEndpoint(s UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(ent.UserRestByQueriesReq)
-		rs, err := s.ByQueries(ctx, req)
+		var err error
 		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.UserRestByQueriesAllReq)
+		rs, err := s.UserRestByQueriesAll(ctx, req)
 		if err != nil {
 			result["err"] = err.Error()
 			return result, nil
@@ -178,11 +179,18 @@ func MakeByQueriesEndpoint(s UserService) endpoint.Endpoint {
 	}
 }
 
-func MakeCreateEndpoint(s UserService) endpoint.Endpoint {
+func MakeUserRestCreateEndpoint(s UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
 		req := request.(ent.UserRestCreateReq)
-		rs, err := s.Create(ctx, req)
-		result := make(map[string]interface{}, 0)
+		rs, err := s.UserRestCreate(ctx, req)
 		if err != nil {
 			result["err"] = err.Error()
 			return result, nil
@@ -193,11 +201,18 @@ func MakeCreateEndpoint(s UserService) endpoint.Endpoint {
 	}
 }
 
-func MakeCreateManyEndpoint(s UserService) endpoint.Endpoint {
+func MakeUserRestCreateManyEndpoint(s UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
 		req := request.(ent.UserRestCreateManyReq)
-		rs, err := s.CreateMany(ctx, req)
-		result := make(map[string]interface{}, 0)
+		rs, err := s.UserRestCreateMany(ctx, req)
 		if err != nil {
 			result["err"] = err.Error()
 			return result, nil
@@ -208,26 +223,18 @@ func MakeCreateManyEndpoint(s UserService) endpoint.Endpoint {
 	}
 }
 
-func MakeCreatePodsSliceByUserIdEndpoint(s UserService) endpoint.Endpoint {
+func MakeUserRestDeleteByIdEndpoint(s UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(ent.UserRestCreatePodsSliceByUserIdReq)
-		rs, err := s.CreatePodsSliceByUserId(ctx, req)
+		var err error
 		result := make(map[string]interface{}, 0)
-		if err != nil {
-			result["err"] = err.Error()
-			return result, nil
-		}
-		result["data"] = rs
-		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
-		return result, nil
-	}
-}
-
-func MakeDeleteByIdEndpoint(s UserService) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
 		req := request.(ent.UserRestDeleteByIdReq)
-		rs, err := s.DeleteById(ctx, req)
-		result := make(map[string]interface{}, 0)
+		rs, err := s.UserRestDeleteById(ctx, req)
 		if err != nil {
 			result["err"] = err.Error()
 			return result, nil
@@ -238,11 +245,18 @@ func MakeDeleteByIdEndpoint(s UserService) endpoint.Endpoint {
 	}
 }
 
-func MakeDeleteManyEndpoint(s UserService) endpoint.Endpoint {
+func MakeUserRestDeleteManyEndpoint(s UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
 		req := request.(ent.UserRestDeleteManyReq)
-		rs, err := s.DeleteMany(ctx, req)
-		result := make(map[string]interface{}, 0)
+		rs, err := s.UserRestDeleteMany(ctx, req)
 		if err != nil {
 			result["err"] = err.Error()
 			return result, nil
@@ -253,11 +267,18 @@ func MakeDeleteManyEndpoint(s UserService) endpoint.Endpoint {
 	}
 }
 
-func MakeGetByIdEndpoint(s UserService) endpoint.Endpoint {
+func MakeUserRestGetByIdEndpoint(s UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
 		req := request.(ent.UserRestGetByIdReq)
-		rs, err := s.GetById(ctx, req)
-		result := make(map[string]interface{}, 0)
+		rs, err := s.UserRestGetById(ctx, req)
 		if err != nil {
 			result["err"] = err.Error()
 			return result, nil
@@ -268,26 +289,18 @@ func MakeGetByIdEndpoint(s UserService) endpoint.Endpoint {
 	}
 }
 
-func MakeGetPodsSliceByUserIdEndpoint(s UserService) endpoint.Endpoint {
+func MakeUserRestUpdateByIdEndpoint(s UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(ent.UserRestGetPodsSliceByUserIdReq)
-		rs, err := s.GetPodsSliceByUserId(ctx, req)
+		var err error
 		result := make(map[string]interface{}, 0)
-		if err != nil {
-			result["err"] = err.Error()
-			return result, nil
-		}
-		result["data"] = rs
-		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
-		return result, nil
-	}
-}
-
-func MakeUpdateByIdEndpoint(s UserService) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
 		req := request.(ent.UserRestUpdateByIdReq)
-		rs, err := s.UpdateById(ctx, req)
-		result := make(map[string]interface{}, 0)
+		rs, err := s.UserRestUpdateById(ctx, req)
 		if err != nil {
 			result["err"] = err.Error()
 			return result, nil
@@ -298,11 +311,18 @@ func MakeUpdateByIdEndpoint(s UserService) endpoint.Endpoint {
 	}
 }
 
-func MakeUpdateManyEndpoint(s UserService) endpoint.Endpoint {
+func MakeUserRestUpdateManyEndpoint(s UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(ent.UserRestUpdateManyReq)
-		rs, err := s.UpdateMany(ctx, req)
+		var err error
 		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.UserRestUpdateManyReq)
+		rs, err := s.UserRestUpdateMany(ctx, req)
 		if err != nil {
 			result["err"] = err.Error()
 			return result, nil

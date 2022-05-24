@@ -25,52 +25,13 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/hello/{id}": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "HelloService"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": " ",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/hello.SwagResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ent.PodBaseGetRes"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/pod": {
+        "/audit": {
             "post": {
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
-                    "PodService"
+                    "AuditService"
                 ],
                 "parameters": [
                     {
@@ -79,7 +40,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/pod.CreateBodySwag"
+                            "$ref": "#/definitions/audit.AuditRestCreateBodySwag"
                         }
                     }
                 ],
@@ -89,13 +50,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/pod.SwagResponse"
+                                    "$ref": "#/definitions/audit.SwagResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ent.Pod"
+                                            "$ref": "#/definitions/ent.Audit"
                                         }
                                     }
                                 }
@@ -105,97 +66,63 @@ const docTemplate = `{
                 }
             }
         },
-        "/pods": {
+        "/audits": {
             "get": {
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
-                    "PodService"
+                    "AuditService"
                 ],
                 "parameters": [
                     {
                         "type": "string",
-                        "name": "ClusterNameEQ",
+                        "name": "ClientIPContains",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "name": "DetailEQ",
+                        "name": "CostTimeContains",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "name": "HostIPEQ",
+                        "name": "HeaderContains",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "name": "MessageEQ",
+                        "name": "MethodContains",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "name": "NamespaceEQ",
+                        "name": "QueryContains",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "name": "PhaseEQ",
+                        "name": "RemoteIPContains",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "name": "PodIPEQ",
+                        "name": "RequestContains",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "name": "PodNameEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "ReasonEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "ResourceVersionEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "ServiceNameEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "StartTimeEQ",
+                        "name": "ResponseContains",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "name": "_limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "_page",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "acs",
-                            "desc"
-                        ],
-                        "type": "string",
-                        "name": "order",
+                        "name": "StatusCodeEQ",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "name": "sortBy",
+                        "name": "URLContains",
                         "in": "query"
                     }
                 ],
@@ -205,13 +132,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/pod.SwagResponse"
+                                    "$ref": "#/definitions/audit.SwagResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ent.PodRestByQueriesRes"
+                                            "$ref": "#/definitions/ent.AuditRestByQueriesAllRes"
                                         }
                                     }
                                 }
@@ -225,7 +152,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "PodService"
+                    "AuditService"
                 ],
                 "parameters": [
                     {
@@ -236,7 +163,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ent.PodBaseUpdateReq"
+                                "$ref": "#/definitions/ent.AuditBaseUpdateReq"
                             }
                         }
                     }
@@ -247,7 +174,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/pod.SwagResponse"
+                                    "$ref": "#/definitions/audit.SwagResponse"
                                 },
                                 {
                                     "type": "object",
@@ -267,7 +194,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "PodService"
+                    "AuditService"
                 ],
                 "parameters": [
                     {
@@ -278,7 +205,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ent.PodBaseCreateReq"
+                                "$ref": "#/definitions/ent.AuditBaseCreateReq"
                             }
                         }
                     }
@@ -289,7 +216,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/pod.SwagResponse"
+                                    "$ref": "#/definitions/audit.SwagResponse"
                                 },
                                 {
                                     "type": "object",
@@ -297,7 +224,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/ent.Pod"
+                                                "$ref": "#/definitions/ent.Audit"
                                             }
                                         }
                                     }
@@ -312,7 +239,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "PodService"
+                    "AuditService"
                 ],
                 "parameters": [
                     {
@@ -331,7 +258,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/pod.SwagResponse"
+                                    "$ref": "#/definitions/audit.SwagResponse"
                                 },
                                 {
                                     "type": "object",
@@ -347,19 +274,19 @@ const docTemplate = `{
                 }
             }
         },
-        "/pods/{id}": {
+        "/audits/{auditId}": {
             "get": {
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
-                    "PodService"
+                    "AuditService"
                 ],
                 "parameters": [
                     {
                         "type": "string",
                         "description": " ",
-                        "name": "id",
+                        "name": "auditId",
                         "in": "path",
                         "required": true
                     }
@@ -370,13 +297,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/pod.SwagResponse"
+                                    "$ref": "#/definitions/audit.SwagResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ent.PodBaseGetRes"
+                                            "$ref": "#/definitions/ent.AuditBaseGetRes"
                                         }
                                     }
                                 }
@@ -390,7 +317,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "PodService"
+                    "AuditService"
                 ],
                 "parameters": [
                     {
@@ -399,13 +326,13 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/pod.UpdateByIdBodySwag"
+                            "$ref": "#/definitions/audit.AuditRestUpdateByIdBodySwag"
                         }
                     },
                     {
                         "type": "string",
                         "description": " ",
-                        "name": "id",
+                        "name": "auditId",
                         "in": "path",
                         "required": true
                     }
@@ -416,13 +343,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/pod.SwagResponse"
+                                    "$ref": "#/definitions/audit.SwagResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ent.Pod"
+                                            "$ref": "#/definitions/ent.Audit"
                                         }
                                     }
                                 }
@@ -436,13 +363,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "PodService"
+                    "AuditService"
                 ],
                 "parameters": [
                     {
                         "type": "string",
                         "description": " ",
-                        "name": "id",
+                        "name": "auditId",
                         "in": "path",
                         "required": true
                     }
@@ -453,7 +380,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/pod.SwagResponse"
+                                    "$ref": "#/definitions/audit.SwagResponse"
                                 },
                                 {
                                     "type": "object",
@@ -469,21 +396,23 @@ const docTemplate = `{
                 }
             }
         },
-        "/pods/{id}/servicetree": {
-            "get": {
+        "/project": {
+            "post": {
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
-                    "PodService"
+                    "ProjectService"
                 ],
                 "parameters": [
                     {
-                        "type": "string",
                         "description": " ",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/project.ProjectRestCreateBodySwag"
+                        }
                     }
                 ],
                 "responses": {
@@ -492,13 +421,85 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/pod.SwagResponse"
+                                    "$ref": "#/definitions/project.SwagResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ent.SpiderDevTblServicetreeBaseGetRes"
+                                            "$ref": "#/definitions/ent.Project"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/projects": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProjectService"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/project.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.ProjectRestByQueriesAllRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProjectService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.ProjectBaseUpdateReq"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/project.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
                                         }
                                     }
                                 }
@@ -512,7 +513,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "PodService"
+                    "ProjectService"
                 ],
                 "parameters": [
                     {
@@ -521,13 +522,136 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/pod.CreateServicetreeByPodIdBodySwag"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.ProjectBaseCreateReq"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/project.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/ent.Project"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProjectService"
+                ],
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "multi",
+                        "name": "ids",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/project.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{projectId}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProjectService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/project.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.ProjectBaseGetRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProjectService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/project.ProjectRestUpdateByIdBodySwag"
                         }
                     },
                     {
                         "type": "string",
                         "description": " ",
-                        "name": "id",
+                        "name": "projectId",
                         "in": "path",
                         "required": true
                     }
@@ -538,13 +662,50 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/pod.SwagResponse"
+                                    "$ref": "#/definitions/project.SwagResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ent.Pod"
+                                            "$ref": "#/definitions/ent.Project"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProjectService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/project.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
                                         }
                                     }
                                 }
@@ -554,19 +715,19 @@ const docTemplate = `{
                 }
             }
         },
-        "/say1pod/{id}": {
+        "/projects/{projectId}/services": {
             "get": {
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
-                    "Say1Service"
+                    "ProjectService"
                 ],
                 "parameters": [
                     {
                         "type": "string",
                         "description": " ",
-                        "name": "id",
+                        "name": "projectId",
                         "in": "path",
                         "required": true
                     }
@@ -577,13 +738,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/say1.SwagResponse"
+                                    "$ref": "#/definitions/project.SwagResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ent.PodBaseGetRes"
+                                            "$ref": "#/definitions/ent.ProjectRestGetServicesSliceByProjectIdRes"
                                         }
                                     }
                                 }
@@ -593,19 +754,31 @@ const docTemplate = `{
                 }
             }
         },
-        "/saypod/{id}": {
-            "get": {
+        "/projects/{projectId}/servicesslice": {
+            "post": {
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
-                    "SayService"
+                    "ProjectService"
                 ],
                 "parameters": [
                     {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.ServiceBaseCreateReq"
+                            }
+                        }
+                    },
+                    {
                         "type": "string",
                         "description": " ",
-                        "name": "id",
+                        "name": "projectId",
                         "in": "path",
                         "required": true
                     }
@@ -616,13 +789,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/say.SwagResponse"
+                                    "$ref": "#/definitions/project.SwagResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ent.PodBaseGetRes"
+                                            "$ref": "#/definitions/ent.Project"
                                         }
                                     }
                                 }
@@ -647,7 +820,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.CreateBodySwag"
+                            "$ref": "#/definitions/user.UserRestCreateBodySwag"
                         }
                     }
                 ],
@@ -738,7 +911,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ent.UserRestByQueriesRes"
+                                            "$ref": "#/definitions/ent.UserRestByQueriesAllRes"
                                         }
                                     }
                                 }
@@ -874,7 +1047,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}": {
+        "/users/{userId}": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -886,7 +1059,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": " ",
-                        "name": "id",
+                        "name": "userId",
                         "in": "path",
                         "required": true
                     }
@@ -926,13 +1099,13 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.UpdateByIdBodySwag"
+                            "$ref": "#/definitions/user.UserRestUpdateByIdBodySwag"
                         }
                     },
                     {
                         "type": "string",
                         "description": " ",
-                        "name": "id",
+                        "name": "userId",
                         "in": "path",
                         "required": true
                     }
@@ -969,7 +1142,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": " ",
-                        "name": "id",
+                        "name": "userId",
                         "in": "path",
                         "required": true
                     }
@@ -995,397 +1168,209 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/users/{id}/pods": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "UserService"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "ClusterNameEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "DetailEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "HostIPEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "MessageEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "NamespaceEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "PhaseEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "PodIPEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "PodNameEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "ReasonEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "ResourceVersionEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "ServiceNameEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "StartTimeEQ",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "_limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "_page",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "acs",
-                            "desc"
-                        ],
-                        "type": "string",
-                        "name": "order",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "sortBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": " ",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/user.SwagResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ent.UserRestGetPodsSliceByUserIdRes"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/users/{id}/podsslice": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "UserService"
-                ],
-                "parameters": [
-                    {
-                        "description": " ",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/ent.PodBaseCreateReq"
-                            }
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": " ",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/user.SwagResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/ent.User"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
-        "ent.Pod": {
+        "audit.AuditRestCreateBodySwag": {
             "type": "object",
             "properties": {
-                "cluster_name": {
-                    "description": "ClusterName holds the value of the \"cluster_name\" field.\n集群标识",
+                "client_ip": {
                     "type": "string"
                 },
-                "created_at": {
-                    "description": "CreatedAt holds the value of the \"created_at\" field.",
+                "cost_time": {
                     "type": "string"
                 },
-                "detail": {
-                    "description": "Detail holds the value of the \"detail\" field.\n详细内容",
+                "header": {
                     "type": "string"
                 },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the PodQuery when eager-loading is set.",
-                    "$ref": "#/definitions/ent.PodEdges"
+                "method": {
+                    "type": "string"
                 },
-                "host_ip": {
-                    "description": "HostIP holds the value of the \"host_ip\" field.\n主机IP",
+                "query": {
+                    "type": "string"
+                },
+                "remote_ip": {
+                    "type": "string"
+                },
+                "request": {
+                    "type": "string"
+                },
+                "response": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "audit.AuditRestUpdateByIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "audit.SwagResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "status": {
+                    "type": "integer"
+                },
+                "traceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "ent.Audit": {
+            "type": "object",
+            "properties": {
+                "client_ip": {
+                    "description": "ClientIP holds the value of the \"client_ip\" field.",
+                    "type": "string"
+                },
+                "cost_time": {
+                    "description": "CostTime holds the value of the \"cost_time\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "header": {
+                    "description": "Header holds the value of the \"header\" field.",
                     "type": "string"
                 },
                 "id": {
                     "description": "ID of the ent.",
                     "type": "integer"
                 },
-                "message": {
-                    "description": "Message holds the value of the \"message\" field.\n消息",
+                "method": {
+                    "description": "Method holds the value of the \"method\" field.",
                     "type": "string"
                 },
-                "namespace": {
-                    "description": "Namespace holds the value of the \"namespace\" field.\n所属项目空间",
+                "query": {
+                    "description": "Query holds the value of the \"query\" field.",
                     "type": "string"
                 },
-                "phase": {
-                    "description": "Phase holds the value of the \"phase\" field.\n阶段",
+                "remote_ip": {
+                    "description": "RemoteIP holds the value of the \"remote_ip\" field.",
                     "type": "string"
                 },
-                "pod_ip": {
-                    "description": "PodIP holds the value of the \"pod_ip\" field.\nPodIP",
+                "request": {
+                    "description": "Request holds the value of the \"request\" field.",
                     "type": "string"
                 },
-                "pod_name": {
-                    "description": "PodName holds the value of the \"pod_name\" field.\npod名称",
+                "response": {
+                    "description": "Response holds the value of the \"response\" field.",
                     "type": "string"
                 },
-                "reason": {
-                    "description": "Reason holds the value of the \"reason\" field.\n原因",
+                "status_code": {
+                    "description": "StatusCode holds the value of the \"status_code\" field.",
+                    "type": "integer"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
                     "type": "string"
                 },
-                "resource_version": {
-                    "description": "ResourceVersion holds the value of the \"resource_version\" field.\n资源版本号",
-                    "type": "string"
-                },
-                "service_name": {
-                    "description": "ServiceName holds the value of the \"service_name\" field.\n应用名称",
-                    "type": "string"
-                },
-                "start_time": {
-                    "description": "StartTime holds the value of the \"start_time\" field.\n启动时间",
-                    "type": "string"
-                },
-                "updated_at": {
-                    "description": "UpdatedAt holds the value of the \"updated_at\" field.",
+                "url": {
+                    "description": "URL holds the value of the \"url\" field.",
                     "type": "string"
                 }
             }
         },
-        "ent.PodBaseCreateReq": {
+        "ent.AuditBaseCreateReq": {
             "type": "object",
             "properties": {
-                "clusterName": {
+                "client_ip": {
                     "type": "string"
                 },
-                "detail": {
+                "cost_time": {
                     "type": "string"
                 },
-                "hostIP": {
+                "header": {
                     "type": "string"
                 },
-                "message": {
+                "method": {
                     "type": "string"
                 },
-                "namespace": {
+                "query": {
                     "type": "string"
                 },
-                "phase": {
+                "remote_ip": {
                     "type": "string"
                 },
-                "podIP": {
+                "request": {
                     "type": "string"
                 },
-                "podName": {
+                "response": {
                     "type": "string"
                 },
-                "reason": {
-                    "type": "string"
+                "status_code": {
+                    "type": "integer"
                 },
-                "resourceVersion": {
-                    "type": "string"
-                },
-                "serviceName": {
-                    "type": "string"
-                },
-                "startTime": {
+                "url": {
                     "type": "string"
                 }
             }
         },
-        "ent.PodBaseGetRes": {
+        "ent.AuditBaseGetRes": {
             "type": "object",
             "properties": {
-                "clusterName": {
+                "client_ip": {
                     "type": "string"
                 },
-                "detail": {
+                "cost_time": {
                     "type": "string"
                 },
-                "hostIP": {
+                "header": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "message": {
+                "method": {
                     "type": "string"
                 },
-                "namespace": {
+                "query": {
                     "type": "string"
                 },
-                "phase": {
+                "remote_ip": {
                     "type": "string"
                 },
-                "podIP": {
+                "request": {
                     "type": "string"
                 },
-                "podName": {
+                "response": {
                     "type": "string"
                 },
-                "reason": {
-                    "type": "string"
-                },
-                "resourceVersion": {
-                    "type": "string"
-                },
-                "serviceName": {
-                    "type": "string"
-                },
-                "startTime": {
-                    "type": "string"
-                }
-            }
-        },
-        "ent.PodBaseUpdateReq": {
-            "type": "object",
-            "properties": {
-                "clusterName": {
-                    "type": "string"
-                },
-                "detail": {
-                    "type": "string"
-                },
-                "hostIP": {
-                    "type": "string"
-                },
-                "id": {
+                "status_code": {
                     "type": "integer"
                 },
-                "message": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "phase": {
-                    "type": "string"
-                },
-                "podIP": {
-                    "type": "string"
-                },
-                "podName": {
-                    "type": "string"
-                },
-                "reason": {
-                    "type": "string"
-                },
-                "resourceVersion": {
-                    "type": "string"
-                },
-                "serviceName": {
-                    "type": "string"
-                },
-                "startTime": {
+                "url": {
                     "type": "string"
                 }
             }
         },
-        "ent.PodEdges": {
+        "ent.AuditBaseUpdateReq": {
             "type": "object",
             "properties": {
-                "servicetree": {
-                    "description": "Servicetree holds the value of the servicetree edge.",
-                    "$ref": "#/definitions/ent.SpiderDevTblServicetree"
+                "id": {
+                    "type": "integer"
                 }
             }
         },
-        "ent.PodRestByQueriesRes": {
+        "ent.AuditRestByQueriesAllRes": {
             "type": "object",
             "properties": {
-                "list": {
+                "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ent.PodBaseGetRes"
+                        "$ref": "#/definitions/ent.AuditBaseGetRes"
                     }
                 },
                 "total": {
@@ -1393,44 +1378,160 @@ const docTemplate = `{
                 }
             }
         },
-        "ent.SpiderDevTblServicetree": {
+        "ent.Project": {
             "type": "object",
             "properties": {
                 "aname": {
                     "description": "Aname holds the value of the \"aname\" field.",
                     "type": "string"
                 },
+                "comments": {
+                    "description": "Comments holds the value of the \"comments\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the ProjectQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.ProjectEdges"
+                },
                 "id": {
                     "description": "ID of the ent.",
                     "type": "integer"
                 },
-                "key": {
-                    "description": "Key holds the value of the \"key\" field.",
+                "name": {
+                    "description": "Name holds the value of the \"name\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.ProjectBaseCreateReq": {
+            "type": "object"
+        },
+        "ent.ProjectBaseGetRes": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ent.ProjectBaseUpdateReq": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ent.ProjectEdges": {
+            "type": "object",
+            "properties": {
+                "services": {
+                    "description": "Services holds the value of the services edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Service"
+                    }
+                }
+            }
+        },
+        "ent.ProjectRestByQueriesAllRes": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.ProjectBaseGetRes"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ent.ProjectRestGetServicesSliceByProjectIdRes": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.ServiceBaseGetRes"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ent.Service": {
+            "type": "object",
+            "properties": {
+                "aname": {
+                    "description": "Aname holds the value of the \"aname\" field.",
+                    "type": "string"
+                },
+                "classes": {
+                    "description": "Classes holds the value of the \"classes\" field.",
+                    "type": "string"
+                },
+                "comments": {
+                    "description": "Comments holds the value of the \"comments\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the ServiceQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.ServiceEdges"
+                },
+                "git": {
+                    "description": "Git holds the value of the \"git\" field.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "lang": {
+                    "description": "Lang holds the value of the \"lang\" field.",
                     "type": "string"
                 },
                 "name": {
                     "description": "Name holds the value of the \"name\" field.",
                     "type": "string"
                 },
-                "origin": {
-                    "description": "Origin holds the value of the \"origin\" field.",
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
                     "type": "string"
-                },
-                "pnode": {
-                    "description": "Pnode holds the value of the \"pnode\" field.",
-                    "type": "integer"
-                },
-                "type": {
-                    "description": "Type holds the value of the \"type\" field.",
-                    "type": "integer"
                 }
             }
         },
-        "ent.SpiderDevTblServicetreeBaseGetRes": {
+        "ent.ServiceBaseCreateReq": {
+            "type": "object"
+        },
+        "ent.ServiceBaseGetRes": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "integer"
+                }
+            }
+        },
+        "ent.ServiceEdges": {
+            "type": "object",
+            "properties": {
+                "project": {
+                    "description": "Project holds the value of the project edge.",
+                    "$ref": "#/definitions/ent.Project"
                 }
             }
         },
@@ -1441,9 +1542,9 @@ const docTemplate = `{
                     "description": "Age holds the value of the \"age\" field.",
                     "type": "integer"
                 },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the UserQuery when eager-loading is set.",
-                    "$ref": "#/definitions/ent.UserEdges"
+                "enable": {
+                    "description": "Enable holds the value of the \"enable\" field.",
+                    "type": "boolean"
                 },
                 "id": {
                     "description": "ID of the ent.",
@@ -1451,6 +1552,14 @@ const docTemplate = `{
                 },
                 "name": {
                     "description": "Name holds the value of the \"name\" field.",
+                    "type": "string"
+                },
+                "pass_word": {
+                    "description": "PassWord holds the value of the \"pass_word\" field.",
+                    "type": "string"
+                },
+                "token": {
+                    "description": "Token holds the value of the \"token\" field.",
                     "type": "string"
                 }
             }
@@ -1461,7 +1570,16 @@ const docTemplate = `{
                 "age": {
                     "type": "integer"
                 },
+                "enable": {
+                    "type": "boolean"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "pass_word": {
+                    "type": "string"
+                },
+                "token": {
                     "type": "string"
                 }
             }
@@ -1472,10 +1590,19 @@ const docTemplate = `{
                 "age": {
                     "type": "integer"
                 },
+                "enable": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "pass_word": {
+                    "type": "string"
+                },
+                "token": {
                     "type": "string"
                 }
             }
@@ -1486,30 +1613,27 @@ const docTemplate = `{
                 "age": {
                     "type": "integer"
                 },
+                "enable": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
                 "name": {
                     "type": "string"
+                },
+                "pass_word": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
                 }
             }
         },
-        "ent.UserEdges": {
+        "ent.UserRestByQueriesAllRes": {
             "type": "object",
             "properties": {
-                "pods": {
-                    "description": "Pods holds the value of the pods edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Pod"
-                    }
-                }
-            }
-        },
-        "ent.UserRestByQueriesRes": {
-            "type": "object",
-            "properties": {
-                "list": {
+                "items": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ent.UserBaseGetRes"
@@ -1520,151 +1644,25 @@ const docTemplate = `{
                 }
             }
         },
-        "ent.UserRestGetPodsSliceByUserIdRes": {
-            "type": "object",
-            "properties": {
-                "list": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.PodBaseGetRes"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "hello.SwagResponse": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "traceId": {
-                    "type": "string"
-                }
-            }
-        },
-        "pod.CreateBodySwag": {
-            "type": "object",
-            "properties": {
-                "clusterName": {
-                    "type": "string"
-                },
-                "detail": {
-                    "type": "string"
-                },
-                "hostIP": {
-                    "type": "string"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "phase": {
-                    "type": "string"
-                },
-                "podIP": {
-                    "type": "string"
-                },
-                "podName": {
-                    "type": "string"
-                },
-                "reason": {
-                    "type": "string"
-                },
-                "resourceVersion": {
-                    "type": "string"
-                },
-                "serviceName": {
-                    "type": "string"
-                },
-                "startTime": {
-                    "type": "string"
-                }
-            }
-        },
-        "pod.CreateServicetreeByPodIdBodySwag": {
+        "project.ProjectRestCreateBodySwag": {
             "type": "object"
         },
-        "pod.SwagResponse": {
+        "project.ProjectRestUpdateByIdBodySwag": {
             "type": "object",
             "properties": {
-                "data": {},
-                "traceId": {
-                    "type": "string"
-                }
-            }
-        },
-        "pod.UpdateByIdBodySwag": {
-            "type": "object",
-            "properties": {
-                "clusterName": {
-                    "type": "string"
-                },
-                "detail": {
-                    "type": "string"
-                },
-                "hostIP": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "phase": {
-                    "type": "string"
-                },
-                "podIP": {
-                    "type": "string"
-                },
-                "podName": {
-                    "type": "string"
-                },
-                "reason": {
-                    "type": "string"
-                },
-                "resourceVersion": {
-                    "type": "string"
-                },
-                "serviceName": {
-                    "type": "string"
-                },
-                "startTime": {
-                    "type": "string"
                 }
             }
         },
-        "say.SwagResponse": {
+        "project.SwagResponse": {
             "type": "object",
             "properties": {
                 "data": {},
-                "traceId": {
-                    "type": "string"
-                }
-            }
-        },
-        "say1.SwagResponse": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "traceId": {
-                    "type": "string"
-                }
-            }
-        },
-        "user.CreateBodySwag": {
-            "type": "object",
-            "properties": {
-                "age": {
+                "status": {
                     "type": "integer"
                 },
-                "name": {
+                "traceId": {
                     "type": "string"
                 }
             }
@@ -1673,21 +1671,53 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {},
+                "status": {
+                    "type": "integer"
+                },
                 "traceId": {
                     "type": "string"
                 }
             }
         },
-        "user.UpdateByIdBodySwag": {
+        "user.UserRestCreateBodySwag": {
             "type": "object",
             "properties": {
                 "age": {
                     "type": "integer"
                 },
+                "enable": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pass_word": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.UserRestUpdateByIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "enable": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "pass_word": {
+                    "type": "string"
+                },
+                "token": {
                     "type": "string"
                 }
             }

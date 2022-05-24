@@ -3,7 +3,6 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -22,7 +21,7 @@ func (User) Annotations() []schema.Annotation {
 		ReadMany:       true,
 		Delete:         true,
 		DeleteMany:     true,
-		PagingMust:     true,
+		PagingMust:     false,
 		PagingLimitMax: 200,
 		Order:          false,
 	}}
@@ -31,10 +30,28 @@ func (User) Annotations() []schema.Annotation {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("age").StructTag(`fake:"{number:0,150}"`).Annotations(FieldAnnotation{
-			Create:  true,
-			Update:  true,
-			Read:    true,
+		field.String("pass_word").StructTag(`json:"pass_word"`).Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
+		field.String("token").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
+		field.Bool("enable").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
+		field.Int("age").Optional().StructTag(`fake:"{number:0,150}"`).Annotations(FieldAnnotation{
+			Create: true,
+			Update: true,
+			Read:   true,
 			QueryOps: NumericQueryOps{
 				EQ:    true,
 				NEQ:   false,
@@ -47,9 +64,9 @@ func (User) Fields() []ent.Field {
 			},
 		}),
 		field.String("name").Default("unknown").Annotations(FieldAnnotation{
-			Create:   true,
-			Update:   true,
-			Read:     true,
+			Create: true,
+			Update: true,
+			Read:   true,
 			QueryOps: StringQueryOps{
 				EQ:        true,
 				NEQ:       false,
@@ -69,10 +86,5 @@ func (User) Fields() []ent.Field {
 
 // Edges of the User.
 func (User) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.To("pods", Pod.Type).Annotations(EdgeAnnotation{
-			Create: true,
-			Read:   true,
-		}),
-	}
+	return nil
 }

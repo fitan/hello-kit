@@ -4,12 +4,15 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"hello/pkg/ent/predicate"
 	"hello/pkg/ent/project"
+	"hello/pkg/ent/service"
 	"math"
 	"reflect"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -25,6 +28,8 @@ type ProjectQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Project
+	// eager-loading edges.
+	withServices *ServiceQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -59,6 +64,28 @@ func (pq *ProjectQuery) Unique(unique bool) *ProjectQuery {
 func (pq *ProjectQuery) Order(o ...OrderFunc) *ProjectQuery {
 	pq.order = append(pq.order, o...)
 	return pq
+}
+
+// QueryServices chains the current query on the "services" edge.
+func (pq *ProjectQuery) QueryServices() *ServiceQuery {
+	query := &ServiceQuery{config: pq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(project.Table, project.FieldID, selector),
+			sqlgraph.To(service.Table, service.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, project.ServicesTable, project.ServicesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Project entity from the query.
@@ -237,16 +264,28 @@ func (pq *ProjectQuery) Clone() *ProjectQuery {
 		return nil
 	}
 	return &ProjectQuery{
-		config:     pq.config,
-		limit:      pq.limit,
-		offset:     pq.offset,
-		order:      append([]OrderFunc{}, pq.order...),
-		predicates: append([]predicate.Project{}, pq.predicates...),
+		config:       pq.config,
+		limit:        pq.limit,
+		offset:       pq.offset,
+		order:        append([]OrderFunc{}, pq.order...),
+		predicates:   append([]predicate.Project{}, pq.predicates...),
+		withServices: pq.withServices.Clone(),
 		// clone intermediate query.
 		sql:    pq.sql.Clone(),
 		path:   pq.path,
 		unique: pq.unique,
 	}
+}
+
+// WithServices tells the query-builder to eager-load the nodes that are connected to
+// the "services" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *ProjectQuery) WithServices(opts ...func(*ServiceQuery)) *ProjectQuery {
+	query := &ServiceQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withServices = query
+	return pq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -255,12 +294,12 @@ func (pq *ProjectQuery) Clone() *ProjectQuery {
 // Example:
 //
 //	var v []struct {
-//		Alias string `json:"alias,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Project.Query().
-//		GroupBy(project.FieldAlias).
+//		GroupBy(project.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -282,11 +321,11 @@ func (pq *ProjectQuery) GroupBy(field string, fields ...string) *ProjectGroupBy 
 // Example:
 //
 //	var v []struct {
-//		Alias string `json:"alias,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
 //	client.Project.Query().
-//		Select(project.FieldAlias).
+//		Select(project.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (pq *ProjectQuery) Select(fields ...string) *ProjectSelect {
@@ -312,8 +351,11 @@ func (pq *ProjectQuery) prepareQuery(ctx context.Context) error {
 
 func (pq *ProjectQuery) sqlAll(ctx context.Context) ([]*Project, error) {
 	var (
-		nodes = []*Project{}
-		_spec = pq.querySpec()
+		nodes       = []*Project{}
+		_spec       = pq.querySpec()
+		loadedTypes = [1]bool{
+			pq.withServices != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Project{config: pq.config}
@@ -325,6 +367,7 @@ func (pq *ProjectQuery) sqlAll(ctx context.Context) ([]*Project, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, pq.driver, _spec); err != nil {
@@ -333,6 +376,36 @@ func (pq *ProjectQuery) sqlAll(ctx context.Context) ([]*Project, error) {
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := pq.withServices; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Project)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Services = []*Service{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Service(func(s *sql.Selector) {
+			s.Where(sql.InValues(project.ServicesColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.project_services
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "project_services" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "project_services" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Services = append(node.Edges.Services, n)
+		}
+	}
+
 	return nodes, nil
 }
 
@@ -433,7 +506,15 @@ func (pq *ProjectQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-func (pq *ProjectQuery) ByQueries(ctx context.Context, i interface{}, vs interface{}) (count int, err error) {
+func (pq *ProjectQuery) Queries(i interface{}) *ProjectQuery {
+	queryList, _ := SetProjectFormQueries(i)
+	for _, v := range queryList {
+		v.Query(pq)
+	}
+	return pq
+}
+
+func (pq *ProjectQuery) ByQueriesAll(ctx context.Context, i interface{}, vs interface{}) (count int, err error) {
 	queryList, countList := SetProjectFormQueries(i)
 	countQ := pq.Clone()
 	for _, v := range queryList {
@@ -522,172 +603,211 @@ func ProjectFormDepValue(v reflect.Value, former reflect.Type, queryList *[]Proj
 type ProjectQueryOps struct {
 }
 
-type ProjectTableAliasEQForm struct {
-	AliasEQ *string `form:"AliasEQ" json:"AliasEQ"`
+type ProjectTableCreateTimeEQForm struct {
+	CreateTimeEQ *time.Time `form:"CreateTimeEQ" json:"CreateTimeEQ"`
 }
 
-func (f ProjectTableAliasEQForm) Query(q *ProjectQuery) {
-	if f.AliasEQ != nil {
-		q.Where(project.AliasEQ(*f.AliasEQ))
+func (f ProjectTableCreateTimeEQForm) Query(q *ProjectQuery) {
+	if f.CreateTimeEQ != nil {
+		q.Where(project.CreateTimeEQ(*f.CreateTimeEQ))
 	}
 }
-func (f ProjectTableAliasEQForm) CountQuery() bool {
+func (f ProjectTableCreateTimeEQForm) CountQuery() bool {
 	return true
 }
 
-type ProjectTableAliasNEQForm struct {
-	AliasNEQ *string `form:"AliasNEQ" json:"AliasNEQ"`
+type ProjectTableCreateTimeNEQForm struct {
+	CreateTimeNEQ *time.Time `form:"CreateTimeNEQ" json:"CreateTimeNEQ"`
 }
 
-func (f ProjectTableAliasNEQForm) Query(q *ProjectQuery) {
-	if f.AliasNEQ != nil {
-		q.Where(project.AliasNEQ(*f.AliasNEQ))
+func (f ProjectTableCreateTimeNEQForm) Query(q *ProjectQuery) {
+	if f.CreateTimeNEQ != nil {
+		q.Where(project.CreateTimeNEQ(*f.CreateTimeNEQ))
 	}
 }
-func (f ProjectTableAliasNEQForm) CountQuery() bool {
+func (f ProjectTableCreateTimeNEQForm) CountQuery() bool {
 	return true
 }
 
-type ProjectTableAliasInForm struct {
-	AliasIn *[]string `form:"AliasIn" json:"AliasIn"`
+type ProjectTableCreateTimeInForm struct {
+	CreateTimeIn *[]time.Time `form:"CreateTimeIn" json:"CreateTimeIn"`
 }
 
-func (f ProjectTableAliasInForm) Query(q *ProjectQuery) {
-	if f.AliasIn != nil {
-		q.Where(project.AliasIn(*f.AliasIn...))
+func (f ProjectTableCreateTimeInForm) Query(q *ProjectQuery) {
+	if f.CreateTimeIn != nil {
+		q.Where(project.CreateTimeIn(*f.CreateTimeIn...))
 	}
 }
-func (f ProjectTableAliasInForm) CountQuery() bool {
+func (f ProjectTableCreateTimeInForm) CountQuery() bool {
 	return true
 }
 
-type ProjectTableAliasNotInForm struct {
-	AliasNotIn *[]string `form:"AliasNotIn" json:"AliasNotIn"`
+type ProjectTableCreateTimeNotInForm struct {
+	CreateTimeNotIn *[]time.Time `form:"CreateTimeNotIn" json:"CreateTimeNotIn"`
 }
 
-func (f ProjectTableAliasNotInForm) Query(q *ProjectQuery) {
-	if f.AliasNotIn != nil {
-		q.Where(project.AliasNotIn(*f.AliasNotIn...))
+func (f ProjectTableCreateTimeNotInForm) Query(q *ProjectQuery) {
+	if f.CreateTimeNotIn != nil {
+		q.Where(project.CreateTimeNotIn(*f.CreateTimeNotIn...))
 	}
 }
-func (f ProjectTableAliasNotInForm) CountQuery() bool {
+func (f ProjectTableCreateTimeNotInForm) CountQuery() bool {
 	return true
 }
 
-type ProjectTableAliasGTForm struct {
-	AliasGT *string `form:"AliasGT" json:"AliasGT"`
+type ProjectTableCreateTimeGTForm struct {
+	CreateTimeGT *time.Time `form:"CreateTimeGT" json:"CreateTimeGT"`
 }
 
-func (f ProjectTableAliasGTForm) Query(q *ProjectQuery) {
-	if f.AliasGT != nil {
-		q.Where(project.AliasGT(*f.AliasGT))
+func (f ProjectTableCreateTimeGTForm) Query(q *ProjectQuery) {
+	if f.CreateTimeGT != nil {
+		q.Where(project.CreateTimeGT(*f.CreateTimeGT))
 	}
 }
-func (f ProjectTableAliasGTForm) CountQuery() bool {
+func (f ProjectTableCreateTimeGTForm) CountQuery() bool {
 	return true
 }
 
-type ProjectTableAliasGTEForm struct {
-	AliasGTE *string `form:"AliasGTE" json:"AliasGTE"`
+type ProjectTableCreateTimeGTEForm struct {
+	CreateTimeGTE *time.Time `form:"CreateTimeGTE" json:"CreateTimeGTE"`
 }
 
-func (f ProjectTableAliasGTEForm) Query(q *ProjectQuery) {
-	if f.AliasGTE != nil {
-		q.Where(project.AliasGTE(*f.AliasGTE))
+func (f ProjectTableCreateTimeGTEForm) Query(q *ProjectQuery) {
+	if f.CreateTimeGTE != nil {
+		q.Where(project.CreateTimeGTE(*f.CreateTimeGTE))
 	}
 }
-func (f ProjectTableAliasGTEForm) CountQuery() bool {
+func (f ProjectTableCreateTimeGTEForm) CountQuery() bool {
 	return true
 }
 
-type ProjectTableAliasLTForm struct {
-	AliasLT *string `form:"AliasLT" json:"AliasLT"`
+type ProjectTableCreateTimeLTForm struct {
+	CreateTimeLT *time.Time `form:"CreateTimeLT" json:"CreateTimeLT"`
 }
 
-func (f ProjectTableAliasLTForm) Query(q *ProjectQuery) {
-	if f.AliasLT != nil {
-		q.Where(project.AliasLT(*f.AliasLT))
+func (f ProjectTableCreateTimeLTForm) Query(q *ProjectQuery) {
+	if f.CreateTimeLT != nil {
+		q.Where(project.CreateTimeLT(*f.CreateTimeLT))
 	}
 }
-func (f ProjectTableAliasLTForm) CountQuery() bool {
+func (f ProjectTableCreateTimeLTForm) CountQuery() bool {
 	return true
 }
 
-type ProjectTableAliasLTEForm struct {
-	AliasLTE *string `form:"AliasLTE" json:"AliasLTE"`
+type ProjectTableCreateTimeLTEForm struct {
+	CreateTimeLTE *time.Time `form:"CreateTimeLTE" json:"CreateTimeLTE"`
 }
 
-func (f ProjectTableAliasLTEForm) Query(q *ProjectQuery) {
-	if f.AliasLTE != nil {
-		q.Where(project.AliasLTE(*f.AliasLTE))
+func (f ProjectTableCreateTimeLTEForm) Query(q *ProjectQuery) {
+	if f.CreateTimeLTE != nil {
+		q.Where(project.CreateTimeLTE(*f.CreateTimeLTE))
 	}
 }
-func (f ProjectTableAliasLTEForm) CountQuery() bool {
+func (f ProjectTableCreateTimeLTEForm) CountQuery() bool {
 	return true
 }
 
-type ProjectTableAliasContainsForm struct {
-	AliasContains *string `form:"AliasContains" json:"AliasContains"`
+type ProjectTableUpdateTimeEQForm struct {
+	UpdateTimeEQ *time.Time `form:"UpdateTimeEQ" json:"UpdateTimeEQ"`
 }
 
-func (f ProjectTableAliasContainsForm) Query(q *ProjectQuery) {
-	if f.AliasContains != nil {
-		q.Where(project.AliasContains(*f.AliasContains))
+func (f ProjectTableUpdateTimeEQForm) Query(q *ProjectQuery) {
+	if f.UpdateTimeEQ != nil {
+		q.Where(project.UpdateTimeEQ(*f.UpdateTimeEQ))
 	}
 }
-func (f ProjectTableAliasContainsForm) CountQuery() bool {
+func (f ProjectTableUpdateTimeEQForm) CountQuery() bool {
 	return true
 }
 
-type ProjectTableAliasHasPrefixForm struct {
-	AliasHasPrefix *string `form:"AliasHasPrefix" json:"AliasHasPrefix"`
+type ProjectTableUpdateTimeNEQForm struct {
+	UpdateTimeNEQ *time.Time `form:"UpdateTimeNEQ" json:"UpdateTimeNEQ"`
 }
 
-func (f ProjectTableAliasHasPrefixForm) Query(q *ProjectQuery) {
-	if f.AliasHasPrefix != nil {
-		q.Where(project.AliasHasPrefix(*f.AliasHasPrefix))
+func (f ProjectTableUpdateTimeNEQForm) Query(q *ProjectQuery) {
+	if f.UpdateTimeNEQ != nil {
+		q.Where(project.UpdateTimeNEQ(*f.UpdateTimeNEQ))
 	}
 }
-func (f ProjectTableAliasHasPrefixForm) CountQuery() bool {
+func (f ProjectTableUpdateTimeNEQForm) CountQuery() bool {
 	return true
 }
 
-type ProjectTableAliasHasSuffixForm struct {
-	AliasHasSuffix *string `form:"AliasHasSuffix" json:"AliasHasSuffix"`
+type ProjectTableUpdateTimeInForm struct {
+	UpdateTimeIn *[]time.Time `form:"UpdateTimeIn" json:"UpdateTimeIn"`
 }
 
-func (f ProjectTableAliasHasSuffixForm) Query(q *ProjectQuery) {
-	if f.AliasHasSuffix != nil {
-		q.Where(project.AliasHasSuffix(*f.AliasHasSuffix))
+func (f ProjectTableUpdateTimeInForm) Query(q *ProjectQuery) {
+	if f.UpdateTimeIn != nil {
+		q.Where(project.UpdateTimeIn(*f.UpdateTimeIn...))
 	}
 }
-func (f ProjectTableAliasHasSuffixForm) CountQuery() bool {
+func (f ProjectTableUpdateTimeInForm) CountQuery() bool {
 	return true
 }
 
-type ProjectTableAliasEqualFoldForm struct {
-	AliasEqualFold *string `form:"AliasEqualFold" json:"AliasEqualFold"`
+type ProjectTableUpdateTimeNotInForm struct {
+	UpdateTimeNotIn *[]time.Time `form:"UpdateTimeNotIn" json:"UpdateTimeNotIn"`
 }
 
-func (f ProjectTableAliasEqualFoldForm) Query(q *ProjectQuery) {
-	if f.AliasEqualFold != nil {
-		q.Where(project.AliasEqualFold(*f.AliasEqualFold))
+func (f ProjectTableUpdateTimeNotInForm) Query(q *ProjectQuery) {
+	if f.UpdateTimeNotIn != nil {
+		q.Where(project.UpdateTimeNotIn(*f.UpdateTimeNotIn...))
 	}
 }
-func (f ProjectTableAliasEqualFoldForm) CountQuery() bool {
+func (f ProjectTableUpdateTimeNotInForm) CountQuery() bool {
 	return true
 }
 
-type ProjectTableAliasContainsFoldForm struct {
-	AliasContainsFold *string `form:"AliasContainsFold" json:"AliasContainsFold"`
+type ProjectTableUpdateTimeGTForm struct {
+	UpdateTimeGT *time.Time `form:"UpdateTimeGT" json:"UpdateTimeGT"`
 }
 
-func (f ProjectTableAliasContainsFoldForm) Query(q *ProjectQuery) {
-	if f.AliasContainsFold != nil {
-		q.Where(project.AliasContainsFold(*f.AliasContainsFold))
+func (f ProjectTableUpdateTimeGTForm) Query(q *ProjectQuery) {
+	if f.UpdateTimeGT != nil {
+		q.Where(project.UpdateTimeGT(*f.UpdateTimeGT))
 	}
 }
-func (f ProjectTableAliasContainsFoldForm) CountQuery() bool {
+func (f ProjectTableUpdateTimeGTForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableUpdateTimeGTEForm struct {
+	UpdateTimeGTE *time.Time `form:"UpdateTimeGTE" json:"UpdateTimeGTE"`
+}
+
+func (f ProjectTableUpdateTimeGTEForm) Query(q *ProjectQuery) {
+	if f.UpdateTimeGTE != nil {
+		q.Where(project.UpdateTimeGTE(*f.UpdateTimeGTE))
+	}
+}
+func (f ProjectTableUpdateTimeGTEForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableUpdateTimeLTForm struct {
+	UpdateTimeLT *time.Time `form:"UpdateTimeLT" json:"UpdateTimeLT"`
+}
+
+func (f ProjectTableUpdateTimeLTForm) Query(q *ProjectQuery) {
+	if f.UpdateTimeLT != nil {
+		q.Where(project.UpdateTimeLT(*f.UpdateTimeLT))
+	}
+}
+func (f ProjectTableUpdateTimeLTForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableUpdateTimeLTEForm struct {
+	UpdateTimeLTE *time.Time `form:"UpdateTimeLTE" json:"UpdateTimeLTE"`
+}
+
+func (f ProjectTableUpdateTimeLTEForm) Query(q *ProjectQuery) {
+	if f.UpdateTimeLTE != nil {
+		q.Where(project.UpdateTimeLTE(*f.UpdateTimeLTE))
+	}
+}
+func (f ProjectTableUpdateTimeLTEForm) CountQuery() bool {
 	return true
 }
 
@@ -857,6 +977,344 @@ func (f ProjectTableNameContainsFoldForm) Query(q *ProjectQuery) {
 	}
 }
 func (f ProjectTableNameContainsFoldForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableAnameEQForm struct {
+	AnameEQ *string `form:"AnameEQ" json:"AnameEQ"`
+}
+
+func (f ProjectTableAnameEQForm) Query(q *ProjectQuery) {
+	if f.AnameEQ != nil {
+		q.Where(project.AnameEQ(*f.AnameEQ))
+	}
+}
+func (f ProjectTableAnameEQForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableAnameNEQForm struct {
+	AnameNEQ *string `form:"AnameNEQ" json:"AnameNEQ"`
+}
+
+func (f ProjectTableAnameNEQForm) Query(q *ProjectQuery) {
+	if f.AnameNEQ != nil {
+		q.Where(project.AnameNEQ(*f.AnameNEQ))
+	}
+}
+func (f ProjectTableAnameNEQForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableAnameInForm struct {
+	AnameIn *[]string `form:"AnameIn" json:"AnameIn"`
+}
+
+func (f ProjectTableAnameInForm) Query(q *ProjectQuery) {
+	if f.AnameIn != nil {
+		q.Where(project.AnameIn(*f.AnameIn...))
+	}
+}
+func (f ProjectTableAnameInForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableAnameNotInForm struct {
+	AnameNotIn *[]string `form:"AnameNotIn" json:"AnameNotIn"`
+}
+
+func (f ProjectTableAnameNotInForm) Query(q *ProjectQuery) {
+	if f.AnameNotIn != nil {
+		q.Where(project.AnameNotIn(*f.AnameNotIn...))
+	}
+}
+func (f ProjectTableAnameNotInForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableAnameGTForm struct {
+	AnameGT *string `form:"AnameGT" json:"AnameGT"`
+}
+
+func (f ProjectTableAnameGTForm) Query(q *ProjectQuery) {
+	if f.AnameGT != nil {
+		q.Where(project.AnameGT(*f.AnameGT))
+	}
+}
+func (f ProjectTableAnameGTForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableAnameGTEForm struct {
+	AnameGTE *string `form:"AnameGTE" json:"AnameGTE"`
+}
+
+func (f ProjectTableAnameGTEForm) Query(q *ProjectQuery) {
+	if f.AnameGTE != nil {
+		q.Where(project.AnameGTE(*f.AnameGTE))
+	}
+}
+func (f ProjectTableAnameGTEForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableAnameLTForm struct {
+	AnameLT *string `form:"AnameLT" json:"AnameLT"`
+}
+
+func (f ProjectTableAnameLTForm) Query(q *ProjectQuery) {
+	if f.AnameLT != nil {
+		q.Where(project.AnameLT(*f.AnameLT))
+	}
+}
+func (f ProjectTableAnameLTForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableAnameLTEForm struct {
+	AnameLTE *string `form:"AnameLTE" json:"AnameLTE"`
+}
+
+func (f ProjectTableAnameLTEForm) Query(q *ProjectQuery) {
+	if f.AnameLTE != nil {
+		q.Where(project.AnameLTE(*f.AnameLTE))
+	}
+}
+func (f ProjectTableAnameLTEForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableAnameContainsForm struct {
+	AnameContains *string `form:"AnameContains" json:"AnameContains"`
+}
+
+func (f ProjectTableAnameContainsForm) Query(q *ProjectQuery) {
+	if f.AnameContains != nil {
+		q.Where(project.AnameContains(*f.AnameContains))
+	}
+}
+func (f ProjectTableAnameContainsForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableAnameHasPrefixForm struct {
+	AnameHasPrefix *string `form:"AnameHasPrefix" json:"AnameHasPrefix"`
+}
+
+func (f ProjectTableAnameHasPrefixForm) Query(q *ProjectQuery) {
+	if f.AnameHasPrefix != nil {
+		q.Where(project.AnameHasPrefix(*f.AnameHasPrefix))
+	}
+}
+func (f ProjectTableAnameHasPrefixForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableAnameHasSuffixForm struct {
+	AnameHasSuffix *string `form:"AnameHasSuffix" json:"AnameHasSuffix"`
+}
+
+func (f ProjectTableAnameHasSuffixForm) Query(q *ProjectQuery) {
+	if f.AnameHasSuffix != nil {
+		q.Where(project.AnameHasSuffix(*f.AnameHasSuffix))
+	}
+}
+func (f ProjectTableAnameHasSuffixForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableAnameEqualFoldForm struct {
+	AnameEqualFold *string `form:"AnameEqualFold" json:"AnameEqualFold"`
+}
+
+func (f ProjectTableAnameEqualFoldForm) Query(q *ProjectQuery) {
+	if f.AnameEqualFold != nil {
+		q.Where(project.AnameEqualFold(*f.AnameEqualFold))
+	}
+}
+func (f ProjectTableAnameEqualFoldForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableAnameContainsFoldForm struct {
+	AnameContainsFold *string `form:"AnameContainsFold" json:"AnameContainsFold"`
+}
+
+func (f ProjectTableAnameContainsFoldForm) Query(q *ProjectQuery) {
+	if f.AnameContainsFold != nil {
+		q.Where(project.AnameContainsFold(*f.AnameContainsFold))
+	}
+}
+func (f ProjectTableAnameContainsFoldForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableCommentsEQForm struct {
+	CommentsEQ *string `form:"CommentsEQ" json:"CommentsEQ"`
+}
+
+func (f ProjectTableCommentsEQForm) Query(q *ProjectQuery) {
+	if f.CommentsEQ != nil {
+		q.Where(project.CommentsEQ(*f.CommentsEQ))
+	}
+}
+func (f ProjectTableCommentsEQForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableCommentsNEQForm struct {
+	CommentsNEQ *string `form:"CommentsNEQ" json:"CommentsNEQ"`
+}
+
+func (f ProjectTableCommentsNEQForm) Query(q *ProjectQuery) {
+	if f.CommentsNEQ != nil {
+		q.Where(project.CommentsNEQ(*f.CommentsNEQ))
+	}
+}
+func (f ProjectTableCommentsNEQForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableCommentsInForm struct {
+	CommentsIn *[]string `form:"CommentsIn" json:"CommentsIn"`
+}
+
+func (f ProjectTableCommentsInForm) Query(q *ProjectQuery) {
+	if f.CommentsIn != nil {
+		q.Where(project.CommentsIn(*f.CommentsIn...))
+	}
+}
+func (f ProjectTableCommentsInForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableCommentsNotInForm struct {
+	CommentsNotIn *[]string `form:"CommentsNotIn" json:"CommentsNotIn"`
+}
+
+func (f ProjectTableCommentsNotInForm) Query(q *ProjectQuery) {
+	if f.CommentsNotIn != nil {
+		q.Where(project.CommentsNotIn(*f.CommentsNotIn...))
+	}
+}
+func (f ProjectTableCommentsNotInForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableCommentsGTForm struct {
+	CommentsGT *string `form:"CommentsGT" json:"CommentsGT"`
+}
+
+func (f ProjectTableCommentsGTForm) Query(q *ProjectQuery) {
+	if f.CommentsGT != nil {
+		q.Where(project.CommentsGT(*f.CommentsGT))
+	}
+}
+func (f ProjectTableCommentsGTForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableCommentsGTEForm struct {
+	CommentsGTE *string `form:"CommentsGTE" json:"CommentsGTE"`
+}
+
+func (f ProjectTableCommentsGTEForm) Query(q *ProjectQuery) {
+	if f.CommentsGTE != nil {
+		q.Where(project.CommentsGTE(*f.CommentsGTE))
+	}
+}
+func (f ProjectTableCommentsGTEForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableCommentsLTForm struct {
+	CommentsLT *string `form:"CommentsLT" json:"CommentsLT"`
+}
+
+func (f ProjectTableCommentsLTForm) Query(q *ProjectQuery) {
+	if f.CommentsLT != nil {
+		q.Where(project.CommentsLT(*f.CommentsLT))
+	}
+}
+func (f ProjectTableCommentsLTForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableCommentsLTEForm struct {
+	CommentsLTE *string `form:"CommentsLTE" json:"CommentsLTE"`
+}
+
+func (f ProjectTableCommentsLTEForm) Query(q *ProjectQuery) {
+	if f.CommentsLTE != nil {
+		q.Where(project.CommentsLTE(*f.CommentsLTE))
+	}
+}
+func (f ProjectTableCommentsLTEForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableCommentsContainsForm struct {
+	CommentsContains *string `form:"CommentsContains" json:"CommentsContains"`
+}
+
+func (f ProjectTableCommentsContainsForm) Query(q *ProjectQuery) {
+	if f.CommentsContains != nil {
+		q.Where(project.CommentsContains(*f.CommentsContains))
+	}
+}
+func (f ProjectTableCommentsContainsForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableCommentsHasPrefixForm struct {
+	CommentsHasPrefix *string `form:"CommentsHasPrefix" json:"CommentsHasPrefix"`
+}
+
+func (f ProjectTableCommentsHasPrefixForm) Query(q *ProjectQuery) {
+	if f.CommentsHasPrefix != nil {
+		q.Where(project.CommentsHasPrefix(*f.CommentsHasPrefix))
+	}
+}
+func (f ProjectTableCommentsHasPrefixForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableCommentsHasSuffixForm struct {
+	CommentsHasSuffix *string `form:"CommentsHasSuffix" json:"CommentsHasSuffix"`
+}
+
+func (f ProjectTableCommentsHasSuffixForm) Query(q *ProjectQuery) {
+	if f.CommentsHasSuffix != nil {
+		q.Where(project.CommentsHasSuffix(*f.CommentsHasSuffix))
+	}
+}
+func (f ProjectTableCommentsHasSuffixForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableCommentsEqualFoldForm struct {
+	CommentsEqualFold *string `form:"CommentsEqualFold" json:"CommentsEqualFold"`
+}
+
+func (f ProjectTableCommentsEqualFoldForm) Query(q *ProjectQuery) {
+	if f.CommentsEqualFold != nil {
+		q.Where(project.CommentsEqualFold(*f.CommentsEqualFold))
+	}
+}
+func (f ProjectTableCommentsEqualFoldForm) CountQuery() bool {
+	return true
+}
+
+type ProjectTableCommentsContainsFoldForm struct {
+	CommentsContainsFold *string `form:"CommentsContainsFold" json:"CommentsContainsFold"`
+}
+
+func (f ProjectTableCommentsContainsFoldForm) Query(q *ProjectQuery) {
+	if f.CommentsContainsFold != nil {
+		q.Where(project.CommentsContainsFold(*f.CommentsContainsFold))
+	}
+}
+func (f ProjectTableCommentsContainsFoldForm) CountQuery() bool {
 	return true
 }
 

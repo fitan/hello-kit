@@ -30,10 +30,10 @@ func NewUserServiceWithTracing(base UserService) UserService {
 	return d
 }
 
-// ByQueries implements UserService
-func (_d UserServiceWithTracing) ByQueries(ctx context.Context, req ent.UserRestByQueriesReq) (res ent.UserRestByQueriesRes, err error) {
+// UserRestByQueriesAll implements UserService
+func (_d UserServiceWithTracing) UserRestByQueriesAll(ctx context.Context, req ent.UserRestByQueriesAllReq) (res ent.UserRestByQueriesAllRes, err error) {
 
-	var name = "UserService.ByQueries"
+	var name = "UserService.UserRestByQueriesAll"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -51,13 +51,13 @@ func (_d UserServiceWithTracing) ByQueries(ctx context.Context, req ent.UserRest
 		span.End()
 	}()
 
-	return _d.UserService.ByQueries(ctx, req)
+	return _d.UserService.UserRestByQueriesAll(ctx, req)
 }
 
-// Create implements UserService
-func (_d UserServiceWithTracing) Create(ctx context.Context, req ent.UserRestCreateReq) (res *ent.User, err error) {
+// UserRestCreate implements UserService
+func (_d UserServiceWithTracing) UserRestCreate(ctx context.Context, req ent.UserRestCreateReq) (res *ent.User, err error) {
 
-	var name = "UserService.Create"
+	var name = "UserService.UserRestCreate"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -75,13 +75,13 @@ func (_d UserServiceWithTracing) Create(ctx context.Context, req ent.UserRestCre
 		span.End()
 	}()
 
-	return _d.UserService.Create(ctx, req)
+	return _d.UserService.UserRestCreate(ctx, req)
 }
 
-// CreateMany implements UserService
-func (_d UserServiceWithTracing) CreateMany(ctx context.Context, req ent.UserRestCreateManyReq) (res ent.Users, err error) {
+// UserRestCreateMany implements UserService
+func (_d UserServiceWithTracing) UserRestCreateMany(ctx context.Context, req ent.UserRestCreateManyReq) (res ent.Users, err error) {
 
-	var name = "UserService.CreateMany"
+	var name = "UserService.UserRestCreateMany"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -99,37 +99,13 @@ func (_d UserServiceWithTracing) CreateMany(ctx context.Context, req ent.UserRes
 		span.End()
 	}()
 
-	return _d.UserService.CreateMany(ctx, req)
+	return _d.UserService.UserRestCreateMany(ctx, req)
 }
 
-// CreatePodsSliceByUserId implements UserService
-func (_d UserServiceWithTracing) CreatePodsSliceByUserId(ctx context.Context, req ent.UserRestCreatePodsSliceByUserIdReq) (res *ent.User, err error) {
+// UserRestDeleteById implements UserService
+func (_d UserServiceWithTracing) UserRestDeleteById(ctx context.Context, req ent.UserRestDeleteByIdReq) (success bool, err error) {
 
-	var name = "UserService.CreatePodsSliceByUserId"
-	_, span := otel.Tracer(name).Start(ctx, name)
-	defer func() {
-		if err != nil {
-			l := map[string]interface{}{
-				"params": map[string]interface{}{
-					"req": req},
-				"result": map[string]interface{}{
-					"res": res,
-					"err": err},
-			}
-			s, _ := json.Marshal(l)
-			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
-			span.SetStatus(codes.Error, err.Error())
-		}
-		span.End()
-	}()
-
-	return _d.UserService.CreatePodsSliceByUserId(ctx, req)
-}
-
-// DeleteById implements UserService
-func (_d UserServiceWithTracing) DeleteById(ctx context.Context, req ent.UserRestDeleteByIdReq) (success bool, err error) {
-
-	var name = "UserService.DeleteById"
+	var name = "UserService.UserRestDeleteById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -147,13 +123,13 @@ func (_d UserServiceWithTracing) DeleteById(ctx context.Context, req ent.UserRes
 		span.End()
 	}()
 
-	return _d.UserService.DeleteById(ctx, req)
+	return _d.UserService.UserRestDeleteById(ctx, req)
 }
 
-// DeleteMany implements UserService
-func (_d UserServiceWithTracing) DeleteMany(ctx context.Context, req ent.UserRestDeleteManyReq) (success bool, err error) {
+// UserRestDeleteMany implements UserService
+func (_d UserServiceWithTracing) UserRestDeleteMany(ctx context.Context, req ent.UserRestDeleteManyReq) (success bool, err error) {
 
-	var name = "UserService.DeleteMany"
+	var name = "UserService.UserRestDeleteMany"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -171,13 +147,13 @@ func (_d UserServiceWithTracing) DeleteMany(ctx context.Context, req ent.UserRes
 		span.End()
 	}()
 
-	return _d.UserService.DeleteMany(ctx, req)
+	return _d.UserService.UserRestDeleteMany(ctx, req)
 }
 
-// GetById implements UserService
-func (_d UserServiceWithTracing) GetById(ctx context.Context, req ent.UserRestGetByIdReq) (res ent.UserBaseGetRes, err error) {
+// UserRestGetById implements UserService
+func (_d UserServiceWithTracing) UserRestGetById(ctx context.Context, req ent.UserRestGetByIdReq) (res ent.UserBaseGetRes, err error) {
 
-	var name = "UserService.GetById"
+	var name = "UserService.UserRestGetById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -195,13 +171,13 @@ func (_d UserServiceWithTracing) GetById(ctx context.Context, req ent.UserRestGe
 		span.End()
 	}()
 
-	return _d.UserService.GetById(ctx, req)
+	return _d.UserService.UserRestGetById(ctx, req)
 }
 
-// GetPodsSliceByUserId implements UserService
-func (_d UserServiceWithTracing) GetPodsSliceByUserId(ctx context.Context, req ent.UserRestGetPodsSliceByUserIdReq) (res ent.UserRestGetPodsSliceByUserIdRes, err error) {
+// UserRestUpdateById implements UserService
+func (_d UserServiceWithTracing) UserRestUpdateById(ctx context.Context, req ent.UserRestUpdateByIdReq) (res *ent.User, err error) {
 
-	var name = "UserService.GetPodsSliceByUserId"
+	var name = "UserService.UserRestUpdateById"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -219,37 +195,13 @@ func (_d UserServiceWithTracing) GetPodsSliceByUserId(ctx context.Context, req e
 		span.End()
 	}()
 
-	return _d.UserService.GetPodsSliceByUserId(ctx, req)
+	return _d.UserService.UserRestUpdateById(ctx, req)
 }
 
-// UpdateById implements UserService
-func (_d UserServiceWithTracing) UpdateById(ctx context.Context, req ent.UserRestUpdateByIdReq) (res *ent.User, err error) {
+// UserRestUpdateMany implements UserService
+func (_d UserServiceWithTracing) UserRestUpdateMany(ctx context.Context, req ent.UserRestUpdateManyReq) (success bool, err error) {
 
-	var name = "UserService.UpdateById"
-	_, span := otel.Tracer(name).Start(ctx, name)
-	defer func() {
-		if err != nil {
-			l := map[string]interface{}{
-				"params": map[string]interface{}{
-					"req": req},
-				"result": map[string]interface{}{
-					"res": res,
-					"err": err},
-			}
-			s, _ := json.Marshal(l)
-			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
-			span.SetStatus(codes.Error, err.Error())
-		}
-		span.End()
-	}()
-
-	return _d.UserService.UpdateById(ctx, req)
-}
-
-// UpdateMany implements UserService
-func (_d UserServiceWithTracing) UpdateMany(ctx context.Context, req ent.UserRestUpdateManyReq) (success bool, err error) {
-
-	var name = "UserService.UpdateMany"
+	var name = "UserService.UserRestUpdateMany"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -267,5 +219,5 @@ func (_d UserServiceWithTracing) UpdateMany(ctx context.Context, req ent.UserRes
 		span.End()
 	}()
 
-	return _d.UserService.UpdateMany(ctx, req)
+	return _d.UserService.UserRestUpdateMany(ctx, req)
 }

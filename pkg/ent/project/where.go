@@ -4,8 +4,10 @@ package project
 
 import (
 	"hello/pkg/ent/predicate"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their ID field.
@@ -91,10 +93,17 @@ func IDLTE(id int) predicate.Project {
 	})
 }
 
-// Alias applies equality check predicate on the "alias" field. It's identical to AliasEQ.
-func Alias(v string) predicate.Project {
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.Project {
 	return predicate.Project(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAlias), v))
+		s.Where(sql.EQ(s.C(FieldCreateTime), v))
+	})
+}
+
+// UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
+func UpdateTime(v time.Time) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
 	})
 }
 
@@ -105,22 +114,36 @@ func Name(v string) predicate.Project {
 	})
 }
 
-// AliasEQ applies the EQ predicate on the "alias" field.
-func AliasEQ(v string) predicate.Project {
+// Aname applies equality check predicate on the "aname" field. It's identical to AnameEQ.
+func Aname(v string) predicate.Project {
 	return predicate.Project(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAlias), v))
+		s.Where(sql.EQ(s.C(FieldAname), v))
 	})
 }
 
-// AliasNEQ applies the NEQ predicate on the "alias" field.
-func AliasNEQ(v string) predicate.Project {
+// Comments applies equality check predicate on the "comments" field. It's identical to CommentsEQ.
+func Comments(v string) predicate.Project {
 	return predicate.Project(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldAlias), v))
+		s.Where(sql.EQ(s.C(FieldComments), v))
 	})
 }
 
-// AliasIn applies the In predicate on the "alias" field.
-func AliasIn(vs ...string) predicate.Project {
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreateTime), v))
+	})
+}
+
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCreateTime), v))
+	})
+}
+
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.Project {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -132,12 +155,12 @@ func AliasIn(vs ...string) predicate.Project {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldAlias), v...))
+		s.Where(sql.In(s.C(FieldCreateTime), v...))
 	})
 }
 
-// AliasNotIn applies the NotIn predicate on the "alias" field.
-func AliasNotIn(vs ...string) predicate.Project {
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.Project {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -149,70 +172,111 @@ func AliasNotIn(vs ...string) predicate.Project {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldAlias), v...))
+		s.Where(sql.NotIn(s.C(FieldCreateTime), v...))
 	})
 }
 
-// AliasGT applies the GT predicate on the "alias" field.
-func AliasGT(v string) predicate.Project {
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.Project {
 	return predicate.Project(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldAlias), v))
+		s.Where(sql.GT(s.C(FieldCreateTime), v))
 	})
 }
 
-// AliasGTE applies the GTE predicate on the "alias" field.
-func AliasGTE(v string) predicate.Project {
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.Project {
 	return predicate.Project(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldAlias), v))
+		s.Where(sql.GTE(s.C(FieldCreateTime), v))
 	})
 }
 
-// AliasLT applies the LT predicate on the "alias" field.
-func AliasLT(v string) predicate.Project {
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.Project {
 	return predicate.Project(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldAlias), v))
+		s.Where(sql.LT(s.C(FieldCreateTime), v))
 	})
 }
 
-// AliasLTE applies the LTE predicate on the "alias" field.
-func AliasLTE(v string) predicate.Project {
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.Project {
 	return predicate.Project(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldAlias), v))
+		s.Where(sql.LTE(s.C(FieldCreateTime), v))
 	})
 }
 
-// AliasContains applies the Contains predicate on the "alias" field.
-func AliasContains(v string) predicate.Project {
+// UpdateTimeEQ applies the EQ predicate on the "update_time" field.
+func UpdateTimeEQ(v time.Time) predicate.Project {
 	return predicate.Project(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldAlias), v))
+		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
 	})
 }
 
-// AliasHasPrefix applies the HasPrefix predicate on the "alias" field.
-func AliasHasPrefix(v string) predicate.Project {
+// UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
+func UpdateTimeNEQ(v time.Time) predicate.Project {
 	return predicate.Project(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldAlias), v))
+		s.Where(sql.NEQ(s.C(FieldUpdateTime), v))
 	})
 }
 
-// AliasHasSuffix applies the HasSuffix predicate on the "alias" field.
-func AliasHasSuffix(v string) predicate.Project {
+// UpdateTimeIn applies the In predicate on the "update_time" field.
+func UpdateTimeIn(vs ...time.Time) predicate.Project {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
 	return predicate.Project(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldAlias), v))
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldUpdateTime), v...))
 	})
 }
 
-// AliasEqualFold applies the EqualFold predicate on the "alias" field.
-func AliasEqualFold(v string) predicate.Project {
+// UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
+func UpdateTimeNotIn(vs ...time.Time) predicate.Project {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
 	return predicate.Project(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldAlias), v))
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
 	})
 }
 
-// AliasContainsFold applies the ContainsFold predicate on the "alias" field.
-func AliasContainsFold(v string) predicate.Project {
+// UpdateTimeGT applies the GT predicate on the "update_time" field.
+func UpdateTimeGT(v time.Time) predicate.Project {
 	return predicate.Project(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldAlias), v))
+		s.Where(sql.GT(s.C(FieldUpdateTime), v))
+	})
+}
+
+// UpdateTimeGTE applies the GTE predicate on the "update_time" field.
+func UpdateTimeGTE(v time.Time) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldUpdateTime), v))
+	})
+}
+
+// UpdateTimeLT applies the LT predicate on the "update_time" field.
+func UpdateTimeLT(v time.Time) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldUpdateTime), v))
+	})
+}
+
+// UpdateTimeLTE applies the LTE predicate on the "update_time" field.
+func UpdateTimeLTE(v time.Time) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
 	})
 }
 
@@ -324,6 +388,256 @@ func NameEqualFold(v string) predicate.Project {
 func NameContainsFold(v string) predicate.Project {
 	return predicate.Project(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldName), v))
+	})
+}
+
+// AnameEQ applies the EQ predicate on the "aname" field.
+func AnameEQ(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAname), v))
+	})
+}
+
+// AnameNEQ applies the NEQ predicate on the "aname" field.
+func AnameNEQ(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldAname), v))
+	})
+}
+
+// AnameIn applies the In predicate on the "aname" field.
+func AnameIn(vs ...string) predicate.Project {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Project(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldAname), v...))
+	})
+}
+
+// AnameNotIn applies the NotIn predicate on the "aname" field.
+func AnameNotIn(vs ...string) predicate.Project {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Project(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldAname), v...))
+	})
+}
+
+// AnameGT applies the GT predicate on the "aname" field.
+func AnameGT(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldAname), v))
+	})
+}
+
+// AnameGTE applies the GTE predicate on the "aname" field.
+func AnameGTE(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldAname), v))
+	})
+}
+
+// AnameLT applies the LT predicate on the "aname" field.
+func AnameLT(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldAname), v))
+	})
+}
+
+// AnameLTE applies the LTE predicate on the "aname" field.
+func AnameLTE(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldAname), v))
+	})
+}
+
+// AnameContains applies the Contains predicate on the "aname" field.
+func AnameContains(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldAname), v))
+	})
+}
+
+// AnameHasPrefix applies the HasPrefix predicate on the "aname" field.
+func AnameHasPrefix(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldAname), v))
+	})
+}
+
+// AnameHasSuffix applies the HasSuffix predicate on the "aname" field.
+func AnameHasSuffix(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldAname), v))
+	})
+}
+
+// AnameEqualFold applies the EqualFold predicate on the "aname" field.
+func AnameEqualFold(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldAname), v))
+	})
+}
+
+// AnameContainsFold applies the ContainsFold predicate on the "aname" field.
+func AnameContainsFold(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldAname), v))
+	})
+}
+
+// CommentsEQ applies the EQ predicate on the "comments" field.
+func CommentsEQ(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldComments), v))
+	})
+}
+
+// CommentsNEQ applies the NEQ predicate on the "comments" field.
+func CommentsNEQ(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldComments), v))
+	})
+}
+
+// CommentsIn applies the In predicate on the "comments" field.
+func CommentsIn(vs ...string) predicate.Project {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Project(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldComments), v...))
+	})
+}
+
+// CommentsNotIn applies the NotIn predicate on the "comments" field.
+func CommentsNotIn(vs ...string) predicate.Project {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Project(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldComments), v...))
+	})
+}
+
+// CommentsGT applies the GT predicate on the "comments" field.
+func CommentsGT(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldComments), v))
+	})
+}
+
+// CommentsGTE applies the GTE predicate on the "comments" field.
+func CommentsGTE(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldComments), v))
+	})
+}
+
+// CommentsLT applies the LT predicate on the "comments" field.
+func CommentsLT(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldComments), v))
+	})
+}
+
+// CommentsLTE applies the LTE predicate on the "comments" field.
+func CommentsLTE(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldComments), v))
+	})
+}
+
+// CommentsContains applies the Contains predicate on the "comments" field.
+func CommentsContains(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldComments), v))
+	})
+}
+
+// CommentsHasPrefix applies the HasPrefix predicate on the "comments" field.
+func CommentsHasPrefix(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldComments), v))
+	})
+}
+
+// CommentsHasSuffix applies the HasSuffix predicate on the "comments" field.
+func CommentsHasSuffix(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldComments), v))
+	})
+}
+
+// CommentsEqualFold applies the EqualFold predicate on the "comments" field.
+func CommentsEqualFold(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldComments), v))
+	})
+}
+
+// CommentsContainsFold applies the ContainsFold predicate on the "comments" field.
+func CommentsContainsFold(v string) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldComments), v))
+	})
+}
+
+// HasServices applies the HasEdge predicate on the "services" edge.
+func HasServices() predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ServicesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ServicesTable, ServicesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasServicesWith applies the HasEdge predicate on the "services" edge with a given conditions (other predicates).
+func HasServicesWith(preds ...predicate.Service) predicate.Project {
+	return predicate.Project(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ServicesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ServicesTable, ServicesColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

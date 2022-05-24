@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"hello/pkg/ent/pod"
 	"hello/pkg/ent/user"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -20,9 +19,35 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
+// SetPassWord sets the "pass_word" field.
+func (uc *UserCreate) SetPassWord(s string) *UserCreate {
+	uc.mutation.SetPassWord(s)
+	return uc
+}
+
+// SetToken sets the "token" field.
+func (uc *UserCreate) SetToken(s string) *UserCreate {
+	uc.mutation.SetToken(s)
+	return uc
+}
+
+// SetEnable sets the "enable" field.
+func (uc *UserCreate) SetEnable(b bool) *UserCreate {
+	uc.mutation.SetEnable(b)
+	return uc
+}
+
 // SetAge sets the "age" field.
 func (uc *UserCreate) SetAge(i int) *UserCreate {
 	uc.mutation.SetAge(i)
+	return uc
+}
+
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (uc *UserCreate) SetNillableAge(i *int) *UserCreate {
+	if i != nil {
+		uc.SetAge(*i)
+	}
 	return uc
 }
 
@@ -38,21 +63,6 @@ func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
 		uc.SetName(*s)
 	}
 	return uc
-}
-
-// AddPodIDs adds the "pods" edge to the Pod entity by IDs.
-func (uc *UserCreate) AddPodIDs(ids ...int64) *UserCreate {
-	uc.mutation.AddPodIDs(ids...)
-	return uc
-}
-
-// AddPods adds the "pods" edges to the Pod entity.
-func (uc *UserCreate) AddPods(p ...*Pod) *UserCreate {
-	ids := make([]int64, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return uc.AddPodIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -134,8 +144,14 @@ func (uc *UserCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
-	if _, ok := uc.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "User.age"`)}
+	if _, ok := uc.mutation.PassWord(); !ok {
+		return &ValidationError{Name: "pass_word", err: errors.New(`ent: missing required field "User.pass_word"`)}
+	}
+	if _, ok := uc.mutation.Token(); !ok {
+		return &ValidationError{Name: "token", err: errors.New(`ent: missing required field "User.token"`)}
+	}
+	if _, ok := uc.mutation.Enable(); !ok {
+		return &ValidationError{Name: "enable", err: errors.New(`ent: missing required field "User.enable"`)}
 	}
 	if _, ok := uc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
@@ -167,6 +183,30 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	if value, ok := uc.mutation.PassWord(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldPassWord,
+		})
+		_node.PassWord = value
+	}
+	if value, ok := uc.mutation.Token(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldToken,
+		})
+		_node.Token = value
+	}
+	if value, ok := uc.mutation.Enable(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: user.FieldEnable,
+		})
+		_node.Enable = value
+	}
 	if value, ok := uc.mutation.Age(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
@@ -182,25 +222,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldName,
 		})
 		_node.Name = value
-	}
-	if nodes := uc.mutation.PodsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.PodsTable,
-			Columns: []string{user.PodsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: pod.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

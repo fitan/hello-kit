@@ -4,10 +4,8 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"errors"
 	"fmt"
-	"hello/pkg/ent/pod"
 	"hello/pkg/ent/predicate"
 	"hello/pkg/ent/user"
 	"math"
@@ -27,8 +25,6 @@ type UserQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.User
-	// eager-loading edges.
-	withPods *PodQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -63,28 +59,6 @@ func (uq *UserQuery) Unique(unique bool) *UserQuery {
 func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
 	uq.order = append(uq.order, o...)
 	return uq
-}
-
-// QueryPods chains the current query on the "pods" edge.
-func (uq *UserQuery) QueryPods() *PodQuery {
-	query := &PodQuery{config: uq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := uq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(pod.Table, pod.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.PodsTable, user.PodsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // First returns the first User entity from the query.
@@ -268,23 +242,11 @@ func (uq *UserQuery) Clone() *UserQuery {
 		offset:     uq.offset,
 		order:      append([]OrderFunc{}, uq.order...),
 		predicates: append([]predicate.User{}, uq.predicates...),
-		withPods:   uq.withPods.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
 		unique: uq.unique,
 	}
-}
-
-// WithPods tells the query-builder to eager-load the nodes that are connected to
-// the "pods" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithPods(opts ...func(*PodQuery)) *UserQuery {
-	query := &PodQuery{config: uq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	uq.withPods = query
-	return uq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -293,12 +255,12 @@ func (uq *UserQuery) WithPods(opts ...func(*PodQuery)) *UserQuery {
 // Example:
 //
 //	var v []struct {
-//		Age int `json:"age,omitempty" fake:"{number:0,150}"`
+//		PassWord string `json:"pass_word"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		GroupBy(user.FieldAge).
+//		GroupBy(user.FieldPassWord).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -320,11 +282,11 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Age int `json:"age,omitempty" fake:"{number:0,150}"`
+//		PassWord string `json:"pass_word"`
 //	}
 //
 //	client.User.Query().
-//		Select(user.FieldAge).
+//		Select(user.FieldPassWord).
 //		Scan(ctx, &v)
 //
 func (uq *UserQuery) Select(fields ...string) *UserSelect {
@@ -350,11 +312,8 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
-		nodes       = []*User{}
-		_spec       = uq.querySpec()
-		loadedTypes = [1]bool{
-			uq.withPods != nil,
-		}
+		nodes = []*User{}
+		_spec = uq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &User{config: uq.config}
@@ -366,7 +325,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, uq.driver, _spec); err != nil {
@@ -375,36 +333,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
-	if query := uq.withPods; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*User)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Pods = []*Pod{}
-		}
-		query.withFKs = true
-		query.Where(predicate.Pod(func(s *sql.Selector) {
-			s.Where(sql.InValues(user.PodsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.user_pods
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "user_pods" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_pods" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Pods = append(node.Edges.Pods, n)
-		}
-	}
-
 	return nodes, nil
 }
 
@@ -505,7 +433,15 @@ func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-func (uq *UserQuery) ByQueries(ctx context.Context, i interface{}, vs interface{}) (count int, err error) {
+func (uq *UserQuery) Queries(i interface{}) *UserQuery {
+	queryList, _ := SetUserFormQueries(i)
+	for _, v := range queryList {
+		v.Query(uq)
+	}
+	return uq
+}
+
+func (uq *UserQuery) ByQueriesAll(ctx context.Context, i interface{}, vs interface{}) (count int, err error) {
 	queryList, countList := SetUserFormQueries(i)
 	countQ := uq.Clone()
 	for _, v := range queryList {
@@ -592,7 +528,7 @@ func UserFormDepValue(v reflect.Value, former reflect.Type, queryList *[]UserTab
 }
 
 type UserQueryOps struct {
-	*UserTablePagingForm `binding:"required"`
+	*UserTablePagingForm
 	UserTableOrderForm
 
 	UserTableAgeEQForm
@@ -600,6 +536,370 @@ type UserQueryOps struct {
 	UserTableNameEQForm
 
 	UserTableNameNotInForm
+}
+
+type UserTablePassWordEQForm struct {
+	PassWordEQ *string `form:"PassWordEQ" json:"PassWordEQ"`
+}
+
+func (f UserTablePassWordEQForm) Query(q *UserQuery) {
+	if f.PassWordEQ != nil {
+		q.Where(user.PassWordEQ(*f.PassWordEQ))
+	}
+}
+func (f UserTablePassWordEQForm) CountQuery() bool {
+	return true
+}
+
+type UserTablePassWordNEQForm struct {
+	PassWordNEQ *string `form:"PassWordNEQ" json:"PassWordNEQ"`
+}
+
+func (f UserTablePassWordNEQForm) Query(q *UserQuery) {
+	if f.PassWordNEQ != nil {
+		q.Where(user.PassWordNEQ(*f.PassWordNEQ))
+	}
+}
+func (f UserTablePassWordNEQForm) CountQuery() bool {
+	return true
+}
+
+type UserTablePassWordInForm struct {
+	PassWordIn *[]string `form:"PassWordIn" json:"PassWordIn"`
+}
+
+func (f UserTablePassWordInForm) Query(q *UserQuery) {
+	if f.PassWordIn != nil {
+		q.Where(user.PassWordIn(*f.PassWordIn...))
+	}
+}
+func (f UserTablePassWordInForm) CountQuery() bool {
+	return true
+}
+
+type UserTablePassWordNotInForm struct {
+	PassWordNotIn *[]string `form:"PassWordNotIn" json:"PassWordNotIn"`
+}
+
+func (f UserTablePassWordNotInForm) Query(q *UserQuery) {
+	if f.PassWordNotIn != nil {
+		q.Where(user.PassWordNotIn(*f.PassWordNotIn...))
+	}
+}
+func (f UserTablePassWordNotInForm) CountQuery() bool {
+	return true
+}
+
+type UserTablePassWordGTForm struct {
+	PassWordGT *string `form:"PassWordGT" json:"PassWordGT"`
+}
+
+func (f UserTablePassWordGTForm) Query(q *UserQuery) {
+	if f.PassWordGT != nil {
+		q.Where(user.PassWordGT(*f.PassWordGT))
+	}
+}
+func (f UserTablePassWordGTForm) CountQuery() bool {
+	return true
+}
+
+type UserTablePassWordGTEForm struct {
+	PassWordGTE *string `form:"PassWordGTE" json:"PassWordGTE"`
+}
+
+func (f UserTablePassWordGTEForm) Query(q *UserQuery) {
+	if f.PassWordGTE != nil {
+		q.Where(user.PassWordGTE(*f.PassWordGTE))
+	}
+}
+func (f UserTablePassWordGTEForm) CountQuery() bool {
+	return true
+}
+
+type UserTablePassWordLTForm struct {
+	PassWordLT *string `form:"PassWordLT" json:"PassWordLT"`
+}
+
+func (f UserTablePassWordLTForm) Query(q *UserQuery) {
+	if f.PassWordLT != nil {
+		q.Where(user.PassWordLT(*f.PassWordLT))
+	}
+}
+func (f UserTablePassWordLTForm) CountQuery() bool {
+	return true
+}
+
+type UserTablePassWordLTEForm struct {
+	PassWordLTE *string `form:"PassWordLTE" json:"PassWordLTE"`
+}
+
+func (f UserTablePassWordLTEForm) Query(q *UserQuery) {
+	if f.PassWordLTE != nil {
+		q.Where(user.PassWordLTE(*f.PassWordLTE))
+	}
+}
+func (f UserTablePassWordLTEForm) CountQuery() bool {
+	return true
+}
+
+type UserTablePassWordContainsForm struct {
+	PassWordContains *string `form:"PassWordContains" json:"PassWordContains"`
+}
+
+func (f UserTablePassWordContainsForm) Query(q *UserQuery) {
+	if f.PassWordContains != nil {
+		q.Where(user.PassWordContains(*f.PassWordContains))
+	}
+}
+func (f UserTablePassWordContainsForm) CountQuery() bool {
+	return true
+}
+
+type UserTablePassWordHasPrefixForm struct {
+	PassWordHasPrefix *string `form:"PassWordHasPrefix" json:"PassWordHasPrefix"`
+}
+
+func (f UserTablePassWordHasPrefixForm) Query(q *UserQuery) {
+	if f.PassWordHasPrefix != nil {
+		q.Where(user.PassWordHasPrefix(*f.PassWordHasPrefix))
+	}
+}
+func (f UserTablePassWordHasPrefixForm) CountQuery() bool {
+	return true
+}
+
+type UserTablePassWordHasSuffixForm struct {
+	PassWordHasSuffix *string `form:"PassWordHasSuffix" json:"PassWordHasSuffix"`
+}
+
+func (f UserTablePassWordHasSuffixForm) Query(q *UserQuery) {
+	if f.PassWordHasSuffix != nil {
+		q.Where(user.PassWordHasSuffix(*f.PassWordHasSuffix))
+	}
+}
+func (f UserTablePassWordHasSuffixForm) CountQuery() bool {
+	return true
+}
+
+type UserTablePassWordEqualFoldForm struct {
+	PassWordEqualFold *string `form:"PassWordEqualFold" json:"PassWordEqualFold"`
+}
+
+func (f UserTablePassWordEqualFoldForm) Query(q *UserQuery) {
+	if f.PassWordEqualFold != nil {
+		q.Where(user.PassWordEqualFold(*f.PassWordEqualFold))
+	}
+}
+func (f UserTablePassWordEqualFoldForm) CountQuery() bool {
+	return true
+}
+
+type UserTablePassWordContainsFoldForm struct {
+	PassWordContainsFold *string `form:"PassWordContainsFold" json:"PassWordContainsFold"`
+}
+
+func (f UserTablePassWordContainsFoldForm) Query(q *UserQuery) {
+	if f.PassWordContainsFold != nil {
+		q.Where(user.PassWordContainsFold(*f.PassWordContainsFold))
+	}
+}
+func (f UserTablePassWordContainsFoldForm) CountQuery() bool {
+	return true
+}
+
+type UserTableTokenEQForm struct {
+	TokenEQ *string `form:"TokenEQ" json:"TokenEQ"`
+}
+
+func (f UserTableTokenEQForm) Query(q *UserQuery) {
+	if f.TokenEQ != nil {
+		q.Where(user.TokenEQ(*f.TokenEQ))
+	}
+}
+func (f UserTableTokenEQForm) CountQuery() bool {
+	return true
+}
+
+type UserTableTokenNEQForm struct {
+	TokenNEQ *string `form:"TokenNEQ" json:"TokenNEQ"`
+}
+
+func (f UserTableTokenNEQForm) Query(q *UserQuery) {
+	if f.TokenNEQ != nil {
+		q.Where(user.TokenNEQ(*f.TokenNEQ))
+	}
+}
+func (f UserTableTokenNEQForm) CountQuery() bool {
+	return true
+}
+
+type UserTableTokenInForm struct {
+	TokenIn *[]string `form:"TokenIn" json:"TokenIn"`
+}
+
+func (f UserTableTokenInForm) Query(q *UserQuery) {
+	if f.TokenIn != nil {
+		q.Where(user.TokenIn(*f.TokenIn...))
+	}
+}
+func (f UserTableTokenInForm) CountQuery() bool {
+	return true
+}
+
+type UserTableTokenNotInForm struct {
+	TokenNotIn *[]string `form:"TokenNotIn" json:"TokenNotIn"`
+}
+
+func (f UserTableTokenNotInForm) Query(q *UserQuery) {
+	if f.TokenNotIn != nil {
+		q.Where(user.TokenNotIn(*f.TokenNotIn...))
+	}
+}
+func (f UserTableTokenNotInForm) CountQuery() bool {
+	return true
+}
+
+type UserTableTokenGTForm struct {
+	TokenGT *string `form:"TokenGT" json:"TokenGT"`
+}
+
+func (f UserTableTokenGTForm) Query(q *UserQuery) {
+	if f.TokenGT != nil {
+		q.Where(user.TokenGT(*f.TokenGT))
+	}
+}
+func (f UserTableTokenGTForm) CountQuery() bool {
+	return true
+}
+
+type UserTableTokenGTEForm struct {
+	TokenGTE *string `form:"TokenGTE" json:"TokenGTE"`
+}
+
+func (f UserTableTokenGTEForm) Query(q *UserQuery) {
+	if f.TokenGTE != nil {
+		q.Where(user.TokenGTE(*f.TokenGTE))
+	}
+}
+func (f UserTableTokenGTEForm) CountQuery() bool {
+	return true
+}
+
+type UserTableTokenLTForm struct {
+	TokenLT *string `form:"TokenLT" json:"TokenLT"`
+}
+
+func (f UserTableTokenLTForm) Query(q *UserQuery) {
+	if f.TokenLT != nil {
+		q.Where(user.TokenLT(*f.TokenLT))
+	}
+}
+func (f UserTableTokenLTForm) CountQuery() bool {
+	return true
+}
+
+type UserTableTokenLTEForm struct {
+	TokenLTE *string `form:"TokenLTE" json:"TokenLTE"`
+}
+
+func (f UserTableTokenLTEForm) Query(q *UserQuery) {
+	if f.TokenLTE != nil {
+		q.Where(user.TokenLTE(*f.TokenLTE))
+	}
+}
+func (f UserTableTokenLTEForm) CountQuery() bool {
+	return true
+}
+
+type UserTableTokenContainsForm struct {
+	TokenContains *string `form:"TokenContains" json:"TokenContains"`
+}
+
+func (f UserTableTokenContainsForm) Query(q *UserQuery) {
+	if f.TokenContains != nil {
+		q.Where(user.TokenContains(*f.TokenContains))
+	}
+}
+func (f UserTableTokenContainsForm) CountQuery() bool {
+	return true
+}
+
+type UserTableTokenHasPrefixForm struct {
+	TokenHasPrefix *string `form:"TokenHasPrefix" json:"TokenHasPrefix"`
+}
+
+func (f UserTableTokenHasPrefixForm) Query(q *UserQuery) {
+	if f.TokenHasPrefix != nil {
+		q.Where(user.TokenHasPrefix(*f.TokenHasPrefix))
+	}
+}
+func (f UserTableTokenHasPrefixForm) CountQuery() bool {
+	return true
+}
+
+type UserTableTokenHasSuffixForm struct {
+	TokenHasSuffix *string `form:"TokenHasSuffix" json:"TokenHasSuffix"`
+}
+
+func (f UserTableTokenHasSuffixForm) Query(q *UserQuery) {
+	if f.TokenHasSuffix != nil {
+		q.Where(user.TokenHasSuffix(*f.TokenHasSuffix))
+	}
+}
+func (f UserTableTokenHasSuffixForm) CountQuery() bool {
+	return true
+}
+
+type UserTableTokenEqualFoldForm struct {
+	TokenEqualFold *string `form:"TokenEqualFold" json:"TokenEqualFold"`
+}
+
+func (f UserTableTokenEqualFoldForm) Query(q *UserQuery) {
+	if f.TokenEqualFold != nil {
+		q.Where(user.TokenEqualFold(*f.TokenEqualFold))
+	}
+}
+func (f UserTableTokenEqualFoldForm) CountQuery() bool {
+	return true
+}
+
+type UserTableTokenContainsFoldForm struct {
+	TokenContainsFold *string `form:"TokenContainsFold" json:"TokenContainsFold"`
+}
+
+func (f UserTableTokenContainsFoldForm) Query(q *UserQuery) {
+	if f.TokenContainsFold != nil {
+		q.Where(user.TokenContainsFold(*f.TokenContainsFold))
+	}
+}
+func (f UserTableTokenContainsFoldForm) CountQuery() bool {
+	return true
+}
+
+type UserTableEnableEQForm struct {
+	EnableEQ *bool `form:"EnableEQ" json:"EnableEQ"`
+}
+
+func (f UserTableEnableEQForm) Query(q *UserQuery) {
+	if f.EnableEQ != nil {
+		q.Where(user.EnableEQ(*f.EnableEQ))
+	}
+}
+func (f UserTableEnableEQForm) CountQuery() bool {
+	return true
+}
+
+type UserTableEnableNEQForm struct {
+	EnableNEQ *bool `form:"EnableNEQ" json:"EnableNEQ"`
+}
+
+func (f UserTableEnableNEQForm) Query(q *UserQuery) {
+	if f.EnableNEQ != nil {
+		q.Where(user.EnableNEQ(*f.EnableNEQ))
+	}
+}
+func (f UserTableEnableNEQForm) CountQuery() bool {
+	return true
 }
 
 type UserTableAgeEQForm struct {

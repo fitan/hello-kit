@@ -1,17 +1,21 @@
 package services
 
 import (
-	"hello/pkg/services/hello"
-	"hello/pkg/services/pod"
-	"hello/pkg/services/say"
-	"hello/pkg/services/say1"
+	"hello/pkg/services/audit"
+	"hello/pkg/services/casbin"
+	"hello/pkg/services/project"
 	"hello/pkg/services/user"
 )
 
+type HttpHandler struct {
+	User    user.HttpHandler
+	Audit   audit.HttpHandler
+	Project project.HttpHandler
+}
+
 type Services struct {
-	Hello hello.HttpHandler
-	User  user.HttpHandler
-	Say say.HttpHandler
-	Say1 say1.HttpHandler
-	Pod pod.HttpHandler
+	User    user.UserService
+	Audit   audit.AuditService
+	Project project.ProjectService
+	Casbin  casbin.CasbinService
 }

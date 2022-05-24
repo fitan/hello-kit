@@ -5,8 +5,10 @@ package ent
 import (
 	"errors"
 	"fmt"
-	"hello/pkg/ent/pod"
+	"hello/pkg/ent/audit"
 	"hello/pkg/ent/project"
+	"hello/pkg/ent/resource"
+	"hello/pkg/ent/service"
 	"hello/pkg/ent/spiderdevtblservicetree"
 	"hello/pkg/ent/user"
 
@@ -32,8 +34,10 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		pod.Table:                     pod.ValidColumn,
+		audit.Table:                   audit.ValidColumn,
 		project.Table:                 project.ValidColumn,
+		resource.Table:                resource.ValidColumn,
+		service.Table:                 service.ValidColumn,
 		spiderdevtblservicetree.Table: spiderdevtblservicetree.ValidColumn,
 		user.Table:                    user.ValidColumn,
 	}

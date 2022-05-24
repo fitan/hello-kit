@@ -7,6 +7,7 @@ package user
 import (
 	"context"
 
+	ginkHttp "github.com/fitan/gink/transport/http"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
@@ -27,27 +28,48 @@ func NewUserServiceWithLog(base UserService, log *zap.SugaredLogger) UserService
 	}
 }
 
-// ByQueries implements UserService
-func (_d UserServiceWithLog) ByQueries(ctx context.Context, i interface{}) (res []ent.UserBaseGetRes, count int, err error) {
+// ByQueriesAll implements UserService
+func (_d UserServiceWithLog) ByQueriesAll(ctx context.Context, i interface{}) (res []ent.UserBaseGetRes, count int, err error) {
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
 	defer func() {
-		_log.Debugw("UserServiceWithLog calling ByQueries", "params", map[string]interface{}{
-			"i": i}, "results", map[string]interface{}{
-			"res":   res,
-			"count": count,
-			"err":   err})
-		if err != nil {
-			_log.Errorw("with_log", "params", map[string]interface{}{
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling ByQueriesAll", "params", map[string]interface{}{
+					"i": i}, "results", map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   err})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling ByQueriesAll", "params", map[string]interface{}{
+					"i": i}, "results", map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   err})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling ByQueriesAll", "params", map[string]interface{}{
 				"i": i}, "results", map[string]interface{}{
 				"res":   res,
 				"count": count,
 				"err":   err})
 		}
-
+		if err != nil && !debug {
+			_log.Errorw("with_log calling ByQueriesAll", "params", map[string]interface{}{
+				"i": i}, "results", map[string]interface{}{
+				"res":   res,
+				"count": count,
+				"err":   err})
+		}
 	}()
-	return _d._base.ByQueries(ctx, i)
+	return _d._base.ByQueriesAll(ctx, i)
 }
 
 // Create implements UserService
@@ -55,18 +77,37 @@ func (_d UserServiceWithLog) Create(ctx context.Context, v ent.UserBaseCreateReq
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
 	defer func() {
-		_log.Debugw("UserServiceWithLog calling Create", "params", map[string]interface{}{
-			"v": v}, "results", map[string]interface{}{
-			"res": res,
-			"err": err})
-		if err != nil {
-			_log.Errorw("with_log", "params", map[string]interface{}{
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling Create", "params", map[string]interface{}{
+					"v": v}, "results", map[string]interface{}{
+					"res": res,
+					"err": err})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling Create", "params", map[string]interface{}{
+					"v": v}, "results", map[string]interface{}{
+					"res": res,
+					"err": err})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling Create", "params", map[string]interface{}{
 				"v": v}, "results", map[string]interface{}{
 				"res": res,
 				"err": err})
 		}
-
+		if err != nil && !debug {
+			_log.Errorw("with_log calling Create", "params", map[string]interface{}{
+				"v": v}, "results", map[string]interface{}{
+				"res": res,
+				"err": err})
+		}
 	}()
 	return _d._base.Create(ctx, v)
 }
@@ -76,43 +117,39 @@ func (_d UserServiceWithLog) CreateMany(ctx context.Context, vs []ent.UserBaseCr
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
 	defer func() {
-		_log.Debugw("UserServiceWithLog calling CreateMany", "params", map[string]interface{}{
-			"vs": vs}, "results", map[string]interface{}{
-			"u1":  u1,
-			"err": err})
-		if err != nil {
-			_log.Errorw("with_log", "params", map[string]interface{}{
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling CreateMany", "params", map[string]interface{}{
+					"vs": vs}, "results", map[string]interface{}{
+					"u1":  u1,
+					"err": err})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling CreateMany", "params", map[string]interface{}{
+					"vs": vs}, "results", map[string]interface{}{
+					"u1":  u1,
+					"err": err})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling CreateMany", "params", map[string]interface{}{
 				"vs": vs}, "results", map[string]interface{}{
 				"u1":  u1,
 				"err": err})
 		}
-
-	}()
-	return _d._base.CreateMany(ctx, vs)
-}
-
-// CreatePodsSliceByUserId implements UserService
-func (_d UserServiceWithLog) CreatePodsSliceByUserId(ctx context.Context, id int, vs []ent.PodBaseCreateReq) (res *ent.User, err error) {
-
-	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
-
-	defer func() {
-		_log.Debugw("UserServiceWithLog calling CreatePodsSliceByUserId", "params", map[string]interface{}{
-			"id": id,
-			"vs": vs}, "results", map[string]interface{}{
-			"res": res,
-			"err": err})
-		if err != nil {
-			_log.Errorw("with_log", "params", map[string]interface{}{
-				"id": id,
+		if err != nil && !debug {
+			_log.Errorw("with_log calling CreateMany", "params", map[string]interface{}{
 				"vs": vs}, "results", map[string]interface{}{
-				"res": res,
+				"u1":  u1,
 				"err": err})
 		}
-
 	}()
-	return _d._base.CreatePodsSliceByUserId(ctx, id, vs)
+	return _d._base.CreateMany(ctx, vs)
 }
 
 // DeleteById implements UserService
@@ -120,16 +157,33 @@ func (_d UserServiceWithLog) DeleteById(ctx context.Context, id int) (err error)
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
 	defer func() {
-		_log.Debugw("UserServiceWithLog calling DeleteById", "params", map[string]interface{}{
-			"id": id}, "results", map[string]interface{}{
-			"err": err})
-		if err != nil {
-			_log.Errorw("with_log", "params", map[string]interface{}{
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling DeleteById", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"err": err})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling DeleteById", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"err": err})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling DeleteById", "params", map[string]interface{}{
 				"id": id}, "results", map[string]interface{}{
 				"err": err})
 		}
-
+		if err != nil && !debug {
+			_log.Errorw("with_log calling DeleteById", "params", map[string]interface{}{
+				"id": id}, "results", map[string]interface{}{
+				"err": err})
+		}
 	}()
 	return _d._base.DeleteById(ctx, id)
 }
@@ -139,16 +193,33 @@ func (_d UserServiceWithLog) DeleteMany(ctx context.Context, ids []int) (err err
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
 	defer func() {
-		_log.Debugw("UserServiceWithLog calling DeleteMany", "params", map[string]interface{}{
-			"ids": ids}, "results", map[string]interface{}{
-			"err": err})
-		if err != nil {
-			_log.Errorw("with_log", "params", map[string]interface{}{
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling DeleteMany", "params", map[string]interface{}{
+					"ids": ids}, "results", map[string]interface{}{
+					"err": err})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling DeleteMany", "params", map[string]interface{}{
+					"ids": ids}, "results", map[string]interface{}{
+					"err": err})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling DeleteMany", "params", map[string]interface{}{
 				"ids": ids}, "results", map[string]interface{}{
 				"err": err})
 		}
-
+		if err != nil && !debug {
+			_log.Errorw("with_log calling DeleteMany", "params", map[string]interface{}{
+				"ids": ids}, "results", map[string]interface{}{
+				"err": err})
+		}
 	}()
 	return _d._base.DeleteMany(ctx, ids)
 }
@@ -158,45 +229,39 @@ func (_d UserServiceWithLog) GetById(ctx context.Context, id int) (res ent.UserB
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
 	defer func() {
-		_log.Debugw("UserServiceWithLog calling GetById", "params", map[string]interface{}{
-			"id": id}, "results", map[string]interface{}{
-			"res": res,
-			"err": err})
-		if err != nil {
-			_log.Errorw("with_log", "params", map[string]interface{}{
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling GetById", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"res": res,
+					"err": err})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling GetById", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"res": res,
+					"err": err})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling GetById", "params", map[string]interface{}{
 				"id": id}, "results", map[string]interface{}{
 				"res": res,
 				"err": err})
 		}
-
+		if err != nil && !debug {
+			_log.Errorw("with_log calling GetById", "params", map[string]interface{}{
+				"id": id}, "results", map[string]interface{}{
+				"res": res,
+				"err": err})
+		}
 	}()
 	return _d._base.GetById(ctx, id)
-}
-
-// GetPodsSliceByUserId implements UserService
-func (_d UserServiceWithLog) GetPodsSliceByUserId(ctx context.Context, id int, i interface{}) (res []ent.PodBaseGetRes, count int, err error) {
-
-	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
-
-	defer func() {
-		_log.Debugw("UserServiceWithLog calling GetPodsSliceByUserId", "params", map[string]interface{}{
-			"id": id,
-			"i":  i}, "results", map[string]interface{}{
-			"res":   res,
-			"count": count,
-			"err":   err})
-		if err != nil {
-			_log.Errorw("with_log", "params", map[string]interface{}{
-				"id": id,
-				"i":  i}, "results", map[string]interface{}{
-				"res":   res,
-				"count": count,
-				"err":   err})
-		}
-
-	}()
-	return _d._base.GetPodsSliceByUserId(ctx, id, i)
 }
 
 // UpdateById implements UserService
@@ -204,20 +269,41 @@ func (_d UserServiceWithLog) UpdateById(ctx context.Context, id int, v ent.UserB
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
 	defer func() {
-		_log.Debugw("UserServiceWithLog calling UpdateById", "params", map[string]interface{}{
-			"id": id,
-			"v":  v}, "results", map[string]interface{}{
-			"up1": up1,
-			"err": err})
-		if err != nil {
-			_log.Errorw("with_log", "params", map[string]interface{}{
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling UpdateById", "params", map[string]interface{}{
+					"id": id,
+					"v":  v}, "results", map[string]interface{}{
+					"up1": up1,
+					"err": err})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling UpdateById", "params", map[string]interface{}{
+					"id": id,
+					"v":  v}, "results", map[string]interface{}{
+					"up1": up1,
+					"err": err})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling UpdateById", "params", map[string]interface{}{
 				"id": id,
 				"v":  v}, "results", map[string]interface{}{
 				"up1": up1,
 				"err": err})
 		}
-
+		if err != nil && !debug {
+			_log.Errorw("with_log calling UpdateById", "params", map[string]interface{}{
+				"id": id,
+				"v":  v}, "results", map[string]interface{}{
+				"up1": up1,
+				"err": err})
+		}
 	}()
 	return _d._base.UpdateById(ctx, id, v)
 }
@@ -227,16 +313,33 @@ func (_d UserServiceWithLog) UpdateMany(ctx context.Context, vs []ent.UserBaseUp
 
 	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
 
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
 	defer func() {
-		_log.Debugw("UserServiceWithLog calling UpdateMany", "params", map[string]interface{}{
-			"vs": vs}, "results", map[string]interface{}{
-			"err": err})
-		if err != nil {
-			_log.Errorw("with_log", "params", map[string]interface{}{
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling UpdateMany", "params", map[string]interface{}{
+					"vs": vs}, "results", map[string]interface{}{
+					"err": err})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling UpdateMany", "params", map[string]interface{}{
+					"vs": vs}, "results", map[string]interface{}{
+					"err": err})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling UpdateMany", "params", map[string]interface{}{
 				"vs": vs}, "results", map[string]interface{}{
 				"err": err})
 		}
-
+		if err != nil && !debug {
+			_log.Errorw("with_log calling UpdateMany", "params", map[string]interface{}{
+				"vs": vs}, "results", map[string]interface{}{
+				"err": err})
+		}
 	}()
 	return _d._base.UpdateMany(ctx, vs)
 }

@@ -6,9 +6,9 @@ package user
 
 import (
 	"context"
-
 	"github.com/fitan/gink/transport/http"
 	"github.com/gin-gonic/gin"
+	"hello/pkg/debug"
 
 	"hello/pkg/ent"
 )
@@ -18,25 +18,21 @@ type Ops map[string][]http.ServerOption
 func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option http.ServerOption) {
 	methods := []string{
 
-		"ByQueries",
+		UserRestByQueriesAllMethodName,
 
-		"Create",
+		UserRestCreateMethodName,
 
-		"CreateMany",
+		UserRestCreateManyMethodName,
 
-		"CreatePodsSliceByUserId",
+		UserRestDeleteByIdMethodName,
 
-		"DeleteById",
+		UserRestDeleteManyMethodName,
 
-		"DeleteMany",
+		UserRestGetByIdMethodName,
 
-		"GetById",
+		UserRestUpdateByIdMethodName,
 
-		"GetPodsSliceByUserId",
-
-		"UpdateById",
-
-		"UpdateMany",
+		UserRestUpdateManyMethodName,
 	}
 	for _, v := range methods {
 		options[v] = append(options[v], option)
@@ -46,49 +42,62 @@ func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option ht
 type HttpHandler struct {
 }
 
-func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops) HttpHandler {
+func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch *debug.DebugSwitch) HttpHandler {
 
-	makeByQueriesHandler(r, endpoints, options["ByQueries"])
+	debugSwitch.Register("UserRestByQueriesAll", "/users", "GET")
 
-	makeCreateHandler(r, endpoints, options["Create"])
+	debugSwitch.Register("UserRestCreate", "/user", "POST")
 
-	makeCreateManyHandler(r, endpoints, options["CreateMany"])
+	debugSwitch.Register("UserRestCreateMany", "/users", "POST")
 
-	makeCreatePodsSliceByUserIdHandler(r, endpoints, options["CreatePodsSliceByUserId"])
+	debugSwitch.Register("UserRestDeleteById", "/users/:userId", "DELETE")
 
-	makeDeleteByIdHandler(r, endpoints, options["DeleteById"])
+	debugSwitch.Register("UserRestDeleteMany", "/users", "DELETE")
 
-	makeDeleteManyHandler(r, endpoints, options["DeleteMany"])
+	debugSwitch.Register("UserRestGetById", "/users/:userId", "GET")
 
-	makeGetByIdHandler(r, endpoints, options["GetById"])
+	debugSwitch.Register("UserRestUpdateById", "/users/:userId", "PUT")
 
-	makeGetPodsSliceByUserIdHandler(r, endpoints, options["GetPodsSliceByUserId"])
+	debugSwitch.Register("UserRestUpdateMany", "/users", "PUT")
 
-	makeUpdateByIdHandler(r, endpoints, options["UpdateById"])
+	makeUserRestByQueriesAllHandler(r, endpoints, options[UserRestByQueriesAllMethodName])
 
-	makeUpdateManyHandler(r, endpoints, options["UpdateMany"])
+	makeUserRestCreateHandler(r, endpoints, options[UserRestCreateMethodName])
+
+	makeUserRestCreateManyHandler(r, endpoints, options[UserRestCreateManyMethodName])
+
+	makeUserRestDeleteByIdHandler(r, endpoints, options[UserRestDeleteByIdMethodName])
+
+	makeUserRestDeleteManyHandler(r, endpoints, options[UserRestDeleteManyMethodName])
+
+	makeUserRestGetByIdHandler(r, endpoints, options[UserRestGetByIdMethodName])
+
+	makeUserRestUpdateByIdHandler(r, endpoints, options[UserRestUpdateByIdMethodName])
+
+	makeUserRestUpdateManyHandler(r, endpoints, options[UserRestUpdateManyMethodName])
 
 	return HttpHandler{}
 }
 
 type SwagResponse struct {
 	TraceId string      `json:"traceId"`
+	Status  int         `json:"status"`
 	Data    interface{} `json:"data"`
 }
 
-type ByQueriesQuerySwag ent.UserQueryOps
+type UserRestByQueriesAllQuerySwag ent.UserQueryOps
 
 // @Accept  json
 // @Tags UserService
-// @Param query query ByQueriesQuerySwag false " "
-// @Success 200 {object} SwagResponse{data=ent.UserRestByQueriesRes}
+// @Param query query UserRestByQueriesAllQuerySwag false " "
+// @Success 200 {object} SwagResponse{data=ent.UserRestByQueriesAllRes}
 // @Router /users [get]
-func makeByQueriesHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
-	r.GET("/users", http.NewServer(endpoints.ByQueriesEndpoint, decodeByQueriesRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+func makeUserRestByQueriesAllHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.GET("/users", http.NewServer(endpoints.UserRestByQueriesAllEndpoint, decodeUserRestByQueriesAllRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
-func decodeByQueriesRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
-	var req ent.UserRestByQueriesReq
+func decodeUserRestByQueriesAllRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestByQueriesAllReq
 	var err error
 
 	err = ctx.ShouldBindQuery(&req.Query)
@@ -99,18 +108,18 @@ func decodeByQueriesRequest(_ context.Context, ctx *gin.Context) (interface{}, e
 	return req, err
 }
 
-type CreateBodySwag ent.UserBaseCreateReq
+type UserRestCreateBodySwag ent.UserBaseCreateReq
 
 // @Accept  json
 // @Tags UserService
-// @Param body body CreateBodySwag true " "
+// @Param body body UserRestCreateBodySwag true " "
 // @Success 200 {object} SwagResponse{data=ent.User}
 // @Router /user [post]
-func makeCreateHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
-	r.POST("/user", http.NewServer(endpoints.CreateEndpoint, decodeCreateRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+func makeUserRestCreateHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.POST("/user", http.NewServer(endpoints.UserRestCreateEndpoint, decodeUserRestCreateRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
-func decodeCreateRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+func decodeUserRestCreateRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
 	var req ent.UserRestCreateReq
 	var err error
 
@@ -122,18 +131,18 @@ func decodeCreateRequest(_ context.Context, ctx *gin.Context) (interface{}, erro
 	return req, err
 }
 
-type CreateManyBodySwag []ent.UserBaseCreateReq
+type UserRestCreateManyBodySwag []ent.UserBaseCreateReq
 
 // @Accept  json
 // @Tags UserService
-// @Param body body CreateManyBodySwag true " "
+// @Param body body UserRestCreateManyBodySwag true " "
 // @Success 200 {object} SwagResponse{data=ent.Users}
 // @Router /users [post]
-func makeCreateManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
-	r.POST("/users", http.NewServer(endpoints.CreateManyEndpoint, decodeCreateManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+func makeUserRestCreateManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.POST("/users", http.NewServer(endpoints.UserRestCreateManyEndpoint, decodeUserRestCreateManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
-func decodeCreateManyRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+func decodeUserRestCreateManyRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
 	var req ent.UserRestCreateManyReq
 	var err error
 
@@ -145,45 +154,16 @@ func decodeCreateManyRequest(_ context.Context, ctx *gin.Context) (interface{}, 
 	return req, err
 }
 
-type CreatePodsSliceByUserIdBodySwag []ent.PodBaseCreateReq
-
 // @Accept  json
 // @Tags UserService
-// @Param body body CreatePodsSliceByUserIdBodySwag true " "
-// @Param id path string true " "
-// @Success 200 {object} SwagResponse{data=ent.User}
-// @Router /users/{id}/podsslice [post]
-func makeCreatePodsSliceByUserIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
-	r.POST("/users/:id/podsslice", http.NewServer(endpoints.CreatePodsSliceByUserIdEndpoint, decodeCreatePodsSliceByUserIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
-}
-
-func decodeCreatePodsSliceByUserIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
-	var req ent.UserRestCreatePodsSliceByUserIdReq
-	var err error
-
-	err = ctx.ShouldBindUri(&req.Uri)
-	if err != nil {
-		return nil, err
-	}
-
-	err = ctx.ShouldBindJSON(&req.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, err
-}
-
-// @Accept  json
-// @Tags UserService
-// @Param id path string true " "
+// @Param userId path string true " "
 // @Success 200 {object} SwagResponse{data=bool}
-// @Router /users/{id} [delete]
-func makeDeleteByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
-	r.DELETE("/users/:id", http.NewServer(endpoints.DeleteByIdEndpoint, decodeDeleteByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+// @Router /users/{userId} [delete]
+func makeUserRestDeleteByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.DELETE("/users/:userId", http.NewServer(endpoints.UserRestDeleteByIdEndpoint, decodeUserRestDeleteByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
-func decodeDeleteByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+func decodeUserRestDeleteByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
 	var req ent.UserRestDeleteByIdReq
 	var err error
 
@@ -195,20 +175,20 @@ func decodeDeleteByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, 
 	return req, err
 }
 
-type DeleteManyQuerySwag struct {
+type UserRestDeleteManyQuerySwag struct {
 	Ids []int `json:"ids" form:"ids"`
 }
 
 // @Accept  json
 // @Tags UserService
-// @Param query query DeleteManyQuerySwag false " "
+// @Param query query UserRestDeleteManyQuerySwag false " "
 // @Success 200 {object} SwagResponse{data=bool}
 // @Router /users [delete]
-func makeDeleteManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
-	r.DELETE("/users", http.NewServer(endpoints.DeleteManyEndpoint, decodeDeleteManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+func makeUserRestDeleteManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.DELETE("/users", http.NewServer(endpoints.UserRestDeleteManyEndpoint, decodeUserRestDeleteManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
-func decodeDeleteManyRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+func decodeUserRestDeleteManyRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
 	var req ent.UserRestDeleteManyReq
 	var err error
 
@@ -222,14 +202,14 @@ func decodeDeleteManyRequest(_ context.Context, ctx *gin.Context) (interface{}, 
 
 // @Accept  json
 // @Tags UserService
-// @Param id path string true " "
+// @Param userId path string true " "
 // @Success 200 {object} SwagResponse{data=ent.UserBaseGetRes}
-// @Router /users/{id} [get]
-func makeGetByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
-	r.GET("/users/:id", http.NewServer(endpoints.GetByIdEndpoint, decodeGetByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+// @Router /users/{userId} [get]
+func makeUserRestGetByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.GET("/users/:userId", http.NewServer(endpoints.UserRestGetByIdEndpoint, decodeUserRestGetByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
-func decodeGetByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+func decodeUserRestGetByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
 	var req ent.UserRestGetByIdReq
 	var err error
 
@@ -241,48 +221,19 @@ func decodeGetByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, err
 	return req, err
 }
 
-type GetPodsSliceByUserIdQuerySwag ent.PodQueryOps
+type UserRestUpdateByIdBodySwag ent.UserBaseUpdateReq
 
 // @Accept  json
 // @Tags UserService
-// @Param query query GetPodsSliceByUserIdQuerySwag false " "
-// @Param id path string true " "
-// @Success 200 {object} SwagResponse{data=ent.UserRestGetPodsSliceByUserIdRes}
-// @Router /users/{id}/pods [get]
-func makeGetPodsSliceByUserIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
-	r.GET("/users/:id/pods", http.NewServer(endpoints.GetPodsSliceByUserIdEndpoint, decodeGetPodsSliceByUserIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
-}
-
-func decodeGetPodsSliceByUserIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
-	var req ent.UserRestGetPodsSliceByUserIdReq
-	var err error
-
-	err = ctx.ShouldBindQuery(&req.Query)
-	if err != nil {
-		return nil, err
-	}
-
-	err = ctx.ShouldBindUri(&req.Uri)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, err
-}
-
-type UpdateByIdBodySwag ent.UserBaseUpdateReq
-
-// @Accept  json
-// @Tags UserService
-// @Param body body UpdateByIdBodySwag true " "
-// @Param id path string true " "
+// @Param body body UserRestUpdateByIdBodySwag true " "
+// @Param userId path string true " "
 // @Success 200 {object} SwagResponse{data=ent.User}
-// @Router /users/{id} [put]
-func makeUpdateByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
-	r.PUT("/users/:id", http.NewServer(endpoints.UpdateByIdEndpoint, decodeUpdateByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+// @Router /users/{userId} [put]
+func makeUserRestUpdateByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/users/:userId", http.NewServer(endpoints.UserRestUpdateByIdEndpoint, decodeUserRestUpdateByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
-func decodeUpdateByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+func decodeUserRestUpdateByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
 	var req ent.UserRestUpdateByIdReq
 	var err error
 
@@ -299,18 +250,18 @@ func decodeUpdateByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, 
 	return req, err
 }
 
-type UpdateManyBodySwag []ent.UserBaseUpdateReq
+type UserRestUpdateManyBodySwag []ent.UserBaseUpdateReq
 
 // @Accept  json
 // @Tags UserService
-// @Param body body UpdateManyBodySwag true " "
+// @Param body body UserRestUpdateManyBodySwag true " "
 // @Success 200 {object} SwagResponse{data=bool}
 // @Router /users [put]
-func makeUpdateManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
-	r.PUT("/users", http.NewServer(endpoints.UpdateManyEndpoint, decodeUpdateManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+func makeUserRestUpdateManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/users", http.NewServer(endpoints.UserRestUpdateManyEndpoint, decodeUserRestUpdateManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
-func decodeUpdateManyRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+func decodeUserRestUpdateManyRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
 	var req ent.UserRestUpdateManyReq
 	var err error
 

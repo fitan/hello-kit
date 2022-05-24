@@ -7,26 +7,26 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldPassWord holds the string denoting the pass_word field in the database.
+	FieldPassWord = "pass_word"
+	// FieldToken holds the string denoting the token field in the database.
+	FieldToken = "token"
+	// FieldEnable holds the string denoting the enable field in the database.
+	FieldEnable = "enable"
 	// FieldAge holds the string denoting the age field in the database.
 	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// EdgePods holds the string denoting the pods edge name in mutations.
-	EdgePods = "pods"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// PodsTable is the table that holds the pods relation/edge.
-	PodsTable = "pods"
-	// PodsInverseTable is the table name for the Pod entity.
-	// It exists in this package in order to avoid circular dependency with the "pod" package.
-	PodsInverseTable = "pods"
-	// PodsColumn is the table column denoting the pods relation/edge.
-	PodsColumn = "user_pods"
 )
 
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
+	FieldPassWord,
+	FieldToken,
+	FieldEnable,
 	FieldAge,
 	FieldName,
 }
