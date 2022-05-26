@@ -5,6 +5,8 @@ package service
 // gowrap: http://github.com/fitan/gowrap
 
 import (
+	"fmt"
+
 	ginkHttp "github.com/fitan/gink/transport/http"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
@@ -42,7 +44,7 @@ func (_d ServiceServiceWithLog) ByQueriesAll(ctx context.Context, i interface{})
 					"i": i}, "results", map[string]interface{}{
 					"res":   res,
 					"count": count,
-					"err":   err})
+					"err":   fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
@@ -50,7 +52,7 @@ func (_d ServiceServiceWithLog) ByQueriesAll(ctx context.Context, i interface{})
 					"i": i}, "results", map[string]interface{}{
 					"res":   res,
 					"count": count,
-					"err":   err})
+					"err":   fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -59,7 +61,7 @@ func (_d ServiceServiceWithLog) ByQueriesAll(ctx context.Context, i interface{})
 				"i": i}, "results", map[string]interface{}{
 				"res":   res,
 				"count": count,
-				"err":   err})
+				"err":   fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
@@ -67,10 +69,51 @@ func (_d ServiceServiceWithLog) ByQueriesAll(ctx context.Context, i interface{})
 				"i": i}, "results", map[string]interface{}{
 				"res":   res,
 				"count": count,
-				"err":   err})
+				"err":   fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.ByQueriesAll(ctx, i)
+}
+
+// ByQueriesOne implements ServiceService
+func (_d ServiceServiceWithLog) ByQueriesOne(ctx context.Context, i interface{}) (res ent.ServiceBaseGetRes, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling ByQueriesOne", "params", map[string]interface{}{
+					"i": i}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling ByQueriesOne", "params", map[string]interface{}{
+					"i": i}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling ByQueriesOne", "params", map[string]interface{}{
+				"i": i}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling ByQueriesOne", "params", map[string]interface{}{
+				"i": i}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.ByQueriesOne(ctx, i)
 }
 
 // Create implements ServiceService
@@ -86,14 +129,14 @@ func (_d ServiceServiceWithLog) Create(ctx context.Context, v ent.ServiceBaseCre
 				_log.Infow("with_log calling Create", "params", map[string]interface{}{
 					"v": v}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling Create", "params", map[string]interface{}{
 					"v": v}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -101,14 +144,14 @@ func (_d ServiceServiceWithLog) Create(ctx context.Context, v ent.ServiceBaseCre
 			_log.Debugw("with_log calling Create", "params", map[string]interface{}{
 				"v": v}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling Create", "params", map[string]interface{}{
 				"v": v}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.Create(ctx, v)
@@ -127,14 +170,14 @@ func (_d ServiceServiceWithLog) CreateMany(ctx context.Context, vs []ent.Service
 				_log.Infow("with_log calling CreateMany", "params", map[string]interface{}{
 					"vs": vs}, "results", map[string]interface{}{
 					"s1":  s1,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling CreateMany", "params", map[string]interface{}{
 					"vs": vs}, "results", map[string]interface{}{
 					"s1":  s1,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -142,14 +185,14 @@ func (_d ServiceServiceWithLog) CreateMany(ctx context.Context, vs []ent.Service
 			_log.Debugw("with_log calling CreateMany", "params", map[string]interface{}{
 				"vs": vs}, "results", map[string]interface{}{
 				"s1":  s1,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling CreateMany", "params", map[string]interface{}{
 				"vs": vs}, "results", map[string]interface{}{
 				"s1":  s1,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.CreateMany(ctx, vs)
@@ -169,7 +212,7 @@ func (_d ServiceServiceWithLog) CreateProjectByServiceId(ctx context.Context, id
 					"id": id,
 					"v":  v}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
@@ -177,7 +220,7 @@ func (_d ServiceServiceWithLog) CreateProjectByServiceId(ctx context.Context, id
 					"id": id,
 					"v":  v}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -186,7 +229,7 @@ func (_d ServiceServiceWithLog) CreateProjectByServiceId(ctx context.Context, id
 				"id": id,
 				"v":  v}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
@@ -194,7 +237,7 @@ func (_d ServiceServiceWithLog) CreateProjectByServiceId(ctx context.Context, id
 				"id": id,
 				"v":  v}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.CreateProjectByServiceId(ctx, id, v)
@@ -212,26 +255,26 @@ func (_d ServiceServiceWithLog) DeleteById(ctx context.Context, id int) (err err
 			if err == nil {
 				_log.Infow("with_log calling DeleteById", "params", map[string]interface{}{
 					"id": id}, "results", map[string]interface{}{
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling DeleteById", "params", map[string]interface{}{
 					"id": id}, "results", map[string]interface{}{
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
 		if !debug && err == nil {
 			_log.Debugw("with_log calling DeleteById", "params", map[string]interface{}{
 				"id": id}, "results", map[string]interface{}{
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling DeleteById", "params", map[string]interface{}{
 				"id": id}, "results", map[string]interface{}{
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.DeleteById(ctx, id)
@@ -249,26 +292,26 @@ func (_d ServiceServiceWithLog) DeleteMany(ctx context.Context, ids []int) (err 
 			if err == nil {
 				_log.Infow("with_log calling DeleteMany", "params", map[string]interface{}{
 					"ids": ids}, "results", map[string]interface{}{
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling DeleteMany", "params", map[string]interface{}{
 					"ids": ids}, "results", map[string]interface{}{
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
 		if !debug && err == nil {
 			_log.Debugw("with_log calling DeleteMany", "params", map[string]interface{}{
 				"ids": ids}, "results", map[string]interface{}{
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling DeleteMany", "params", map[string]interface{}{
 				"ids": ids}, "results", map[string]interface{}{
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.DeleteMany(ctx, ids)
@@ -287,14 +330,14 @@ func (_d ServiceServiceWithLog) GetById(ctx context.Context, id int) (res ent.Se
 				_log.Infow("with_log calling GetById", "params", map[string]interface{}{
 					"id": id}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling GetById", "params", map[string]interface{}{
 					"id": id}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -302,14 +345,14 @@ func (_d ServiceServiceWithLog) GetById(ctx context.Context, id int) (res ent.Se
 			_log.Debugw("with_log calling GetById", "params", map[string]interface{}{
 				"id": id}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling GetById", "params", map[string]interface{}{
 				"id": id}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.GetById(ctx, id)
@@ -328,14 +371,14 @@ func (_d ServiceServiceWithLog) GetProjectByServiceId(ctx context.Context, id in
 				_log.Infow("with_log calling GetProjectByServiceId", "params", map[string]interface{}{
 					"id": id}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling GetProjectByServiceId", "params", map[string]interface{}{
 					"id": id}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -343,14 +386,14 @@ func (_d ServiceServiceWithLog) GetProjectByServiceId(ctx context.Context, id in
 			_log.Debugw("with_log calling GetProjectByServiceId", "params", map[string]interface{}{
 				"id": id}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling GetProjectByServiceId", "params", map[string]interface{}{
 				"id": id}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.GetProjectByServiceId(ctx, id)
@@ -370,7 +413,7 @@ func (_d ServiceServiceWithLog) UpdateById(ctx context.Context, id int, v ent.Se
 					"id": id,
 					"v":  v}, "results", map[string]interface{}{
 					"sp1": sp1,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
@@ -378,7 +421,7 @@ func (_d ServiceServiceWithLog) UpdateById(ctx context.Context, id int, v ent.Se
 					"id": id,
 					"v":  v}, "results", map[string]interface{}{
 					"sp1": sp1,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -387,7 +430,7 @@ func (_d ServiceServiceWithLog) UpdateById(ctx context.Context, id int, v ent.Se
 				"id": id,
 				"v":  v}, "results", map[string]interface{}{
 				"sp1": sp1,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
@@ -395,7 +438,7 @@ func (_d ServiceServiceWithLog) UpdateById(ctx context.Context, id int, v ent.Se
 				"id": id,
 				"v":  v}, "results", map[string]interface{}{
 				"sp1": sp1,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.UpdateById(ctx, id, v)
@@ -413,26 +456,26 @@ func (_d ServiceServiceWithLog) UpdateMany(ctx context.Context, vs []ent.Service
 			if err == nil {
 				_log.Infow("with_log calling UpdateMany", "params", map[string]interface{}{
 					"vs": vs}, "results", map[string]interface{}{
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling UpdateMany", "params", map[string]interface{}{
 					"vs": vs}, "results", map[string]interface{}{
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
 		if !debug && err == nil {
 			_log.Debugw("with_log calling UpdateMany", "params", map[string]interface{}{
 				"vs": vs}, "results", map[string]interface{}{
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling UpdateMany", "params", map[string]interface{}{
 				"vs": vs}, "results", map[string]interface{}{
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.UpdateMany(ctx, vs)

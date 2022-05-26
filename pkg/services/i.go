@@ -4,18 +4,24 @@ import (
 	"hello/pkg/services/audit"
 	"hello/pkg/services/casbin"
 	"hello/pkg/services/project"
+	"hello/pkg/services/resource"
+	"hello/pkg/services/service"
 	"hello/pkg/services/user"
 )
 
 type HttpHandler struct {
-	User    user.HttpHandler
-	Audit   audit.HttpHandler
-	Project project.HttpHandler
+	User     user.HttpHandler
+	Audit    audit.HttpHandler
+	Project  project.HttpHandler
+	Service  service.HttpHandler
+	Resource resource.HttpHandler
 }
 
 type Services struct {
-	User    user.UserService
-	Audit   audit.AuditService
-	Project project.ProjectService
-	Casbin  casbin.CasbinService
+	User     user.UserService
+	Audit    audit.AuditService
+	Project  project.ProjectService
+	Casbin   casbin.CasbinService
+	Service  service.ServiceService
+	Resource resource.ResourceService
 }

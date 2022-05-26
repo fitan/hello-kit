@@ -6,9 +6,10 @@ package user
 
 import (
 	"context"
+	"hello/pkg/debug"
+
 	"github.com/fitan/gink/transport/http"
 	"github.com/gin-gonic/gin"
-	"hello/pkg/debug"
 
 	"hello/pkg/ent"
 )

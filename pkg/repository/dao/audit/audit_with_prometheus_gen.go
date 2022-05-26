@@ -52,6 +52,20 @@ func (_d AuditServiceWithPrometheus) ByQueriesAll(ctx context.Context, i interfa
 	return _d.base.ByQueriesAll(ctx, i)
 }
 
+// ByQueriesOne implements AuditService
+func (_d AuditServiceWithPrometheus) ByQueriesOne(ctx context.Context, i interface{}) (res ent.AuditBaseGetRes, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		auditserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ByQueriesOne", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.ByQueriesOne(ctx, i)
+}
+
 // Create implements AuditService
 func (_d AuditServiceWithPrometheus) Create(ctx context.Context, v ent.AuditBaseCreateReq) (res *ent.Audit, err error) {
 	_since := time.Now()

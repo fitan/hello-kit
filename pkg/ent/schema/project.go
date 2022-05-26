@@ -21,9 +21,24 @@ func (Project) Mixin() []ent.Mixin {
 // Fields of the User.
 func (Project) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name"),
-		field.String("aname"),
-		field.String("comments"),
+		field.String("name").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
+		field.String("aname").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
+		field.String("comments").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
 	}
 }
 

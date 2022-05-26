@@ -56,6 +56,30 @@ func (_d ResourceServiceWithTracing) ByQueriesAll(ctx context.Context, i interfa
 	return _d.ResourceService.ByQueriesAll(ctx, i)
 }
 
+// ByQueriesOne implements ResourceService
+func (_d ResourceServiceWithTracing) ByQueriesOne(ctx context.Context, i interface{}) (res ent.ResourceBaseGetRes, err error) {
+
+	var name = "ResourceService.ByQueriesOne"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"i": i},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.ByQueriesOne(ctx, i)
+}
+
 // Create implements ResourceService
 func (_d ResourceServiceWithTracing) Create(ctx context.Context, v ent.ResourceBaseCreateReq) (res *ent.Resource, err error) {
 

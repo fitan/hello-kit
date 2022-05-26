@@ -53,6 +53,20 @@ func (_d ServiceServiceWithPrometheus) ByQueriesAll(ctx context.Context, i inter
 	return _d.base.ByQueriesAll(ctx, i)
 }
 
+// ByQueriesOne implements ServiceService
+func (_d ServiceServiceWithPrometheus) ByQueriesOne(ctx context.Context, i interface{}) (res ent.ServiceBaseGetRes, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		serviceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ByQueriesOne", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.ByQueriesOne(ctx, i)
+}
+
 // Create implements ServiceService
 func (_d ServiceServiceWithPrometheus) Create(ctx context.Context, v ent.ServiceBaseCreateReq) (res *ent.Service, err error) {
 	_since := time.Now()

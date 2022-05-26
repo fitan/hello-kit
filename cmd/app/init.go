@@ -59,6 +59,7 @@ type App struct {
 	repository *repository.Repository
 	InitAuditMid
 	//services   *services.Services
+	debug       *debug.DebugSwitch
 	httpHandler *services.HttpHandler
 	g           *run.Group
 	conf        *conf.MyConf
@@ -105,6 +106,50 @@ func RunApp(confName string) {
 	}
 	initAuditMid(r, app.repository)
 	logger.Errorw("exit", app.Run().Error())
+}
+
+func PathPutInStorage(confName string) error {
+	g := &run.Group{}
+	r := gin.Default()
+	app, err := InitApp(r, g, ConfName(confName))
+	if err != nil {
+		return err
+	}
+	list := app.debug.List()
+	req := make([]ent.ResourceBaseCreateReq, 0)
+	for _, v := range list {
+		_, err := app.repository.Resource.ByQueriesOne(
+			context.Background(), struct {
+				ent.ResourceTableActionEQForm
+				ent.ResourceTablePathEQForm
+			}{
+				ResourceTableActionEQForm: ent.ResourceTableActionEQForm{ActionEQ: &v.Method},
+				ResourceTablePathEQForm:   ent.ResourceTablePathEQForm{PathEQ: &v.Path},
+			},
+		)
+		if err == nil {
+			continue
+		}
+
+		if err != nil {
+			if !ent.IsNotFound(err) {
+				return err
+			}
+		}
+
+		req = append(req, ent.ResourceBaseCreateReq{
+			Name:     v.Annotation,
+			Key:      v.Path + v.Method,
+			Path:     v.Path,
+			Action:   v.Method,
+			Comments: v.Annotation,
+		})
+	}
+	_, err = app.repository.Resource.CreateMany(context.Background(), req)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 type InitAuditMid struct {
@@ -174,7 +219,7 @@ func initEnt(conf *conf.MyConf) (*ent.Client, error) {
 		}
 	}
 
-	return ent.NewClient(ent.Driver(drv)), nil
+	return ent.NewClient(ent.Driver(drv)).Debug(), nil
 }
 
 func initDb(conf *conf.MyConf) (*gorm.DB, error) {

@@ -55,6 +55,30 @@ func (_d AuditServiceWithTracing) ByQueriesAll(ctx context.Context, i interface{
 	return _d.AuditService.ByQueriesAll(ctx, i)
 }
 
+// ByQueriesOne implements AuditService
+func (_d AuditServiceWithTracing) ByQueriesOne(ctx context.Context, i interface{}) (res ent.AuditBaseGetRes, err error) {
+
+	var name = "AuditService.ByQueriesOne"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"i": i},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.AuditService.ByQueriesOne(ctx, i)
+}
+
 // Create implements AuditService
 func (_d AuditServiceWithTracing) Create(ctx context.Context, v ent.AuditBaseCreateReq) (res *ent.Audit, err error) {
 

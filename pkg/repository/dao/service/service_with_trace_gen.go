@@ -56,6 +56,30 @@ func (_d ServiceServiceWithTracing) ByQueriesAll(ctx context.Context, i interfac
 	return _d.ServiceService.ByQueriesAll(ctx, i)
 }
 
+// ByQueriesOne implements ServiceService
+func (_d ServiceServiceWithTracing) ByQueriesOne(ctx context.Context, i interface{}) (res ent.ServiceBaseGetRes, err error) {
+
+	var name = "ServiceService.ByQueriesOne"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"i": i},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ServiceService.ByQueriesOne(ctx, i)
+}
+
 // Create implements ServiceService
 func (_d ServiceServiceWithTracing) Create(ctx context.Context, v ent.ServiceBaseCreateReq) (res *ent.Service, err error) {
 

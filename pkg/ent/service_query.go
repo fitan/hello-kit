@@ -521,7 +521,7 @@ func (sq *ServiceQuery) Queries(i interface{}) *ServiceQuery {
 	return sq
 }
 
-func (sq *ServiceQuery) ByQueriesAll(ctx context.Context, i interface{}, vs interface{}) (count int, err error) {
+func (sq *ServiceQuery) ByQueriesAll(ctx context.Context, i interface{}) (res Services, count int, err error) {
 	queryList, countList := SetServiceFormQueries(i)
 	countQ := sq.Clone()
 	for _, v := range queryList {
@@ -534,7 +534,7 @@ func (sq *ServiceQuery) ByQueriesAll(ctx context.Context, i interface{}, vs inte
 	if err != nil {
 		return
 	}
-	err = sq.Select(service.Columns...).Scan(ctx, vs)
+	res, err = sq.All(ctx)
 	return
 }
 

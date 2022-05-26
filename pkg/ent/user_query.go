@@ -441,7 +441,7 @@ func (uq *UserQuery) Queries(i interface{}) *UserQuery {
 	return uq
 }
 
-func (uq *UserQuery) ByQueriesAll(ctx context.Context, i interface{}, vs interface{}) (count int, err error) {
+func (uq *UserQuery) ByQueriesAll(ctx context.Context, i interface{}) (res Users, count int, err error) {
 	queryList, countList := SetUserFormQueries(i)
 	countQ := uq.Clone()
 	for _, v := range queryList {
@@ -454,7 +454,7 @@ func (uq *UserQuery) ByQueriesAll(ctx context.Context, i interface{}, vs interfa
 	if err != nil {
 		return
 	}
-	err = uq.Select(user.Columns...).Scan(ctx, vs)
+	res, err = uq.All(ctx)
 	return
 }
 

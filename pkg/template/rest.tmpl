@@ -11,7 +11,7 @@ func ({{ $receiver }} *{{ $builder }}) Queries(i interface{}) *{{ $builder }} {
 	return {{ $receiver }}
 }
 
-func ({{ $receiver }} *{{ $builder }}) ByQueriesAll(ctx context.Context, i interface{}, vs interface{}) (count int, err error) {
+func ({{ $receiver }} *{{ $builder }}) ByQueriesAll(ctx context.Context, i interface{}) (res {{plural (pascal $.Name)}},count int, err error) {
 	queryList, countList := Set{{.Name}}FormQueries(i)
 	countQ := {{ $receiver }}.Clone()
 	for _,v := range queryList {
@@ -24,7 +24,7 @@ func ({{ $receiver }} *{{ $builder }}) ByQueriesAll(ctx context.Context, i inter
 	if err != nil {
 		return
 	}
-	err = {{ $receiver }}.Select({{camel $.Name}}.Columns...).Scan(ctx, vs)
+	res, err = {{ $receiver }}.All(ctx)
 	return
 }
 
@@ -148,6 +148,7 @@ type {{$interfaceName}} interface {
 	CreateMany(ctx context.Context, vs []{{$structName}}CreateReq) ({{plural $n.Name}}, error)
 	GetById(ctx context.Context, id {{$n.ID.Type.String}}) (res {{$structName}}GetRes,err error)
 	ByQueriesAll(ctx context.Context, i interface{}) (res []{{$structName}}GetRes, count int,err error)
+	ByQueriesOne(ctx context.Context, i interface{}) (res {{$structName}}GetRes, err error)
 	UpdateById(ctx context.Context,id {{$n.ID.Type.String}}, v {{$structName}}UpdateReq) (*{{$n.Name}}, error)
 	UpdateMany(ctx context.Context, vs []{{$structName}}UpdateReq) (err error)
 	DeleteById(ctx context.Context, id {{$n.ID.Type.String}}) error
@@ -155,12 +156,12 @@ type {{$interfaceName}} interface {
 	{{range $e := $n.Edges }}
     {{$edgeNamePre := print $e.Type.Name "Base"}}
     {{if or $e.O2O $e.M2O}}
-	Create{{pascal $e.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},v {{$edgeNamePre}}CreateReq) (res *{{$n.Name}}, err error)
-	Get{{pascal $e.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}) (res {{$edgeNamePre}}GetRes, err error)
+	Create{{pascal $e.Type.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},v {{$edgeNamePre}}CreateReq) (res *{{$n.Name}}, err error)
+	Get{{pascal $e.Type.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}) (res {{$edgeNamePre}}GetRes, err error)
 	{{end}}
     {{if or $e.O2M $e.M2M}}
-	Create{{pascal (plural $e.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},vs []{{$edgeNamePre}}CreateReq) (res *{{$n.Name}}, err error)
-	Get{{plural (pascal $e.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}, i interface{}) (res []{{$edgeNamePre}}GetRes,count int,err error)
+	Create{{pascal (plural $e.Type.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},vs []{{$edgeNamePre}}CreateReq) (res *{{$n.Name}}, err error)
+	Get{{plural (pascal $e.Type.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}, i interface{}) (res []{{$edgeNamePre}}GetRes,count int,err error)
     {{end}}
     {{end}}
 }
@@ -202,20 +203,11 @@ type {{$structName}}GetRes struct {
 {{end}}{{end}}
 }
 
-func {{$structName}}GetSelect(query *{{$n.Name}}Query) *{{$n.Name}}Select {
-	{{$hasSelectAll := true }}
-	return query.Select({{range $f := $n.Fields}}
-	{{if hasKey $f.Annotations.rest "read"}}{{$hasSelectAll = false}}{{camel $n.Name}}.Field{{pascal $f.Name}},{{end}}
-	{{- end}}{{- if $hasSelectAll}}{{camel $n.Name}}.Columns...{{end}}
-	)
-}
-
 func (c *{{$structName}}) GetById(ctx context.Context, id {{$n.ID.Type.String}}) (res {{$structName}}GetRes, err error) {
 	query := c.client.{{$n.Name}}.Query()
 	query = query.Where({{lower $n.Name}}.IDEQ(id))
-	err = {{$structName}}GetSelect(query).Scan(ctx, &res)
 
-	v, err := {{$structName}}GetSelect(query).First(ctx)
+	v, err := query.First(ctx)
 	if err != nil {
 		return
 	}
@@ -228,10 +220,28 @@ func (c *{{$structName}}) GetById(ctx context.Context, id {{$n.ID.Type.String}})
 	return
 }
 
+func (c *{{$structName}}) ByQueriesOne(ctx context.Context, i interface{}) (res {{$structName}}GetRes, err error) {
+	v, err := c.client.{{$n.Name}}.Query().Queries(i).First(ctx)
+	if err != nil {
+		return
+	}
+	res.{{pascal $n.ID.Name}} = v.{{pascal $n.ID.Name}}
+	{{range $f := $n.Fields}}{{if hasKey $f.Annotations.rest "read"}}
+	res.{{pascal $f.Name}} = v.{{pascal $f.Name}}
+	{{end}}{{end}}
+	return
+}
+
 func (c *{{$structName}}) ByQueriesAll(ctx context.Context, i interface{}) (res []{{$structName}}GetRes, count int, err error) {
-	query := c.client.{{$n.Name}}.Query()
-	{{$structName}}GetSelect(query)
-	count, err = query.ByQueriesAll(ctx,i, &res)
+	vs, count, err := c.client.{{$n.Name}}.Query().ByQueriesAll(ctx,i)
+    for _,v := range vs {
+		res = append(res, {{$structName}}GetRes{
+			{{pascal $n.ID.Name}}: v.{{pascal $n.ID.Name}},
+			{{range $f := $n.Fields}}{{if hasKey $f.Annotations.rest "read"}}
+			{{pascal $f.Name}}: v.{{pascal $f.Name}},
+			{{end}}{{end}}
+		})
+	}
 	return
 }
 
@@ -296,7 +306,7 @@ func (c *{{$structName}}) DeleteMany(ctx context.Context, ids []{{$n.ID.Type.Str
 {{range $e := $n.Edges }}
 {{$edgeNamePre := print $e.Type.Name "Base"}}
     {{if or $e.O2O $e.M2O}}
-func (c *{{$structName}}) Create{{pascal $e.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},v {{$edgeNamePre}}CreateReq) (res *{{$n.Name}}, err error) {
+func (c *{{$structName}}) Create{{pascal $e.Type.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},v {{$edgeNamePre}}CreateReq) (res *{{$n.Name}}, err error) {
 	tx , err := c.client.Tx(ctx)
 	if err != nil {
 		return
@@ -318,16 +328,23 @@ func (c *{{$structName}}) Create{{pascal $e.Name}}By{{$n.Name}}Id(ctx context.Co
 		return
 	}
 
-	return c.client.{{$n.Name}}.UpdateOneID(id).Set{{pascal $e.Name}}(save).Save(ctx)
+	return tx.{{$n.Name}}.UpdateOneID(id).Set{{pascal $e.Name}}(save).Save(ctx)
 }
 
-func (c *{{$structName}}) Get{{pascal $e.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}) (res {{$edgeNamePre}}GetRes, err error) {
-	err = c.client.{{$n.Name}}.Query().Where({{lower $n.Name}}.ID(id)).Query{{pascal $e.Name}}().Select({{camel $e.Type.Name}}.Columns...).Scan(ctx, &res)
+func (c *{{$structName}}) Get{{pascal $e.Type.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}) (res {{$edgeNamePre}}GetRes, err error) {
+	v, err := c.client.{{$n.Name}}.Query().Where({{lower $n.Name}}.ID(id)).Query{{pascal $e.Name}}().First(ctx)
+    if err != nil {
+		return
+	}
+	res.{{pascal $e.Type.ID.Name}} = v.{{pascal $e.Type.ID.Name}}
+{{range $f := $e.Type.Fields}}{{if hasKey $f.Annotations.rest "read"}}
+	res.{{pascal $f.Name}} = v.{{pascal $f.Name}}
+{{end}}{{end}}
 	return
 }
 	{{end}}
     {{if or $e.O2M $e.M2M}}
-func (c *{{$structName}}) Create{{pascal (plural $e.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},vs []{{$edgeNamePre}}CreateReq) (res *{{$n.Name}}, err error) {
+func (c *{{$structName}}) Create{{pascal (plural $e.Type.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},vs []{{$edgeNamePre}}CreateReq) (res *{{$n.Name}}, err error) {
 	tx , err := c.client.Tx(ctx)
 	if err != nil {
 		return
@@ -349,11 +366,22 @@ func (c *{{$structName}}) Create{{pascal (plural $e.Name)}}By{{$n.Name}}Id(ctx c
 		bulk[i] = create
 	}
 	save, err := tx.{{$e.Type.Name}}.CreateBulk(bulk...).Save(ctx)
+	if err != nil {
+		return
+	}
 
-	return c.client.{{$n.Name}}.UpdateOneID(id).Add{{pascal $e.Name}}(save...).Save(ctx)
+	return tx.{{$n.Name}}.UpdateOneID(id).Add{{pascal $e.Name}}(save...).Save(ctx)
 }
-func (c *{{$structName}}) Get{{plural (pascal $e.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}, i interface{}) (res []{{$edgeNamePre}}GetRes,count int,err error) {
-	count, err = c.client.{{$n.Name}}.Query().Where({{lower $n.Name}}.ID(id)).Query{{pascal $e.Name}}().ByQueriesAll(ctx, i, &res)
+func (c *{{$structName}}) Get{{plural (pascal $e.Type.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}, i interface{}) (res []{{$edgeNamePre}}GetRes,count int,err error) {
+	vs, count, err := c.client.{{$n.Name}}.Query().Where({{lower $n.Name}}.ID(id)).Query{{pascal $e.Name}}().ByQueriesAll(ctx, i)
+	for _,v := range vs {
+		res = append(res, {{$edgeNamePre}}GetRes{
+{{pascal $e.Type.ID.Name}}: v.{{pascal $e.Type.ID.Name}},
+{{range $f := $e.Type.Fields}}{{if hasKey $f.Annotations.rest "read"}}
+	{{pascal $f.Name}}:  v.{{pascal $f.Name}},
+{{end}}{{end}}
+		})
+	}
 	return
 }
     {{end}}
@@ -418,22 +446,22 @@ type {{$interfaceName}} interface {
 	{{- $funcName = print $structName "DeleteMany"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
 	{{$funcName}}(ctx context.Context, req {{$req}}) (success bool,err error)
 	{{range $e := $n.Edges }}
-	{{$edgeHttpName := lower (plural $e.Name)}}
+	{{$edgeHttpName := lower (pascal $e.Type.Name)}}
     {{$edgeBasePre := print $e.Type.Name "Base"}}
     {{if or $e.O2O $e.M2O}}
 		// @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{lower $e.Name}} POST
-        {{- $funcName = print $structName "Create" (pascal $e.Name) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
+        {{- $funcName = print $structName "Create" (pascal $e.Type.Name) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
 		{{$funcName}}(ctx context.Context,req {{$req}}) (res *{{$n.Name}}, err error)
 		// @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{lower $e.Name}} GET
-        {{- $funcName = print $structName "Get" (pascal $e.Name) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
+        {{- $funcName = print $structName "Get" (pascal $e.Type.Name) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
 		{{$funcName}}(ctx context.Context,req {{$req}}) (res {{$edgeBasePre}}GetRes, err error)
 	{{end}}
     {{if or $e.O2M $e.M2M}}
-	    // @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{$edgeHttpName}} POST
-        {{- $funcName = print $structName "Create" (pascal (plural $e.Name)) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
+	    // @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{plural $edgeHttpName}} POST
+        {{- $funcName = print $structName "Create" (pascal (plural $e.Type.Name)) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
 	    {{$funcName}}(ctx context.Context,req {{$req}}) (res *{{$n.Name}}, err error)
-	    // @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{lower $e.Name}} GET
-        {{- $funcName = print $structName "Get" (plural (pascal $e.Name)) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
+	    // @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{plural $edgeHttpName}} GET
+        {{- $funcName = print $structName "Get" (plural (pascal $e.Type.Name)) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
 	    {{$funcName}}(ctx context.Context,req {{$req}}) (res {{$res}},err error)
     {{end}}
 	{{end}}
@@ -462,11 +490,18 @@ type {{$req}} struct {
 func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res {{plural $n.Name}},err error) {
 	return rest.repo.CreateMany(ctx, req.Body)
 }
+
 {{$funcName = print $structName "GetById"}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
 type {{$req}} struct {
 	Uri struct{
 		Id {{$n.ID.Type}} `json:"id" uri:"{{lower $n.Name}}Id"`
 	}
+}
+type {{$req}} struct {
+	{{pascal $n.ID.Name}} {{$n.ID.Type.String}} `{{$n.ID.StructTag}}`
+{{range $f := $n.Fields}}{{if hasKey $f.Annotations.rest "read"}}
+	{{pascal $f.Name}} {{$f.Type.String}} `{{$f.StructTag}}`
+{{end}}{{end}}
 }
 
 func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res {{$baseNamePre}}GetRes, err error) {
@@ -542,7 +577,7 @@ func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (s
     {{$edgeHttpName := lower (plural $e.Name)}}
     {{$edgeBasePre := print $e.Type.Name "Base"}}
     {{if or $e.O2O $e.M2O}}
-    {{$baseName := print "Create" (pascal $e.Name) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
+    {{$baseName := print "Create" (pascal $e.Type.Name) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
 type {{$req}} struct {
 	Uri struct{
 		Id {{$n.ID.Type}} `json:"id" uri:"{{lower $n.Name}}Id"`
@@ -553,7 +588,7 @@ type {{$req}} struct {
 func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res *{{$n.Name}}, err error) {
 	return rest.repo.{{$baseName}}(ctx, req.Uri.Id, req.Body)
 }
-    {{$baseName = print "Get" (pascal $e.Name) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
+    {{$baseName = print "Get" (pascal $e.Type.Name) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
 type {{$req}} struct {
 	Uri struct{
 		Id {{$n.ID.Type}} `json:"id" uri:"{{lower $n.Name}}Id"`
@@ -565,7 +600,7 @@ func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (r
 }
     {{end}}
     {{if or $e.O2M $e.M2M}}
-    {{$baseName := print "Create" (pascal (plural $e.Name)) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
+    {{$baseName := print "Create" (pascal (plural $e.Type.Name)) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
 type {{$req}} struct {
 	Uri struct{
 		Id {{$n.ID.Type}} `json:"id" uri:"{{lower $n.Name}}Id"`
@@ -576,7 +611,7 @@ type {{$req}} struct {
 func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res *{{$n.Name}}, err error) {
 	return rest.repo.{{$baseName}}(ctx, req.Uri.Id, req.Body)
 }
-    {{$baseName = print "Get" (plural (pascal $e.Name)) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
+    {{$baseName = print "Get" (plural (pascal $e.Type.Name)) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
 type {{$req}} struct {
 	Uri struct{
 		Id {{$n.ID.Type}} `json:"id" uri:"{{lower $n.Name}}Id"`

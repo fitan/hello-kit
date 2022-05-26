@@ -442,7 +442,7 @@ func (aq *AuditQuery) Queries(i interface{}) *AuditQuery {
 	return aq
 }
 
-func (aq *AuditQuery) ByQueriesAll(ctx context.Context, i interface{}, vs interface{}) (count int, err error) {
+func (aq *AuditQuery) ByQueriesAll(ctx context.Context, i interface{}) (res Audits, count int, err error) {
 	queryList, countList := SetAuditFormQueries(i)
 	countQ := aq.Clone()
 	for _, v := range queryList {
@@ -455,7 +455,7 @@ func (aq *AuditQuery) ByQueriesAll(ctx context.Context, i interface{}, vs interf
 	if err != nil {
 		return
 	}
-	err = aq.Select(audit.Columns...).Scan(ctx, vs)
+	res, err = aq.All(ctx)
 	return
 }
 

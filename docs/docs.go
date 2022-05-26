@@ -744,7 +744,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ent.ProjectRestGetServicesSliceByProjectIdRes"
+                                            "$ref": "#/definitions/ent.ProjectRestGetServicesByProjectIdRes"
                                         }
                                     }
                                 }
@@ -752,9 +752,7 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/projects/{projectId}/servicesslice": {
+            },
             "post": {
                 "consumes": [
                     "application/json"
@@ -796,6 +794,729 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/ent.Project"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/resource": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/resource.ResourceRestCreateBodySwag"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.Resource"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/resources": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.ResourceRestByQueriesAllRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.ResourceBaseUpdateReq"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.ResourceBaseCreateReq"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/ent.Resource"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "multi",
+                        "name": "ids",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/{resourceId}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "resourceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.ResourceBaseGetRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/resource.ResourceRestUpdateByIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "resourceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.Resource"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "resourceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/service": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ServiceService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.ServiceRestCreateBodySwag"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/service.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.Service"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/services": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ServiceService"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/service.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.ServiceRestByQueriesAllRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ServiceService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.ServiceBaseUpdateReq"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/service.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ServiceService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.ServiceBaseCreateReq"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/service.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/ent.Service"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ServiceService"
+                ],
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "multi",
+                        "name": "ids",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/service.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/services/{serviceId}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ServiceService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "serviceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/service.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.ServiceBaseGetRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ServiceService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.ServiceRestUpdateByIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "serviceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/service.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.Service"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ServiceService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "serviceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/service.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/services/{serviceId}/project": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ServiceService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "serviceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/service.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.ProjectBaseGetRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ServiceService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.ServiceRestCreateProjectByServiceIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "serviceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/service.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.Service"
                                         }
                                     }
                                 }
@@ -1412,21 +2133,50 @@ const docTemplate = `{
             }
         },
         "ent.ProjectBaseCreateReq": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "aname": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         },
         "ent.ProjectBaseGetRes": {
             "type": "object",
             "properties": {
+                "aname": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
         "ent.ProjectBaseUpdateReq": {
             "type": "object",
             "properties": {
+                "aname": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -1456,13 +2206,130 @@ const docTemplate = `{
                 }
             }
         },
-        "ent.ProjectRestGetServicesSliceByProjectIdRes": {
+        "ent.ProjectRestGetServicesByProjectIdRes": {
             "type": "object",
             "properties": {
                 "list": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ent.ServiceBaseGetRes"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ent.Resource": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "Action holds the value of the \"action\" field.",
+                    "type": "string"
+                },
+                "comments": {
+                    "description": "Comments holds the value of the \"comments\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "key": {
+                    "description": "Key holds the value of the \"key\" field.",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name holds the value of the \"name\" field.",
+                    "type": "string"
+                },
+                "path": {
+                    "description": "Path holds the value of the \"path\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.ResourceBaseCreateReq": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "ent.ResourceBaseGetRes": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "ent.ResourceBaseUpdateReq": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "ent.ResourceRestByQueriesAllRes": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.ResourceBaseGetRes"
                     }
                 },
                 "total": {
@@ -1516,13 +2383,77 @@ const docTemplate = `{
             }
         },
         "ent.ServiceBaseCreateReq": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "aname": {
+                    "type": "string"
+                },
+                "classes": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
+                "git": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         },
         "ent.ServiceBaseGetRes": {
             "type": "object",
             "properties": {
+                "aname": {
+                    "type": "string"
+                },
+                "classes": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
+                "git": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "ent.ServiceBaseUpdateReq": {
+            "type": "object",
+            "properties": {
+                "aname": {
+                    "type": "string"
+                },
+                "classes": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
+                "git": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -1532,6 +2463,20 @@ const docTemplate = `{
                 "project": {
                     "description": "Project holds the value of the project edge.",
                     "$ref": "#/definitions/ent.Project"
+                }
+            }
+        },
+        "ent.ServiceRestByQueriesAllRes": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.ServiceBaseGetRes"
+                    }
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },
@@ -1645,17 +2590,167 @@ const docTemplate = `{
             }
         },
         "project.ProjectRestCreateBodySwag": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "aname": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         },
         "project.ProjectRestUpdateByIdBodySwag": {
             "type": "object",
             "properties": {
+                "aname": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
         "project.SwagResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "status": {
+                    "type": "integer"
+                },
+                "traceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "resource.ResourceRestCreateBodySwag": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "resource.ResourceRestUpdateByIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "resource.SwagResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "status": {
+                    "type": "integer"
+                },
+                "traceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.ServiceRestCreateBodySwag": {
+            "type": "object",
+            "properties": {
+                "aname": {
+                    "type": "string"
+                },
+                "classes": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
+                "git": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.ServiceRestCreateProjectByServiceIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "aname": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.ServiceRestUpdateByIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "aname": {
+                    "type": "string"
+                },
+                "classes": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
+                "git": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.SwagResponse": {
             "type": "object",
             "properties": {
                 "data": {},

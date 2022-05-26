@@ -21,7 +21,7 @@ const (
 
 	ProjectRestCreateManyMethodName = "ProjectRestCreateMany"
 
-	ProjectRestCreateServicesSliceByProjectIdMethodName = "ProjectRestCreateServicesSliceByProjectId"
+	ProjectRestCreateServicesByProjectIdMethodName = "ProjectRestCreateServicesByProjectId"
 
 	ProjectRestDeleteByIdMethodName = "ProjectRestDeleteById"
 
@@ -29,7 +29,7 @@ const (
 
 	ProjectRestGetByIdMethodName = "ProjectRestGetById"
 
-	ProjectRestGetServicesSliceByProjectIdMethodName = "ProjectRestGetServicesSliceByProjectId"
+	ProjectRestGetServicesByProjectIdMethodName = "ProjectRestGetServicesByProjectId"
 
 	ProjectRestUpdateByIdMethodName = "ProjectRestUpdateById"
 
@@ -45,7 +45,7 @@ type Endpoints struct {
 
 	ProjectRestCreateManyEndpoint endpoint.Endpoint
 
-	ProjectRestCreateServicesSliceByProjectIdEndpoint endpoint.Endpoint
+	ProjectRestCreateServicesByProjectIdEndpoint endpoint.Endpoint
 
 	ProjectRestDeleteByIdEndpoint endpoint.Endpoint
 
@@ -53,7 +53,7 @@ type Endpoints struct {
 
 	ProjectRestGetByIdEndpoint endpoint.Endpoint
 
-	ProjectRestGetServicesSliceByProjectIdEndpoint endpoint.Endpoint
+	ProjectRestGetServicesByProjectIdEndpoint endpoint.Endpoint
 
 	ProjectRestUpdateByIdEndpoint endpoint.Endpoint
 
@@ -69,7 +69,7 @@ func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m en
 
 		ProjectRestCreateManyMethodName,
 
-		ProjectRestCreateServicesSliceByProjectIdMethodName,
+		ProjectRestCreateServicesByProjectIdMethodName,
 
 		ProjectRestDeleteByIdMethodName,
 
@@ -77,7 +77,7 @@ func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m en
 
 		ProjectRestGetByIdMethodName,
 
-		ProjectRestGetServicesSliceByProjectIdMethodName,
+		ProjectRestGetServicesByProjectIdMethodName,
 
 		ProjectRestUpdateByIdMethodName,
 
@@ -97,7 +97,7 @@ func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Mi
 
 		ProjectRestCreateManyMethodName,
 
-		ProjectRestCreateServicesSliceByProjectIdMethodName,
+		ProjectRestCreateServicesByProjectIdMethodName,
 
 		ProjectRestDeleteByIdMethodName,
 
@@ -105,7 +105,7 @@ func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Mi
 
 		ProjectRestGetByIdMethodName,
 
-		ProjectRestGetServicesSliceByProjectIdMethodName,
+		ProjectRestGetServicesByProjectIdMethodName,
 
 		ProjectRestUpdateByIdMethodName,
 
@@ -127,7 +127,7 @@ func NewEndpoints(s ProjectService, mdw Mws) Endpoints {
 
 		ProjectRestCreateManyEndpoint: MakeProjectRestCreateManyEndpoint(s),
 
-		ProjectRestCreateServicesSliceByProjectIdEndpoint: MakeProjectRestCreateServicesSliceByProjectIdEndpoint(s),
+		ProjectRestCreateServicesByProjectIdEndpoint: MakeProjectRestCreateServicesByProjectIdEndpoint(s),
 
 		ProjectRestDeleteByIdEndpoint: MakeProjectRestDeleteByIdEndpoint(s),
 
@@ -135,7 +135,7 @@ func NewEndpoints(s ProjectService, mdw Mws) Endpoints {
 
 		ProjectRestGetByIdEndpoint: MakeProjectRestGetByIdEndpoint(s),
 
-		ProjectRestGetServicesSliceByProjectIdEndpoint: MakeProjectRestGetServicesSliceByProjectIdEndpoint(s),
+		ProjectRestGetServicesByProjectIdEndpoint: MakeProjectRestGetServicesByProjectIdEndpoint(s),
 
 		ProjectRestUpdateByIdEndpoint: MakeProjectRestUpdateByIdEndpoint(s),
 
@@ -154,8 +154,8 @@ func NewEndpoints(s ProjectService, mdw Mws) Endpoints {
 		eps.ProjectRestCreateManyEndpoint = m(eps.ProjectRestCreateManyEndpoint)
 	}
 
-	for _, m := range mdw[ProjectRestCreateServicesSliceByProjectIdMethodName] {
-		eps.ProjectRestCreateServicesSliceByProjectIdEndpoint = m(eps.ProjectRestCreateServicesSliceByProjectIdEndpoint)
+	for _, m := range mdw[ProjectRestCreateServicesByProjectIdMethodName] {
+		eps.ProjectRestCreateServicesByProjectIdEndpoint = m(eps.ProjectRestCreateServicesByProjectIdEndpoint)
 	}
 
 	for _, m := range mdw[ProjectRestDeleteByIdMethodName] {
@@ -170,8 +170,8 @@ func NewEndpoints(s ProjectService, mdw Mws) Endpoints {
 		eps.ProjectRestGetByIdEndpoint = m(eps.ProjectRestGetByIdEndpoint)
 	}
 
-	for _, m := range mdw[ProjectRestGetServicesSliceByProjectIdMethodName] {
-		eps.ProjectRestGetServicesSliceByProjectIdEndpoint = m(eps.ProjectRestGetServicesSliceByProjectIdEndpoint)
+	for _, m := range mdw[ProjectRestGetServicesByProjectIdMethodName] {
+		eps.ProjectRestGetServicesByProjectIdEndpoint = m(eps.ProjectRestGetServicesByProjectIdEndpoint)
 	}
 
 	for _, m := range mdw[ProjectRestUpdateByIdMethodName] {
@@ -251,7 +251,7 @@ func MakeProjectRestCreateManyEndpoint(s ProjectService) endpoint.Endpoint {
 	}
 }
 
-func MakeProjectRestCreateServicesSliceByProjectIdEndpoint(s ProjectService) endpoint.Endpoint {
+func MakeProjectRestCreateServicesByProjectIdEndpoint(s ProjectService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		var err error
 		result := make(map[string]interface{}, 0)
@@ -261,8 +261,8 @@ func MakeProjectRestCreateServicesSliceByProjectIdEndpoint(s ProjectService) end
 			}
 			result["status"] = 0
 		}()
-		req := request.(ent.ProjectRestCreateServicesSliceByProjectIdReq)
-		rs, err := s.ProjectRestCreateServicesSliceByProjectId(ctx, req)
+		req := request.(ent.ProjectRestCreateServicesByProjectIdReq)
+		rs, err := s.ProjectRestCreateServicesByProjectId(ctx, req)
 		if err != nil {
 			result["err"] = err.Error()
 			return result, nil
@@ -339,7 +339,7 @@ func MakeProjectRestGetByIdEndpoint(s ProjectService) endpoint.Endpoint {
 	}
 }
 
-func MakeProjectRestGetServicesSliceByProjectIdEndpoint(s ProjectService) endpoint.Endpoint {
+func MakeProjectRestGetServicesByProjectIdEndpoint(s ProjectService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		var err error
 		result := make(map[string]interface{}, 0)
@@ -349,8 +349,8 @@ func MakeProjectRestGetServicesSliceByProjectIdEndpoint(s ProjectService) endpoi
 			}
 			result["status"] = 0
 		}()
-		req := request.(ent.ProjectRestGetServicesSliceByProjectIdReq)
-		rs, err := s.ProjectRestGetServicesSliceByProjectId(ctx, req)
+		req := request.(ent.ProjectRestGetServicesByProjectIdReq)
+		rs, err := s.ProjectRestGetServicesByProjectId(ctx, req)
 		if err != nil {
 			result["err"] = err.Error()
 			return result, nil

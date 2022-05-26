@@ -442,7 +442,7 @@ func (rq *ResourceQuery) Queries(i interface{}) *ResourceQuery {
 	return rq
 }
 
-func (rq *ResourceQuery) ByQueriesAll(ctx context.Context, i interface{}, vs interface{}) (count int, err error) {
+func (rq *ResourceQuery) ByQueriesAll(ctx context.Context, i interface{}) (res Resources, count int, err error) {
 	queryList, countList := SetResourceFormQueries(i)
 	countQ := rq.Clone()
 	for _, v := range queryList {
@@ -455,7 +455,7 @@ func (rq *ResourceQuery) ByQueriesAll(ctx context.Context, i interface{}, vs int
 	if err != nil {
 		return
 	}
-	err = rq.Select(resource.Columns...).Scan(ctx, vs)
+	res, err = rq.All(ctx)
 	return
 }
 

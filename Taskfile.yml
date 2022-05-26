@@ -17,7 +17,7 @@ tasks:
   run:
     cmds:
       - task: swag
-      - go run main.go app {{.CLI_ARGS}}
+      - go run main.go app start {{.CLI_ARGS}}
   conf:
     cmds:
       - vim conf/dev.conf.yaml

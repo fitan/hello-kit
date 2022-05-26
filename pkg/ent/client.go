@@ -163,6 +163,7 @@ type AuditBaseInterface interface {
 	CreateMany(ctx context.Context, vs []AuditBaseCreateReq) (Audits, error)
 	GetById(ctx context.Context, id int) (res AuditBaseGetRes, err error)
 	ByQueriesAll(ctx context.Context, i interface{}) (res []AuditBaseGetRes, count int, err error)
+	ByQueriesOne(ctx context.Context, i interface{}) (res AuditBaseGetRes, err error)
 	UpdateById(ctx context.Context, id int, v AuditBaseUpdateReq) (*Audit, error)
 	UpdateMany(ctx context.Context, vs []AuditBaseUpdateReq) (err error)
 	DeleteById(ctx context.Context, id int) error
@@ -248,29 +249,11 @@ type AuditBaseGetRes struct {
 	CostTime string `json:"cost_time,omitempty"`
 }
 
-func AuditBaseGetSelect(query *AuditQuery) *AuditSelect {
-
-	return query.Select(
-
-		audit.FieldURL,
-		audit.FieldQuery,
-		audit.FieldMethod,
-		audit.FieldRequest,
-		audit.FieldResponse,
-		audit.FieldHeader,
-		audit.FieldStatusCode,
-		audit.FieldRemoteIP,
-		audit.FieldClientIP,
-		audit.FieldCostTime,
-	)
-}
-
 func (c *AuditBase) GetById(ctx context.Context, id int) (res AuditBaseGetRes, err error) {
 	query := c.client.Audit.Query()
 	query = query.Where(audit.IDEQ(id))
-	err = AuditBaseGetSelect(query).Scan(ctx, &res)
 
-	v, err := AuditBaseGetSelect(query).First(ctx)
+	v, err := query.First(ctx)
 	if err != nil {
 		return
 	}
@@ -300,10 +283,63 @@ func (c *AuditBase) GetById(ctx context.Context, id int) (res AuditBaseGetRes, e
 	return
 }
 
+func (c *AuditBase) ByQueriesOne(ctx context.Context, i interface{}) (res AuditBaseGetRes, err error) {
+	v, err := c.client.Audit.Query().Queries(i).First(ctx)
+	if err != nil {
+		return
+	}
+	res.ID = v.ID
+
+	res.URL = v.URL
+
+	res.Query = v.Query
+
+	res.Method = v.Method
+
+	res.Request = v.Request
+
+	res.Response = v.Response
+
+	res.Header = v.Header
+
+	res.StatusCode = v.StatusCode
+
+	res.RemoteIP = v.RemoteIP
+
+	res.ClientIP = v.ClientIP
+
+	res.CostTime = v.CostTime
+
+	return
+}
+
 func (c *AuditBase) ByQueriesAll(ctx context.Context, i interface{}) (res []AuditBaseGetRes, count int, err error) {
-	query := c.client.Audit.Query()
-	AuditBaseGetSelect(query)
-	count, err = query.ByQueriesAll(ctx, i, &res)
+	vs, count, err := c.client.Audit.Query().ByQueriesAll(ctx, i)
+	for _, v := range vs {
+		res = append(res, AuditBaseGetRes{
+			ID: v.ID,
+
+			URL: v.URL,
+
+			Query: v.Query,
+
+			Method: v.Method,
+
+			Request: v.Request,
+
+			Response: v.Response,
+
+			Header: v.Header,
+
+			StatusCode: v.StatusCode,
+
+			RemoteIP: v.RemoteIP,
+
+			ClientIP: v.ClientIP,
+
+			CostTime: v.CostTime,
+		})
+	}
 	return
 }
 
@@ -368,23 +404,32 @@ type ProjectBaseInterface interface {
 	CreateMany(ctx context.Context, vs []ProjectBaseCreateReq) (Projects, error)
 	GetById(ctx context.Context, id int) (res ProjectBaseGetRes, err error)
 	ByQueriesAll(ctx context.Context, i interface{}) (res []ProjectBaseGetRes, count int, err error)
+	ByQueriesOne(ctx context.Context, i interface{}) (res ProjectBaseGetRes, err error)
 	UpdateById(ctx context.Context, id int, v ProjectBaseUpdateReq) (*Project, error)
 	UpdateMany(ctx context.Context, vs []ProjectBaseUpdateReq) (err error)
 	DeleteById(ctx context.Context, id int) error
 	DeleteMany(ctx context.Context, ids []int) (err error)
 
-	CreateServicesSliceByProjectId(ctx context.Context, id int, vs []ServiceBaseCreateReq) (res *Project, err error)
-	GetServicesSliceByProjectId(ctx context.Context, id int, i interface{}) (res []ServiceBaseGetRes, count int, err error)
+	CreateServicesByProjectId(ctx context.Context, id int, vs []ServiceBaseCreateReq) (res *Project, err error)
+	GetServicesByProjectId(ctx context.Context, id int, i interface{}) (res []ServiceBaseGetRes, count int, err error)
 }
 
 type ProjectBase struct {
 	client *Client
 }
 type ProjectBaseCreateReq struct {
+	Name string `json:"name,omitempty""`
+
+	Aname string `json:"aname,omitempty""`
+
+	Comments string `json:"comments,omitempty""`
 }
 
 func ProjectBaseCreateSet(create *ProjectCreate, v ProjectBaseCreateReq) *ProjectCreate {
-	return create
+	return create.
+		SetName(v.Name).
+		SetAname(v.Aname).
+		SetComments(v.Comments)
 }
 
 func (c *ProjectBase) Create(ctx context.Context, v ProjectBaseCreateReq) (res *Project, err error) {
@@ -405,44 +450,81 @@ func (c *ProjectBase) CreateMany(ctx context.Context, vs []ProjectBaseCreateReq)
 
 type ProjectBaseGetRes struct {
 	ID int `json:"id,omitempty"`
-}
 
-func ProjectBaseGetSelect(query *ProjectQuery) *ProjectSelect {
+	Name string `json:"name,omitempty"`
 
-	return query.Select(
+	Aname string `json:"aname,omitempty"`
 
-		project.Columns...,
-	)
+	Comments string `json:"comments,omitempty"`
 }
 
 func (c *ProjectBase) GetById(ctx context.Context, id int) (res ProjectBaseGetRes, err error) {
 	query := c.client.Project.Query()
 	query = query.Where(project.IDEQ(id))
-	err = ProjectBaseGetSelect(query).Scan(ctx, &res)
 
-	v, err := ProjectBaseGetSelect(query).First(ctx)
+	v, err := query.First(ctx)
 	if err != nil {
 		return
 	}
 
 	res.ID = v.ID
 
+	res.Name = v.Name
+
+	res.Aname = v.Aname
+
+	res.Comments = v.Comments
+
+	return
+}
+
+func (c *ProjectBase) ByQueriesOne(ctx context.Context, i interface{}) (res ProjectBaseGetRes, err error) {
+	v, err := c.client.Project.Query().Queries(i).First(ctx)
+	if err != nil {
+		return
+	}
+	res.ID = v.ID
+
+	res.Name = v.Name
+
+	res.Aname = v.Aname
+
+	res.Comments = v.Comments
+
 	return
 }
 
 func (c *ProjectBase) ByQueriesAll(ctx context.Context, i interface{}) (res []ProjectBaseGetRes, count int, err error) {
-	query := c.client.Project.Query()
-	ProjectBaseGetSelect(query)
-	count, err = query.ByQueriesAll(ctx, i, &res)
+	vs, count, err := c.client.Project.Query().ByQueriesAll(ctx, i)
+	for _, v := range vs {
+		res = append(res, ProjectBaseGetRes{
+			ID: v.ID,
+
+			Name: v.Name,
+
+			Aname: v.Aname,
+
+			Comments: v.Comments,
+		})
+	}
 	return
 }
 
 type ProjectBaseUpdateReq struct {
 	ID int `json:"id,omitempty"`
+
+	Name string `json:"name,omitempty"`
+
+	Aname string `json:"aname,omitempty"`
+
+	Comments string `json:"comments,omitempty"`
 }
 
 func ProjectBaseUpdateSet(update *ProjectUpdateOne, v ProjectBaseUpdateReq) *ProjectUpdateOne {
-	return update
+	return update.
+		SetName(v.Name).
+		SetAname(v.Aname).
+		SetComments(v.Comments)
 }
 
 func (c *ProjectBase) UpdateById(ctx context.Context, id int, v ProjectBaseUpdateReq) (*Project, error) {
@@ -489,7 +571,7 @@ func (c *ProjectBase) DeleteMany(ctx context.Context, ids []int) error {
 	return err
 }
 
-func (c *ProjectBase) CreateServicesSliceByProjectId(ctx context.Context, id int, vs []ServiceBaseCreateReq) (res *Project, err error) {
+func (c *ProjectBase) CreateServicesByProjectId(ctx context.Context, id int, vs []ServiceBaseCreateReq) (res *Project, err error) {
 	tx, err := c.client.Tx(ctx)
 	if err != nil {
 		return
@@ -511,11 +593,31 @@ func (c *ProjectBase) CreateServicesSliceByProjectId(ctx context.Context, id int
 		bulk[i] = create
 	}
 	save, err := tx.Service.CreateBulk(bulk...).Save(ctx)
+	if err != nil {
+		return
+	}
 
-	return c.client.Project.UpdateOneID(id).AddServices(save...).Save(ctx)
+	return tx.Project.UpdateOneID(id).AddServices(save...).Save(ctx)
 }
-func (c *ProjectBase) GetServicesSliceByProjectId(ctx context.Context, id int, i interface{}) (res []ServiceBaseGetRes, count int, err error) {
-	count, err = c.client.Project.Query().Where(project.ID(id)).QueryServices().ByQueriesAll(ctx, i, &res)
+func (c *ProjectBase) GetServicesByProjectId(ctx context.Context, id int, i interface{}) (res []ServiceBaseGetRes, count int, err error) {
+	vs, count, err := c.client.Project.Query().Where(project.ID(id)).QueryServices().ByQueriesAll(ctx, i)
+	for _, v := range vs {
+		res = append(res, ServiceBaseGetRes{
+			ID: v.ID,
+
+			Name: v.Name,
+
+			Aname: v.Aname,
+
+			Comments: v.Comments,
+
+			Classes: v.Classes,
+
+			Lang: v.Lang,
+
+			Git: v.Git,
+		})
+	}
 	return
 }
 
@@ -528,6 +630,7 @@ type ResourceBaseInterface interface {
 	CreateMany(ctx context.Context, vs []ResourceBaseCreateReq) (Resources, error)
 	GetById(ctx context.Context, id int) (res ResourceBaseGetRes, err error)
 	ByQueriesAll(ctx context.Context, i interface{}) (res []ResourceBaseGetRes, count int, err error)
+	ByQueriesOne(ctx context.Context, i interface{}) (res ResourceBaseGetRes, err error)
 	UpdateById(ctx context.Context, id int, v ResourceBaseUpdateReq) (*Resource, error)
 	UpdateMany(ctx context.Context, vs []ResourceBaseUpdateReq) (err error)
 	DeleteById(ctx context.Context, id int) error
@@ -538,10 +641,24 @@ type ResourceBase struct {
 	client *Client
 }
 type ResourceBaseCreateReq struct {
+	Name string `json:"name,omitempty""`
+
+	Key string `json:"key,omitempty""`
+
+	Path string `json:"path,omitempty""`
+
+	Action string `json:"action,omitempty""`
+
+	Comments string `json:"comments,omitempty""`
 }
 
 func ResourceBaseCreateSet(create *ResourceCreate, v ResourceBaseCreateReq) *ResourceCreate {
-	return create
+	return create.
+		SetName(v.Name).
+		SetKey(v.Key).
+		SetPath(v.Path).
+		SetAction(v.Action).
+		SetComments(v.Comments)
 }
 
 func (c *ResourceBase) Create(ctx context.Context, v ResourceBaseCreateReq) (res *Resource, err error) {
@@ -562,44 +679,103 @@ func (c *ResourceBase) CreateMany(ctx context.Context, vs []ResourceBaseCreateRe
 
 type ResourceBaseGetRes struct {
 	ID int `json:"id,omitempty"`
-}
 
-func ResourceBaseGetSelect(query *ResourceQuery) *ResourceSelect {
+	Name string `json:"name,omitempty"`
 
-	return query.Select(
+	Key string `json:"key,omitempty"`
 
-		resource.Columns...,
-	)
+	Path string `json:"path,omitempty"`
+
+	Action string `json:"action,omitempty"`
+
+	Comments string `json:"comments,omitempty"`
 }
 
 func (c *ResourceBase) GetById(ctx context.Context, id int) (res ResourceBaseGetRes, err error) {
 	query := c.client.Resource.Query()
 	query = query.Where(resource.IDEQ(id))
-	err = ResourceBaseGetSelect(query).Scan(ctx, &res)
 
-	v, err := ResourceBaseGetSelect(query).First(ctx)
+	v, err := query.First(ctx)
 	if err != nil {
 		return
 	}
 
 	res.ID = v.ID
 
+	res.Name = v.Name
+
+	res.Key = v.Key
+
+	res.Path = v.Path
+
+	res.Action = v.Action
+
+	res.Comments = v.Comments
+
+	return
+}
+
+func (c *ResourceBase) ByQueriesOne(ctx context.Context, i interface{}) (res ResourceBaseGetRes, err error) {
+	v, err := c.client.Resource.Query().Queries(i).First(ctx)
+	if err != nil {
+		return
+	}
+	res.ID = v.ID
+
+	res.Name = v.Name
+
+	res.Key = v.Key
+
+	res.Path = v.Path
+
+	res.Action = v.Action
+
+	res.Comments = v.Comments
+
 	return
 }
 
 func (c *ResourceBase) ByQueriesAll(ctx context.Context, i interface{}) (res []ResourceBaseGetRes, count int, err error) {
-	query := c.client.Resource.Query()
-	ResourceBaseGetSelect(query)
-	count, err = query.ByQueriesAll(ctx, i, &res)
+	vs, count, err := c.client.Resource.Query().ByQueriesAll(ctx, i)
+	for _, v := range vs {
+		res = append(res, ResourceBaseGetRes{
+			ID: v.ID,
+
+			Name: v.Name,
+
+			Key: v.Key,
+
+			Path: v.Path,
+
+			Action: v.Action,
+
+			Comments: v.Comments,
+		})
+	}
 	return
 }
 
 type ResourceBaseUpdateReq struct {
 	ID int `json:"id,omitempty"`
+
+	Name string `json:"name,omitempty"`
+
+	Key string `json:"key,omitempty"`
+
+	Path string `json:"path,omitempty"`
+
+	Action string `json:"action,omitempty"`
+
+	Comments string `json:"comments,omitempty"`
 }
 
 func ResourceBaseUpdateSet(update *ResourceUpdateOne, v ResourceBaseUpdateReq) *ResourceUpdateOne {
-	return update
+	return update.
+		SetName(v.Name).
+		SetKey(v.Key).
+		SetPath(v.Path).
+		SetAction(v.Action).
+		SetComments(v.Comments)
 }
 
 func (c *ResourceBase) UpdateById(ctx context.Context, id int, v ResourceBaseUpdateReq) (*Resource, error) {
@@ -655,6 +831,7 @@ type ServiceBaseInterface interface {
 	CreateMany(ctx context.Context, vs []ServiceBaseCreateReq) (Services, error)
 	GetById(ctx context.Context, id int) (res ServiceBaseGetRes, err error)
 	ByQueriesAll(ctx context.Context, i interface{}) (res []ServiceBaseGetRes, count int, err error)
+	ByQueriesOne(ctx context.Context, i interface{}) (res ServiceBaseGetRes, err error)
 	UpdateById(ctx context.Context, id int, v ServiceBaseUpdateReq) (*Service, error)
 	UpdateMany(ctx context.Context, vs []ServiceBaseUpdateReq) (err error)
 	DeleteById(ctx context.Context, id int) error
@@ -668,10 +845,27 @@ type ServiceBase struct {
 	client *Client
 }
 type ServiceBaseCreateReq struct {
+	Name string `json:"name,omitempty""`
+
+	Aname string `json:"aname,omitempty""`
+
+	Comments string `json:"comments,omitempty""`
+
+	Classes service.Classes `json:"classes,omitempty""`
+
+	Lang string `json:"lang,omitempty""`
+
+	Git string `json:"git,omitempty""`
 }
 
 func ServiceBaseCreateSet(create *ServiceCreate, v ServiceBaseCreateReq) *ServiceCreate {
-	return create
+	return create.
+		SetName(v.Name).
+		SetAname(v.Aname).
+		SetComments(v.Comments).
+		SetClasses(v.Classes).
+		SetLang(v.Lang).
+		SetGit(v.Git)
 }
 
 func (c *ServiceBase) Create(ctx context.Context, v ServiceBaseCreateReq) (res *Service, err error) {
@@ -692,44 +886,114 @@ func (c *ServiceBase) CreateMany(ctx context.Context, vs []ServiceBaseCreateReq)
 
 type ServiceBaseGetRes struct {
 	ID int `json:"id,omitempty"`
-}
 
-func ServiceBaseGetSelect(query *ServiceQuery) *ServiceSelect {
+	Name string `json:"name,omitempty"`
 
-	return query.Select(
+	Aname string `json:"aname,omitempty"`
 
-		service.Columns...,
-	)
+	Comments string `json:"comments,omitempty"`
+
+	Classes service.Classes `json:"classes,omitempty"`
+
+	Lang string `json:"lang,omitempty"`
+
+	Git string `json:"git,omitempty"`
 }
 
 func (c *ServiceBase) GetById(ctx context.Context, id int) (res ServiceBaseGetRes, err error) {
 	query := c.client.Service.Query()
 	query = query.Where(service.IDEQ(id))
-	err = ServiceBaseGetSelect(query).Scan(ctx, &res)
 
-	v, err := ServiceBaseGetSelect(query).First(ctx)
+	v, err := query.First(ctx)
 	if err != nil {
 		return
 	}
 
 	res.ID = v.ID
 
+	res.Name = v.Name
+
+	res.Aname = v.Aname
+
+	res.Comments = v.Comments
+
+	res.Classes = v.Classes
+
+	res.Lang = v.Lang
+
+	res.Git = v.Git
+
+	return
+}
+
+func (c *ServiceBase) ByQueriesOne(ctx context.Context, i interface{}) (res ServiceBaseGetRes, err error) {
+	v, err := c.client.Service.Query().Queries(i).First(ctx)
+	if err != nil {
+		return
+	}
+	res.ID = v.ID
+
+	res.Name = v.Name
+
+	res.Aname = v.Aname
+
+	res.Comments = v.Comments
+
+	res.Classes = v.Classes
+
+	res.Lang = v.Lang
+
+	res.Git = v.Git
+
 	return
 }
 
 func (c *ServiceBase) ByQueriesAll(ctx context.Context, i interface{}) (res []ServiceBaseGetRes, count int, err error) {
-	query := c.client.Service.Query()
-	ServiceBaseGetSelect(query)
-	count, err = query.ByQueriesAll(ctx, i, &res)
+	vs, count, err := c.client.Service.Query().ByQueriesAll(ctx, i)
+	for _, v := range vs {
+		res = append(res, ServiceBaseGetRes{
+			ID: v.ID,
+
+			Name: v.Name,
+
+			Aname: v.Aname,
+
+			Comments: v.Comments,
+
+			Classes: v.Classes,
+
+			Lang: v.Lang,
+
+			Git: v.Git,
+		})
+	}
 	return
 }
 
 type ServiceBaseUpdateReq struct {
 	ID int `json:"id,omitempty"`
+
+	Name string `json:"name,omitempty"`
+
+	Aname string `json:"aname,omitempty"`
+
+	Comments string `json:"comments,omitempty"`
+
+	Classes service.Classes `json:"classes,omitempty"`
+
+	Lang string `json:"lang,omitempty"`
+
+	Git string `json:"git,omitempty"`
 }
 
 func ServiceBaseUpdateSet(update *ServiceUpdateOne, v ServiceBaseUpdateReq) *ServiceUpdateOne {
-	return update
+	return update.
+		SetName(v.Name).
+		SetAname(v.Aname).
+		SetComments(v.Comments).
+		SetClasses(v.Classes).
+		SetLang(v.Lang).
+		SetGit(v.Git)
 }
 
 func (c *ServiceBase) UpdateById(ctx context.Context, id int, v ServiceBaseUpdateReq) (*Service, error) {
@@ -798,11 +1062,22 @@ func (c *ServiceBase) CreateProjectByServiceId(ctx context.Context, id int, v Pr
 		return
 	}
 
-	return c.client.Service.UpdateOneID(id).SetProject(save).Save(ctx)
+	return tx.Service.UpdateOneID(id).SetProject(save).Save(ctx)
 }
 
 func (c *ServiceBase) GetProjectByServiceId(ctx context.Context, id int) (res ProjectBaseGetRes, err error) {
-	err = c.client.Service.Query().Where(service.ID(id)).QueryProject().Select(project.Columns...).Scan(ctx, &res)
+	v, err := c.client.Service.Query().Where(service.ID(id)).QueryProject().First(ctx)
+	if err != nil {
+		return
+	}
+	res.ID = v.ID
+
+	res.Name = v.Name
+
+	res.Aname = v.Aname
+
+	res.Comments = v.Comments
+
 	return
 }
 
@@ -815,6 +1090,7 @@ type SpiderDevTblServicetreeBaseInterface interface {
 	CreateMany(ctx context.Context, vs []SpiderDevTblServicetreeBaseCreateReq) (SpiderDevTblServicetrees, error)
 	GetById(ctx context.Context, id int32) (res SpiderDevTblServicetreeBaseGetRes, err error)
 	ByQueriesAll(ctx context.Context, i interface{}) (res []SpiderDevTblServicetreeBaseGetRes, count int, err error)
+	ByQueriesOne(ctx context.Context, i interface{}) (res SpiderDevTblServicetreeBaseGetRes, err error)
 	UpdateById(ctx context.Context, id int32, v SpiderDevTblServicetreeBaseUpdateReq) (*SpiderDevTblServicetree, error)
 	UpdateMany(ctx context.Context, vs []SpiderDevTblServicetreeBaseUpdateReq) (err error)
 	DeleteById(ctx context.Context, id int32) error
@@ -851,20 +1127,11 @@ type SpiderDevTblServicetreeBaseGetRes struct {
 	ID int32 `json:"id,omitempty"`
 }
 
-func SpiderDevTblServicetreeBaseGetSelect(query *SpiderDevTblServicetreeQuery) *SpiderDevTblServicetreeSelect {
-
-	return query.Select(
-
-		spiderdevtblservicetree.Columns...,
-	)
-}
-
 func (c *SpiderDevTblServicetreeBase) GetById(ctx context.Context, id int32) (res SpiderDevTblServicetreeBaseGetRes, err error) {
 	query := c.client.SpiderDevTblServicetree.Query()
 	query = query.Where(spiderdevtblservicetree.IDEQ(id))
-	err = SpiderDevTblServicetreeBaseGetSelect(query).Scan(ctx, &res)
 
-	v, err := SpiderDevTblServicetreeBaseGetSelect(query).First(ctx)
+	v, err := query.First(ctx)
 	if err != nil {
 		return
 	}
@@ -874,10 +1141,23 @@ func (c *SpiderDevTblServicetreeBase) GetById(ctx context.Context, id int32) (re
 	return
 }
 
+func (c *SpiderDevTblServicetreeBase) ByQueriesOne(ctx context.Context, i interface{}) (res SpiderDevTblServicetreeBaseGetRes, err error) {
+	v, err := c.client.SpiderDevTblServicetree.Query().Queries(i).First(ctx)
+	if err != nil {
+		return
+	}
+	res.ID = v.ID
+
+	return
+}
+
 func (c *SpiderDevTblServicetreeBase) ByQueriesAll(ctx context.Context, i interface{}) (res []SpiderDevTblServicetreeBaseGetRes, count int, err error) {
-	query := c.client.SpiderDevTblServicetree.Query()
-	SpiderDevTblServicetreeBaseGetSelect(query)
-	count, err = query.ByQueriesAll(ctx, i, &res)
+	vs, count, err := c.client.SpiderDevTblServicetree.Query().ByQueriesAll(ctx, i)
+	for _, v := range vs {
+		res = append(res, SpiderDevTblServicetreeBaseGetRes{
+			ID: v.ID,
+		})
+	}
 	return
 }
 
@@ -942,6 +1222,7 @@ type UserBaseInterface interface {
 	CreateMany(ctx context.Context, vs []UserBaseCreateReq) (Users, error)
 	GetById(ctx context.Context, id int) (res UserBaseGetRes, err error)
 	ByQueriesAll(ctx context.Context, i interface{}) (res []UserBaseGetRes, count int, err error)
+	ByQueriesOne(ctx context.Context, i interface{}) (res UserBaseGetRes, err error)
 	UpdateById(ctx context.Context, id int, v UserBaseUpdateReq) (*User, error)
 	UpdateMany(ctx context.Context, vs []UserBaseUpdateReq) (err error)
 	DeleteById(ctx context.Context, id int) error
@@ -1002,23 +1283,11 @@ type UserBaseGetRes struct {
 	Name string `json:"name,omitempty"`
 }
 
-func UserBaseGetSelect(query *UserQuery) *UserSelect {
-
-	return query.Select(
-		user.FieldPassWord,
-		user.FieldToken,
-		user.FieldEnable,
-		user.FieldAge,
-		user.FieldName,
-	)
-}
-
 func (c *UserBase) GetById(ctx context.Context, id int) (res UserBaseGetRes, err error) {
 	query := c.client.User.Query()
 	query = query.Where(user.IDEQ(id))
-	err = UserBaseGetSelect(query).Scan(ctx, &res)
 
-	v, err := UserBaseGetSelect(query).First(ctx)
+	v, err := query.First(ctx)
 	if err != nil {
 		return
 	}
@@ -1038,10 +1307,43 @@ func (c *UserBase) GetById(ctx context.Context, id int) (res UserBaseGetRes, err
 	return
 }
 
+func (c *UserBase) ByQueriesOne(ctx context.Context, i interface{}) (res UserBaseGetRes, err error) {
+	v, err := c.client.User.Query().Queries(i).First(ctx)
+	if err != nil {
+		return
+	}
+	res.ID = v.ID
+
+	res.PassWord = v.PassWord
+
+	res.Token = v.Token
+
+	res.Enable = v.Enable
+
+	res.Age = v.Age
+
+	res.Name = v.Name
+
+	return
+}
+
 func (c *UserBase) ByQueriesAll(ctx context.Context, i interface{}) (res []UserBaseGetRes, count int, err error) {
-	query := c.client.User.Query()
-	UserBaseGetSelect(query)
-	count, err = query.ByQueriesAll(ctx, i, &res)
+	vs, count, err := c.client.User.Query().ByQueriesAll(ctx, i)
+	for _, v := range vs {
+		res = append(res, UserBaseGetRes{
+			ID: v.ID,
+
+			PassWord: v.PassWord,
+
+			Token: v.Token,
+
+			Enable: v.Enable,
+
+			Age: v.Age,
+
+			Name: v.Name,
+		})
+	}
 	return
 }
 
@@ -1209,6 +1511,29 @@ type AuditRestGetByIdReq struct {
 		Id int `json:"id" uri:"auditId"`
 	}
 }
+type AuditRestGetByIdReq struct {
+	ID int `json:"id,omitempty"`
+
+	URL string `json:"url,omitempty"`
+
+	Query string `json:"query,omitempty"`
+
+	Method string `json:"method,omitempty"`
+
+	Request string `json:"request,omitempty"`
+
+	Response string `json:"response,omitempty"`
+
+	Header string `json:"header,omitempty"`
+
+	StatusCode int `json:"status_code,omitempty"`
+
+	RemoteIP string `json:"remote_ip,omitempty"`
+
+	ClientIP string `json:"client_ip,omitempty"`
+
+	CostTime string `json:"cost_time,omitempty"`
+}
 
 func (rest *AuditRest) AuditRestGetById(ctx context.Context, req AuditRestGetByIdReq) (res AuditBaseGetRes, err error) {
 	return rest.repo.GetById(ctx, req.Uri.Id)
@@ -1297,10 +1622,10 @@ type ProjectRestInterface interface {
 	// @http-gin /projects DELETE
 	ProjectRestDeleteMany(ctx context.Context, req ProjectRestDeleteManyReq) (success bool, err error)
 
-	// @http-gin /projects/:projectId/servicesslice POST
-	ProjectRestCreateServicesSliceByProjectId(ctx context.Context, req ProjectRestCreateServicesSliceByProjectIdReq) (res *Project, err error)
+	// @http-gin /projects/:projectId/services POST
+	ProjectRestCreateServicesByProjectId(ctx context.Context, req ProjectRestCreateServicesByProjectIdReq) (res *Project, err error)
 	// @http-gin /projects/:projectId/services GET
-	ProjectRestGetServicesSliceByProjectId(ctx context.Context, req ProjectRestGetServicesSliceByProjectIdReq) (res ProjectRestGetServicesSliceByProjectIdRes, err error)
+	ProjectRestGetServicesByProjectId(ctx context.Context, req ProjectRestGetServicesByProjectIdReq) (res ProjectRestGetServicesByProjectIdRes, err error)
 }
 
 func NewProjectRest(client *Client) ProjectRestInterface {
@@ -1331,6 +1656,15 @@ type ProjectRestGetByIdReq struct {
 	Uri struct {
 		Id int `json:"id" uri:"projectId"`
 	}
+}
+type ProjectRestGetByIdReq struct {
+	ID int `json:"id,omitempty"`
+
+	Name string `json:"name,omitempty"`
+
+	Aname string `json:"aname,omitempty"`
+
+	Comments string `json:"comments,omitempty"`
 }
 
 func (rest *ProjectRest) ProjectRestGetById(ctx context.Context, req ProjectRestGetByIdReq) (res ProjectBaseGetRes, err error) {
@@ -1402,32 +1736,32 @@ func (rest *ProjectRest) ProjectRestDeleteMany(ctx context.Context, req ProjectR
 	return true, err
 }
 
-type ProjectRestCreateServicesSliceByProjectIdReq struct {
+type ProjectRestCreateServicesByProjectIdReq struct {
 	Uri struct {
 		Id int `json:"id" uri:"projectId"`
 	}
 	Body []ServiceBaseCreateReq `json:"body"`
 }
 
-func (rest *ProjectRest) ProjectRestCreateServicesSliceByProjectId(ctx context.Context, req ProjectRestCreateServicesSliceByProjectIdReq) (res *Project, err error) {
-	return rest.repo.CreateServicesSliceByProjectId(ctx, req.Uri.Id, req.Body)
+func (rest *ProjectRest) ProjectRestCreateServicesByProjectId(ctx context.Context, req ProjectRestCreateServicesByProjectIdReq) (res *Project, err error) {
+	return rest.repo.CreateServicesByProjectId(ctx, req.Uri.Id, req.Body)
 }
 
-type ProjectRestGetServicesSliceByProjectIdReq struct {
+type ProjectRestGetServicesByProjectIdReq struct {
 	Uri struct {
 		Id int `json:"id" uri:"projectId"`
 	} `json:"uri"`
 	Query ServiceQueryOps `json:"query"`
 }
 
-type ProjectRestGetServicesSliceByProjectIdRes struct {
+type ProjectRestGetServicesByProjectIdRes struct {
 	List  []ServiceBaseGetRes `json:"list"`
 	Total int                 `json:"total"`
 }
 
-func (rest *ProjectRest) ProjectRestGetServicesSliceByProjectId(ctx context.Context, req ProjectRestGetServicesSliceByProjectIdReq) (res ProjectRestGetServicesSliceByProjectIdRes, err error) {
-	list, total, err := rest.repo.GetServicesSliceByProjectId(ctx, req.Uri.Id, req.Query)
-	return ProjectRestGetServicesSliceByProjectIdRes{List: list, Total: total}, err
+func (rest *ProjectRest) ProjectRestGetServicesByProjectId(ctx context.Context, req ProjectRestGetServicesByProjectIdReq) (res ProjectRestGetServicesByProjectIdRes, err error) {
+	list, total, err := rest.repo.GetServicesByProjectId(ctx, req.Uri.Id, req.Query)
+	return ProjectRestGetServicesByProjectIdRes{List: list, Total: total}, err
 }
 
 type ResourceRestInterface interface {
@@ -1477,6 +1811,19 @@ type ResourceRestGetByIdReq struct {
 	Uri struct {
 		Id int `json:"id" uri:"resourceId"`
 	}
+}
+type ResourceRestGetByIdReq struct {
+	ID int `json:"id,omitempty"`
+
+	Name string `json:"name,omitempty"`
+
+	Key string `json:"key,omitempty"`
+
+	Path string `json:"path,omitempty"`
+
+	Action string `json:"action,omitempty"`
+
+	Comments string `json:"comments,omitempty"`
 }
 
 func (rest *ResourceRest) ResourceRestGetById(ctx context.Context, req ResourceRestGetByIdReq) (res ResourceBaseGetRes, err error) {
@@ -1600,6 +1947,21 @@ type ServiceRestGetByIdReq struct {
 	Uri struct {
 		Id int `json:"id" uri:"serviceId"`
 	}
+}
+type ServiceRestGetByIdReq struct {
+	ID int `json:"id,omitempty"`
+
+	Name string `json:"name,omitempty"`
+
+	Aname string `json:"aname,omitempty"`
+
+	Comments string `json:"comments,omitempty"`
+
+	Classes service.Classes `json:"classes,omitempty"`
+
+	Lang string `json:"lang,omitempty"`
+
+	Git string `json:"git,omitempty"`
 }
 
 func (rest *ServiceRest) ServiceRestGetById(ctx context.Context, req ServiceRestGetByIdReq) (res ServiceBaseGetRes, err error) {
@@ -1740,6 +2102,9 @@ type SpiderDevTblServicetreeRestGetByIdReq struct {
 		Id int32 `json:"id" uri:"spiderdevtblservicetreeId"`
 	}
 }
+type SpiderDevTblServicetreeRestGetByIdReq struct {
+	ID int32 `json:"id,omitempty"`
+}
 
 func (rest *SpiderDevTblServicetreeRest) SpiderDevTblServicetreeRestGetById(ctx context.Context, req SpiderDevTblServicetreeRestGetByIdReq) (res SpiderDevTblServicetreeBaseGetRes, err error) {
 	return rest.repo.GetById(ctx, req.Uri.Id)
@@ -1857,6 +2222,19 @@ type UserRestGetByIdReq struct {
 	Uri struct {
 		Id int `json:"id" uri:"userId"`
 	}
+}
+type UserRestGetByIdReq struct {
+	ID int `json:"id,omitempty"`
+
+	PassWord string `json:"pass_word"`
+
+	Token string `json:"token,omitempty"`
+
+	Enable bool `json:"enable,omitempty"`
+
+	Age int `json:"age,omitempty" fake:"{number:0,150}"`
+
+	Name string `json:"name,omitempty"`
 }
 
 func (rest *UserRest) UserRestGetById(ctx context.Context, req UserRestGetByIdReq) (res UserBaseGetRes, err error) {

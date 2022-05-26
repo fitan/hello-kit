@@ -21,12 +21,42 @@ func (Service) Mixin() []ent.Mixin {
 // Fields of the Service.
 func (Service) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name"),
-		field.String("aname"),
-		field.String("comments"),
-		field.Enum("classes").Values("app", "middleware"),
-		field.String("lang"),
-		field.String("git"),
+		field.String("name").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
+		field.String("aname").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
+		field.String("comments").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
+		field.Enum("classes").Values("app", "middleware").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
+		field.String("lang").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
+		field.String("git").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
 	}
 }
 

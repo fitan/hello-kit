@@ -52,6 +52,20 @@ func (_d UserServiceWithPrometheus) ByQueriesAll(ctx context.Context, i interfac
 	return _d.base.ByQueriesAll(ctx, i)
 }
 
+// ByQueriesOne implements UserService
+func (_d UserServiceWithPrometheus) ByQueriesOne(ctx context.Context, i interface{}) (res ent.UserBaseGetRes, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ByQueriesOne", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.ByQueriesOne(ctx, i)
+}
+
 // Create implements UserService
 func (_d UserServiceWithPrometheus) Create(ctx context.Context, v ent.UserBaseCreateReq) (res *ent.User, err error) {
 	_since := time.Now()

@@ -20,11 +20,36 @@ func (Resource) Mixin() []ent.Mixin {
 // Fields of the Resource.
 func (Resource) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name"),
-		field.String("key"),
-		field.String("path"),
-		field.String("action"),
-		field.String("comments"),
+		field.String("name").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
+		field.String("key").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
+		field.String("path").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
+		field.String("action").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
+		field.String("comments").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
 	}
 }
 

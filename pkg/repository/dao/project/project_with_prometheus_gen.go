@@ -53,6 +53,20 @@ func (_d ProjectServiceWithPrometheus) ByQueriesAll(ctx context.Context, i inter
 	return _d.base.ByQueriesAll(ctx, i)
 }
 
+// ByQueriesOne implements ProjectService
+func (_d ProjectServiceWithPrometheus) ByQueriesOne(ctx context.Context, i interface{}) (res ent.ProjectBaseGetRes, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ByQueriesOne", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.ByQueriesOne(ctx, i)
+}
+
 // Create implements ProjectService
 func (_d ProjectServiceWithPrometheus) Create(ctx context.Context, v ent.ProjectBaseCreateReq) (res *ent.Project, err error) {
 	_since := time.Now()
@@ -81,8 +95,8 @@ func (_d ProjectServiceWithPrometheus) CreateMany(ctx context.Context, vs []ent.
 	return _d.base.CreateMany(ctx, vs)
 }
 
-// CreateServicesSliceByProjectId implements ProjectService
-func (_d ProjectServiceWithPrometheus) CreateServicesSliceByProjectId(ctx context.Context, id int, vs []ent.ServiceBaseCreateReq) (res *ent.Project, err error) {
+// CreateServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithPrometheus) CreateServicesByProjectId(ctx context.Context, id int, vs []ent.ServiceBaseCreateReq) (res *ent.Project, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -90,9 +104,9 @@ func (_d ProjectServiceWithPrometheus) CreateServicesSliceByProjectId(ctx contex
 			result = "error"
 		}
 
-		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "CreateServicesSliceByProjectId", result).Observe(time.Since(_since).Seconds())
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "CreateServicesByProjectId", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.CreateServicesSliceByProjectId(ctx, id, vs)
+	return _d.base.CreateServicesByProjectId(ctx, id, vs)
 }
 
 // DeleteById implements ProjectService
@@ -151,8 +165,8 @@ func (_d ProjectServiceWithPrometheus) GetOneWithServiceQsById(ctx context.Conte
 	return _d.base.GetOneWithServiceQsById(ctx, id, qs)
 }
 
-// GetServicesSliceByProjectId implements ProjectService
-func (_d ProjectServiceWithPrometheus) GetServicesSliceByProjectId(ctx context.Context, id int, i interface{}) (res []ent.ServiceBaseGetRes, count int, err error) {
+// GetServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithPrometheus) GetServicesByProjectId(ctx context.Context, id int, i interface{}) (res []ent.ServiceBaseGetRes, count int, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -160,9 +174,9 @@ func (_d ProjectServiceWithPrometheus) GetServicesSliceByProjectId(ctx context.C
 			result = "error"
 		}
 
-		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetServicesSliceByProjectId", result).Observe(time.Since(_since).Seconds())
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetServicesByProjectId", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.GetServicesSliceByProjectId(ctx, id, i)
+	return _d.base.GetServicesByProjectId(ctx, id, i)
 }
 
 // UpdateById implements ProjectService

@@ -56,6 +56,30 @@ func (_d ProjectServiceWithTracing) ByQueriesAll(ctx context.Context, i interfac
 	return _d.ProjectService.ByQueriesAll(ctx, i)
 }
 
+// ByQueriesOne implements ProjectService
+func (_d ProjectServiceWithTracing) ByQueriesOne(ctx context.Context, i interface{}) (res ent.ProjectBaseGetRes, err error) {
+
+	var name = "ProjectService.ByQueriesOne"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"i": i},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ProjectService.ByQueriesOne(ctx, i)
+}
+
 // Create implements ProjectService
 func (_d ProjectServiceWithTracing) Create(ctx context.Context, v ent.ProjectBaseCreateReq) (res *ent.Project, err error) {
 
@@ -104,10 +128,10 @@ func (_d ProjectServiceWithTracing) CreateMany(ctx context.Context, vs []ent.Pro
 	return _d.ProjectService.CreateMany(ctx, vs)
 }
 
-// CreateServicesSliceByProjectId implements ProjectService
-func (_d ProjectServiceWithTracing) CreateServicesSliceByProjectId(ctx context.Context, id int, vs []ent.ServiceBaseCreateReq) (res *ent.Project, err error) {
+// CreateServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithTracing) CreateServicesByProjectId(ctx context.Context, id int, vs []ent.ServiceBaseCreateReq) (res *ent.Project, err error) {
 
-	var name = "ProjectService.CreateServicesSliceByProjectId"
+	var name = "ProjectService.CreateServicesByProjectId"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -126,7 +150,7 @@ func (_d ProjectServiceWithTracing) CreateServicesSliceByProjectId(ctx context.C
 		span.End()
 	}()
 
-	return _d.ProjectService.CreateServicesSliceByProjectId(ctx, id, vs)
+	return _d.ProjectService.CreateServicesByProjectId(ctx, id, vs)
 }
 
 // DeleteById implements ProjectService
@@ -224,10 +248,10 @@ func (_d ProjectServiceWithTracing) GetOneWithServiceQsById(ctx context.Context,
 	return _d.ProjectService.GetOneWithServiceQsById(ctx, id, qs)
 }
 
-// GetServicesSliceByProjectId implements ProjectService
-func (_d ProjectServiceWithTracing) GetServicesSliceByProjectId(ctx context.Context, id int, i interface{}) (res []ent.ServiceBaseGetRes, count int, err error) {
+// GetServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithTracing) GetServicesByProjectId(ctx context.Context, id int, i interface{}) (res []ent.ServiceBaseGetRes, count int, err error) {
 
-	var name = "ProjectService.GetServicesSliceByProjectId"
+	var name = "ProjectService.GetServicesByProjectId"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -247,7 +271,7 @@ func (_d ProjectServiceWithTracing) GetServicesSliceByProjectId(ctx context.Cont
 		span.End()
 	}()
 
-	return _d.ProjectService.GetServicesSliceByProjectId(ctx, id, i)
+	return _d.ProjectService.GetServicesByProjectId(ctx, id, i)
 }
 
 // UpdateById implements ProjectService

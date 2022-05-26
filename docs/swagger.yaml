@@ -167,16 +167,35 @@ definitions:
         type: string
     type: object
   ent.ProjectBaseCreateReq:
+    properties:
+      aname:
+        type: string
+      comments:
+        type: string
+      name:
+        type: string
     type: object
   ent.ProjectBaseGetRes:
     properties:
+      aname:
+        type: string
+      comments:
+        type: string
       id:
         type: integer
+      name:
+        type: string
     type: object
   ent.ProjectBaseUpdateReq:
     properties:
+      aname:
+        type: string
+      comments:
+        type: string
       id:
         type: integer
+      name:
+        type: string
     type: object
   ent.ProjectEdges:
     properties:
@@ -195,11 +214,90 @@ definitions:
       total:
         type: integer
     type: object
-  ent.ProjectRestGetServicesSliceByProjectIdRes:
+  ent.ProjectRestGetServicesByProjectIdRes:
     properties:
       list:
         items:
           $ref: '#/definitions/ent.ServiceBaseGetRes'
+        type: array
+      total:
+        type: integer
+    type: object
+  ent.Resource:
+    properties:
+      action:
+        description: Action holds the value of the "action" field.
+        type: string
+      comments:
+        description: Comments holds the value of the "comments" field.
+        type: string
+      create_time:
+        description: CreateTime holds the value of the "create_time" field.
+        type: string
+      id:
+        description: ID of the ent.
+        type: integer
+      key:
+        description: Key holds the value of the "key" field.
+        type: string
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
+      path:
+        description: Path holds the value of the "path" field.
+        type: string
+      update_time:
+        description: UpdateTime holds the value of the "update_time" field.
+        type: string
+    type: object
+  ent.ResourceBaseCreateReq:
+    properties:
+      action:
+        type: string
+      comments:
+        type: string
+      key:
+        type: string
+      name:
+        type: string
+      path:
+        type: string
+    type: object
+  ent.ResourceBaseGetRes:
+    properties:
+      action:
+        type: string
+      comments:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      name:
+        type: string
+      path:
+        type: string
+    type: object
+  ent.ResourceBaseUpdateReq:
+    properties:
+      action:
+        type: string
+      comments:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      name:
+        type: string
+      path:
+        type: string
+    type: object
+  ent.ResourceRestByQueriesAllRes:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/ent.ResourceBaseGetRes'
         type: array
       total:
         type: integer
@@ -240,17 +338,68 @@ definitions:
         type: string
     type: object
   ent.ServiceBaseCreateReq:
+    properties:
+      aname:
+        type: string
+      classes:
+        type: string
+      comments:
+        type: string
+      git:
+        type: string
+      lang:
+        type: string
+      name:
+        type: string
     type: object
   ent.ServiceBaseGetRes:
     properties:
+      aname:
+        type: string
+      classes:
+        type: string
+      comments:
+        type: string
+      git:
+        type: string
       id:
         type: integer
+      lang:
+        type: string
+      name:
+        type: string
+    type: object
+  ent.ServiceBaseUpdateReq:
+    properties:
+      aname:
+        type: string
+      classes:
+        type: string
+      comments:
+        type: string
+      git:
+        type: string
+      id:
+        type: integer
+      lang:
+        type: string
+      name:
+        type: string
     type: object
   ent.ServiceEdges:
     properties:
       project:
         $ref: '#/definitions/ent.Project'
         description: Project holds the value of the project edge.
+    type: object
+  ent.ServiceRestByQueriesAllRes:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/ent.ServiceBaseGetRes'
+        type: array
+      total:
+        type: integer
     type: object
   ent.User:
     properties:
@@ -326,13 +475,111 @@ definitions:
         type: integer
     type: object
   project.ProjectRestCreateBodySwag:
+    properties:
+      aname:
+        type: string
+      comments:
+        type: string
+      name:
+        type: string
     type: object
   project.ProjectRestUpdateByIdBodySwag:
     properties:
+      aname:
+        type: string
+      comments:
+        type: string
       id:
         type: integer
+      name:
+        type: string
     type: object
   project.SwagResponse:
+    properties:
+      data: {}
+      status:
+        type: integer
+      traceId:
+        type: string
+    type: object
+  resource.ResourceRestCreateBodySwag:
+    properties:
+      action:
+        type: string
+      comments:
+        type: string
+      key:
+        type: string
+      name:
+        type: string
+      path:
+        type: string
+    type: object
+  resource.ResourceRestUpdateByIdBodySwag:
+    properties:
+      action:
+        type: string
+      comments:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      name:
+        type: string
+      path:
+        type: string
+    type: object
+  resource.SwagResponse:
+    properties:
+      data: {}
+      status:
+        type: integer
+      traceId:
+        type: string
+    type: object
+  service.ServiceRestCreateBodySwag:
+    properties:
+      aname:
+        type: string
+      classes:
+        type: string
+      comments:
+        type: string
+      git:
+        type: string
+      lang:
+        type: string
+      name:
+        type: string
+    type: object
+  service.ServiceRestCreateProjectByServiceIdBodySwag:
+    properties:
+      aname:
+        type: string
+      comments:
+        type: string
+      name:
+        type: string
+    type: object
+  service.ServiceRestUpdateByIdBodySwag:
+    properties:
+      aname:
+        type: string
+      classes:
+        type: string
+      comments:
+        type: string
+      git:
+        type: string
+      id:
+        type: integer
+      lang:
+        type: string
+      name:
+        type: string
+    type: object
+  service.SwagResponse:
     properties:
       data: {}
       status:
@@ -801,11 +1048,10 @@ paths:
             - $ref: '#/definitions/project.SwagResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/ent.ProjectRestGetServicesSliceByProjectIdRes'
+                  $ref: '#/definitions/ent.ProjectRestGetServicesByProjectIdRes'
               type: object
       tags:
       - ProjectService
-  /projects/{projectId}/servicesslice:
     post:
       consumes:
       - application/json
@@ -835,6 +1081,417 @@ paths:
               type: object
       tags:
       - ProjectService
+  /resource:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/resource.ResourceRestCreateBodySwag'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.Resource'
+              type: object
+      tags:
+      - ResourceService
+  /resources:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - collectionFormat: multi
+        in: query
+        items:
+          type: integer
+        name: ids
+        type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+      tags:
+      - ResourceService
+    get:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.ResourceRestByQueriesAllRes'
+              type: object
+      tags:
+      - ResourceService
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/ent.ResourceBaseCreateReq'
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/ent.Resource'
+                  type: array
+              type: object
+      tags:
+      - ResourceService
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/ent.ResourceBaseUpdateReq'
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+      tags:
+      - ResourceService
+  /resources/{resourceId}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: resourceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+      tags:
+      - ResourceService
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: resourceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.ResourceBaseGetRes'
+              type: object
+      tags:
+      - ResourceService
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/resource.ResourceRestUpdateByIdBodySwag'
+      - description: ' '
+        in: path
+        name: resourceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.Resource'
+              type: object
+      tags:
+      - ResourceService
+  /service:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.ServiceRestCreateBodySwag'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/service.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.Service'
+              type: object
+      tags:
+      - ServiceService
+  /services:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - collectionFormat: multi
+        in: query
+        items:
+          type: integer
+        name: ids
+        type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/service.SwagResponse'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+      tags:
+      - ServiceService
+    get:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/service.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.ServiceRestByQueriesAllRes'
+              type: object
+      tags:
+      - ServiceService
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/ent.ServiceBaseCreateReq'
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/service.SwagResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/ent.Service'
+                  type: array
+              type: object
+      tags:
+      - ServiceService
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/ent.ServiceBaseUpdateReq'
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/service.SwagResponse'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+      tags:
+      - ServiceService
+  /services/{serviceId}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/service.SwagResponse'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+      tags:
+      - ServiceService
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/service.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.ServiceBaseGetRes'
+              type: object
+      tags:
+      - ServiceService
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.ServiceRestUpdateByIdBodySwag'
+      - description: ' '
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/service.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.Service'
+              type: object
+      tags:
+      - ServiceService
+  /services/{serviceId}/project:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/service.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.ProjectBaseGetRes'
+              type: object
+      tags:
+      - ServiceService
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.ServiceRestCreateProjectByServiceIdBodySwag'
+      - description: ' '
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/service.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.Service'
+              type: object
+      tags:
+      - ServiceService
   /user:
     post:
       consumes:

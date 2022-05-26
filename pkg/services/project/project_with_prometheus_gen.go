@@ -80,8 +80,8 @@ func (_d ProjectServiceWithPrometheus) ProjectRestCreateMany(ctx context.Context
 	return _d.base.ProjectRestCreateMany(ctx, req)
 }
 
-// ProjectRestCreateServicesSliceByProjectId implements ProjectService
-func (_d ProjectServiceWithPrometheus) ProjectRestCreateServicesSliceByProjectId(ctx context.Context, req ent.ProjectRestCreateServicesSliceByProjectIdReq) (res *ent.Project, err error) {
+// ProjectRestCreateServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithPrometheus) ProjectRestCreateServicesByProjectId(ctx context.Context, req ent.ProjectRestCreateServicesByProjectIdReq) (res *ent.Project, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -89,9 +89,9 @@ func (_d ProjectServiceWithPrometheus) ProjectRestCreateServicesSliceByProjectId
 			result = "error"
 		}
 
-		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ProjectRestCreateServicesSliceByProjectId", result).Observe(time.Since(_since).Seconds())
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ProjectRestCreateServicesByProjectId", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.ProjectRestCreateServicesSliceByProjectId(ctx, req)
+	return _d.base.ProjectRestCreateServicesByProjectId(ctx, req)
 }
 
 // ProjectRestDeleteById implements ProjectService
@@ -136,8 +136,8 @@ func (_d ProjectServiceWithPrometheus) ProjectRestGetById(ctx context.Context, r
 	return _d.base.ProjectRestGetById(ctx, req)
 }
 
-// ProjectRestGetServicesSliceByProjectId implements ProjectService
-func (_d ProjectServiceWithPrometheus) ProjectRestGetServicesSliceByProjectId(ctx context.Context, req ent.ProjectRestGetServicesSliceByProjectIdReq) (res ent.ProjectRestGetServicesSliceByProjectIdRes, err error) {
+// ProjectRestGetServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithPrometheus) ProjectRestGetServicesByProjectId(ctx context.Context, req ent.ProjectRestGetServicesByProjectIdReq) (res ent.ProjectRestGetServicesByProjectIdRes, err error) {
 	_since := time.Now()
 	defer func() {
 		result := "ok"
@@ -145,9 +145,9 @@ func (_d ProjectServiceWithPrometheus) ProjectRestGetServicesSliceByProjectId(ct
 			result = "error"
 		}
 
-		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ProjectRestGetServicesSliceByProjectId", result).Observe(time.Since(_since).Seconds())
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ProjectRestGetServicesByProjectId", result).Observe(time.Since(_since).Seconds())
 	}()
-	return _d.base.ProjectRestGetServicesSliceByProjectId(ctx, req)
+	return _d.base.ProjectRestGetServicesByProjectId(ctx, req)
 }
 
 // ProjectRestUpdateById implements ProjectService

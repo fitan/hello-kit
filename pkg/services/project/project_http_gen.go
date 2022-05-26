@@ -6,9 +6,10 @@ package project
 
 import (
 	"context"
+	"hello/pkg/debug"
+
 	"github.com/fitan/gink/transport/http"
 	"github.com/gin-gonic/gin"
-	"hello/pkg/debug"
 
 	"hello/pkg/ent"
 )
@@ -24,7 +25,7 @@ func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option ht
 
 		ProjectRestCreateManyMethodName,
 
-		ProjectRestCreateServicesSliceByProjectIdMethodName,
+		ProjectRestCreateServicesByProjectIdMethodName,
 
 		ProjectRestDeleteByIdMethodName,
 
@@ -32,7 +33,7 @@ func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option ht
 
 		ProjectRestGetByIdMethodName,
 
-		ProjectRestGetServicesSliceByProjectIdMethodName,
+		ProjectRestGetServicesByProjectIdMethodName,
 
 		ProjectRestUpdateByIdMethodName,
 
@@ -54,7 +55,7 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch
 
 	debugSwitch.Register("ProjectRestCreateMany", "/projects", "POST")
 
-	debugSwitch.Register("ProjectRestCreateServicesSliceByProjectId", "/projects/:projectId/servicesslice", "POST")
+	debugSwitch.Register("ProjectRestCreateServicesByProjectId", "/projects/:projectId/services", "POST")
 
 	debugSwitch.Register("ProjectRestDeleteById", "/projects/:projectId", "DELETE")
 
@@ -62,7 +63,7 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch
 
 	debugSwitch.Register("ProjectRestGetById", "/projects/:projectId", "GET")
 
-	debugSwitch.Register("ProjectRestGetServicesSliceByProjectId", "/projects/:projectId/services", "GET")
+	debugSwitch.Register("ProjectRestGetServicesByProjectId", "/projects/:projectId/services", "GET")
 
 	debugSwitch.Register("ProjectRestUpdateById", "/projects/:projectId", "PUT")
 
@@ -74,7 +75,7 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch
 
 	makeProjectRestCreateManyHandler(r, endpoints, options[ProjectRestCreateManyMethodName])
 
-	makeProjectRestCreateServicesSliceByProjectIdHandler(r, endpoints, options[ProjectRestCreateServicesSliceByProjectIdMethodName])
+	makeProjectRestCreateServicesByProjectIdHandler(r, endpoints, options[ProjectRestCreateServicesByProjectIdMethodName])
 
 	makeProjectRestDeleteByIdHandler(r, endpoints, options[ProjectRestDeleteByIdMethodName])
 
@@ -82,7 +83,7 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch
 
 	makeProjectRestGetByIdHandler(r, endpoints, options[ProjectRestGetByIdMethodName])
 
-	makeProjectRestGetServicesSliceByProjectIdHandler(r, endpoints, options[ProjectRestGetServicesSliceByProjectIdMethodName])
+	makeProjectRestGetServicesByProjectIdHandler(r, endpoints, options[ProjectRestGetServicesByProjectIdMethodName])
 
 	makeProjectRestUpdateByIdHandler(r, endpoints, options[ProjectRestUpdateByIdMethodName])
 
@@ -166,20 +167,20 @@ func decodeProjectRestCreateManyRequest(_ context.Context, ctx *gin.Context) (in
 	return req, err
 }
 
-type ProjectRestCreateServicesSliceByProjectIdBodySwag []ent.ServiceBaseCreateReq
+type ProjectRestCreateServicesByProjectIdBodySwag []ent.ServiceBaseCreateReq
 
 // @Accept  json
 // @Tags ProjectService
-// @Param body body ProjectRestCreateServicesSliceByProjectIdBodySwag true " "
+// @Param body body ProjectRestCreateServicesByProjectIdBodySwag true " "
 // @Param projectId path string true " "
 // @Success 200 {object} SwagResponse{data=ent.Project}
-// @Router /projects/{projectId}/servicesslice [post]
-func makeProjectRestCreateServicesSliceByProjectIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
-	r.POST("/projects/:projectId/servicesslice", http.NewServer(endpoints.ProjectRestCreateServicesSliceByProjectIdEndpoint, decodeProjectRestCreateServicesSliceByProjectIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+// @Router /projects/{projectId}/services [post]
+func makeProjectRestCreateServicesByProjectIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.POST("/projects/:projectId/services", http.NewServer(endpoints.ProjectRestCreateServicesByProjectIdEndpoint, decodeProjectRestCreateServicesByProjectIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
-func decodeProjectRestCreateServicesSliceByProjectIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
-	var req ent.ProjectRestCreateServicesSliceByProjectIdReq
+func decodeProjectRestCreateServicesByProjectIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ProjectRestCreateServicesByProjectIdReq
 	var err error
 
 	err = ctx.ShouldBindUri(&req.Uri)
@@ -262,20 +263,20 @@ func decodeProjectRestGetByIdRequest(_ context.Context, ctx *gin.Context) (inter
 	return req, err
 }
 
-type ProjectRestGetServicesSliceByProjectIdQuerySwag ent.ServiceQueryOps
+type ProjectRestGetServicesByProjectIdQuerySwag ent.ServiceQueryOps
 
 // @Accept  json
 // @Tags ProjectService
-// @Param query query ProjectRestGetServicesSliceByProjectIdQuerySwag false " "
+// @Param query query ProjectRestGetServicesByProjectIdQuerySwag false " "
 // @Param projectId path string true " "
-// @Success 200 {object} SwagResponse{data=ent.ProjectRestGetServicesSliceByProjectIdRes}
+// @Success 200 {object} SwagResponse{data=ent.ProjectRestGetServicesByProjectIdRes}
 // @Router /projects/{projectId}/services [get]
-func makeProjectRestGetServicesSliceByProjectIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
-	r.GET("/projects/:projectId/services", http.NewServer(endpoints.ProjectRestGetServicesSliceByProjectIdEndpoint, decodeProjectRestGetServicesSliceByProjectIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+func makeProjectRestGetServicesByProjectIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.GET("/projects/:projectId/services", http.NewServer(endpoints.ProjectRestGetServicesByProjectIdEndpoint, decodeProjectRestGetServicesByProjectIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
-func decodeProjectRestGetServicesSliceByProjectIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
-	var req ent.ProjectRestGetServicesSliceByProjectIdReq
+func decodeProjectRestGetServicesByProjectIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ProjectRestGetServicesByProjectIdReq
 	var err error
 
 	err = ctx.ShouldBindQuery(&req.Query)

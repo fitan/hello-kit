@@ -5,6 +5,8 @@ package casbin
 // gowrap: http://github.com/fitan/gowrap
 
 import (
+	"fmt"
+
 	ginkHttp "github.com/fitan/gink/transport/http"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
@@ -38,26 +40,26 @@ func (_d CasbinServiceWithLog) AddRoleAuthorization(ctx context.Context, role Ro
 			if err == nil {
 				_log.Infow("with_log calling AddRoleAuthorization", "params", map[string]interface{}{
 					"role": role}, "results", map[string]interface{}{
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling AddRoleAuthorization", "params", map[string]interface{}{
 					"role": role}, "results", map[string]interface{}{
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
 		if !debug && err == nil {
 			_log.Debugw("with_log calling AddRoleAuthorization", "params", map[string]interface{}{
 				"role": role}, "results", map[string]interface{}{
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling AddRoleAuthorization", "params", map[string]interface{}{
 				"role": role}, "results", map[string]interface{}{
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.AddRoleAuthorization(ctx, role)
@@ -75,26 +77,26 @@ func (_d CasbinServiceWithLog) BindPermission(ctx context.Context, permission Pe
 			if err == nil {
 				_log.Infow("with_log calling BindPermission", "params", map[string]interface{}{
 					"permission": permission}, "results", map[string]interface{}{
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling BindPermission", "params", map[string]interface{}{
 					"permission": permission}, "results", map[string]interface{}{
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
 		if !debug && err == nil {
 			_log.Debugw("with_log calling BindPermission", "params", map[string]interface{}{
 				"permission": permission}, "results", map[string]interface{}{
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling BindPermission", "params", map[string]interface{}{
 				"permission": permission}, "results", map[string]interface{}{
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.BindPermission(ctx, permission)
@@ -113,14 +115,14 @@ func (_d CasbinServiceWithLog) CheckPermission(ctx context.Context, permission C
 				_log.Infow("with_log calling CheckPermission", "params", map[string]interface{}{
 					"permission": permission}, "results", map[string]interface{}{
 					"b1":  b1,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling CheckPermission", "params", map[string]interface{}{
 					"permission": permission}, "results", map[string]interface{}{
 					"b1":  b1,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -128,14 +130,14 @@ func (_d CasbinServiceWithLog) CheckPermission(ctx context.Context, permission C
 			_log.Debugw("with_log calling CheckPermission", "params", map[string]interface{}{
 				"permission": permission}, "results", map[string]interface{}{
 				"b1":  b1,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling CheckPermission", "params", map[string]interface{}{
 				"permission": permission}, "results", map[string]interface{}{
 				"b1":  b1,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.CheckPermission(ctx, permission)
@@ -153,26 +155,26 @@ func (_d CasbinServiceWithLog) DelRoleAuthorization(ctx context.Context, role Ro
 			if err == nil {
 				_log.Infow("with_log calling DelRoleAuthorization", "params", map[string]interface{}{
 					"role": role}, "results", map[string]interface{}{
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling DelRoleAuthorization", "params", map[string]interface{}{
 					"role": role}, "results", map[string]interface{}{
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
 		if !debug && err == nil {
 			_log.Debugw("with_log calling DelRoleAuthorization", "params", map[string]interface{}{
 				"role": role}, "results", map[string]interface{}{
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling DelRoleAuthorization", "params", map[string]interface{}{
 				"role": role}, "results", map[string]interface{}{
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.DelRoleAuthorization(ctx, role)
@@ -207,26 +209,26 @@ func (_d CasbinServiceWithLog) UnBindPermission(ctx context.Context, permission 
 			if err == nil {
 				_log.Infow("with_log calling UnBindPermission", "params", map[string]interface{}{
 					"permission": permission}, "results", map[string]interface{}{
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling UnBindPermission", "params", map[string]interface{}{
 					"permission": permission}, "results", map[string]interface{}{
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
 		if !debug && err == nil {
 			_log.Debugw("with_log calling UnBindPermission", "params", map[string]interface{}{
 				"permission": permission}, "results", map[string]interface{}{
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling UnBindPermission", "params", map[string]interface{}{
 				"permission": permission}, "results", map[string]interface{}{
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.UnBindPermission(ctx, permission)

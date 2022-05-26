@@ -514,7 +514,7 @@ func (pq *ProjectQuery) Queries(i interface{}) *ProjectQuery {
 	return pq
 }
 
-func (pq *ProjectQuery) ByQueriesAll(ctx context.Context, i interface{}, vs interface{}) (count int, err error) {
+func (pq *ProjectQuery) ByQueriesAll(ctx context.Context, i interface{}) (res Projects, count int, err error) {
 	queryList, countList := SetProjectFormQueries(i)
 	countQ := pq.Clone()
 	for _, v := range queryList {
@@ -527,7 +527,7 @@ func (pq *ProjectQuery) ByQueriesAll(ctx context.Context, i interface{}, vs inte
 	if err != nil {
 		return
 	}
-	err = pq.Select(project.Columns...).Scan(ctx, vs)
+	res, err = pq.All(ctx)
 	return
 }
 

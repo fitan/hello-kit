@@ -38,30 +38,59 @@ var (
 
 // appCmd represents the app command
 var appCmd = &cobra.Command{
-	Use:   "app",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use: "app",
+	//	Short: "A brief description of your command",
+	//	Long: `A longer description that spans multiple lines and likely contains examples
+	//and usage of using your command. For example:
+	//
+	//Cobra is a CLI library for Go that empowers applications.
+	//This application is a tool to generate the needed files
+	//to quickly create a Cobra application.`,
+	//	Run: func(cmd *cobra.Command, args []string) {
+	//		if version {
+	//			fmt.Printf("Git Tag: %s \n", gitTag)
+	//			fmt.Printf("Git Commit hash: %s \n", gitHash)
+	//			fmt.Printf("Build TimeStamp: %s \n", buildTime)
+	//			fmt.Printf("GoLang Version: %s \n", goVersion)
+	//			return
+	//		}
+	//		app.RunApp(confName)
+	//	},
+}
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+var appStartCmd = &cobra.Command{
+	Use:   "start",
+	Short: "start app",
 	Run: func(cmd *cobra.Command, args []string) {
-		if version {
-			fmt.Printf("Git Tag: %s \n", gitTag)
-			fmt.Printf("Git Commit hash: %s \n", gitHash)
-			fmt.Printf("Build TimeStamp: %s \n", buildTime)
-			fmt.Printf("GoLang Version: %s \n", goVersion)
-			return
-		}
 		app.RunApp(confName)
 	},
 }
 
+var appPathPutInStorageCmd = &cobra.Command{
+	Use:     "pathPutInStorage",
+	Aliases: []string{"ppis"},
+	Short:   "PathPutInStorage",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return app.PathPutInStorage(confName)
+	},
+}
+
+var appVersionCmd = &cobra.Command{
+	Use:     "version",
+	Aliases: []string{"v"},
+	Short:   "echo app version",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("Git Tag: %s \n", gitTag)
+		fmt.Printf("Git Commit hash: %s \n", gitHash)
+		fmt.Printf("Build TimeStamp: %s \n", buildTime)
+		fmt.Printf("GoLang Version: %s \n", goVersion)
+	},
+}
+
 var confName string
-var version bool
 
 func init() {
+	appCmd.AddCommand(appStartCmd, appVersionCmd, appPathPutInStorageCmd)
 	rootCmd.AddCommand(appCmd)
 
 	// Here you will define your flags and configuration settings.
@@ -72,6 +101,6 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	appCmd.Flags().StringVarP(&confName, "confName","c", "dev", "config name")
-	appCmd.Flags().BoolVarP(&version, "version", "v", false, "version")
+	appPathPutInStorageCmd.Flags().StringVarP(&confName, "confName", "c", "dev", "config name")
+	appStartCmd.Flags().StringVarP(&confName, "confName", "c", "dev", "config name")
 }

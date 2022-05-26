@@ -22,6 +22,8 @@ import (
 	audit2 "hello/pkg/services/audit"
 	"hello/pkg/services/casbin"
 	project2 "hello/pkg/services/project"
+	resource2 "hello/pkg/services/resource"
+	service2 "hello/pkg/services/service"
 	user2 "hello/pkg/services/user"
 )
 
@@ -73,6 +75,7 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 		Resource: resourceService,
 	}
 	appInitAuditMid := initAuditMid(r, repositoryRepository)
+	debugSwitch := initDebugSwitch()
 	repository2 := repository.Repository{
 		Baidu:    baiduService,
 		Taobao:   taobaoService,
@@ -94,31 +97,48 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 	baseService4 := project2.NewBasicService(repository2, client)
 	v11 := project2.NewServiceMiddleware(sugaredLogger)
 	projectProjectService := project2.NewService(baseService4, v11)
+	baseService5 := service2.NewBasicService(client)
+	v12 := service2.NewServiceMiddleware(sugaredLogger)
+	serviceServiceService := service2.NewService(baseService5, v12)
+	baseService6 := resource2.NewBasicService(client)
+	v13 := resource2.NewServiceMiddleware(sugaredLogger)
+	resourceResourceService := resource2.NewService(baseService6, v13)
 	servicesServices := &services.Services{
-		User:    userUserService,
-		Audit:   auditAuditService,
-		Project: projectProjectService,
-		Casbin:  casbinService,
+		User:     userUserService,
+		Audit:    auditAuditService,
+		Project:  projectProjectService,
+		Casbin:   casbinService,
+		Service:  serviceServiceService,
+		Resource: resourceResourceService,
 	}
-	v12 := initEndpointMiddleware(servicesServices, repository2)
-	mws := user2.NewEndpointMiddleware(sugaredLogger, v12)
+	v14 := initEndpointMiddleware(servicesServices, repository2)
+	mws := user2.NewEndpointMiddleware(sugaredLogger, v14)
 	endpoints := user2.NewEndpoints(userUserService, mws)
-	debugSwitch := initDebugSwitch()
-	v13 := initHttpServerOption(debugSwitch)
-	ops := user2.NewServiceOption(v13)
+	v15 := initHttpServerOption(debugSwitch)
+	ops := user2.NewServiceOption(v15)
 	httpHandler := user2.NewHTTPHandler(r, endpoints, ops, debugSwitch)
-	auditMws := audit2.NewEndpointMiddleware(sugaredLogger, v12)
+	auditMws := audit2.NewEndpointMiddleware(sugaredLogger, v14)
 	auditEndpoints := audit2.NewEndpoints(auditAuditService, auditMws)
-	auditOps := audit2.NewServiceOption(v13)
+	auditOps := audit2.NewServiceOption(v15)
 	auditHttpHandler := audit2.NewHTTPHandler(r, auditEndpoints, auditOps, debugSwitch)
-	projectMws := project2.NewEndpointMiddleware(sugaredLogger, v12)
+	projectMws := project2.NewEndpointMiddleware(sugaredLogger, v14)
 	projectEndpoints := project2.NewEndpoints(projectProjectService, projectMws)
-	projectOps := project2.NewServiceOption(v13)
+	projectOps := project2.NewServiceOption(v15)
 	projectHttpHandler := project2.NewHTTPHandler(r, projectEndpoints, projectOps, debugSwitch)
+	serviceMws := service2.NewEndpointMiddleware(sugaredLogger, v14)
+	serviceEndpoints := service2.NewEndpoints(serviceServiceService, serviceMws)
+	serviceOps := service2.NewServiceOption(v15)
+	serviceHttpHandler := service2.NewHTTPHandler(r, serviceEndpoints, serviceOps, debugSwitch)
+	resourceMws := resource2.NewEndpointMiddleware(sugaredLogger, v14)
+	resourceEndpoints := resource2.NewEndpoints(resourceResourceService, resourceMws)
+	resourceOps := resource2.NewServiceOption(v15)
+	resourceHttpHandler := resource2.NewHTTPHandler(r, resourceEndpoints, resourceOps, debugSwitch)
 	servicesHttpHandler := &services.HttpHandler{
-		User:    httpHandler,
-		Audit:   auditHttpHandler,
-		Project: projectHttpHandler,
+		User:     httpHandler,
+		Audit:    auditHttpHandler,
+		Project:  projectHttpHandler,
+		Service:  serviceHttpHandler,
+		Resource: resourceHttpHandler,
 	}
 	tracerProvider := initTracer(myConf)
 	db, err := initDb(myConf)
@@ -143,6 +163,7 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 		r:                   r,
 		repository:          repositoryRepository,
 		InitAuditMid:        appInitAuditMid,
+		debug:               debugSwitch,
 		httpHandler:         servicesHttpHandler,
 		g:                   g,
 		conf:                myConf,
@@ -192,7 +213,7 @@ var repoSet = wire.NewSet(resource.ResourceServiceSet, service.ServiceServiceSet
 // http service
 var casbinServiceSet = wire.NewSet(casbin.NewBasicService, casbin.NewService, casbin.NewServiceMiddleware)
 
-var servicesSet = wire.NewSet(project2.ProjectKitSet, audit2.AuditKitSet, casbinServiceSet, user2.UserServiceSet, wire.Struct(new(services.HttpHandler), "*"), wire.Struct(new(services.Services), "*"))
+var servicesSet = wire.NewSet(resource2.ResourceKitSet, service2.ServiceKitSet, project2.ProjectKitSet, audit2.AuditKitSet, casbinServiceSet, user2.UserServiceSet, wire.Struct(new(services.HttpHandler), "*"), wire.Struct(new(services.Services), "*"))
 
 var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 

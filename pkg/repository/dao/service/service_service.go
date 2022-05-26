@@ -19,8 +19,7 @@ type basicServiceService struct {
 type BaseService ServiceService
 
 func (s *basicServiceService) ListByQs(ctx context.Context, qs interface{}) (res ent.Services, total int, err error) {
-	total, err = s.db.Service.Query().WithProject().ByQueriesAll(ctx, qs, &res)
-	return
+	return s.db.Service.Query().WithProject().ByQueriesAll(ctx, nil)
 }
 
 // NewBasicServiceService returns a naive, stateless implementation of ServiceService.

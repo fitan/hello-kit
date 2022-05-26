@@ -6,6 +6,7 @@ package audit
 
 import (
 	"context"
+	"fmt"
 
 	ginkHttp "github.com/fitan/gink/transport/http"
 	"go.opentelemetry.io/otel/trace"
@@ -41,14 +42,14 @@ func (_d AuditServiceWithLog) AuditRestByQueriesAll(ctx context.Context, req ent
 				_log.Infow("with_log calling AuditRestByQueriesAll", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling AuditRestByQueriesAll", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -56,14 +57,14 @@ func (_d AuditServiceWithLog) AuditRestByQueriesAll(ctx context.Context, req ent
 			_log.Debugw("with_log calling AuditRestByQueriesAll", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling AuditRestByQueriesAll", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.AuditRestByQueriesAll(ctx, req)
@@ -82,14 +83,14 @@ func (_d AuditServiceWithLog) AuditRestCreate(ctx context.Context, req ent.Audit
 				_log.Infow("with_log calling AuditRestCreate", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling AuditRestCreate", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -97,14 +98,14 @@ func (_d AuditServiceWithLog) AuditRestCreate(ctx context.Context, req ent.Audit
 			_log.Debugw("with_log calling AuditRestCreate", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling AuditRestCreate", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.AuditRestCreate(ctx, req)
@@ -123,14 +124,14 @@ func (_d AuditServiceWithLog) AuditRestCreateMany(ctx context.Context, req ent.A
 				_log.Infow("with_log calling AuditRestCreateMany", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling AuditRestCreateMany", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -138,14 +139,14 @@ func (_d AuditServiceWithLog) AuditRestCreateMany(ctx context.Context, req ent.A
 			_log.Debugw("with_log calling AuditRestCreateMany", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling AuditRestCreateMany", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.AuditRestCreateMany(ctx, req)
@@ -164,14 +165,14 @@ func (_d AuditServiceWithLog) AuditRestDeleteById(ctx context.Context, req ent.A
 				_log.Infow("with_log calling AuditRestDeleteById", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"success": success,
-					"err":     err})
+					"err":     fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling AuditRestDeleteById", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"success": success,
-					"err":     err})
+					"err":     fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -179,14 +180,14 @@ func (_d AuditServiceWithLog) AuditRestDeleteById(ctx context.Context, req ent.A
 			_log.Debugw("with_log calling AuditRestDeleteById", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"success": success,
-				"err":     err})
+				"err":     fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling AuditRestDeleteById", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"success": success,
-				"err":     err})
+				"err":     fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.AuditRestDeleteById(ctx, req)
@@ -205,14 +206,14 @@ func (_d AuditServiceWithLog) AuditRestDeleteMany(ctx context.Context, req ent.A
 				_log.Infow("with_log calling AuditRestDeleteMany", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"success": success,
-					"err":     err})
+					"err":     fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling AuditRestDeleteMany", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"success": success,
-					"err":     err})
+					"err":     fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -220,14 +221,14 @@ func (_d AuditServiceWithLog) AuditRestDeleteMany(ctx context.Context, req ent.A
 			_log.Debugw("with_log calling AuditRestDeleteMany", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"success": success,
-				"err":     err})
+				"err":     fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling AuditRestDeleteMany", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"success": success,
-				"err":     err})
+				"err":     fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.AuditRestDeleteMany(ctx, req)
@@ -246,14 +247,14 @@ func (_d AuditServiceWithLog) AuditRestGetById(ctx context.Context, req ent.Audi
 				_log.Infow("with_log calling AuditRestGetById", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling AuditRestGetById", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -261,14 +262,14 @@ func (_d AuditServiceWithLog) AuditRestGetById(ctx context.Context, req ent.Audi
 			_log.Debugw("with_log calling AuditRestGetById", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling AuditRestGetById", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.AuditRestGetById(ctx, req)
@@ -287,14 +288,14 @@ func (_d AuditServiceWithLog) AuditRestUpdateById(ctx context.Context, req ent.A
 				_log.Infow("with_log calling AuditRestUpdateById", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling AuditRestUpdateById", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"res": res,
-					"err": err})
+					"err": fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -302,14 +303,14 @@ func (_d AuditServiceWithLog) AuditRestUpdateById(ctx context.Context, req ent.A
 			_log.Debugw("with_log calling AuditRestUpdateById", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling AuditRestUpdateById", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"res": res,
-				"err": err})
+				"err": fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.AuditRestUpdateById(ctx, req)
@@ -328,14 +329,14 @@ func (_d AuditServiceWithLog) AuditRestUpdateMany(ctx context.Context, req ent.A
 				_log.Infow("with_log calling AuditRestUpdateMany", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"success": success,
-					"err":     err})
+					"err":     fmt.Sprintf("%v", err)})
 			}
 
 			if err != nil {
 				_log.Errorw("with_log calling AuditRestUpdateMany", "params", map[string]interface{}{
 					"req": req}, "results", map[string]interface{}{
 					"success": success,
-					"err":     err})
+					"err":     fmt.Sprintf("%v", err)})
 			}
 
 		}
@@ -343,14 +344,14 @@ func (_d AuditServiceWithLog) AuditRestUpdateMany(ctx context.Context, req ent.A
 			_log.Debugw("with_log calling AuditRestUpdateMany", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"success": success,
-				"err":     err})
+				"err":     fmt.Sprintf("%v", err)})
 		}
 
 		if err != nil && !debug {
 			_log.Errorw("with_log calling AuditRestUpdateMany", "params", map[string]interface{}{
 				"req": req}, "results", map[string]interface{}{
 				"success": success,
-				"err":     err})
+				"err":     fmt.Sprintf("%v", err)})
 		}
 	}()
 	return _d._base.AuditRestUpdateMany(ctx, req)

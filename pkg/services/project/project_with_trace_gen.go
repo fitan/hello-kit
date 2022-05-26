@@ -102,10 +102,10 @@ func (_d ProjectServiceWithTracing) ProjectRestCreateMany(ctx context.Context, r
 	return _d.ProjectService.ProjectRestCreateMany(ctx, req)
 }
 
-// ProjectRestCreateServicesSliceByProjectId implements ProjectService
-func (_d ProjectServiceWithTracing) ProjectRestCreateServicesSliceByProjectId(ctx context.Context, req ent.ProjectRestCreateServicesSliceByProjectIdReq) (res *ent.Project, err error) {
+// ProjectRestCreateServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithTracing) ProjectRestCreateServicesByProjectId(ctx context.Context, req ent.ProjectRestCreateServicesByProjectIdReq) (res *ent.Project, err error) {
 
-	var name = "ProjectService.ProjectRestCreateServicesSliceByProjectId"
+	var name = "ProjectService.ProjectRestCreateServicesByProjectId"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -123,7 +123,7 @@ func (_d ProjectServiceWithTracing) ProjectRestCreateServicesSliceByProjectId(ct
 		span.End()
 	}()
 
-	return _d.ProjectService.ProjectRestCreateServicesSliceByProjectId(ctx, req)
+	return _d.ProjectService.ProjectRestCreateServicesByProjectId(ctx, req)
 }
 
 // ProjectRestDeleteById implements ProjectService
@@ -198,10 +198,10 @@ func (_d ProjectServiceWithTracing) ProjectRestGetById(ctx context.Context, req 
 	return _d.ProjectService.ProjectRestGetById(ctx, req)
 }
 
-// ProjectRestGetServicesSliceByProjectId implements ProjectService
-func (_d ProjectServiceWithTracing) ProjectRestGetServicesSliceByProjectId(ctx context.Context, req ent.ProjectRestGetServicesSliceByProjectIdReq) (res ent.ProjectRestGetServicesSliceByProjectIdRes, err error) {
+// ProjectRestGetServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithTracing) ProjectRestGetServicesByProjectId(ctx context.Context, req ent.ProjectRestGetServicesByProjectIdReq) (res ent.ProjectRestGetServicesByProjectIdRes, err error) {
 
-	var name = "ProjectService.ProjectRestGetServicesSliceByProjectId"
+	var name = "ProjectService.ProjectRestGetServicesByProjectId"
 	_, span := otel.Tracer(name).Start(ctx, name)
 	defer func() {
 		if err != nil {
@@ -219,7 +219,7 @@ func (_d ProjectServiceWithTracing) ProjectRestGetServicesSliceByProjectId(ctx c
 		span.End()
 	}()
 
-	return _d.ProjectService.ProjectRestGetServicesSliceByProjectId(ctx, req)
+	return _d.ProjectService.ProjectRestGetServicesByProjectId(ctx, req)
 }
 
 // ProjectRestUpdateById implements ProjectService
