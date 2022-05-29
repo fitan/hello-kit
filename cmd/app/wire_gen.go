@@ -75,7 +75,6 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 		Resource: resourceService,
 	}
 	appInitAuditMid := initAuditMid(r, repositoryRepository)
-	debugSwitch := initDebugSwitch()
 	repository2 := repository.Repository{
 		Baidu:    baiduService,
 		Taobao:   taobaoService,
@@ -85,7 +84,11 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 		Service:  serviceService,
 		Resource: resourceService,
 	}
-	casbinBaseService := casbin.NewBasicService()
+	syncedEnforcer, err := initCasbin(myConf)
+	if err != nil {
+		return App{}, err
+	}
+	casbinBaseService := casbin.NewBasicService(syncedEnforcer)
 	v8 := casbin.NewServiceMiddleware(sugaredLogger)
 	casbinService := casbin.NewService(casbinBaseService, v8)
 	baseService2 := user2.NewBasicService(repository2, casbinService, client)
@@ -111,6 +114,7 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 		Service:  serviceServiceService,
 		Resource: resourceResourceService,
 	}
+	debugSwitch := initDebugSwitch()
 	v14 := initEndpointMiddleware(servicesServices, repository2)
 	mws := user2.NewEndpointMiddleware(sugaredLogger, v14)
 	endpoints := user2.NewEndpoints(userUserService, mws)
@@ -149,10 +153,6 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 	if err != nil {
 		return App{}, err
 	}
-	enforcer, err := initCasbin(myConf)
-	if err != nil {
-		return App{}, err
-	}
 	appInitCancelInterrupt := initCancelInterrupt(g)
 	appInitMetricsEndpoint := initMetricsEndpoint(g, myConf, debugSwitch)
 	appInitMicro, err := initMicro(g, r, myConf)
@@ -163,6 +163,7 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 		r:                   r,
 		repository:          repositoryRepository,
 		InitAuditMid:        appInitAuditMid,
+		services:            servicesServices,
 		debug:               debugSwitch,
 		httpHandler:         servicesHttpHandler,
 		g:                   g,
@@ -172,7 +173,7 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 		db:                  db,
 		ent:                 client,
 		pyroscope:           profiler,
-		casbin:              enforcer,
+		casbin:              syncedEnforcer,
 		InitCancelInterrupt: appInitCancelInterrupt,
 		InitMetricsEndpoint: appInitMetricsEndpoint,
 		InitMicro:           appInitMicro,

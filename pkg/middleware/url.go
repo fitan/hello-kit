@@ -8,15 +8,19 @@ import (
 
 func UrlRequestContext() func(ctx context.Context, r *gin.Context) context.Context {
 	return func(ctx context.Context, r *gin.Context) context.Context {
-		projectIdStr := r.Param(ContextKeyProjectId)
-		serviceIdStr := r.Param(ContextKeyServiceId)
-		var projectId int
-		var serviceId int
+		projectIdStr, ok := r.Params.Get(ContextKeyProjectId)
+		if ok {
+			var projectId int
+			projectId, _ = strconv.Atoi(projectIdStr)
+			ctx = context.WithValue(ctx, ContextKeyProjectId, projectId)
+		}
 
-		projectId, _ = strconv.Atoi(projectIdStr)
-		serviceId, _ = strconv.Atoi(serviceIdStr)
-		ctx = context.WithValue(ctx, ContextKeyProjectId, projectId)
-		ctx = context.WithValue(ctx, ContextKeyServiceId, serviceId)
+		serviceIdStr, ok := r.Params.Get(ContextKeyServiceId)
+		if ok {
+			var serviceId int
+			serviceId, _ = strconv.Atoi(serviceIdStr)
+			ctx = context.WithValue(ctx, ContextKeyServiceId, serviceId)
+		}
 
 		return ctx
 	}

@@ -5,13 +5,13 @@ package casbin
 // gowrap: http://github.com/fitan/gowrap
 
 import (
-	"fmt"
-
 	ginkHttp "github.com/fitan/gink/transport/http"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	"context"
+
+	"fmt"
 )
 
 // CasbinServiceWithLog implements CasbinService that is instrumented with logging

@@ -30,6 +30,30 @@ func NewProjectServiceWithTracing(base ProjectService) ProjectService {
 	return d
 }
 
+// ProjectRestAddBindServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithTracing) ProjectRestAddBindServicesByProjectId(ctx context.Context, req ent.ProjectRestAddBindServicesByProjectIdReq) (res string, err error) {
+
+	var name = "ProjectService.ProjectRestAddBindServicesByProjectId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"req": req},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ProjectService.ProjectRestAddBindServicesByProjectId(ctx, req)
+}
+
 // ProjectRestByQueriesAll implements ProjectService
 func (_d ProjectServiceWithTracing) ProjectRestByQueriesAll(ctx context.Context, req ent.ProjectRestByQueriesAllReq) (res ent.ProjectRestByQueriesAllRes, err error) {
 
@@ -174,6 +198,30 @@ func (_d ProjectServiceWithTracing) ProjectRestDeleteMany(ctx context.Context, r
 	return _d.ProjectService.ProjectRestDeleteMany(ctx, req)
 }
 
+// ProjectRestDeleteServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithTracing) ProjectRestDeleteServicesByProjectId(ctx context.Context, req ent.ProjectRestDeleteServicesByProjectIdReq) (res string, err error) {
+
+	var name = "ProjectService.ProjectRestDeleteServicesByProjectId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"req": req},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ProjectService.ProjectRestDeleteServicesByProjectId(ctx, req)
+}
+
 // ProjectRestGetById implements ProjectService
 func (_d ProjectServiceWithTracing) ProjectRestGetById(ctx context.Context, req ent.ProjectRestGetByIdReq) (res ent.ProjectBaseGetRes, err error) {
 
@@ -220,6 +268,54 @@ func (_d ProjectServiceWithTracing) ProjectRestGetServicesByProjectId(ctx contex
 	}()
 
 	return _d.ProjectService.ProjectRestGetServicesByProjectId(ctx, req)
+}
+
+// ProjectRestRemoveBindServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithTracing) ProjectRestRemoveBindServicesByProjectId(ctx context.Context, req ent.ProjectRestRemoveBindServicesByProjectIdReq) (res string, err error) {
+
+	var name = "ProjectService.ProjectRestRemoveBindServicesByProjectId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"req": req},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ProjectService.ProjectRestRemoveBindServicesByProjectId(ctx, req)
+}
+
+// ProjectRestUpdateBindServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithTracing) ProjectRestUpdateBindServicesByProjectId(ctx context.Context, req ent.ProjectRestUpdateBindServicesByProjectIdReq) (res string, err error) {
+
+	var name = "ProjectService.ProjectRestUpdateBindServicesByProjectId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"req": req},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ProjectService.ProjectRestUpdateBindServicesByProjectId(ctx, req)
 }
 
 // ProjectRestUpdateById implements ProjectService

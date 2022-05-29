@@ -159,6 +159,14 @@ func (c *Client) Use(hooks ...Hook) {
 }
 
 type AuditBaseInterface interface {
+	RawCreate(ctx context.Context, v *Audit) (res *Audit, err error)
+	RawCreateMany(ctx context.Context, vs Audits) (Audits, error)
+	RawGetById(ctx context.Context, id int) (res *Audit, err error)
+	RawByQueriesAll(ctx context.Context, i interface{}) (res Audits, count int, err error)
+	RawByQueriesOne(ctx context.Context, i interface{}) (res *Audit, err error)
+	RawUpdateById(ctx context.Context, id int, v *Audit) (*Audit, error)
+	RawUpdateMany(ctx context.Context, vs Audits) (err error)
+
 	Create(ctx context.Context, v AuditBaseCreateReq) (res *Audit, err error)
 	CreateMany(ctx context.Context, vs []AuditBaseCreateReq) (Audits, error)
 	GetById(ctx context.Context, id int) (res AuditBaseGetRes, err error)
@@ -173,6 +181,101 @@ type AuditBaseInterface interface {
 type AuditBase struct {
 	client *Client
 }
+
+func RawAuditBaseCreateSet(create *AuditCreate, v *Audit) *AuditCreate {
+	return create.
+		SetCreateTime(v.CreateTime).
+		SetUpdateTime(v.UpdateTime).
+		SetURL(v.URL).
+		SetQuery(v.Query).
+		SetMethod(v.Method).
+		SetRequest(v.Request).
+		SetResponse(v.Response).
+		SetHeader(v.Header).
+		SetStatusCode(v.StatusCode).
+		SetRemoteIP(v.RemoteIP).
+		SetClientIP(v.ClientIP).
+		SetCostTime(v.CostTime)
+}
+
+func (c *AuditBase) RawCreate(ctx context.Context, v *Audit) (res *Audit, err error) {
+	create := c.client.Audit.Create()
+	RawAuditBaseCreateSet(create, v)
+	return create.Save(ctx)
+}
+
+func (c *AuditBase) RawCreateMany(ctx context.Context, vs Audits) (Audits, error) {
+	bulk := make([]*AuditCreate, len(vs))
+	for i, v := range vs {
+		create := c.client.Audit.Create()
+		RawAuditBaseCreateSet(create, v)
+		bulk[i] = create
+	}
+	return c.client.Audit.CreateBulk(bulk...).Save(ctx)
+}
+
+func (c *AuditBase) RawGetById(ctx context.Context, id int) (res *Audit, err error) {
+	return c.client.Audit.Query().Where(audit.IDEQ(id)).First(ctx)
+}
+
+func (c *AuditBase) RawByQueriesOne(ctx context.Context, i interface{}) (res *Audit, err error) {
+	return c.client.Audit.Query().Queries(i).First(ctx)
+}
+
+func (c *AuditBase) RawByQueriesAll(ctx context.Context, i interface{}) (res Audits, count int, err error) {
+	return c.client.Audit.Query().ByQueriesAll(ctx, i)
+}
+
+func RawAuditBaseUpdateSet(update *AuditUpdateOne, v *Audit) *AuditUpdateOne {
+	return update.
+		SetUpdateTime(v.UpdateTime).
+		SetURL(v.URL).
+		SetQuery(v.Query).
+		SetMethod(v.Method).
+		SetRequest(v.Request).
+		SetResponse(v.Response).
+		SetHeader(v.Header).
+		SetStatusCode(v.StatusCode).
+		SetRemoteIP(v.RemoteIP).
+		SetClientIP(v.ClientIP).
+		SetCostTime(v.CostTime)
+}
+
+func (c *AuditBase) RawUpdateById(ctx context.Context, id int, v *Audit) (*Audit, error) {
+	update := c.client.Audit.UpdateOneID(id)
+	RawAuditBaseUpdateSet(update, v)
+	return update.Save(ctx)
+}
+
+func (c *AuditBase) RawUpdateMany(ctx context.Context, vs Audits) (err error) {
+	tx, err := c.client.Tx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+
+		err = tx.Commit()
+	}()
+
+	for _, v := range vs {
+		update := tx.Audit.UpdateOneID(v.ID)
+		RawAuditBaseUpdateSet(update, v)
+		_, err = update.Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 type AuditBaseCreateReq struct {
 	URL string `json:"url,omitempty""`
 
@@ -400,6 +503,21 @@ func NewAuditBase(client *Client) AuditBaseInterface {
 }
 
 type ProjectBaseInterface interface {
+	RawCreate(ctx context.Context, v *Project) (res *Project, err error)
+	RawCreateMany(ctx context.Context, vs Projects) (Projects, error)
+	RawGetById(ctx context.Context, id int) (res *Project, err error)
+	RawByQueriesAll(ctx context.Context, i interface{}) (res Projects, count int, err error)
+	RawByQueriesOne(ctx context.Context, i interface{}) (res *Project, err error)
+	RawUpdateById(ctx context.Context, id int, v *Project) (*Project, error)
+	RawUpdateMany(ctx context.Context, vs Projects) (err error)
+
+	RawCreateServicesByProjectId(ctx context.Context, id int, vs Services) (res *Project, err error)
+	RawGetServicesByProjectId(ctx context.Context, id int, i interface{}) (res Services, count int, err error)
+	RawDeleteServicesByProjectId(ctx context.Context, id int, deleteIds []int) (err error)
+	RawUpdateBindServicesByProjectId(ctx context.Context, id int, removeIds []int, addIds []int) (err error)
+	RawAddBindServicesByProjectId(ctx context.Context, id int, addIds []int) (err error)
+	RawRemoveBindServicesByProjectId(ctx context.Context, id int, removeIds []int) (err error)
+
 	Create(ctx context.Context, v ProjectBaseCreateReq) (res *Project, err error)
 	CreateMany(ctx context.Context, vs []ProjectBaseCreateReq) (Projects, error)
 	GetById(ctx context.Context, id int) (res ProjectBaseGetRes, err error)
@@ -417,6 +535,153 @@ type ProjectBaseInterface interface {
 type ProjectBase struct {
 	client *Client
 }
+
+func RawProjectBaseCreateSet(create *ProjectCreate, v *Project) *ProjectCreate {
+	return create.
+		SetCreateTime(v.CreateTime).
+		SetUpdateTime(v.UpdateTime).
+		SetName(v.Name).
+		SetAname(v.Aname).
+		SetComments(v.Comments)
+}
+
+func (c *ProjectBase) RawCreate(ctx context.Context, v *Project) (res *Project, err error) {
+	create := c.client.Project.Create()
+	RawProjectBaseCreateSet(create, v)
+	return create.Save(ctx)
+}
+
+func (c *ProjectBase) RawCreateMany(ctx context.Context, vs Projects) (Projects, error) {
+	bulk := make([]*ProjectCreate, len(vs))
+	for i, v := range vs {
+		create := c.client.Project.Create()
+		RawProjectBaseCreateSet(create, v)
+		bulk[i] = create
+	}
+	return c.client.Project.CreateBulk(bulk...).Save(ctx)
+}
+
+func (c *ProjectBase) RawGetById(ctx context.Context, id int) (res *Project, err error) {
+	return c.client.Project.Query().Where(project.IDEQ(id)).First(ctx)
+}
+
+func (c *ProjectBase) RawByQueriesOne(ctx context.Context, i interface{}) (res *Project, err error) {
+	return c.client.Project.Query().Queries(i).First(ctx)
+}
+
+func (c *ProjectBase) RawByQueriesAll(ctx context.Context, i interface{}) (res Projects, count int, err error) {
+	return c.client.Project.Query().ByQueriesAll(ctx, i)
+}
+
+func RawProjectBaseUpdateSet(update *ProjectUpdateOne, v *Project) *ProjectUpdateOne {
+	return update.
+		SetUpdateTime(v.UpdateTime).
+		SetName(v.Name).
+		SetAname(v.Aname).
+		SetComments(v.Comments)
+}
+
+func (c *ProjectBase) RawUpdateById(ctx context.Context, id int, v *Project) (*Project, error) {
+	update := c.client.Project.UpdateOneID(id)
+	RawProjectBaseUpdateSet(update, v)
+	return update.Save(ctx)
+}
+
+func (c *ProjectBase) RawUpdateMany(ctx context.Context, vs Projects) (err error) {
+	tx, err := c.client.Tx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+
+		err = tx.Commit()
+	}()
+
+	for _, v := range vs {
+		update := tx.Project.UpdateOneID(v.ID)
+		RawProjectBaseUpdateSet(update, v)
+		_, err = update.Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *ProjectBase) RawCreateServicesByProjectId(ctx context.Context, id int, vs Services) (res *Project, err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	bulk := make([]*ServiceCreate, len(vs))
+	for i, v := range vs {
+		create := c.client.Service.Create()
+		RawServiceBaseCreateSet(create, v)
+		bulk[i] = create
+	}
+	save, err := tx.Service.CreateBulk(bulk...).Save(ctx)
+	if err != nil {
+		return
+	}
+
+	return tx.Project.UpdateOneID(id).AddServices(save...).Save(ctx)
+}
+func (c *ProjectBase) RawGetServicesByProjectId(ctx context.Context, id int, i interface{}) (res Services, count int, err error) {
+	return c.client.Project.Query().Where(project.ID(id)).QueryServices().ByQueriesAll(ctx, i)
+}
+func (c *ProjectBase) RawRemoveBindServicesByProjectId(ctx context.Context, id int, removeIds []int) (err error) {
+	_, err = c.client.Project.UpdateOneID(id).RemoveServiceIDs(removeIds...).Save(ctx)
+	return
+}
+func (c *ProjectBase) RawDeleteServicesByProjectId(ctx context.Context, id int, deleteIds []int) (err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	_, err = tx.client.Project.UpdateOneID(id).RemoveServiceIDs(deleteIds...).Save(ctx)
+	if err != nil {
+		return
+	}
+	_, err = tx.client.Service.Delete().Where(service.IDIn(deleteIds...)).Exec(ctx)
+	return
+}
+
+func (c *ProjectBase) RawUpdateBindServicesByProjectId(ctx context.Context, id int, removeIds []int, addIds []int) (err error) {
+	return c.client.Project.UpdateOneID(id).RemoveServiceIDs(removeIds...).AddServiceIDs(addIds...).Exec(ctx)
+}
+
+func (c *ProjectBase) RawAddBindServicesByProjectId(ctx context.Context, id int, addIds []int) (err error) {
+	return c.client.Project.UpdateOneID(id).AddServiceIDs(addIds...).Exec(ctx)
+}
+
 type ProjectBaseCreateReq struct {
 	Name string `json:"name,omitempty""`
 
@@ -626,6 +891,14 @@ func NewProjectBase(client *Client) ProjectBaseInterface {
 }
 
 type ResourceBaseInterface interface {
+	RawCreate(ctx context.Context, v *Resource) (res *Resource, err error)
+	RawCreateMany(ctx context.Context, vs Resources) (Resources, error)
+	RawGetById(ctx context.Context, id int) (res *Resource, err error)
+	RawByQueriesAll(ctx context.Context, i interface{}) (res Resources, count int, err error)
+	RawByQueriesOne(ctx context.Context, i interface{}) (res *Resource, err error)
+	RawUpdateById(ctx context.Context, id int, v *Resource) (*Resource, error)
+	RawUpdateMany(ctx context.Context, vs Resources) (err error)
+
 	Create(ctx context.Context, v ResourceBaseCreateReq) (res *Resource, err error)
 	CreateMany(ctx context.Context, vs []ResourceBaseCreateReq) (Resources, error)
 	GetById(ctx context.Context, id int) (res ResourceBaseGetRes, err error)
@@ -640,6 +913,91 @@ type ResourceBaseInterface interface {
 type ResourceBase struct {
 	client *Client
 }
+
+func RawResourceBaseCreateSet(create *ResourceCreate, v *Resource) *ResourceCreate {
+	return create.
+		SetCreateTime(v.CreateTime).
+		SetUpdateTime(v.UpdateTime).
+		SetName(v.Name).
+		SetKey(v.Key).
+		SetPath(v.Path).
+		SetAction(v.Action).
+		SetComments(v.Comments)
+}
+
+func (c *ResourceBase) RawCreate(ctx context.Context, v *Resource) (res *Resource, err error) {
+	create := c.client.Resource.Create()
+	RawResourceBaseCreateSet(create, v)
+	return create.Save(ctx)
+}
+
+func (c *ResourceBase) RawCreateMany(ctx context.Context, vs Resources) (Resources, error) {
+	bulk := make([]*ResourceCreate, len(vs))
+	for i, v := range vs {
+		create := c.client.Resource.Create()
+		RawResourceBaseCreateSet(create, v)
+		bulk[i] = create
+	}
+	return c.client.Resource.CreateBulk(bulk...).Save(ctx)
+}
+
+func (c *ResourceBase) RawGetById(ctx context.Context, id int) (res *Resource, err error) {
+	return c.client.Resource.Query().Where(resource.IDEQ(id)).First(ctx)
+}
+
+func (c *ResourceBase) RawByQueriesOne(ctx context.Context, i interface{}) (res *Resource, err error) {
+	return c.client.Resource.Query().Queries(i).First(ctx)
+}
+
+func (c *ResourceBase) RawByQueriesAll(ctx context.Context, i interface{}) (res Resources, count int, err error) {
+	return c.client.Resource.Query().ByQueriesAll(ctx, i)
+}
+
+func RawResourceBaseUpdateSet(update *ResourceUpdateOne, v *Resource) *ResourceUpdateOne {
+	return update.
+		SetUpdateTime(v.UpdateTime).
+		SetName(v.Name).
+		SetKey(v.Key).
+		SetPath(v.Path).
+		SetAction(v.Action).
+		SetComments(v.Comments)
+}
+
+func (c *ResourceBase) RawUpdateById(ctx context.Context, id int, v *Resource) (*Resource, error) {
+	update := c.client.Resource.UpdateOneID(id)
+	RawResourceBaseUpdateSet(update, v)
+	return update.Save(ctx)
+}
+
+func (c *ResourceBase) RawUpdateMany(ctx context.Context, vs Resources) (err error) {
+	tx, err := c.client.Tx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+
+		err = tx.Commit()
+	}()
+
+	for _, v := range vs {
+		update := tx.Resource.UpdateOneID(v.ID)
+		RawResourceBaseUpdateSet(update, v)
+		_, err = update.Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 type ResourceBaseCreateReq struct {
 	Name string `json:"name,omitempty""`
 
@@ -827,6 +1185,21 @@ func NewResourceBase(client *Client) ResourceBaseInterface {
 }
 
 type ServiceBaseInterface interface {
+	RawCreate(ctx context.Context, v *Service) (res *Service, err error)
+	RawCreateMany(ctx context.Context, vs Services) (Services, error)
+	RawGetById(ctx context.Context, id int) (res *Service, err error)
+	RawByQueriesAll(ctx context.Context, i interface{}) (res Services, count int, err error)
+	RawByQueriesOne(ctx context.Context, i interface{}) (res *Service, err error)
+	RawUpdateById(ctx context.Context, id int, v *Service) (*Service, error)
+	RawUpdateMany(ctx context.Context, vs Services) (err error)
+
+	RawCreateProjectByServiceId(ctx context.Context, id int, v *Project) (res *Service, err error)
+	RawGetProjectByServiceId(ctx context.Context, id int) (res *Project, err error)
+	RawDeleteProjectByServiceId(ctx context.Context, id int, deleteId int) (err error)
+	RawUpdateBindProjectByServiceId(ctx context.Context, id int, updateId int) (err error)
+	RawAddBindProjectByServiceId(ctx context.Context, id int, addId int) (err error)
+	RawRemoveBindProjectByServiceId(ctx context.Context, id int) (err error)
+
 	Create(ctx context.Context, v ServiceBaseCreateReq) (res *Service, err error)
 	CreateMany(ctx context.Context, vs []ServiceBaseCreateReq) (Services, error)
 	GetById(ctx context.Context, id int) (res ServiceBaseGetRes, err error)
@@ -844,6 +1217,156 @@ type ServiceBaseInterface interface {
 type ServiceBase struct {
 	client *Client
 }
+
+func RawServiceBaseCreateSet(create *ServiceCreate, v *Service) *ServiceCreate {
+	return create.
+		SetCreateTime(v.CreateTime).
+		SetUpdateTime(v.UpdateTime).
+		SetName(v.Name).
+		SetAname(v.Aname).
+		SetComments(v.Comments).
+		SetClasses(v.Classes).
+		SetLang(v.Lang).
+		SetGit(v.Git)
+}
+
+func (c *ServiceBase) RawCreate(ctx context.Context, v *Service) (res *Service, err error) {
+	create := c.client.Service.Create()
+	RawServiceBaseCreateSet(create, v)
+	return create.Save(ctx)
+}
+
+func (c *ServiceBase) RawCreateMany(ctx context.Context, vs Services) (Services, error) {
+	bulk := make([]*ServiceCreate, len(vs))
+	for i, v := range vs {
+		create := c.client.Service.Create()
+		RawServiceBaseCreateSet(create, v)
+		bulk[i] = create
+	}
+	return c.client.Service.CreateBulk(bulk...).Save(ctx)
+}
+
+func (c *ServiceBase) RawGetById(ctx context.Context, id int) (res *Service, err error) {
+	return c.client.Service.Query().Where(service.IDEQ(id)).First(ctx)
+}
+
+func (c *ServiceBase) RawByQueriesOne(ctx context.Context, i interface{}) (res *Service, err error) {
+	return c.client.Service.Query().Queries(i).First(ctx)
+}
+
+func (c *ServiceBase) RawByQueriesAll(ctx context.Context, i interface{}) (res Services, count int, err error) {
+	return c.client.Service.Query().ByQueriesAll(ctx, i)
+}
+
+func RawServiceBaseUpdateSet(update *ServiceUpdateOne, v *Service) *ServiceUpdateOne {
+	return update.
+		SetUpdateTime(v.UpdateTime).
+		SetName(v.Name).
+		SetAname(v.Aname).
+		SetComments(v.Comments).
+		SetClasses(v.Classes).
+		SetLang(v.Lang).
+		SetGit(v.Git)
+}
+
+func (c *ServiceBase) RawUpdateById(ctx context.Context, id int, v *Service) (*Service, error) {
+	update := c.client.Service.UpdateOneID(id)
+	RawServiceBaseUpdateSet(update, v)
+	return update.Save(ctx)
+}
+
+func (c *ServiceBase) RawUpdateMany(ctx context.Context, vs Services) (err error) {
+	tx, err := c.client.Tx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+
+		err = tx.Commit()
+	}()
+
+	for _, v := range vs {
+		update := tx.Service.UpdateOneID(v.ID)
+		RawServiceBaseUpdateSet(update, v)
+		_, err = update.Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *ServiceBase) RawCreateProjectByServiceId(ctx context.Context, id int, v *Project) (res *Service, err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	create := tx.Project.Create()
+	RawProjectBaseCreateSet(create, v)
+	save, err := create.Save(ctx)
+	if err != nil {
+		return
+	}
+
+	return tx.Service.UpdateOneID(id).SetProject(save).Save(ctx)
+}
+
+func (c *ServiceBase) RawGetProjectByServiceId(ctx context.Context, id int) (res *Project, err error) {
+	return c.client.Service.Query().Where(service.ID(id)).QueryProject().First(ctx)
+}
+func (c *ServiceBase) RawRemoveBindProjectByServiceId(ctx context.Context, id int) (err error) {
+	_, err = c.client.Service.UpdateOneID(id).ClearProject().Save(ctx)
+	return
+}
+func (c *ServiceBase) RawDeleteProjectByServiceId(ctx context.Context, id int, deleteId int) (err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	_, err = tx.client.Service.UpdateOneID(id).ClearProject().Save(ctx)
+	if err != nil {
+		return
+	}
+	_, err = tx.client.Project.Delete().Where(project.IDEQ(deleteId)).Exec(ctx)
+	return
+}
+
+func (c *ServiceBase) RawUpdateBindProjectByServiceId(ctx context.Context, id int, updateId int) (err error) {
+	return c.client.Service.UpdateOneID(id).SetProjectID(updateId).Exec(ctx)
+}
+
+func (c *ServiceBase) RawAddBindProjectByServiceId(ctx context.Context, id int, addId int) (err error) {
+	return c.client.Service.UpdateOneID(id).SetProjectID(addId).Exec(ctx)
+}
+
 type ServiceBaseCreateReq struct {
 	Name string `json:"name,omitempty""`
 
@@ -1086,6 +1609,14 @@ func NewServiceBase(client *Client) ServiceBaseInterface {
 }
 
 type SpiderDevTblServicetreeBaseInterface interface {
+	RawCreate(ctx context.Context, v *SpiderDevTblServicetree) (res *SpiderDevTblServicetree, err error)
+	RawCreateMany(ctx context.Context, vs SpiderDevTblServicetrees) (SpiderDevTblServicetrees, error)
+	RawGetById(ctx context.Context, id int32) (res *SpiderDevTblServicetree, err error)
+	RawByQueriesAll(ctx context.Context, i interface{}) (res SpiderDevTblServicetrees, count int, err error)
+	RawByQueriesOne(ctx context.Context, i interface{}) (res *SpiderDevTblServicetree, err error)
+	RawUpdateById(ctx context.Context, id int32, v *SpiderDevTblServicetree) (*SpiderDevTblServicetree, error)
+	RawUpdateMany(ctx context.Context, vs SpiderDevTblServicetrees) (err error)
+
 	Create(ctx context.Context, v SpiderDevTblServicetreeBaseCreateReq) (res *SpiderDevTblServicetree, err error)
 	CreateMany(ctx context.Context, vs []SpiderDevTblServicetreeBaseCreateReq) (SpiderDevTblServicetrees, error)
 	GetById(ctx context.Context, id int32) (res SpiderDevTblServicetreeBaseGetRes, err error)
@@ -1100,6 +1631,90 @@ type SpiderDevTblServicetreeBaseInterface interface {
 type SpiderDevTblServicetreeBase struct {
 	client *Client
 }
+
+func RawSpiderDevTblServicetreeBaseCreateSet(create *SpiderDevTblServicetreeCreate, v *SpiderDevTblServicetree) *SpiderDevTblServicetreeCreate {
+	return create.
+		SetName(v.Name).
+		SetAname(v.Aname).
+		SetPnode(v.Pnode).
+		SetType(v.Type).
+		SetKey(v.Key).
+		SetOrigin(v.Origin)
+}
+
+func (c *SpiderDevTblServicetreeBase) RawCreate(ctx context.Context, v *SpiderDevTblServicetree) (res *SpiderDevTblServicetree, err error) {
+	create := c.client.SpiderDevTblServicetree.Create()
+	RawSpiderDevTblServicetreeBaseCreateSet(create, v)
+	return create.Save(ctx)
+}
+
+func (c *SpiderDevTblServicetreeBase) RawCreateMany(ctx context.Context, vs SpiderDevTblServicetrees) (SpiderDevTblServicetrees, error) {
+	bulk := make([]*SpiderDevTblServicetreeCreate, len(vs))
+	for i, v := range vs {
+		create := c.client.SpiderDevTblServicetree.Create()
+		RawSpiderDevTblServicetreeBaseCreateSet(create, v)
+		bulk[i] = create
+	}
+	return c.client.SpiderDevTblServicetree.CreateBulk(bulk...).Save(ctx)
+}
+
+func (c *SpiderDevTblServicetreeBase) RawGetById(ctx context.Context, id int32) (res *SpiderDevTblServicetree, err error) {
+	return c.client.SpiderDevTblServicetree.Query().Where(spiderdevtblservicetree.IDEQ(id)).First(ctx)
+}
+
+func (c *SpiderDevTblServicetreeBase) RawByQueriesOne(ctx context.Context, i interface{}) (res *SpiderDevTblServicetree, err error) {
+	return c.client.SpiderDevTblServicetree.Query().Queries(i).First(ctx)
+}
+
+func (c *SpiderDevTblServicetreeBase) RawByQueriesAll(ctx context.Context, i interface{}) (res SpiderDevTblServicetrees, count int, err error) {
+	return c.client.SpiderDevTblServicetree.Query().ByQueriesAll(ctx, i)
+}
+
+func RawSpiderDevTblServicetreeBaseUpdateSet(update *SpiderDevTblServicetreeUpdateOne, v *SpiderDevTblServicetree) *SpiderDevTblServicetreeUpdateOne {
+	return update.
+		SetName(v.Name).
+		SetAname(v.Aname).
+		SetPnode(v.Pnode).
+		SetType(v.Type).
+		SetKey(v.Key).
+		SetOrigin(v.Origin)
+}
+
+func (c *SpiderDevTblServicetreeBase) RawUpdateById(ctx context.Context, id int32, v *SpiderDevTblServicetree) (*SpiderDevTblServicetree, error) {
+	update := c.client.SpiderDevTblServicetree.UpdateOneID(id)
+	RawSpiderDevTblServicetreeBaseUpdateSet(update, v)
+	return update.Save(ctx)
+}
+
+func (c *SpiderDevTblServicetreeBase) RawUpdateMany(ctx context.Context, vs SpiderDevTblServicetrees) (err error) {
+	tx, err := c.client.Tx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+
+		err = tx.Commit()
+	}()
+
+	for _, v := range vs {
+		update := tx.SpiderDevTblServicetree.UpdateOneID(v.ID)
+		RawSpiderDevTblServicetreeBaseUpdateSet(update, v)
+		_, err = update.Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 type SpiderDevTblServicetreeBaseCreateReq struct {
 }
 
@@ -1218,6 +1833,14 @@ func NewSpiderDevTblServicetreeBase(client *Client) SpiderDevTblServicetreeBaseI
 }
 
 type UserBaseInterface interface {
+	RawCreate(ctx context.Context, v *User) (res *User, err error)
+	RawCreateMany(ctx context.Context, vs Users) (Users, error)
+	RawGetById(ctx context.Context, id int) (res *User, err error)
+	RawByQueriesAll(ctx context.Context, i interface{}) (res Users, count int, err error)
+	RawByQueriesOne(ctx context.Context, i interface{}) (res *User, err error)
+	RawUpdateById(ctx context.Context, id int, v *User) (*User, error)
+	RawUpdateMany(ctx context.Context, vs Users) (err error)
+
 	Create(ctx context.Context, v UserBaseCreateReq) (res *User, err error)
 	CreateMany(ctx context.Context, vs []UserBaseCreateReq) (Users, error)
 	GetById(ctx context.Context, id int) (res UserBaseGetRes, err error)
@@ -1232,6 +1855,88 @@ type UserBaseInterface interface {
 type UserBase struct {
 	client *Client
 }
+
+func RawUserBaseCreateSet(create *UserCreate, v *User) *UserCreate {
+	return create.
+		SetPassWord(v.PassWord).
+		SetToken(v.Token).
+		SetEnable(v.Enable).
+		SetAge(v.Age).
+		SetName(v.Name)
+}
+
+func (c *UserBase) RawCreate(ctx context.Context, v *User) (res *User, err error) {
+	create := c.client.User.Create()
+	RawUserBaseCreateSet(create, v)
+	return create.Save(ctx)
+}
+
+func (c *UserBase) RawCreateMany(ctx context.Context, vs Users) (Users, error) {
+	bulk := make([]*UserCreate, len(vs))
+	for i, v := range vs {
+		create := c.client.User.Create()
+		RawUserBaseCreateSet(create, v)
+		bulk[i] = create
+	}
+	return c.client.User.CreateBulk(bulk...).Save(ctx)
+}
+
+func (c *UserBase) RawGetById(ctx context.Context, id int) (res *User, err error) {
+	return c.client.User.Query().Where(user.IDEQ(id)).First(ctx)
+}
+
+func (c *UserBase) RawByQueriesOne(ctx context.Context, i interface{}) (res *User, err error) {
+	return c.client.User.Query().Queries(i).First(ctx)
+}
+
+func (c *UserBase) RawByQueriesAll(ctx context.Context, i interface{}) (res Users, count int, err error) {
+	return c.client.User.Query().ByQueriesAll(ctx, i)
+}
+
+func RawUserBaseUpdateSet(update *UserUpdateOne, v *User) *UserUpdateOne {
+	return update.
+		SetPassWord(v.PassWord).
+		SetToken(v.Token).
+		SetEnable(v.Enable).
+		SetAge(v.Age).
+		SetName(v.Name)
+}
+
+func (c *UserBase) RawUpdateById(ctx context.Context, id int, v *User) (*User, error) {
+	update := c.client.User.UpdateOneID(id)
+	RawUserBaseUpdateSet(update, v)
+	return update.Save(ctx)
+}
+
+func (c *UserBase) RawUpdateMany(ctx context.Context, vs Users) (err error) {
+	tx, err := c.client.Tx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+
+		err = tx.Commit()
+	}()
+
+	for _, v := range vs {
+		update := tx.User.UpdateOneID(v.ID)
+		RawUserBaseUpdateSet(update, v)
+		_, err = update.Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 type UserBaseCreateReq struct {
 	PassWord string `json:"pass_word""`
 
@@ -1511,29 +2216,6 @@ type AuditRestGetByIdReq struct {
 		Id int `json:"id" uri:"auditId"`
 	}
 }
-type AuditRestGetByIdReq struct {
-	ID int `json:"id,omitempty"`
-
-	URL string `json:"url,omitempty"`
-
-	Query string `json:"query,omitempty"`
-
-	Method string `json:"method,omitempty"`
-
-	Request string `json:"request,omitempty"`
-
-	Response string `json:"response,omitempty"`
-
-	Header string `json:"header,omitempty"`
-
-	StatusCode int `json:"status_code,omitempty"`
-
-	RemoteIP string `json:"remote_ip,omitempty"`
-
-	ClientIP string `json:"client_ip,omitempty"`
-
-	CostTime string `json:"cost_time,omitempty"`
-}
 
 func (rest *AuditRest) AuditRestGetById(ctx context.Context, req AuditRestGetByIdReq) (res AuditBaseGetRes, err error) {
 	return rest.repo.GetById(ctx, req.Uri.Id)
@@ -1626,6 +2308,14 @@ type ProjectRestInterface interface {
 	ProjectRestCreateServicesByProjectId(ctx context.Context, req ProjectRestCreateServicesByProjectIdReq) (res *Project, err error)
 	// @http-gin /projects/:projectId/services GET
 	ProjectRestGetServicesByProjectId(ctx context.Context, req ProjectRestGetServicesByProjectIdReq) (res ProjectRestGetServicesByProjectIdRes, err error)
+	// @http-gin /projects/:projectId/services DELETE
+	ProjectRestDeleteServicesByProjectId(ctx context.Context, req ProjectRestDeleteServicesByProjectIdReq) (res string, err error)
+	// @http-gin /projects/:projectId/services/bind/remove PUT
+	ProjectRestRemoveBindServicesByProjectId(ctx context.Context, req ProjectRestRemoveBindServicesByProjectIdReq) (res string, err error)
+	// @http-gin /projects/:projectId/services/bind/add PUT
+	ProjectRestAddBindServicesByProjectId(ctx context.Context, req ProjectRestAddBindServicesByProjectIdReq) (res string, err error)
+	// @http-gin /projects/:projectId/services/bind/update PUT
+	ProjectRestUpdateBindServicesByProjectId(ctx context.Context, req ProjectRestUpdateBindServicesByProjectIdReq) (res string, err error)
 }
 
 func NewProjectRest(client *Client) ProjectRestInterface {
@@ -1656,15 +2346,6 @@ type ProjectRestGetByIdReq struct {
 	Uri struct {
 		Id int `json:"id" uri:"projectId"`
 	}
-}
-type ProjectRestGetByIdReq struct {
-	ID int `json:"id,omitempty"`
-
-	Name string `json:"name,omitempty"`
-
-	Aname string `json:"aname,omitempty"`
-
-	Comments string `json:"comments,omitempty"`
 }
 
 func (rest *ProjectRest) ProjectRestGetById(ctx context.Context, req ProjectRestGetByIdReq) (res ProjectBaseGetRes, err error) {
@@ -1764,6 +2445,60 @@ func (rest *ProjectRest) ProjectRestGetServicesByProjectId(ctx context.Context, 
 	return ProjectRestGetServicesByProjectIdRes{List: list, Total: total}, err
 }
 
+type ProjectRestDeleteServicesByProjectIdReq struct {
+	Uri struct {
+		ProjectId int `json:"projectId" uri:"projectId"`
+	} `json:"uri"`
+	Query struct {
+		ServiceIds []int `json:"serviceIds" form:"serviceIds"`
+	}
+}
+
+func (rest *ProjectRest) ProjectRestDeleteServicesByProjectId(ctx context.Context, req ProjectRestDeleteServicesByProjectIdReq) (res string, err error) {
+	return "", rest.repo.RawDeleteServicesByProjectId(ctx, req.Uri.ProjectId, req.Query.ServiceIds)
+
+}
+
+type ProjectRestRemoveBindServicesByProjectIdReq struct {
+	Uri struct {
+		ProjectId int `json:"projectId" uri:"projectId"`
+	} `json:"uri"`
+	Body struct {
+		ServiceIds []int `json:"serviceIds"`
+	}
+}
+
+func (rest *ProjectRest) ProjectRestRemoveBindServicesByProjectId(ctx context.Context, req ProjectRestRemoveBindServicesByProjectIdReq) (res string, err error) {
+	return "", rest.repo.RawRemoveBindServicesByProjectId(ctx, req.Uri.ProjectId, req.Body.ServiceIds)
+}
+
+type ProjectRestAddBindServicesByProjectIdReq struct {
+	Uri struct {
+		ProjectId int `json:"projectId" uri:"projectId"`
+	} `json:"uri"`
+	Body struct {
+		ServiceIds []int `json:"serviceIds"`
+	}
+}
+
+func (rest *ProjectRest) ProjectRestAddBindServicesByProjectId(ctx context.Context, req ProjectRestAddBindServicesByProjectIdReq) (res string, err error) {
+	return "", rest.repo.RawAddBindServicesByProjectId(ctx, req.Uri.ProjectId, req.Body.ServiceIds)
+}
+
+type ProjectRestUpdateBindServicesByProjectIdReq struct {
+	Uri struct {
+		ProjectId int `json:"projectId" uri:"projectId"`
+	} `json:"uri"`
+	Body struct {
+		OldIds []int `json:"OldIds"`
+		NewIds []int `json:"NewIds"`
+	} `json:"body"`
+}
+
+func (rest *ProjectRest) ProjectRestUpdateBindServicesByProjectId(ctx context.Context, req ProjectRestUpdateBindServicesByProjectIdReq) (res string, err error) {
+	return "", rest.repo.RawUpdateBindServicesByProjectId(ctx, req.Uri.ProjectId, req.Body.OldIds, req.Body.NewIds)
+}
+
 type ResourceRestInterface interface {
 	// @http-gin /resource POST
 	ResourceRestCreate(ctx context.Context, req ResourceRestCreateReq) (res *Resource, err error)
@@ -1811,19 +2546,6 @@ type ResourceRestGetByIdReq struct {
 	Uri struct {
 		Id int `json:"id" uri:"resourceId"`
 	}
-}
-type ResourceRestGetByIdReq struct {
-	ID int `json:"id,omitempty"`
-
-	Name string `json:"name,omitempty"`
-
-	Key string `json:"key,omitempty"`
-
-	Path string `json:"path,omitempty"`
-
-	Action string `json:"action,omitempty"`
-
-	Comments string `json:"comments,omitempty"`
 }
 
 func (rest *ResourceRest) ResourceRestGetById(ctx context.Context, req ResourceRestGetByIdReq) (res ResourceBaseGetRes, err error) {
@@ -1917,6 +2639,14 @@ type ServiceRestInterface interface {
 	ServiceRestCreateProjectByServiceId(ctx context.Context, req ServiceRestCreateProjectByServiceIdReq) (res *Service, err error)
 	// @http-gin /services/:serviceId/project GET
 	ServiceRestGetProjectByServiceId(ctx context.Context, req ServiceRestGetProjectByServiceIdReq) (res ProjectBaseGetRes, err error)
+	// @http-gin /services/:serviceId/project DELETE
+	ServiceRestDeleteProjectByServiceId(ctx context.Context, req ServiceRestDeleteProjectByServiceIdReq) (res string, err error)
+	// @http-gin /services/:serviceId/project/bind/remove PUT
+	ServiceRestRemoveBindProjectByServiceId(ctx context.Context, req ServiceRestRemoveBindProjectByServiceIdReq) (res string, err error)
+	// @http-gin /services/:serviceId/project/:projectId/bind/add PUT
+	ServiceRestAddBindProjectByServiceId(ctx context.Context, req ServiceRestAddBindProjectByServiceIdReq) (res string, err error)
+	// @http-gin /services/:serviceId/project/:projectId/bind/update PUT
+	ServiceRestUpdateBindProjectByServiceId(ctx context.Context, req ServiceRestUpdateBindProjectByServiceIdReq) (res string, err error)
 }
 
 func NewServiceRest(client *Client) ServiceRestInterface {
@@ -1947,21 +2677,6 @@ type ServiceRestGetByIdReq struct {
 	Uri struct {
 		Id int `json:"id" uri:"serviceId"`
 	}
-}
-type ServiceRestGetByIdReq struct {
-	ID int `json:"id,omitempty"`
-
-	Name string `json:"name,omitempty"`
-
-	Aname string `json:"aname,omitempty"`
-
-	Comments string `json:"comments,omitempty"`
-
-	Classes service.Classes `json:"classes,omitempty"`
-
-	Lang string `json:"lang,omitempty"`
-
-	Git string `json:"git,omitempty"`
 }
 
 func (rest *ServiceRest) ServiceRestGetById(ctx context.Context, req ServiceRestGetByIdReq) (res ServiceBaseGetRes, err error) {
@@ -2054,6 +2769,50 @@ func (rest *ServiceRest) ServiceRestGetProjectByServiceId(ctx context.Context, r
 	return rest.repo.GetProjectByServiceId(ctx, req.Uri.Id)
 }
 
+type ServiceRestDeleteProjectByServiceIdReq struct {
+	Uri struct {
+		ServiceId int `json:"serviceId" uri:"serviceId"`
+		ProjectId int `json:"projectId" uri:"projectId"`
+	} `json:"uri"`
+}
+
+func (rest *ServiceRest) ServiceRestDeleteProjectByServiceId(ctx context.Context, req ServiceRestDeleteProjectByServiceIdReq) (res string, err error) {
+	return "", rest.repo.RawDeleteProjectByServiceId(ctx, req.Uri.ServiceId, req.Uri.ProjectId)
+
+}
+
+type ServiceRestRemoveBindProjectByServiceIdReq struct {
+	Uri struct {
+		ServiceId int `json:"serviceId" uri:"serviceId"`
+	} `json:"uri"`
+}
+
+func (rest *ServiceRest) ServiceRestRemoveBindProjectByServiceId(ctx context.Context, req ServiceRestRemoveBindProjectByServiceIdReq) (res string, err error) {
+	return "", rest.repo.RawRemoveBindProjectByServiceId(ctx, req.Uri.ServiceId)
+}
+
+type ServiceRestAddBindProjectByServiceIdReq struct {
+	Uri struct {
+		ServiceId int `json:"serviceId" uri:"serviceId"`
+		ProjectId int `json:"projectId" uri:"projectId"`
+	} `json:"uri"`
+}
+
+func (rest *ServiceRest) ServiceRestAddBindProjectByServiceId(ctx context.Context, req ServiceRestAddBindProjectByServiceIdReq) (res string, err error) {
+	return "", rest.repo.RawAddBindProjectByServiceId(ctx, req.Uri.ServiceId, req.Uri.ProjectId)
+}
+
+type ServiceRestUpdateBindProjectByServiceIdReq struct {
+	Uri struct {
+		ServiceId int `json:"serviceId" uri:"serviceId"`
+		ProjectId int `json:"projectId" uri:"projectId"`
+	} `json:"uri"`
+}
+
+func (rest *ServiceRest) ServiceRestUpdateBindProjectByServiceId(ctx context.Context, req ServiceRestUpdateBindProjectByServiceIdReq) (res string, err error) {
+	return "", rest.repo.RawUpdateBindProjectByServiceId(ctx, req.Uri.ServiceId, req.Uri.ProjectId)
+}
+
 type SpiderDevTblServicetreeRestInterface interface {
 	// @http-gin /spiderdevtblservicetree POST
 	SpiderDevTblServicetreeRestCreate(ctx context.Context, req SpiderDevTblServicetreeRestCreateReq) (res *SpiderDevTblServicetree, err error)
@@ -2101,9 +2860,6 @@ type SpiderDevTblServicetreeRestGetByIdReq struct {
 	Uri struct {
 		Id int32 `json:"id" uri:"spiderdevtblservicetreeId"`
 	}
-}
-type SpiderDevTblServicetreeRestGetByIdReq struct {
-	ID int32 `json:"id,omitempty"`
 }
 
 func (rest *SpiderDevTblServicetreeRest) SpiderDevTblServicetreeRestGetById(ctx context.Context, req SpiderDevTblServicetreeRestGetByIdReq) (res SpiderDevTblServicetreeBaseGetRes, err error) {
@@ -2222,19 +2978,6 @@ type UserRestGetByIdReq struct {
 	Uri struct {
 		Id int `json:"id" uri:"userId"`
 	}
-}
-type UserRestGetByIdReq struct {
-	ID int `json:"id,omitempty"`
-
-	PassWord string `json:"pass_word"`
-
-	Token string `json:"token,omitempty"`
-
-	Enable bool `json:"enable,omitempty"`
-
-	Age int `json:"age,omitempty" fake:"{number:0,150}"`
-
-	Name string `json:"name,omitempty"`
 }
 
 func (rest *UserRest) UserRestGetById(ctx context.Context, req UserRestGetByIdReq) (res UserBaseGetRes, err error) {

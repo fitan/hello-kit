@@ -3,8 +3,9 @@ package casbin
 import "strconv"
 
 const (
-	UserPre = "user_"
-	RolePre = "role_"
+	UserPre     = "user_"
+	RolePre     = "role_"
+	ResourcePre = "resource_"
 )
 
 type CheckPermission struct {
@@ -26,7 +27,7 @@ func (c CheckPermission) DomainKey() string {
 }
 
 func (c CheckPermission) ResourceKey() string {
-	return strconv.Itoa(c.ResourceId)
+	return ResourcePre + strconv.Itoa(c.ResourceId)
 }
 
 type Permission struct {
@@ -65,5 +66,5 @@ func (r Role) NameKey() string {
 }
 
 func (r Role) ResourceKey() string {
-	return strconv.Itoa(r.ResourceId)
+	return ResourcePre + strconv.Itoa(r.ResourceId)
 }

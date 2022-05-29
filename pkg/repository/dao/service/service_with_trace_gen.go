@@ -247,6 +247,319 @@ func (_d ServiceServiceWithTracing) GetProjectByServiceId(ctx context.Context, i
 	return _d.ServiceService.GetProjectByServiceId(ctx, id)
 }
 
+// RawAddBindProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithTracing) RawAddBindProjectByServiceId(ctx context.Context, id int, addId int) (err error) {
+
+	var name = "ServiceService.RawAddBindProjectByServiceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id":    id,
+					"addId": addId},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ServiceService.RawAddBindProjectByServiceId(ctx, id, addId)
+}
+
+// RawByQueriesAll implements ServiceService
+func (_d ServiceServiceWithTracing) RawByQueriesAll(ctx context.Context, i interface{}) (res ent.Services, count int, err error) {
+
+	var name = "ServiceService.RawByQueriesAll"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"i": i},
+				"result": map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ServiceService.RawByQueriesAll(ctx, i)
+}
+
+// RawByQueriesOne implements ServiceService
+func (_d ServiceServiceWithTracing) RawByQueriesOne(ctx context.Context, i interface{}) (res *ent.Service, err error) {
+
+	var name = "ServiceService.RawByQueriesOne"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"i": i},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ServiceService.RawByQueriesOne(ctx, i)
+}
+
+// RawCreate implements ServiceService
+func (_d ServiceServiceWithTracing) RawCreate(ctx context.Context, v *ent.Service) (res *ent.Service, err error) {
+
+	var name = "ServiceService.RawCreate"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"v": v},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ServiceService.RawCreate(ctx, v)
+}
+
+// RawCreateMany implements ServiceService
+func (_d ServiceServiceWithTracing) RawCreateMany(ctx context.Context, vs ent.Services) (s1 ent.Services, err error) {
+
+	var name = "ServiceService.RawCreateMany"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"vs": vs},
+				"result": map[string]interface{}{
+					"s1":  s1,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ServiceService.RawCreateMany(ctx, vs)
+}
+
+// RawCreateProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithTracing) RawCreateProjectByServiceId(ctx context.Context, id int, v *ent.Project) (res *ent.Service, err error) {
+
+	var name = "ServiceService.RawCreateProjectByServiceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id,
+					"v":  v},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ServiceService.RawCreateProjectByServiceId(ctx, id, v)
+}
+
+// RawDeleteProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithTracing) RawDeleteProjectByServiceId(ctx context.Context, id int, deleteId int) (err error) {
+
+	var name = "ServiceService.RawDeleteProjectByServiceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id":       id,
+					"deleteId": deleteId},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ServiceService.RawDeleteProjectByServiceId(ctx, id, deleteId)
+}
+
+// RawGetById implements ServiceService
+func (_d ServiceServiceWithTracing) RawGetById(ctx context.Context, id int) (res *ent.Service, err error) {
+
+	var name = "ServiceService.RawGetById"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ServiceService.RawGetById(ctx, id)
+}
+
+// RawGetProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithTracing) RawGetProjectByServiceId(ctx context.Context, id int) (res *ent.Project, err error) {
+
+	var name = "ServiceService.RawGetProjectByServiceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ServiceService.RawGetProjectByServiceId(ctx, id)
+}
+
+// RawRemoveBindProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithTracing) RawRemoveBindProjectByServiceId(ctx context.Context, id int) (err error) {
+
+	var name = "ServiceService.RawRemoveBindProjectByServiceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ServiceService.RawRemoveBindProjectByServiceId(ctx, id)
+}
+
+// RawUpdateBindProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithTracing) RawUpdateBindProjectByServiceId(ctx context.Context, id int, updateId int) (err error) {
+
+	var name = "ServiceService.RawUpdateBindProjectByServiceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id":       id,
+					"updateId": updateId},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ServiceService.RawUpdateBindProjectByServiceId(ctx, id, updateId)
+}
+
+// RawUpdateById implements ServiceService
+func (_d ServiceServiceWithTracing) RawUpdateById(ctx context.Context, id int, v *ent.Service) (sp1 *ent.Service, err error) {
+
+	var name = "ServiceService.RawUpdateById"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id,
+					"v":  v},
+				"result": map[string]interface{}{
+					"sp1": sp1,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ServiceService.RawUpdateById(ctx, id, v)
+}
+
+// RawUpdateMany implements ServiceService
+func (_d ServiceServiceWithTracing) RawUpdateMany(ctx context.Context, vs ent.Services) (err error) {
+
+	var name = "ServiceService.RawUpdateMany"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"vs": vs},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ServiceService.RawUpdateMany(ctx, vs)
+}
+
 // UpdateById implements ServiceService
 func (_d ServiceServiceWithTracing) UpdateById(ctx context.Context, id int, v ent.ServiceBaseUpdateReq) (sp1 *ent.Service, err error) {
 

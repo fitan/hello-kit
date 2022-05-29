@@ -223,6 +223,175 @@ func (_d ResourceServiceWithTracing) IdByResource(ctx context.Context, path stri
 	return _d.ResourceService.IdByResource(ctx, path, action)
 }
 
+// RawByQueriesAll implements ResourceService
+func (_d ResourceServiceWithTracing) RawByQueriesAll(ctx context.Context, i interface{}) (res ent.Resources, count int, err error) {
+
+	var name = "ResourceService.RawByQueriesAll"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"i": i},
+				"result": map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawByQueriesAll(ctx, i)
+}
+
+// RawByQueriesOne implements ResourceService
+func (_d ResourceServiceWithTracing) RawByQueriesOne(ctx context.Context, i interface{}) (res *ent.Resource, err error) {
+
+	var name = "ResourceService.RawByQueriesOne"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"i": i},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawByQueriesOne(ctx, i)
+}
+
+// RawCreate implements ResourceService
+func (_d ResourceServiceWithTracing) RawCreate(ctx context.Context, v *ent.Resource) (res *ent.Resource, err error) {
+
+	var name = "ResourceService.RawCreate"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"v": v},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawCreate(ctx, v)
+}
+
+// RawCreateMany implements ResourceService
+func (_d ResourceServiceWithTracing) RawCreateMany(ctx context.Context, vs ent.Resources) (r1 ent.Resources, err error) {
+
+	var name = "ResourceService.RawCreateMany"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"vs": vs},
+				"result": map[string]interface{}{
+					"r1":  r1,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawCreateMany(ctx, vs)
+}
+
+// RawGetById implements ResourceService
+func (_d ResourceServiceWithTracing) RawGetById(ctx context.Context, id int) (res *ent.Resource, err error) {
+
+	var name = "ResourceService.RawGetById"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawGetById(ctx, id)
+}
+
+// RawUpdateById implements ResourceService
+func (_d ResourceServiceWithTracing) RawUpdateById(ctx context.Context, id int, v *ent.Resource) (rp1 *ent.Resource, err error) {
+
+	var name = "ResourceService.RawUpdateById"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id,
+					"v":  v},
+				"result": map[string]interface{}{
+					"rp1": rp1,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawUpdateById(ctx, id, v)
+}
+
+// RawUpdateMany implements ResourceService
+func (_d ResourceServiceWithTracing) RawUpdateMany(ctx context.Context, vs ent.Resources) (err error) {
+
+	var name = "ResourceService.RawUpdateMany"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"vs": vs},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawUpdateMany(ctx, vs)
+}
+
 // UpdateById implements ResourceService
 func (_d ResourceServiceWithTracing) UpdateById(ctx context.Context, id int, v ent.ResourceBaseUpdateReq) (rp1 *ent.Resource, err error) {
 

@@ -2,9 +2,9 @@ package casbin
 
 import (
 	"context"
+	"fmt"
 	"github.com/casbin/casbin/v2"
 	"github.com/pkg/errors"
-	"hello/pkg/ent"
 	"strconv"
 	"strings"
 )
@@ -22,8 +22,7 @@ type CasbinService interface {
 }
 
 type basicCasbinService struct {
-	e  *casbin.Enforcer
-	db *ent.Client
+	e *casbin.SyncedEnforcer
 }
 
 func (s *basicCasbinService) GetPermissionByUser(ctx context.Context, permission Permission) (res []Permission) {
@@ -49,8 +48,9 @@ func (s *basicCasbinService) GetPermissionByUser(ctx context.Context, permission
 }
 
 func (s *basicCasbinService) CheckPermission(ctx context.Context, permission CheckPermission) (bool, error) {
-
-	has, err := s.e.Enforce(permission.CasbinObj()...)
+	fmt.Println(permission.CasbinObj())
+	has, reason, err := s.e.EnforceEx(permission.CasbinObj()...)
+	fmt.Println(permission.CasbinObj(), has, reason)
 	return has, errors.Wrap(err, "EnforceEx")
 }
 
@@ -58,7 +58,7 @@ func (s *basicCasbinService) BindPermission(ctx context.Context, permission Perm
 
 	_, err := s.e.AddGroupingPolicy(permission.CasbinObj()...)
 	if err != nil {
-		return errors.Wrap(err, "AddGroupingPolicy")
+		return errors.Wrap(err, "AddPolicy")
 	}
 	return nil
 }
@@ -74,7 +74,7 @@ func (s *basicCasbinService) UnBindPermission(ctx context.Context, permission Pe
 func (s *basicCasbinService) AddRoleAuthorization(ctx context.Context, role Role) error {
 	_, err := s.e.AddPolicy(role.CasbinObj()...)
 	if err != nil {
-		err = errors.Wrap(err, "AddPolicy")
+		err = errors.Wrap(err, "AddGroupingPolicy")
 		return err
 	}
 	return nil
@@ -91,6 +91,6 @@ func (s *basicCasbinService) DelRoleAuthorization(ctx context.Context, role Role
 type BaseService CasbinService
 
 // NewBasicCasbinService returns a naive, stateless implementation of CasbinService.
-func NewBasicService() BaseService {
-	return &basicCasbinService{}
+func NewBasicService(e *casbin.SyncedEnforcer) BaseService {
+	return &basicCasbinService{e}
 }

@@ -179,6 +179,188 @@ func (_d ProjectServiceWithPrometheus) GetServicesByProjectId(ctx context.Contex
 	return _d.base.GetServicesByProjectId(ctx, id, i)
 }
 
+// RawAddBindServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithPrometheus) RawAddBindServicesByProjectId(ctx context.Context, id int, addIds []int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawAddBindServicesByProjectId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawAddBindServicesByProjectId(ctx, id, addIds)
+}
+
+// RawByQueriesAll implements ProjectService
+func (_d ProjectServiceWithPrometheus) RawByQueriesAll(ctx context.Context, i interface{}) (res ent.Projects, count int, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawByQueriesAll", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawByQueriesAll(ctx, i)
+}
+
+// RawByQueriesOne implements ProjectService
+func (_d ProjectServiceWithPrometheus) RawByQueriesOne(ctx context.Context, i interface{}) (res *ent.Project, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawByQueriesOne", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawByQueriesOne(ctx, i)
+}
+
+// RawCreate implements ProjectService
+func (_d ProjectServiceWithPrometheus) RawCreate(ctx context.Context, v *ent.Project) (res *ent.Project, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawCreate", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawCreate(ctx, v)
+}
+
+// RawCreateMany implements ProjectService
+func (_d ProjectServiceWithPrometheus) RawCreateMany(ctx context.Context, vs ent.Projects) (p1 ent.Projects, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawCreateMany", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawCreateMany(ctx, vs)
+}
+
+// RawCreateServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithPrometheus) RawCreateServicesByProjectId(ctx context.Context, id int, vs ent.Services) (res *ent.Project, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawCreateServicesByProjectId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawCreateServicesByProjectId(ctx, id, vs)
+}
+
+// RawDeleteServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithPrometheus) RawDeleteServicesByProjectId(ctx context.Context, id int, deleteIds []int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawDeleteServicesByProjectId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawDeleteServicesByProjectId(ctx, id, deleteIds)
+}
+
+// RawGetById implements ProjectService
+func (_d ProjectServiceWithPrometheus) RawGetById(ctx context.Context, id int) (res *ent.Project, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawGetById", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawGetById(ctx, id)
+}
+
+// RawGetServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithPrometheus) RawGetServicesByProjectId(ctx context.Context, id int, i interface{}) (res ent.Services, count int, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawGetServicesByProjectId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawGetServicesByProjectId(ctx, id, i)
+}
+
+// RawRemoveBindServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithPrometheus) RawRemoveBindServicesByProjectId(ctx context.Context, id int, removeIds []int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawRemoveBindServicesByProjectId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawRemoveBindServicesByProjectId(ctx, id, removeIds)
+}
+
+// RawUpdateBindServicesByProjectId implements ProjectService
+func (_d ProjectServiceWithPrometheus) RawUpdateBindServicesByProjectId(ctx context.Context, id int, removeIds []int, addIds []int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawUpdateBindServicesByProjectId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawUpdateBindServicesByProjectId(ctx, id, removeIds, addIds)
+}
+
+// RawUpdateById implements ProjectService
+func (_d ProjectServiceWithPrometheus) RawUpdateById(ctx context.Context, id int, v *ent.Project) (pp1 *ent.Project, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawUpdateById", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawUpdateById(ctx, id, v)
+}
+
+// RawUpdateMany implements ProjectService
+func (_d ProjectServiceWithPrometheus) RawUpdateMany(ctx context.Context, vs ent.Projects) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		projectserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawUpdateMany", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawUpdateMany(ctx, vs)
+}
+
 // UpdateById implements ProjectService
 func (_d ProjectServiceWithPrometheus) UpdateById(ctx context.Context, id int, v ent.ProjectBaseUpdateReq) (pp1 *ent.Project, err error) {
 	_since := time.Now()

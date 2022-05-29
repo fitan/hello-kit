@@ -399,6 +399,543 @@ func (_d ServiceServiceWithLog) GetProjectByServiceId(ctx context.Context, id in
 	return _d._base.GetProjectByServiceId(ctx, id)
 }
 
+// RawAddBindProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithLog) RawAddBindProjectByServiceId(ctx context.Context, id int, addId int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawAddBindProjectByServiceId", "params", map[string]interface{}{
+					"id":    id,
+					"addId": addId}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawAddBindProjectByServiceId", "params", map[string]interface{}{
+					"id":    id,
+					"addId": addId}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawAddBindProjectByServiceId", "params", map[string]interface{}{
+				"id":    id,
+				"addId": addId}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawAddBindProjectByServiceId", "params", map[string]interface{}{
+				"id":    id,
+				"addId": addId}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawAddBindProjectByServiceId(ctx, id, addId)
+}
+
+// RawByQueriesAll implements ServiceService
+func (_d ServiceServiceWithLog) RawByQueriesAll(ctx context.Context, i interface{}) (res ent.Services, count int, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawByQueriesAll", "params", map[string]interface{}{
+					"i": i}, "results", map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawByQueriesAll", "params", map[string]interface{}{
+					"i": i}, "results", map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawByQueriesAll", "params", map[string]interface{}{
+				"i": i}, "results", map[string]interface{}{
+				"res":   res,
+				"count": count,
+				"err":   fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawByQueriesAll", "params", map[string]interface{}{
+				"i": i}, "results", map[string]interface{}{
+				"res":   res,
+				"count": count,
+				"err":   fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawByQueriesAll(ctx, i)
+}
+
+// RawByQueriesOne implements ServiceService
+func (_d ServiceServiceWithLog) RawByQueriesOne(ctx context.Context, i interface{}) (res *ent.Service, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawByQueriesOne", "params", map[string]interface{}{
+					"i": i}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawByQueriesOne", "params", map[string]interface{}{
+					"i": i}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawByQueriesOne", "params", map[string]interface{}{
+				"i": i}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawByQueriesOne", "params", map[string]interface{}{
+				"i": i}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawByQueriesOne(ctx, i)
+}
+
+// RawCreate implements ServiceService
+func (_d ServiceServiceWithLog) RawCreate(ctx context.Context, v *ent.Service) (res *ent.Service, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawCreate", "params", map[string]interface{}{
+					"v": v}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawCreate", "params", map[string]interface{}{
+					"v": v}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawCreate", "params", map[string]interface{}{
+				"v": v}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawCreate", "params", map[string]interface{}{
+				"v": v}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawCreate(ctx, v)
+}
+
+// RawCreateMany implements ServiceService
+func (_d ServiceServiceWithLog) RawCreateMany(ctx context.Context, vs ent.Services) (s1 ent.Services, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawCreateMany", "params", map[string]interface{}{
+					"vs": vs}, "results", map[string]interface{}{
+					"s1":  s1,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawCreateMany", "params", map[string]interface{}{
+					"vs": vs}, "results", map[string]interface{}{
+					"s1":  s1,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawCreateMany", "params", map[string]interface{}{
+				"vs": vs}, "results", map[string]interface{}{
+				"s1":  s1,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawCreateMany", "params", map[string]interface{}{
+				"vs": vs}, "results", map[string]interface{}{
+				"s1":  s1,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawCreateMany(ctx, vs)
+}
+
+// RawCreateProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithLog) RawCreateProjectByServiceId(ctx context.Context, id int, v *ent.Project) (res *ent.Service, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawCreateProjectByServiceId", "params", map[string]interface{}{
+					"id": id,
+					"v":  v}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawCreateProjectByServiceId", "params", map[string]interface{}{
+					"id": id,
+					"v":  v}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawCreateProjectByServiceId", "params", map[string]interface{}{
+				"id": id,
+				"v":  v}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawCreateProjectByServiceId", "params", map[string]interface{}{
+				"id": id,
+				"v":  v}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawCreateProjectByServiceId(ctx, id, v)
+}
+
+// RawDeleteProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithLog) RawDeleteProjectByServiceId(ctx context.Context, id int, deleteId int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawDeleteProjectByServiceId", "params", map[string]interface{}{
+					"id":       id,
+					"deleteId": deleteId}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawDeleteProjectByServiceId", "params", map[string]interface{}{
+					"id":       id,
+					"deleteId": deleteId}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawDeleteProjectByServiceId", "params", map[string]interface{}{
+				"id":       id,
+				"deleteId": deleteId}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawDeleteProjectByServiceId", "params", map[string]interface{}{
+				"id":       id,
+				"deleteId": deleteId}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawDeleteProjectByServiceId(ctx, id, deleteId)
+}
+
+// RawGetById implements ServiceService
+func (_d ServiceServiceWithLog) RawGetById(ctx context.Context, id int) (res *ent.Service, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawGetById", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawGetById", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawGetById", "params", map[string]interface{}{
+				"id": id}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawGetById", "params", map[string]interface{}{
+				"id": id}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawGetById(ctx, id)
+}
+
+// RawGetProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithLog) RawGetProjectByServiceId(ctx context.Context, id int) (res *ent.Project, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawGetProjectByServiceId", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawGetProjectByServiceId", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawGetProjectByServiceId", "params", map[string]interface{}{
+				"id": id}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawGetProjectByServiceId", "params", map[string]interface{}{
+				"id": id}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawGetProjectByServiceId(ctx, id)
+}
+
+// RawRemoveBindProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithLog) RawRemoveBindProjectByServiceId(ctx context.Context, id int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawRemoveBindProjectByServiceId", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawRemoveBindProjectByServiceId", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawRemoveBindProjectByServiceId", "params", map[string]interface{}{
+				"id": id}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawRemoveBindProjectByServiceId", "params", map[string]interface{}{
+				"id": id}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawRemoveBindProjectByServiceId(ctx, id)
+}
+
+// RawUpdateBindProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithLog) RawUpdateBindProjectByServiceId(ctx context.Context, id int, updateId int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawUpdateBindProjectByServiceId", "params", map[string]interface{}{
+					"id":       id,
+					"updateId": updateId}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawUpdateBindProjectByServiceId", "params", map[string]interface{}{
+					"id":       id,
+					"updateId": updateId}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawUpdateBindProjectByServiceId", "params", map[string]interface{}{
+				"id":       id,
+				"updateId": updateId}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawUpdateBindProjectByServiceId", "params", map[string]interface{}{
+				"id":       id,
+				"updateId": updateId}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawUpdateBindProjectByServiceId(ctx, id, updateId)
+}
+
+// RawUpdateById implements ServiceService
+func (_d ServiceServiceWithLog) RawUpdateById(ctx context.Context, id int, v *ent.Service) (sp1 *ent.Service, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawUpdateById", "params", map[string]interface{}{
+					"id": id,
+					"v":  v}, "results", map[string]interface{}{
+					"sp1": sp1,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawUpdateById", "params", map[string]interface{}{
+					"id": id,
+					"v":  v}, "results", map[string]interface{}{
+					"sp1": sp1,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawUpdateById", "params", map[string]interface{}{
+				"id": id,
+				"v":  v}, "results", map[string]interface{}{
+				"sp1": sp1,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawUpdateById", "params", map[string]interface{}{
+				"id": id,
+				"v":  v}, "results", map[string]interface{}{
+				"sp1": sp1,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawUpdateById(ctx, id, v)
+}
+
+// RawUpdateMany implements ServiceService
+func (_d ServiceServiceWithLog) RawUpdateMany(ctx context.Context, vs ent.Services) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawUpdateMany", "params", map[string]interface{}{
+					"vs": vs}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawUpdateMany", "params", map[string]interface{}{
+					"vs": vs}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawUpdateMany", "params", map[string]interface{}{
+				"vs": vs}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawUpdateMany", "params", map[string]interface{}{
+				"vs": vs}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawUpdateMany(ctx, vs)
+}
+
 // UpdateById implements ServiceService
 func (_d ServiceServiceWithLog) UpdateById(ctx context.Context, id int, v ent.ServiceBaseUpdateReq) (sp1 *ent.Service, err error) {
 

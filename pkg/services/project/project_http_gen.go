@@ -19,6 +19,8 @@ type Ops map[string][]http.ServerOption
 func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option http.ServerOption) {
 	methods := []string{
 
+		ProjectRestAddBindServicesByProjectIdMethodName,
+
 		ProjectRestByQueriesAllMethodName,
 
 		ProjectRestCreateMethodName,
@@ -31,9 +33,15 @@ func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option ht
 
 		ProjectRestDeleteManyMethodName,
 
+		ProjectRestDeleteServicesByProjectIdMethodName,
+
 		ProjectRestGetByIdMethodName,
 
 		ProjectRestGetServicesByProjectIdMethodName,
+
+		ProjectRestRemoveBindServicesByProjectIdMethodName,
+
+		ProjectRestUpdateBindServicesByProjectIdMethodName,
 
 		ProjectRestUpdateByIdMethodName,
 
@@ -49,6 +57,8 @@ type HttpHandler struct {
 
 func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch *debug.DebugSwitch) HttpHandler {
 
+	debugSwitch.Register("ProjectRestAddBindServicesByProjectId", "/projects/:projectId/services/bind/add", "PUT")
+
 	debugSwitch.Register("ProjectRestByQueriesAll", "/projects", "GET")
 
 	debugSwitch.Register("ProjectRestCreate", "/project", "POST")
@@ -61,13 +71,21 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch
 
 	debugSwitch.Register("ProjectRestDeleteMany", "/projects", "DELETE")
 
+	debugSwitch.Register("ProjectRestDeleteServicesByProjectId", "/projects/:projectId/services", "DELETE")
+
 	debugSwitch.Register("ProjectRestGetById", "/projects/:projectId", "GET")
 
 	debugSwitch.Register("ProjectRestGetServicesByProjectId", "/projects/:projectId/services", "GET")
 
+	debugSwitch.Register("ProjectRestRemoveBindServicesByProjectId", "/projects/:projectId/services/bind/remove", "PUT")
+
+	debugSwitch.Register("ProjectRestUpdateBindServicesByProjectId", "/projects/:projectId/services/bind/update", "PUT")
+
 	debugSwitch.Register("ProjectRestUpdateById", "/projects/:projectId", "PUT")
 
 	debugSwitch.Register("ProjectRestUpdateMany", "/projects", "PUT")
+
+	makeProjectRestAddBindServicesByProjectIdHandler(r, endpoints, options[ProjectRestAddBindServicesByProjectIdMethodName])
 
 	makeProjectRestByQueriesAllHandler(r, endpoints, options[ProjectRestByQueriesAllMethodName])
 
@@ -81,9 +99,15 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch
 
 	makeProjectRestDeleteManyHandler(r, endpoints, options[ProjectRestDeleteManyMethodName])
 
+	makeProjectRestDeleteServicesByProjectIdHandler(r, endpoints, options[ProjectRestDeleteServicesByProjectIdMethodName])
+
 	makeProjectRestGetByIdHandler(r, endpoints, options[ProjectRestGetByIdMethodName])
 
 	makeProjectRestGetServicesByProjectIdHandler(r, endpoints, options[ProjectRestGetServicesByProjectIdMethodName])
+
+	makeProjectRestRemoveBindServicesByProjectIdHandler(r, endpoints, options[ProjectRestRemoveBindServicesByProjectIdMethodName])
+
+	makeProjectRestUpdateBindServicesByProjectIdHandler(r, endpoints, options[ProjectRestUpdateBindServicesByProjectIdMethodName])
 
 	makeProjectRestUpdateByIdHandler(r, endpoints, options[ProjectRestUpdateByIdMethodName])
 
@@ -96,6 +120,37 @@ type SwagResponse struct {
 	TraceId string      `json:"traceId"`
 	Status  int         `json:"status"`
 	Data    interface{} `json:"data"`
+}
+
+type ProjectRestAddBindServicesByProjectIdBodySwag struct {
+	ServiceIds []int `json:"serviceIds"`
+}
+
+// @Accept  json
+// @Tags ProjectService
+// @Param body body ProjectRestAddBindServicesByProjectIdBodySwag true " "
+// @Param projectId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /projects/{projectId}/services/bind/add [put]
+func makeProjectRestAddBindServicesByProjectIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/projects/:projectId/services/bind/add", http.NewServer(endpoints.ProjectRestAddBindServicesByProjectIdEndpoint, decodeProjectRestAddBindServicesByProjectIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeProjectRestAddBindServicesByProjectIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ProjectRestAddBindServicesByProjectIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindJSON(&req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
 }
 
 type ProjectRestByQueriesAllQuerySwag ent.ProjectQueryOps
@@ -242,6 +297,37 @@ func decodeProjectRestDeleteManyRequest(_ context.Context, ctx *gin.Context) (in
 	return req, err
 }
 
+type ProjectRestDeleteServicesByProjectIdQuerySwag struct {
+	ServiceIds []int `json:"serviceIds" form:"serviceIds"`
+}
+
+// @Accept  json
+// @Tags ProjectService
+// @Param query query ProjectRestDeleteServicesByProjectIdQuerySwag false " "
+// @Param projectId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /projects/{projectId}/services [delete]
+func makeProjectRestDeleteServicesByProjectIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.DELETE("/projects/:projectId/services", http.NewServer(endpoints.ProjectRestDeleteServicesByProjectIdEndpoint, decodeProjectRestDeleteServicesByProjectIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeProjectRestDeleteServicesByProjectIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ProjectRestDeleteServicesByProjectIdReq
+	var err error
+
+	err = ctx.ShouldBindQuery(&req.Query)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
 // @Accept  json
 // @Tags ProjectService
 // @Param projectId path string true " "
@@ -285,6 +371,69 @@ func decodeProjectRestGetServicesByProjectIdRequest(_ context.Context, ctx *gin.
 	}
 
 	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+type ProjectRestRemoveBindServicesByProjectIdBodySwag struct {
+	ServiceIds []int `json:"serviceIds"`
+}
+
+// @Accept  json
+// @Tags ProjectService
+// @Param body body ProjectRestRemoveBindServicesByProjectIdBodySwag true " "
+// @Param projectId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /projects/{projectId}/services/bind/remove [put]
+func makeProjectRestRemoveBindServicesByProjectIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/projects/:projectId/services/bind/remove", http.NewServer(endpoints.ProjectRestRemoveBindServicesByProjectIdEndpoint, decodeProjectRestRemoveBindServicesByProjectIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeProjectRestRemoveBindServicesByProjectIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ProjectRestRemoveBindServicesByProjectIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindJSON(&req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+type ProjectRestUpdateBindServicesByProjectIdBodySwag struct {
+	OldIds []int `json:"OldIds"`
+	NewIds []int `json:"NewIds"`
+}
+
+// @Accept  json
+// @Tags ProjectService
+// @Param body body ProjectRestUpdateBindServicesByProjectIdBodySwag true " "
+// @Param projectId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /projects/{projectId}/services/bind/update [put]
+func makeProjectRestUpdateBindServicesByProjectIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/projects/:projectId/services/bind/update", http.NewServer(endpoints.ProjectRestUpdateBindServicesByProjectIdEndpoint, decodeProjectRestUpdateBindServicesByProjectIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeProjectRestUpdateBindServicesByProjectIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ProjectRestUpdateBindServicesByProjectIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindJSON(&req.Body)
 	if err != nil {
 		return nil, err
 	}

@@ -19,6 +19,8 @@ type Ops map[string][]http.ServerOption
 func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option http.ServerOption) {
 	methods := []string{
 
+		ServiceRestAddBindProjectByServiceIdMethodName,
+
 		ServiceRestByQueriesAllMethodName,
 
 		ServiceRestCreateMethodName,
@@ -31,9 +33,15 @@ func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option ht
 
 		ServiceRestDeleteManyMethodName,
 
+		ServiceRestDeleteProjectByServiceIdMethodName,
+
 		ServiceRestGetByIdMethodName,
 
 		ServiceRestGetProjectByServiceIdMethodName,
+
+		ServiceRestRemoveBindProjectByServiceIdMethodName,
+
+		ServiceRestUpdateBindProjectByServiceIdMethodName,
 
 		ServiceRestUpdateByIdMethodName,
 
@@ -49,6 +57,8 @@ type HttpHandler struct {
 
 func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch *debug.DebugSwitch) HttpHandler {
 
+	debugSwitch.Register("ServiceRestAddBindProjectByServiceId", "/services/:serviceId/project/:projectId/bind/add", "PUT")
+
 	debugSwitch.Register("ServiceRestByQueriesAll", "/services", "GET")
 
 	debugSwitch.Register("ServiceRestCreate", "/service", "POST")
@@ -61,13 +71,21 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch
 
 	debugSwitch.Register("ServiceRestDeleteMany", "/services", "DELETE")
 
+	debugSwitch.Register("ServiceRestDeleteProjectByServiceId", "/services/:serviceId/project", "DELETE")
+
 	debugSwitch.Register("ServiceRestGetById", "/services/:serviceId", "GET")
 
 	debugSwitch.Register("ServiceRestGetProjectByServiceId", "/services/:serviceId/project", "GET")
 
+	debugSwitch.Register("ServiceRestRemoveBindProjectByServiceId", "/services/:serviceId/project/bind/remove", "PUT")
+
+	debugSwitch.Register("ServiceRestUpdateBindProjectByServiceId", "/services/:serviceId/project/:projectId/bind/update", "PUT")
+
 	debugSwitch.Register("ServiceRestUpdateById", "/services/:serviceId", "PUT")
 
 	debugSwitch.Register("ServiceRestUpdateMany", "/services", "PUT")
+
+	makeServiceRestAddBindProjectByServiceIdHandler(r, endpoints, options[ServiceRestAddBindProjectByServiceIdMethodName])
 
 	makeServiceRestByQueriesAllHandler(r, endpoints, options[ServiceRestByQueriesAllMethodName])
 
@@ -81,9 +99,15 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch
 
 	makeServiceRestDeleteManyHandler(r, endpoints, options[ServiceRestDeleteManyMethodName])
 
+	makeServiceRestDeleteProjectByServiceIdHandler(r, endpoints, options[ServiceRestDeleteProjectByServiceIdMethodName])
+
 	makeServiceRestGetByIdHandler(r, endpoints, options[ServiceRestGetByIdMethodName])
 
 	makeServiceRestGetProjectByServiceIdHandler(r, endpoints, options[ServiceRestGetProjectByServiceIdMethodName])
+
+	makeServiceRestRemoveBindProjectByServiceIdHandler(r, endpoints, options[ServiceRestRemoveBindProjectByServiceIdMethodName])
+
+	makeServiceRestUpdateBindProjectByServiceIdHandler(r, endpoints, options[ServiceRestUpdateBindProjectByServiceIdMethodName])
 
 	makeServiceRestUpdateByIdHandler(r, endpoints, options[ServiceRestUpdateByIdMethodName])
 
@@ -96,6 +120,28 @@ type SwagResponse struct {
 	TraceId string      `json:"traceId"`
 	Status  int         `json:"status"`
 	Data    interface{} `json:"data"`
+}
+
+// @Accept  json
+// @Tags ServiceService
+// @Param serviceId path string true " "
+// @Param projectId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /services/{serviceId}/project/{projectId}/bind/add [put]
+func makeServiceRestAddBindProjectByServiceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/services/:serviceId/project/:projectId/bind/add", http.NewServer(endpoints.ServiceRestAddBindProjectByServiceIdEndpoint, decodeServiceRestAddBindProjectByServiceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeServiceRestAddBindProjectByServiceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ServiceRestAddBindProjectByServiceIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
 }
 
 type ServiceRestByQueriesAllQuerySwag ent.ServiceQueryOps
@@ -245,6 +291,28 @@ func decodeServiceRestDeleteManyRequest(_ context.Context, ctx *gin.Context) (in
 // @Accept  json
 // @Tags ServiceService
 // @Param serviceId path string true " "
+// @Param projectId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /services/{serviceId}/project [delete]
+func makeServiceRestDeleteProjectByServiceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.DELETE("/services/:serviceId/project", http.NewServer(endpoints.ServiceRestDeleteProjectByServiceIdEndpoint, decodeServiceRestDeleteProjectByServiceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeServiceRestDeleteProjectByServiceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ServiceRestDeleteProjectByServiceIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+// @Accept  json
+// @Tags ServiceService
+// @Param serviceId path string true " "
 // @Success 200 {object} SwagResponse{data=ent.ServiceBaseGetRes}
 // @Router /services/{serviceId} [get]
 func makeServiceRestGetByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
@@ -274,6 +342,49 @@ func makeServiceRestGetProjectByServiceIdHandler(r *gin.Engine, endpoints Endpoi
 
 func decodeServiceRestGetProjectByServiceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
 	var req ent.ServiceRestGetProjectByServiceIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+// @Accept  json
+// @Tags ServiceService
+// @Param serviceId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /services/{serviceId}/project/bind/remove [put]
+func makeServiceRestRemoveBindProjectByServiceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/services/:serviceId/project/bind/remove", http.NewServer(endpoints.ServiceRestRemoveBindProjectByServiceIdEndpoint, decodeServiceRestRemoveBindProjectByServiceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeServiceRestRemoveBindProjectByServiceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ServiceRestRemoveBindProjectByServiceIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+// @Accept  json
+// @Tags ServiceService
+// @Param serviceId path string true " "
+// @Param projectId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /services/{serviceId}/project/{projectId}/bind/update [put]
+func makeServiceRestUpdateBindProjectByServiceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/services/:serviceId/project/:projectId/bind/update", http.NewServer(endpoints.ServiceRestUpdateBindProjectByServiceIdEndpoint, decodeServiceRestUpdateBindProjectByServiceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeServiceRestUpdateBindProjectByServiceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ServiceRestUpdateBindProjectByServiceIdReq
 	var err error
 
 	err = ctx.ShouldBindUri(&req.Uri)

@@ -15,6 +15,8 @@ import (
 )
 
 const (
+	ProjectRestAddBindServicesByProjectIdMethodName = "ProjectRestAddBindServicesByProjectId"
+
 	ProjectRestByQueriesAllMethodName = "ProjectRestByQueriesAll"
 
 	ProjectRestCreateMethodName = "ProjectRestCreate"
@@ -27,9 +29,15 @@ const (
 
 	ProjectRestDeleteManyMethodName = "ProjectRestDeleteMany"
 
+	ProjectRestDeleteServicesByProjectIdMethodName = "ProjectRestDeleteServicesByProjectId"
+
 	ProjectRestGetByIdMethodName = "ProjectRestGetById"
 
 	ProjectRestGetServicesByProjectIdMethodName = "ProjectRestGetServicesByProjectId"
+
+	ProjectRestRemoveBindServicesByProjectIdMethodName = "ProjectRestRemoveBindServicesByProjectId"
+
+	ProjectRestUpdateBindServicesByProjectIdMethodName = "ProjectRestUpdateBindServicesByProjectId"
 
 	ProjectRestUpdateByIdMethodName = "ProjectRestUpdateById"
 
@@ -39,6 +47,8 @@ const (
 type Mws map[string][]endpoint.Middleware
 
 type Endpoints struct {
+	ProjectRestAddBindServicesByProjectIdEndpoint endpoint.Endpoint
+
 	ProjectRestByQueriesAllEndpoint endpoint.Endpoint
 
 	ProjectRestCreateEndpoint endpoint.Endpoint
@@ -51,9 +61,15 @@ type Endpoints struct {
 
 	ProjectRestDeleteManyEndpoint endpoint.Endpoint
 
+	ProjectRestDeleteServicesByProjectIdEndpoint endpoint.Endpoint
+
 	ProjectRestGetByIdEndpoint endpoint.Endpoint
 
 	ProjectRestGetServicesByProjectIdEndpoint endpoint.Endpoint
+
+	ProjectRestRemoveBindServicesByProjectIdEndpoint endpoint.Endpoint
+
+	ProjectRestUpdateBindServicesByProjectIdEndpoint endpoint.Endpoint
 
 	ProjectRestUpdateByIdEndpoint endpoint.Endpoint
 
@@ -62,6 +78,8 @@ type Endpoints struct {
 
 func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m endpoint.Middleware) {
 	methods := []string{
+
+		ProjectRestAddBindServicesByProjectIdMethodName,
 
 		ProjectRestByQueriesAllMethodName,
 
@@ -75,9 +93,15 @@ func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m en
 
 		ProjectRestDeleteManyMethodName,
 
+		ProjectRestDeleteServicesByProjectIdMethodName,
+
 		ProjectRestGetByIdMethodName,
 
 		ProjectRestGetServicesByProjectIdMethodName,
+
+		ProjectRestRemoveBindServicesByProjectIdMethodName,
+
+		ProjectRestUpdateBindServicesByProjectIdMethodName,
 
 		ProjectRestUpdateByIdMethodName,
 
@@ -91,6 +115,8 @@ func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m en
 func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Middleware, m func(n string) endpoint.Middleware) {
 	methods := []string{
 
+		ProjectRestAddBindServicesByProjectIdMethodName,
+
 		ProjectRestByQueriesAllMethodName,
 
 		ProjectRestCreateMethodName,
@@ -103,9 +129,15 @@ func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Mi
 
 		ProjectRestDeleteManyMethodName,
 
+		ProjectRestDeleteServicesByProjectIdMethodName,
+
 		ProjectRestGetByIdMethodName,
 
 		ProjectRestGetServicesByProjectIdMethodName,
+
+		ProjectRestRemoveBindServicesByProjectIdMethodName,
+
+		ProjectRestUpdateBindServicesByProjectIdMethodName,
 
 		ProjectRestUpdateByIdMethodName,
 
@@ -121,6 +153,8 @@ func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Mi
 func NewEndpoints(s ProjectService, mdw Mws) Endpoints {
 	eps := Endpoints{
 
+		ProjectRestAddBindServicesByProjectIdEndpoint: MakeProjectRestAddBindServicesByProjectIdEndpoint(s),
+
 		ProjectRestByQueriesAllEndpoint: MakeProjectRestByQueriesAllEndpoint(s),
 
 		ProjectRestCreateEndpoint: MakeProjectRestCreateEndpoint(s),
@@ -133,13 +167,23 @@ func NewEndpoints(s ProjectService, mdw Mws) Endpoints {
 
 		ProjectRestDeleteManyEndpoint: MakeProjectRestDeleteManyEndpoint(s),
 
+		ProjectRestDeleteServicesByProjectIdEndpoint: MakeProjectRestDeleteServicesByProjectIdEndpoint(s),
+
 		ProjectRestGetByIdEndpoint: MakeProjectRestGetByIdEndpoint(s),
 
 		ProjectRestGetServicesByProjectIdEndpoint: MakeProjectRestGetServicesByProjectIdEndpoint(s),
 
+		ProjectRestRemoveBindServicesByProjectIdEndpoint: MakeProjectRestRemoveBindServicesByProjectIdEndpoint(s),
+
+		ProjectRestUpdateBindServicesByProjectIdEndpoint: MakeProjectRestUpdateBindServicesByProjectIdEndpoint(s),
+
 		ProjectRestUpdateByIdEndpoint: MakeProjectRestUpdateByIdEndpoint(s),
 
 		ProjectRestUpdateManyEndpoint: MakeProjectRestUpdateManyEndpoint(s),
+	}
+
+	for _, m := range mdw[ProjectRestAddBindServicesByProjectIdMethodName] {
+		eps.ProjectRestAddBindServicesByProjectIdEndpoint = m(eps.ProjectRestAddBindServicesByProjectIdEndpoint)
 	}
 
 	for _, m := range mdw[ProjectRestByQueriesAllMethodName] {
@@ -166,12 +210,24 @@ func NewEndpoints(s ProjectService, mdw Mws) Endpoints {
 		eps.ProjectRestDeleteManyEndpoint = m(eps.ProjectRestDeleteManyEndpoint)
 	}
 
+	for _, m := range mdw[ProjectRestDeleteServicesByProjectIdMethodName] {
+		eps.ProjectRestDeleteServicesByProjectIdEndpoint = m(eps.ProjectRestDeleteServicesByProjectIdEndpoint)
+	}
+
 	for _, m := range mdw[ProjectRestGetByIdMethodName] {
 		eps.ProjectRestGetByIdEndpoint = m(eps.ProjectRestGetByIdEndpoint)
 	}
 
 	for _, m := range mdw[ProjectRestGetServicesByProjectIdMethodName] {
 		eps.ProjectRestGetServicesByProjectIdEndpoint = m(eps.ProjectRestGetServicesByProjectIdEndpoint)
+	}
+
+	for _, m := range mdw[ProjectRestRemoveBindServicesByProjectIdMethodName] {
+		eps.ProjectRestRemoveBindServicesByProjectIdEndpoint = m(eps.ProjectRestRemoveBindServicesByProjectIdEndpoint)
+	}
+
+	for _, m := range mdw[ProjectRestUpdateBindServicesByProjectIdMethodName] {
+		eps.ProjectRestUpdateBindServicesByProjectIdEndpoint = m(eps.ProjectRestUpdateBindServicesByProjectIdEndpoint)
 	}
 
 	for _, m := range mdw[ProjectRestUpdateByIdMethodName] {
@@ -183,6 +239,28 @@ func NewEndpoints(s ProjectService, mdw Mws) Endpoints {
 	}
 
 	return eps
+}
+
+func MakeProjectRestAddBindServicesByProjectIdEndpoint(s ProjectService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ProjectRestAddBindServicesByProjectIdReq)
+		rs, err := s.ProjectRestAddBindServicesByProjectId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
 }
 
 func MakeProjectRestByQueriesAllEndpoint(s ProjectService) endpoint.Endpoint {
@@ -317,6 +395,28 @@ func MakeProjectRestDeleteManyEndpoint(s ProjectService) endpoint.Endpoint {
 	}
 }
 
+func MakeProjectRestDeleteServicesByProjectIdEndpoint(s ProjectService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ProjectRestDeleteServicesByProjectIdReq)
+		rs, err := s.ProjectRestDeleteServicesByProjectId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
 func MakeProjectRestGetByIdEndpoint(s ProjectService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		var err error
@@ -351,6 +451,50 @@ func MakeProjectRestGetServicesByProjectIdEndpoint(s ProjectService) endpoint.En
 		}()
 		req := request.(ent.ProjectRestGetServicesByProjectIdReq)
 		rs, err := s.ProjectRestGetServicesByProjectId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeProjectRestRemoveBindServicesByProjectIdEndpoint(s ProjectService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ProjectRestRemoveBindServicesByProjectIdReq)
+		rs, err := s.ProjectRestRemoveBindServicesByProjectId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeProjectRestUpdateBindServicesByProjectIdEndpoint(s ProjectService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ProjectRestUpdateBindServicesByProjectIdReq)
+		rs, err := s.ProjectRestUpdateBindServicesByProjectId(ctx, req)
 		if err != nil {
 			result["err"] = err.Error()
 			return result, nil

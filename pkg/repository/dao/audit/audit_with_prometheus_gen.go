@@ -136,6 +136,104 @@ func (_d AuditServiceWithPrometheus) GetById(ctx context.Context, id int) (res e
 	return _d.base.GetById(ctx, id)
 }
 
+// RawByQueriesAll implements AuditService
+func (_d AuditServiceWithPrometheus) RawByQueriesAll(ctx context.Context, i interface{}) (res ent.Audits, count int, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		auditserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawByQueriesAll", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawByQueriesAll(ctx, i)
+}
+
+// RawByQueriesOne implements AuditService
+func (_d AuditServiceWithPrometheus) RawByQueriesOne(ctx context.Context, i interface{}) (res *ent.Audit, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		auditserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawByQueriesOne", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawByQueriesOne(ctx, i)
+}
+
+// RawCreate implements AuditService
+func (_d AuditServiceWithPrometheus) RawCreate(ctx context.Context, v *ent.Audit) (res *ent.Audit, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		auditserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawCreate", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawCreate(ctx, v)
+}
+
+// RawCreateMany implements AuditService
+func (_d AuditServiceWithPrometheus) RawCreateMany(ctx context.Context, vs ent.Audits) (a1 ent.Audits, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		auditserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawCreateMany", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawCreateMany(ctx, vs)
+}
+
+// RawGetById implements AuditService
+func (_d AuditServiceWithPrometheus) RawGetById(ctx context.Context, id int) (res *ent.Audit, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		auditserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawGetById", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawGetById(ctx, id)
+}
+
+// RawUpdateById implements AuditService
+func (_d AuditServiceWithPrometheus) RawUpdateById(ctx context.Context, id int, v *ent.Audit) (ap1 *ent.Audit, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		auditserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawUpdateById", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawUpdateById(ctx, id, v)
+}
+
+// RawUpdateMany implements AuditService
+func (_d AuditServiceWithPrometheus) RawUpdateMany(ctx context.Context, vs ent.Audits) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		auditserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawUpdateMany", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawUpdateMany(ctx, vs)
+}
+
 // UpdateById implements AuditService
 func (_d AuditServiceWithPrometheus) UpdateById(ctx context.Context, id int, v ent.AuditBaseUpdateReq) (ap1 *ent.Audit, err error) {
 	_since := time.Now()

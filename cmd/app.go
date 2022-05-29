@@ -75,6 +75,15 @@ var appPathPutInStorageCmd = &cobra.Command{
 	},
 }
 
+var appCasbinCmd = &cobra.Command{
+	Use:     "casbin input",
+	Aliases: []string{"casbin"},
+	Short:   "casbin input",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return app.CasbinInput(confName)
+	},
+}
+
 var appVersionCmd = &cobra.Command{
 	Use:     "version",
 	Aliases: []string{"v"},
@@ -90,7 +99,7 @@ var appVersionCmd = &cobra.Command{
 var confName string
 
 func init() {
-	appCmd.AddCommand(appStartCmd, appVersionCmd, appPathPutInStorageCmd)
+	appCmd.AddCommand(appStartCmd, appVersionCmd, appPathPutInStorageCmd, appCasbinCmd)
 	rootCmd.AddCommand(appCmd)
 
 	// Here you will define your flags and configuration settings.
@@ -103,4 +112,5 @@ func init() {
 	// is called directly, e.g.:
 	appPathPutInStorageCmd.Flags().StringVarP(&confName, "confName", "c", "dev", "config name")
 	appStartCmd.Flags().StringVarP(&confName, "confName", "c", "dev", "config name")
+	appCasbinCmd.Flags().StringVarP(&confName, "confName", "c", "dev", "config name")
 }

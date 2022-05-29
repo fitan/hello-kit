@@ -15,6 +15,8 @@ import (
 )
 
 const (
+	ServiceRestAddBindProjectByServiceIdMethodName = "ServiceRestAddBindProjectByServiceId"
+
 	ServiceRestByQueriesAllMethodName = "ServiceRestByQueriesAll"
 
 	ServiceRestCreateMethodName = "ServiceRestCreate"
@@ -27,9 +29,15 @@ const (
 
 	ServiceRestDeleteManyMethodName = "ServiceRestDeleteMany"
 
+	ServiceRestDeleteProjectByServiceIdMethodName = "ServiceRestDeleteProjectByServiceId"
+
 	ServiceRestGetByIdMethodName = "ServiceRestGetById"
 
 	ServiceRestGetProjectByServiceIdMethodName = "ServiceRestGetProjectByServiceId"
+
+	ServiceRestRemoveBindProjectByServiceIdMethodName = "ServiceRestRemoveBindProjectByServiceId"
+
+	ServiceRestUpdateBindProjectByServiceIdMethodName = "ServiceRestUpdateBindProjectByServiceId"
 
 	ServiceRestUpdateByIdMethodName = "ServiceRestUpdateById"
 
@@ -39,6 +47,8 @@ const (
 type Mws map[string][]endpoint.Middleware
 
 type Endpoints struct {
+	ServiceRestAddBindProjectByServiceIdEndpoint endpoint.Endpoint
+
 	ServiceRestByQueriesAllEndpoint endpoint.Endpoint
 
 	ServiceRestCreateEndpoint endpoint.Endpoint
@@ -51,9 +61,15 @@ type Endpoints struct {
 
 	ServiceRestDeleteManyEndpoint endpoint.Endpoint
 
+	ServiceRestDeleteProjectByServiceIdEndpoint endpoint.Endpoint
+
 	ServiceRestGetByIdEndpoint endpoint.Endpoint
 
 	ServiceRestGetProjectByServiceIdEndpoint endpoint.Endpoint
+
+	ServiceRestRemoveBindProjectByServiceIdEndpoint endpoint.Endpoint
+
+	ServiceRestUpdateBindProjectByServiceIdEndpoint endpoint.Endpoint
 
 	ServiceRestUpdateByIdEndpoint endpoint.Endpoint
 
@@ -62,6 +78,8 @@ type Endpoints struct {
 
 func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m endpoint.Middleware) {
 	methods := []string{
+
+		ServiceRestAddBindProjectByServiceIdMethodName,
 
 		ServiceRestByQueriesAllMethodName,
 
@@ -75,9 +93,15 @@ func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m en
 
 		ServiceRestDeleteManyMethodName,
 
+		ServiceRestDeleteProjectByServiceIdMethodName,
+
 		ServiceRestGetByIdMethodName,
 
 		ServiceRestGetProjectByServiceIdMethodName,
+
+		ServiceRestRemoveBindProjectByServiceIdMethodName,
+
+		ServiceRestUpdateBindProjectByServiceIdMethodName,
 
 		ServiceRestUpdateByIdMethodName,
 
@@ -91,6 +115,8 @@ func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m en
 func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Middleware, m func(n string) endpoint.Middleware) {
 	methods := []string{
 
+		ServiceRestAddBindProjectByServiceIdMethodName,
+
 		ServiceRestByQueriesAllMethodName,
 
 		ServiceRestCreateMethodName,
@@ -103,9 +129,15 @@ func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Mi
 
 		ServiceRestDeleteManyMethodName,
 
+		ServiceRestDeleteProjectByServiceIdMethodName,
+
 		ServiceRestGetByIdMethodName,
 
 		ServiceRestGetProjectByServiceIdMethodName,
+
+		ServiceRestRemoveBindProjectByServiceIdMethodName,
+
+		ServiceRestUpdateBindProjectByServiceIdMethodName,
 
 		ServiceRestUpdateByIdMethodName,
 
@@ -121,6 +153,8 @@ func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Mi
 func NewEndpoints(s ServiceService, mdw Mws) Endpoints {
 	eps := Endpoints{
 
+		ServiceRestAddBindProjectByServiceIdEndpoint: MakeServiceRestAddBindProjectByServiceIdEndpoint(s),
+
 		ServiceRestByQueriesAllEndpoint: MakeServiceRestByQueriesAllEndpoint(s),
 
 		ServiceRestCreateEndpoint: MakeServiceRestCreateEndpoint(s),
@@ -133,13 +167,23 @@ func NewEndpoints(s ServiceService, mdw Mws) Endpoints {
 
 		ServiceRestDeleteManyEndpoint: MakeServiceRestDeleteManyEndpoint(s),
 
+		ServiceRestDeleteProjectByServiceIdEndpoint: MakeServiceRestDeleteProjectByServiceIdEndpoint(s),
+
 		ServiceRestGetByIdEndpoint: MakeServiceRestGetByIdEndpoint(s),
 
 		ServiceRestGetProjectByServiceIdEndpoint: MakeServiceRestGetProjectByServiceIdEndpoint(s),
 
+		ServiceRestRemoveBindProjectByServiceIdEndpoint: MakeServiceRestRemoveBindProjectByServiceIdEndpoint(s),
+
+		ServiceRestUpdateBindProjectByServiceIdEndpoint: MakeServiceRestUpdateBindProjectByServiceIdEndpoint(s),
+
 		ServiceRestUpdateByIdEndpoint: MakeServiceRestUpdateByIdEndpoint(s),
 
 		ServiceRestUpdateManyEndpoint: MakeServiceRestUpdateManyEndpoint(s),
+	}
+
+	for _, m := range mdw[ServiceRestAddBindProjectByServiceIdMethodName] {
+		eps.ServiceRestAddBindProjectByServiceIdEndpoint = m(eps.ServiceRestAddBindProjectByServiceIdEndpoint)
 	}
 
 	for _, m := range mdw[ServiceRestByQueriesAllMethodName] {
@@ -166,12 +210,24 @@ func NewEndpoints(s ServiceService, mdw Mws) Endpoints {
 		eps.ServiceRestDeleteManyEndpoint = m(eps.ServiceRestDeleteManyEndpoint)
 	}
 
+	for _, m := range mdw[ServiceRestDeleteProjectByServiceIdMethodName] {
+		eps.ServiceRestDeleteProjectByServiceIdEndpoint = m(eps.ServiceRestDeleteProjectByServiceIdEndpoint)
+	}
+
 	for _, m := range mdw[ServiceRestGetByIdMethodName] {
 		eps.ServiceRestGetByIdEndpoint = m(eps.ServiceRestGetByIdEndpoint)
 	}
 
 	for _, m := range mdw[ServiceRestGetProjectByServiceIdMethodName] {
 		eps.ServiceRestGetProjectByServiceIdEndpoint = m(eps.ServiceRestGetProjectByServiceIdEndpoint)
+	}
+
+	for _, m := range mdw[ServiceRestRemoveBindProjectByServiceIdMethodName] {
+		eps.ServiceRestRemoveBindProjectByServiceIdEndpoint = m(eps.ServiceRestRemoveBindProjectByServiceIdEndpoint)
+	}
+
+	for _, m := range mdw[ServiceRestUpdateBindProjectByServiceIdMethodName] {
+		eps.ServiceRestUpdateBindProjectByServiceIdEndpoint = m(eps.ServiceRestUpdateBindProjectByServiceIdEndpoint)
 	}
 
 	for _, m := range mdw[ServiceRestUpdateByIdMethodName] {
@@ -183,6 +239,28 @@ func NewEndpoints(s ServiceService, mdw Mws) Endpoints {
 	}
 
 	return eps
+}
+
+func MakeServiceRestAddBindProjectByServiceIdEndpoint(s ServiceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ServiceRestAddBindProjectByServiceIdReq)
+		rs, err := s.ServiceRestAddBindProjectByServiceId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
 }
 
 func MakeServiceRestByQueriesAllEndpoint(s ServiceService) endpoint.Endpoint {
@@ -317,6 +395,28 @@ func MakeServiceRestDeleteManyEndpoint(s ServiceService) endpoint.Endpoint {
 	}
 }
 
+func MakeServiceRestDeleteProjectByServiceIdEndpoint(s ServiceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ServiceRestDeleteProjectByServiceIdReq)
+		rs, err := s.ServiceRestDeleteProjectByServiceId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
 func MakeServiceRestGetByIdEndpoint(s ServiceService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		var err error
@@ -351,6 +451,50 @@ func MakeServiceRestGetProjectByServiceIdEndpoint(s ServiceService) endpoint.End
 		}()
 		req := request.(ent.ServiceRestGetProjectByServiceIdReq)
 		rs, err := s.ServiceRestGetProjectByServiceId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeServiceRestRemoveBindProjectByServiceIdEndpoint(s ServiceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ServiceRestRemoveBindProjectByServiceIdReq)
+		rs, err := s.ServiceRestRemoveBindProjectByServiceId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeServiceRestUpdateBindProjectByServiceIdEndpoint(s ServiceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ServiceRestUpdateBindProjectByServiceIdReq)
+		rs, err := s.ServiceRestUpdateBindProjectByServiceId(ctx, req)
 		if err != nil {
 			result["err"] = err.Error()
 			return result, nil

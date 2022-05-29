@@ -474,6 +474,13 @@ definitions:
       total:
         type: integer
     type: object
+  project.ProjectRestAddBindServicesByProjectIdBodySwag:
+    properties:
+      serviceIds:
+        items:
+          type: integer
+        type: array
+    type: object
   project.ProjectRestCreateBodySwag:
     properties:
       aname:
@@ -482,6 +489,24 @@ definitions:
         type: string
       name:
         type: string
+    type: object
+  project.ProjectRestRemoveBindServicesByProjectIdBodySwag:
+    properties:
+      serviceIds:
+        items:
+          type: integer
+        type: array
+    type: object
+  project.ProjectRestUpdateBindServicesByProjectIdBodySwag:
+    properties:
+      NewIds:
+        items:
+          type: integer
+        type: array
+      OldIds:
+        items:
+          type: integer
+        type: array
     type: object
   project.ProjectRestUpdateByIdBodySwag:
     properties:
@@ -1031,6 +1056,33 @@ paths:
       tags:
       - ProjectService
   /projects/{projectId}/services:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - collectionFormat: multi
+        in: query
+        items:
+          type: integer
+        name: serviceIds
+        type: array
+      - description: ' '
+        in: path
+        name: projectId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/project.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - ProjectService
     get:
       consumes:
       - application/json
@@ -1078,6 +1130,90 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/ent.Project'
+              type: object
+      tags:
+      - ProjectService
+  /projects/{projectId}/services/bind/add:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/project.ProjectRestAddBindServicesByProjectIdBodySwag'
+      - description: ' '
+        in: path
+        name: projectId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/project.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - ProjectService
+  /projects/{projectId}/services/bind/remove:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/project.ProjectRestRemoveBindServicesByProjectIdBodySwag'
+      - description: ' '
+        in: path
+        name: projectId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/project.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - ProjectService
+  /projects/{projectId}/services/bind/update:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/project.ProjectRestUpdateBindServicesByProjectIdBodySwag'
+      - description: ' '
+        in: path
+        name: projectId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/project.SwagResponse'
+            - properties:
+                data:
+                  type: string
               type: object
       tags:
       - ProjectService
@@ -1444,6 +1580,32 @@ paths:
       tags:
       - ServiceService
   /services/{serviceId}/project:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      - description: ' '
+        in: path
+        name: projectId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/service.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - ServiceService
     get:
       consumes:
       - application/json
@@ -1489,6 +1651,82 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/ent.Service'
+              type: object
+      tags:
+      - ServiceService
+  /services/{serviceId}/project/{projectId}/bind/add:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      - description: ' '
+        in: path
+        name: projectId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/service.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - ServiceService
+  /services/{serviceId}/project/{projectId}/bind/update:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      - description: ' '
+        in: path
+        name: projectId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/service.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - ServiceService
+  /services/{serviceId}/project/bind/remove:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/service.SwagResponse'
+            - properties:
+                data:
+                  type: string
               type: object
       tags:
       - ServiceService

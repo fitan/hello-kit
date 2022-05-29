@@ -144,6 +144,33 @@ func (f {{$.Name}}Table{{ $func }}Form) CountQuery() bool {
 {{$structName := print $n.Name "Base"}}
 {{$interfaceName := print $structName "Interface"}}
 type {{$interfaceName}} interface {
+	RawCreate(ctx context.Context, v *{{$n.Name}}) (res *{{$n.Name}}, err error)
+	RawCreateMany(ctx context.Context, vs {{plural $n.Name}}) ({{plural $n.Name}}, error)
+	RawGetById(ctx context.Context, id {{$n.ID.Type.String}}) (res *{{$n.Name}}, err error)
+	RawByQueriesAll(ctx context.Context, i interface{}) (res {{plural $n.Name}}, count int, err error)
+	RawByQueriesOne(ctx context.Context, i interface{}) (res *{{$n.Name}}, err error)
+	RawUpdateById(ctx context.Context, id {{$n.ID.Type.String}}, v *{{$n.Name}}) (*{{$n.Name}}, error)
+	RawUpdateMany(ctx context.Context, vs {{plural $n.Name}}) (err error)
+	{{range $e := $n.Edges }}
+    {{$edgeNamePre := print $e.Type.Name "Base"}}
+    {{if or $e.O2O $e.M2O}}
+	RawCreate{{pascal $e.Type.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},v *{{$e.Type.Name}}) (res *{{$n.Name}}, err error)
+	RawGet{{pascal $e.Type.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}) (res *{{$e.Type.Name}}, err error)
+	RawDelete{{pascal $e.Type.Name}}By{{pascal $n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}, deleteId {{$e.Type.ID.Type.String}}) (err error)
+	RawUpdateBind{{pascal $e.Type.Name}}By{{pascal $n.Name}}Id(ctx context.Context, id {{$n.ID.Type.String}}, updateId {{$e.Type.ID.Type.String}}) (err error)
+	RawAddBind{{pascal $e.Type.Name}}By{{pascal $n.Name}}Id(ctx context.Context, id {{$n.ID.Type.String}}, addId {{$e.Type.ID.Type.String}}) (err error)
+	RawRemoveBind{{pascal $e.Type.Name}}By{{pascal $n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}) (err error)
+	{{end}}
+    {{if or $e.O2M $e.M2M}}
+	RawCreate{{pascal (plural $e.Type.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},vs {{plural $e.Type.Name}}) (res *{{$n.Name}}, err error)
+	RawGet{{plural (pascal $e.Type.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}, i interface{}) (res {{plural $e.Type.Name}},count int,err error)
+	RawDelete{{plural (pascal $e.Type.Name)}}By{{pascal $n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}, deleteIds []{{$e.Type.ID.Type.String}}) (err error)
+	RawUpdateBind{{plural (pascal $e.Type.Name)}}By{{pascal $n.Name}}Id(ctx context.Context, id {{$n.ID.Type.String}}, removeIds []{{$e.Type.ID.Type.String}}, addIds []{{$e.Type.ID.Type.String}}) (err error)
+	RawAddBind{{plural (pascal $e.Type.Name)}}By{{pascal $n.Name}}Id(ctx context.Context, id {{$n.ID.Type.String}}, addIds []{{$e.Type.ID.Type.String}}) (err error)
+	RawRemoveBind{{plural (pascal $e.Type.Name)}}By{{pascal $n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}, removeIds []{{$e.Type.ID.Type.String}}) (err error)
+	{{end}}
+    {{end}}
+
 	Create(ctx context.Context, v {{$structName}}CreateReq) (res *{{$n.Name}},err error )
 	CreateMany(ctx context.Context, vs []{{$structName}}CreateReq) ({{plural $n.Name}}, error)
 	GetById(ctx context.Context, id {{$n.ID.Type.String}}) (res {{$structName}}GetRes,err error)
@@ -169,6 +196,222 @@ type {{$interfaceName}} interface {
 type {{$structName}} struct {
 	client *Client
 }
+
+func Raw{{$structName}}CreateSet(create *{{$n.Name}}Create, v *{{$n.Name}}) *{{$n.Name}}Create {
+	return create
+		{{- range $f := $n.Fields}}.{{ $func := print "Set" $f.StructField }}
+			{{$func}}(v.{{$f.StructField}}){{- end}}
+}
+
+func (c *{{$structName}}) RawCreate(ctx context.Context, v *{{$n.Name}}) (res *{{$n.Name}}, err error) {
+	create := c.client.{{$n.Name}}.Create()
+	Raw{{$structName}}CreateSet(create, v)
+	return create.Save(ctx)
+}
+
+func (c *{{$structName}}) RawCreateMany(ctx context.Context, vs {{plural $n.Name}}) ({{plural $n.Name}}, error) {
+	bulk := make([]*{{$n.Name}}Create, len(vs))
+	for i, v := range vs {
+		create := c.client.{{$n.Name}}.Create()
+		Raw{{$structName}}CreateSet(create, v)
+		bulk[i] = create
+	}
+	return c.client.{{$n.Name}}.CreateBulk(bulk...).Save(ctx)
+}
+
+func (c *{{$structName}}) RawGetById(ctx context.Context, id {{$n.ID.Type.String}}) (res *{{$n.Name}}, err error) {
+	return c.client.{{$n.Name}}.Query().Where({{lower $n.Name}}.IDEQ(id)).First(ctx)
+}
+
+func (c *{{$structName}}) RawByQueriesOne(ctx context.Context, i interface{}) (res *{{$n.Name}}, err error) {
+	return c.client.{{$n.Name}}.Query().Queries(i).First(ctx)
+}
+
+func (c *{{$structName}}) RawByQueriesAll(ctx context.Context, i interface{}) (res {{plural $n.Name}}, count int, err error) {
+	return c.client.{{$n.Name}}.Query().ByQueriesAll(ctx,i)
+}
+
+func Raw{{$structName}}UpdateSet(update *{{$n.Name}}UpdateOne, v *{{$n.Name}}) *{{$n.Name}}UpdateOne  {
+	return update
+		{{- range $f := $n.Fields}}{{if not $f.Immutable}}.{{ $func := print "Set" $f.StructField }}
+			{{$func}}(v.{{$f.StructField}}){{end}}{{- end}}
+}
+
+
+func (c *{{$structName}}) RawUpdateById(ctx context.Context, id {{$n.ID.Type.String}}, v *{{$n.Name}}) (*{{$n.Name}}, error) {
+	update := c.client.{{$n.Name}}.UpdateOneID(id)
+	Raw{{$structName}}UpdateSet(update, v)
+	return update.Save(ctx)
+}
+
+func (c *{{$structName}}) RawUpdateMany(ctx context.Context, vs {{plural $n.Name}}) (err error) {
+	tx, err := c.client.Tx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+
+		err = tx.Commit()
+	}()
+
+	for _,v := range vs {
+		update := tx.{{$n.Name}}.UpdateOneID(v.ID)
+		Raw{{$structName}}UpdateSet(update, v)
+		_, err = update.Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+
+
+{{range $e := $n.Edges }}
+{{$edgeNamePre := print $e.Type.Name "Base"}}
+    {{if or $e.O2O $e.M2O}}
+func (c *{{$structName}}) RawCreate{{pascal $e.Type.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},v *{{$e.Type.Name}}) (res *{{$n.Name}}, err error) {
+	tx , err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err =tx.Commit()
+	}()
+
+	create := tx.{{$e.Type.Name}}.Create()
+	Raw{{$edgeNamePre}}CreateSet(create, v)
+	save, err := create.Save(ctx)
+	if err != nil {
+		return
+	}
+
+	return tx.{{$n.Name}}.UpdateOneID(id).Set{{pascal $e.Name}}(save).Save(ctx)
+}
+
+func (c *{{$structName}}) RawGet{{pascal $e.Type.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}) (res *{{$e.Type.Name}}, err error) {
+	return c.client.{{$n.Name}}.Query().Where({{lower $n.Name}}.ID(id)).Query{{pascal $e.Name}}().First(ctx)
+}
+func (c *{{$structName}}) RawRemoveBind{{pascal $e.Type.Name}}By{{pascal $n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}) (err error) {
+	_, err = c.client.{{pascal $n.Name}}.UpdateOneID(id).Clear{{pascal $e.Type.Name}}().Save(ctx)
+	return
+}
+func (c *{{$structName}}) RawDelete{{pascal $e.Type.Name}}By{{pascal $n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}, deleteId {{$e.Type.ID.Type.String}}) (err error) {
+    tx,err  := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	_,err = tx.client.{{pascal $n.Name}}.UpdateOneID(id).Clear{{pascal $e.Type.Name}}().Save(ctx)
+	if err != nil {
+		return
+	}
+	_,err = tx.client.{{pascal $e.Type.Name}}.Delete().Where({{lower $e.Type.Name}}.IDEQ(deleteId)).Exec(ctx)
+	return
+}
+
+func (c *{{$structName}}) RawUpdateBind{{pascal $e.Type.Name}}By{{pascal $n.Name}}Id(ctx context.Context, id {{$n.ID.Type.String}}, updateId {{$e.Type.ID.Type.String}}) (err error) {
+	return c.client.{{pascal $n.Name}}.UpdateOneID(id).Set{{pascal $e.Type.Name}}ID(updateId).Exec(ctx)
+}
+
+func (c *{{$structName}}) RawAddBind{{pascal $e.Type.Name}}By{{pascal $n.Name}}Id(ctx context.Context, id {{$n.ID.Type.String}}, addId {{$e.Type.ID.Type.String}}) (err error) {
+	return c.client.{{pascal $n.Name}}.UpdateOneID(id).Set{{pascal $e.Type.Name}}ID(addId).Exec(ctx)
+}
+	{{end}}
+    {{if or $e.O2M $e.M2M}}
+func (c *{{$structName}}) RawCreate{{pascal (plural $e.Type.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}},vs {{plural $e.Type.Name}}) (res *{{$n.Name}}, err error) {
+	tx , err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err =tx.Commit()
+	}()
+
+	bulk := make([]*{{$e.Type.Name}}Create, len(vs))
+	for i, v := range vs {
+		create := c.client.{{$e.Type.Name}}.Create()
+		Raw{{$edgeNamePre}}CreateSet(create, v)
+		bulk[i] = create
+	}
+	save, err := tx.{{$e.Type.Name}}.CreateBulk(bulk...).Save(ctx)
+	if err != nil {
+		return
+	}
+
+	return tx.{{$n.Name}}.UpdateOneID(id).Add{{pascal $e.Name}}(save...).Save(ctx)
+}
+func (c *{{$structName}}) RawGet{{plural (pascal $e.Type.Name)}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}, i interface{}) (res {{plural $e.Type.Name}},count int,err error) {
+	return c.client.{{$n.Name}}.Query().Where({{lower $n.Name}}.ID(id)).Query{{pascal $e.Name}}().ByQueriesAll(ctx, i)
+}
+func (c *{{$structName}}) RawRemoveBind{{plural (pascal $e.Type.Name)}}By{{pascal $n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}, removeIds []{{$e.Type.ID.Type.String}}) (err error) {
+	_, err = c.client.{{pascal $n.Name}}.UpdateOneID(id).Remove{{pascal $e.Type.Name}}IDs(removeIds...).Save(ctx)
+	return
+}
+func (c *{{$structName}}) RawDelete{{plural (pascal $e.Type.Name)}}By{{pascal $n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}, deleteIds []{{$e.Type.ID.Type.String}}) (err error) {
+	tx,err  := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	_,err = tx.client.{{pascal $n.Name}}.UpdateOneID(id).Remove{{pascal $e.Type.Name}}IDs(deleteIds...).Save(ctx)
+	if err != nil {
+		return
+	}
+	_,err = tx.client.{{pascal $e.Type.Name}}.Delete().Where({{lower $e.Type.Name}}.IDIn(deleteIds...)).Exec(ctx)
+	return
+}
+
+func (c *{{$structName}}) RawUpdateBind{{plural (pascal $e.Type.Name)}}By{{pascal $n.Name}}Id(ctx context.Context, id {{$n.ID.Type.String}}, removeIds []{{$e.Type.ID.Type.String}}, addIds []{{$e.Type.ID.Type.String}}) (err error) {
+	return c.client.{{pascal $n.Name}}.UpdateOneID(id).Remove{{pascal $e.Type.Name}}IDs(removeIds...).Add{{pascal $e.Type.Name}}IDs(addIds...).Exec(ctx)
+}
+
+func (c *{{$structName}}) RawAddBind{{plural (pascal $e.Type.Name)}}By{{pascal $n.Name}}Id(ctx context.Context, id {{$n.ID.Type.String}}, addIds []{{$e.Type.ID.Type.String}}) (err error) {
+	return c.client.{{pascal $n.Name}}.UpdateOneID(id).Add{{pascal $e.Type.Name}}IDs(addIds...).Exec(ctx)
+}
+
+    {{end}}
+{{end}}
+
+
 type {{$structName}}CreateReq struct {
 	{{range $f := $n.Fields}}{{if hasKey $f.Annotations.rest "create"}}
 	{{pascal $f.Name}} {{$f.Type}} `{{$f.StructTag}}"`
@@ -455,6 +698,18 @@ type {{$interfaceName}} interface {
 		// @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{lower $e.Name}} GET
         {{- $funcName = print $structName "Get" (pascal $e.Type.Name) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
 		{{$funcName}}(ctx context.Context,req {{$req}}) (res {{$edgeBasePre}}GetRes, err error)
+		// @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{lower $e.Name}} DELETE
+		{{- $funcName = print $structName "Delete" (pascal $e.Type.Name) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
+		{{$funcName}}(ctx context.Context,req {{$req}}) (res string, err error)
+		// @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{lower $e.Name}}/bind/remove PUT
+		{{- $funcName = print $structName "RemoveBind" (pascal $e.Type.Name) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
+		{{$funcName}}(ctx context.Context,req {{$req}}) (res string, err error)
+		// @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{lower $e.Name}}/:{{lower $e.Type.Name}}Id/bind/add PUT
+		{{- $funcName = print $structName "AddBind" (pascal $e.Type.Name) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
+		{{$funcName}}(ctx context.Context,req {{$req}}) (res string, err error)
+		// @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{lower $e.Name}}/:{{lower $e.Type.Name}}Id/bind/update PUT
+		{{- $funcName = print $structName "UpdateBind" (pascal $e.Type.Name) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
+		{{$funcName}}(ctx context.Context,req {{$req}}) (res string, err error)
 	{{end}}
     {{if or $e.O2M $e.M2M}}
 	    // @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{plural $edgeHttpName}} POST
@@ -463,6 +718,18 @@ type {{$interfaceName}} interface {
 	    // @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{plural $edgeHttpName}} GET
         {{- $funcName = print $structName "Get" (plural (pascal $e.Type.Name)) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
 	    {{$funcName}}(ctx context.Context,req {{$req}}) (res {{$res}},err error)
+        // @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{plural $edgeHttpName}} DELETE
+        {{- $funcName = print $structName "Delete" (plural (pascal $e.Type.Name)) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
+		{{$funcName}}(ctx context.Context,req {{$req}}) (res string, err error)
+		// @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{plural $edgeHttpName}}/bind/remove PUT
+		{{- $funcName = print $structName "RemoveBind" (plural (pascal $e.Type.Name)) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
+		{{$funcName}}(ctx context.Context,req {{$req}}) (res string, err error)
+		// @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{plural $edgeHttpName}}/bind/add PUT
+		{{- $funcName = print $structName "AddBind" (plural (pascal $e.Type.Name)) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
+		{{$funcName}}(ctx context.Context,req {{$req}}) (res string, err error)
+		// @http-gin /{{$nodeHttpName}}/:{{lower $n.Name}}Id/{{plural $edgeHttpName}}/bind/update PUT
+		{{- $funcName = print $structName "UpdateBind" (plural (pascal $e.Type.Name)) "By" $n.Name "Id"}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
+		{{$funcName}}(ctx context.Context,req {{$req}}) (res string, err error)
     {{end}}
 	{{end}}
 }
@@ -496,12 +763,6 @@ type {{$req}} struct {
 	Uri struct{
 		Id {{$n.ID.Type}} `json:"id" uri:"{{lower $n.Name}}Id"`
 	}
-}
-type {{$req}} struct {
-	{{pascal $n.ID.Name}} {{$n.ID.Type.String}} `{{$n.ID.StructTag}}`
-{{range $f := $n.Fields}}{{if hasKey $f.Annotations.rest "read"}}
-	{{pascal $f.Name}} {{$f.Type.String}} `{{$f.StructTag}}`
-{{end}}{{end}}
 }
 
 func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res {{$baseNamePre}}GetRes, err error) {
@@ -598,6 +859,55 @@ type {{$req}} struct {
 func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res {{$edgeBasePre}}GetRes, err error) {
 	return rest.repo.{{$baseName}}(ctx, req.Uri.Id)
 }
+
+{{$baseName = print "Delete" (pascal $e.Type.Name) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
+type {{$req}} struct {
+	Uri struct{
+		{{pascal $n.Name}}Id {{$n.ID.Type.String}} `json:"{{lower $n.Name}}Id" uri:"{{lower $n.Name}}Id"`
+		{{pascal $e.Type.Name}}Id {{$e.Type.ID.Type.String}} `json:"{{lower $e.Type.Name}}Id" uri:"{{lower $e.Type.Name}}Id"`
+	} `json:"uri"`
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res string, err error) {
+	return "",rest.repo.Raw{{$baseName}}(ctx, req.Uri.{{pascal $n.Name}}Id, req.Uri.{{pascal $e.Type.Name}}Id)
+
+}
+
+{{$baseName = print "RemoveBind" (pascal $e.Type.Name) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
+type {{$req}} struct {
+	Uri struct{
+		{{pascal $n.Name}}Id {{$n.ID.Type.String}} `json:"{{lower $n.Name}}Id" uri:"{{lower $n.Name}}Id"`
+	} `json:"uri"`
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res string, err error) {
+	return "", rest.repo.Raw{{$baseName}}(ctx, req.Uri.{{pascal $n.Name}}Id)
+}
+
+{{$baseName = print "AddBind" (pascal $e.Type.Name) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
+type {{$req}} struct {
+	Uri struct{
+		{{pascal $n.Name}}Id {{$n.ID.Type.String}} `json:"{{lower $n.Name}}Id" uri:"{{lower $n.Name}}Id"`
+		{{pascal $e.Type.Name}}Id {{$e.Type.ID.Type.String}} `json:"{{lower $e.Type.Name}}Id" uri:"{{lower $e.Type.Name}}Id"`
+	} `json:"uri"`
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res string, err error) {
+	return "", rest.repo.Raw{{$baseName}}(ctx, req.Uri.{{pascal $n.Name}}Id, req.Uri.{{pascal $e.Type.Name}}Id)
+}
+
+{{$baseName = print "UpdateBind" (pascal $e.Type.Name) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
+type {{$req}} struct {
+	Uri struct{
+		{{pascal $n.Name}}Id {{$n.ID.Type.String}} `json:"{{lower $n.Name}}Id" uri:"{{lower $n.Name}}Id"`
+		{{pascal $e.Type.Name}}Id {{$e.Type.ID.Type.String}} `json:"{{lower $e.Type.Name}}Id" uri:"{{lower $e.Type.Name}}Id"`
+	} `json:"uri"`
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res string, err error) {
+	return "", rest.repo.Raw{{$baseName}}(ctx, req.Uri.{{pascal $n.Name}}Id, req.Uri.{{pascal $e.Type.Name}}Id)
+}
+
     {{end}}
     {{if or $e.O2M $e.M2M}}
     {{$baseName := print "Create" (pascal (plural $e.Type.Name)) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
@@ -611,7 +921,7 @@ type {{$req}} struct {
 func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res *{{$n.Name}}, err error) {
 	return rest.repo.{{$baseName}}(ctx, req.Uri.Id, req.Body)
 }
-    {{$baseName = print "Get" (plural (pascal $e.Type.Name)) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
+{{$baseName = print "Get" (plural (pascal $e.Type.Name)) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }} {{$res = print $funcName "Res" }}
 type {{$req}} struct {
 	Uri struct{
 		Id {{$n.ID.Type}} `json:"id" uri:"{{lower $n.Name}}Id"`
@@ -628,6 +938,65 @@ func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (r
 	list, total,err := rest.repo.{{$baseName}}(ctx, req.Uri.Id, req.Query)
     return {{$res}}{List:list, Total:total},err
 }
+
+{{$baseName = print "Delete" (plural (pascal $e.Type.Name)) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
+type {{$req}} struct {
+	Uri struct{
+		{{pascal $n.Name}}Id {{$n.ID.Type.String}} `json:"{{lower $n.Name}}Id" uri:"{{lower $n.Name}}Id"`
+	} `json:"uri"`
+    Query struct{
+		{{pascal $e.Type.Name}}Ids []{{$e.Type.ID.Type.String}} `json:"{{lower $e.Type.Name}}Ids" form:"{{lower $e.Type.Name}}Ids"`
+	}
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res string, err error) {
+	return "",rest.repo.Raw{{$baseName}}(ctx, req.Uri.{{pascal $n.Name}}Id, req.Query.{{pascal $e.Type.Name}}Ids)
+
+}
+
+{{$baseName = print "RemoveBind" (plural (pascal $e.Type.Name)) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
+type {{$req}} struct {
+	Uri struct{
+		{{pascal $n.Name}}Id {{$n.ID.Type.String}} `json:"{{lower $n.Name}}Id" uri:"{{lower $n.Name}}Id"`
+	} `json:"uri"`
+    Body struct{
+		{{pascal $e.Type.Name}}Ids []{{$e.Type.ID.Type.String}} `json:"{{lower $e.Type.Name}}Ids"`
+	}
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res string, err error) {
+	return "", rest.repo.Raw{{$baseName}}(ctx, req.Uri.{{pascal $n.Name}}Id, req.Body.{{pascal $e.Type.Name}}Ids)
+}
+
+{{$baseName = print "AddBind" (plural (pascal $e.Type.Name)) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
+type {{$req}} struct {
+	Uri struct{
+		{{pascal $n.Name}}Id {{$n.ID.Type.String}} `json:"{{lower $n.Name}}Id" uri:"{{lower $n.Name}}Id"`
+	} `json:"uri"`
+    Body struct{
+		{{pascal $e.Type.Name}}Ids []{{$e.Type.ID.Type.String}} `json:"{{lower $e.Type.Name}}Ids"`
+	}
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res string, err error) {
+	return "", rest.repo.Raw{{$baseName}}(ctx, req.Uri.{{pascal $n.Name}}Id, req.Body.{{pascal $e.Type.Name}}Ids)
+}
+
+{{$baseName = print "UpdateBind" (plural (pascal $e.Type.Name)) "By" $n.Name "Id"}} {{$funcName = print $structName $baseName}} {{$req = print $funcName "Req" }}  {{$res = print $funcName "Res" }}
+type {{$req}} struct {
+	Uri struct{
+		{{pascal $n.Name}}Id {{$n.ID.Type.String}} `json:"{{lower $n.Name}}Id" uri:"{{lower $n.Name}}Id"`
+	} `json:"uri"`
+    Body struct{
+		OldIds []{{$e.Type.ID.Type.String}} `json:"OldIds"`
+        NewIds []{{$e.Type.ID.Type.String}} `json:"NewIds"`
+	} `json:"body"`
+}
+
+func (rest *{{$structName}}) {{$funcName}}(ctx context.Context, req {{$req}}) (res string, err error) {
+	return "", rest.repo.Raw{{$baseName}}(ctx, req.Uri.{{pascal $n.Name}}Id, req.Body.OldIds, req.Body.NewIds)
+}
+
     {{end}}
 {{end}}
 

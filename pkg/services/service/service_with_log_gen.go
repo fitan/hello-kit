@@ -29,6 +29,47 @@ func NewServiceServiceWithLog(base ServiceService, log *zap.SugaredLogger) Servi
 	}
 }
 
+// ServiceRestAddBindProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithLog) ServiceRestAddBindProjectByServiceId(ctx context.Context, req ent.ServiceRestAddBindProjectByServiceIdReq) (res string, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling ServiceRestAddBindProjectByServiceId", "params", map[string]interface{}{
+					"req": req}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling ServiceRestAddBindProjectByServiceId", "params", map[string]interface{}{
+					"req": req}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling ServiceRestAddBindProjectByServiceId", "params", map[string]interface{}{
+				"req": req}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling ServiceRestAddBindProjectByServiceId", "params", map[string]interface{}{
+				"req": req}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.ServiceRestAddBindProjectByServiceId(ctx, req)
+}
+
 // ServiceRestByQueriesAll implements ServiceService
 func (_d ServiceServiceWithLog) ServiceRestByQueriesAll(ctx context.Context, req ent.ServiceRestByQueriesAllReq) (res ent.ServiceRestByQueriesAllRes, err error) {
 
@@ -275,6 +316,47 @@ func (_d ServiceServiceWithLog) ServiceRestDeleteMany(ctx context.Context, req e
 	return _d._base.ServiceRestDeleteMany(ctx, req)
 }
 
+// ServiceRestDeleteProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithLog) ServiceRestDeleteProjectByServiceId(ctx context.Context, req ent.ServiceRestDeleteProjectByServiceIdReq) (res string, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling ServiceRestDeleteProjectByServiceId", "params", map[string]interface{}{
+					"req": req}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling ServiceRestDeleteProjectByServiceId", "params", map[string]interface{}{
+					"req": req}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling ServiceRestDeleteProjectByServiceId", "params", map[string]interface{}{
+				"req": req}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling ServiceRestDeleteProjectByServiceId", "params", map[string]interface{}{
+				"req": req}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.ServiceRestDeleteProjectByServiceId(ctx, req)
+}
+
 // ServiceRestGetById implements ServiceService
 func (_d ServiceServiceWithLog) ServiceRestGetById(ctx context.Context, req ent.ServiceRestGetByIdReq) (res ent.ServiceBaseGetRes, err error) {
 
@@ -355,6 +437,88 @@ func (_d ServiceServiceWithLog) ServiceRestGetProjectByServiceId(ctx context.Con
 		}
 	}()
 	return _d._base.ServiceRestGetProjectByServiceId(ctx, req)
+}
+
+// ServiceRestRemoveBindProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithLog) ServiceRestRemoveBindProjectByServiceId(ctx context.Context, req ent.ServiceRestRemoveBindProjectByServiceIdReq) (res string, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling ServiceRestRemoveBindProjectByServiceId", "params", map[string]interface{}{
+					"req": req}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling ServiceRestRemoveBindProjectByServiceId", "params", map[string]interface{}{
+					"req": req}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling ServiceRestRemoveBindProjectByServiceId", "params", map[string]interface{}{
+				"req": req}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling ServiceRestRemoveBindProjectByServiceId", "params", map[string]interface{}{
+				"req": req}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.ServiceRestRemoveBindProjectByServiceId(ctx, req)
+}
+
+// ServiceRestUpdateBindProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithLog) ServiceRestUpdateBindProjectByServiceId(ctx context.Context, req ent.ServiceRestUpdateBindProjectByServiceIdReq) (res string, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling ServiceRestUpdateBindProjectByServiceId", "params", map[string]interface{}{
+					"req": req}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling ServiceRestUpdateBindProjectByServiceId", "params", map[string]interface{}{
+					"req": req}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling ServiceRestUpdateBindProjectByServiceId", "params", map[string]interface{}{
+				"req": req}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling ServiceRestUpdateBindProjectByServiceId", "params", map[string]interface{}{
+				"req": req}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.ServiceRestUpdateBindProjectByServiceId(ctx, req)
 }
 
 // ServiceRestUpdateById implements ServiceService

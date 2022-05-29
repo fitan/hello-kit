@@ -39,6 +39,7 @@ import (
 	"hello/pkg/middleware"
 	"hello/pkg/repository"
 	"hello/pkg/services"
+	casbin2 "hello/pkg/services/casbin"
 	"hello/utils/conf"
 	"hello/utils/log"
 	"io/ioutil"
@@ -58,7 +59,7 @@ type App struct {
 	r          *gin.Engine
 	repository *repository.Repository
 	InitAuditMid
-	//services   *services.Services
+	services    *services.Services
 	debug       *debug.DebugSwitch
 	httpHandler *services.HttpHandler
 	g           *run.Group
@@ -68,7 +69,7 @@ type App struct {
 	db          *gorm.DB
 	ent         *ent.Client
 	pyroscope   *profiler.Profiler
-	casbin      *casbin.Enforcer
+	casbin      *casbin.SyncedEnforcer
 	InitCancelInterrupt
 	InitMetricsEndpoint
 	//InitHttpHandler
@@ -80,8 +81,6 @@ func (a *App) Run() error {
 }
 
 func RunApp(confName string) {
-	//fs.Parse(os.Args[1:])
-
 	r := gin.Default()
 	opts := ginprom.NewDefaultOpts()
 	opts.EndpointLabelMappingFn = func(c *gin.Context) string {
@@ -106,6 +105,26 @@ func RunApp(confName string) {
 	}
 	initAuditMid(r, app.repository)
 	logger.Errorw("exit", app.Run().Error())
+}
+
+func CasbinInput(confName string) error {
+	g := &run.Group{}
+	r := gin.Default()
+	app, err := InitApp(r, g, ConfName(confName))
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	app.services.Casbin.BindPermission(ctx, casbin2.Permission{
+		UserId: 1,
+		RoleId: 1,
+		Domain: "/1/1",
+	})
+	app.services.Casbin.AddRoleAuthorization(ctx, casbin2.Role{
+		RoleId:     1,
+		ResourceId: 100,
+	})
+	return nil
 }
 
 func PathPutInStorage(confName string) error {
@@ -219,7 +238,7 @@ func initEnt(conf *conf.MyConf) (*ent.Client, error) {
 		}
 	}
 
-	return ent.NewClient(ent.Driver(drv)).Debug(), nil
+	return ent.NewClient(ent.Driver(drv)), nil
 }
 
 func initDb(conf *conf.MyConf) (*gorm.DB, error) {
@@ -391,7 +410,7 @@ func initEndpointMiddleware(services *services.Services, repository repository.R
 
 func initHttpServerOption(debugSwitch *debug.DebugSwitch) []ginkHttp.ServerOption {
 	so := make([]ginkHttp.ServerOption, 0)
-	so = append(so, ginkHttp.ServerBefore(ginkHttp.PopulateRequestContext, debug.DebugSwitchRequestContext(debugSwitch)))
+	so = append(so, ginkHttp.ServerBefore(ginkHttp.PopulateRequestContext, debug.DebugSwitchRequestContext(debugSwitch), middleware.UrlRequestContext()))
 	return so
 }
 
@@ -435,10 +454,16 @@ func initMicro(g *run.Group, r *gin.Engine, conf *conf.MyConf) (InitMicro, error
 	return InitMicro{}, nil
 }
 
-func initCasbin(conf *conf.MyConf) (*casbin.Enforcer, error) {
+func initCasbin(conf *conf.MyConf) (*casbin.SyncedEnforcer, error) {
 	a, err := entadapter.NewAdapter("mysql", conf.Mysql.Url)
 	if err != nil {
 		return nil, err
 	}
-	return casbin.NewEnforcer("./conf/rbac_model.conf", a)
+	e, err := casbin.NewSyncedEnforcer("./conf/rbac_model.conf", a)
+	if err != nil {
+		return nil, err
+	}
+	e.StartAutoLoadPolicy(10 * time.Second)
+	return e, err
+	//return casbin.NewEnforcer("./conf/rbac_model.conf", a)
 }

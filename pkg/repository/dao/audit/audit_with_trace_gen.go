@@ -197,6 +197,175 @@ func (_d AuditServiceWithTracing) GetById(ctx context.Context, id int) (res ent.
 	return _d.AuditService.GetById(ctx, id)
 }
 
+// RawByQueriesAll implements AuditService
+func (_d AuditServiceWithTracing) RawByQueriesAll(ctx context.Context, i interface{}) (res ent.Audits, count int, err error) {
+
+	var name = "AuditService.RawByQueriesAll"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"i": i},
+				"result": map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.AuditService.RawByQueriesAll(ctx, i)
+}
+
+// RawByQueriesOne implements AuditService
+func (_d AuditServiceWithTracing) RawByQueriesOne(ctx context.Context, i interface{}) (res *ent.Audit, err error) {
+
+	var name = "AuditService.RawByQueriesOne"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"i": i},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.AuditService.RawByQueriesOne(ctx, i)
+}
+
+// RawCreate implements AuditService
+func (_d AuditServiceWithTracing) RawCreate(ctx context.Context, v *ent.Audit) (res *ent.Audit, err error) {
+
+	var name = "AuditService.RawCreate"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"v": v},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.AuditService.RawCreate(ctx, v)
+}
+
+// RawCreateMany implements AuditService
+func (_d AuditServiceWithTracing) RawCreateMany(ctx context.Context, vs ent.Audits) (a1 ent.Audits, err error) {
+
+	var name = "AuditService.RawCreateMany"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"vs": vs},
+				"result": map[string]interface{}{
+					"a1":  a1,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.AuditService.RawCreateMany(ctx, vs)
+}
+
+// RawGetById implements AuditService
+func (_d AuditServiceWithTracing) RawGetById(ctx context.Context, id int) (res *ent.Audit, err error) {
+
+	var name = "AuditService.RawGetById"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.AuditService.RawGetById(ctx, id)
+}
+
+// RawUpdateById implements AuditService
+func (_d AuditServiceWithTracing) RawUpdateById(ctx context.Context, id int, v *ent.Audit) (ap1 *ent.Audit, err error) {
+
+	var name = "AuditService.RawUpdateById"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id,
+					"v":  v},
+				"result": map[string]interface{}{
+					"ap1": ap1,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.AuditService.RawUpdateById(ctx, id, v)
+}
+
+// RawUpdateMany implements AuditService
+func (_d AuditServiceWithTracing) RawUpdateMany(ctx context.Context, vs ent.Audits) (err error) {
+
+	var name = "AuditService.RawUpdateMany"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"vs": vs},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.AuditService.RawUpdateMany(ctx, vs)
+}
+
 // UpdateById implements AuditService
 func (_d AuditServiceWithTracing) UpdateById(ctx context.Context, id int, v ent.AuditBaseUpdateReq) (ap1 *ent.Audit, err error) {
 

@@ -136,6 +136,104 @@ func (_d UserServiceWithPrometheus) GetById(ctx context.Context, id int) (res en
 	return _d.base.GetById(ctx, id)
 }
 
+// RawByQueriesAll implements UserService
+func (_d UserServiceWithPrometheus) RawByQueriesAll(ctx context.Context, i interface{}) (res ent.Users, count int, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawByQueriesAll", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawByQueriesAll(ctx, i)
+}
+
+// RawByQueriesOne implements UserService
+func (_d UserServiceWithPrometheus) RawByQueriesOne(ctx context.Context, i interface{}) (res *ent.User, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawByQueriesOne", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawByQueriesOne(ctx, i)
+}
+
+// RawCreate implements UserService
+func (_d UserServiceWithPrometheus) RawCreate(ctx context.Context, v *ent.User) (res *ent.User, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawCreate", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawCreate(ctx, v)
+}
+
+// RawCreateMany implements UserService
+func (_d UserServiceWithPrometheus) RawCreateMany(ctx context.Context, vs ent.Users) (u1 ent.Users, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawCreateMany", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawCreateMany(ctx, vs)
+}
+
+// RawGetById implements UserService
+func (_d UserServiceWithPrometheus) RawGetById(ctx context.Context, id int) (res *ent.User, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawGetById", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawGetById(ctx, id)
+}
+
+// RawUpdateById implements UserService
+func (_d UserServiceWithPrometheus) RawUpdateById(ctx context.Context, id int, v *ent.User) (up1 *ent.User, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawUpdateById", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawUpdateById(ctx, id, v)
+}
+
+// RawUpdateMany implements UserService
+func (_d UserServiceWithPrometheus) RawUpdateMany(ctx context.Context, vs ent.Users) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawUpdateMany", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawUpdateMany(ctx, vs)
+}
+
 // UpdateById implements UserService
 func (_d UserServiceWithPrometheus) UpdateById(ctx context.Context, id int, v ent.UserBaseUpdateReq) (up1 *ent.User, err error) {
 	_since := time.Now()

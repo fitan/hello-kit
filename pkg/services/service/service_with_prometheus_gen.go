@@ -38,6 +38,20 @@ func NewServiceServiceWithPrometheus(base ServiceService) ServiceServiceWithProm
 	}
 }
 
+// ServiceRestAddBindProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithPrometheus) ServiceRestAddBindProjectByServiceId(ctx context.Context, req ent.ServiceRestAddBindProjectByServiceIdReq) (res string, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		serviceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ServiceRestAddBindProjectByServiceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.ServiceRestAddBindProjectByServiceId(ctx, req)
+}
+
 // ServiceRestByQueriesAll implements ServiceService
 func (_d ServiceServiceWithPrometheus) ServiceRestByQueriesAll(ctx context.Context, req ent.ServiceRestByQueriesAllReq) (res ent.ServiceRestByQueriesAllRes, err error) {
 	_since := time.Now()
@@ -122,6 +136,20 @@ func (_d ServiceServiceWithPrometheus) ServiceRestDeleteMany(ctx context.Context
 	return _d.base.ServiceRestDeleteMany(ctx, req)
 }
 
+// ServiceRestDeleteProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithPrometheus) ServiceRestDeleteProjectByServiceId(ctx context.Context, req ent.ServiceRestDeleteProjectByServiceIdReq) (res string, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		serviceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ServiceRestDeleteProjectByServiceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.ServiceRestDeleteProjectByServiceId(ctx, req)
+}
+
 // ServiceRestGetById implements ServiceService
 func (_d ServiceServiceWithPrometheus) ServiceRestGetById(ctx context.Context, req ent.ServiceRestGetByIdReq) (res ent.ServiceBaseGetRes, err error) {
 	_since := time.Now()
@@ -148,6 +176,34 @@ func (_d ServiceServiceWithPrometheus) ServiceRestGetProjectByServiceId(ctx cont
 		serviceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ServiceRestGetProjectByServiceId", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.ServiceRestGetProjectByServiceId(ctx, req)
+}
+
+// ServiceRestRemoveBindProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithPrometheus) ServiceRestRemoveBindProjectByServiceId(ctx context.Context, req ent.ServiceRestRemoveBindProjectByServiceIdReq) (res string, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		serviceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ServiceRestRemoveBindProjectByServiceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.ServiceRestRemoveBindProjectByServiceId(ctx, req)
+}
+
+// ServiceRestUpdateBindProjectByServiceId implements ServiceService
+func (_d ServiceServiceWithPrometheus) ServiceRestUpdateBindProjectByServiceId(ctx context.Context, req ent.ServiceRestUpdateBindProjectByServiceIdReq) (res string, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		serviceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "ServiceRestUpdateBindProjectByServiceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.ServiceRestUpdateBindProjectByServiceId(ctx, req)
 }
 
 // ServiceRestUpdateById implements ServiceService

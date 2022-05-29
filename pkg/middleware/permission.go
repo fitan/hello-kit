@@ -17,11 +17,15 @@ func PermissionMiddleware(services *services.Services, repository repository.Rep
 			projectId, projectOK := ctx.Value(ContextKeyProjectId).(int)
 			serviceId, serviceOK := ctx.Value(ContextKeyServiceId).(int)
 			UserId, _ := ctx.Value("userId").(int)
+			if UserId == 0 {
+				UserId = 99999999
+			}
 			//if !userOk {
 			//	err = fmt.Errorf("not logged in")
 			//	return
 			//}
 			if !projectOK && !serviceOK {
+				fmt.Println("!!!!! not ok")
 				return e(ctx, request)
 			}
 
