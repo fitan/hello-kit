@@ -234,6 +234,11 @@ definitions:
       create_time:
         description: CreateTime holds the value of the "create_time" field.
         type: string
+      edges:
+        $ref: '#/definitions/ent.ResourceEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the ResourceQuery when eager-loading is set.
       id:
         description: ID of the ent.
         type: integer
@@ -245,6 +250,9 @@ definitions:
         type: string
       path:
         description: Path holds the value of the "path" field.
+        type: string
+      type:
+        description: Type holds the value of the "type" field.
         type: string
       update_time:
         description: UpdateTime holds the value of the "update_time" field.
@@ -262,6 +270,8 @@ definitions:
         type: string
       path:
         type: string
+      type:
+        type: string
     type: object
   ent.ResourceBaseGetRes:
     properties:
@@ -276,6 +286,8 @@ definitions:
       name:
         type: string
       path:
+        type: string
+      type:
         type: string
     type: object
   ent.ResourceBaseUpdateReq:
@@ -292,10 +304,115 @@ definitions:
         type: string
       path:
         type: string
+      type:
+        type: string
+    type: object
+  ent.ResourceEdges:
+    properties:
+      next:
+        description: Next holds the value of the next edge.
+        items:
+          $ref: '#/definitions/ent.Resource'
+        type: array
+      pre:
+        $ref: '#/definitions/ent.Resource'
+        description: Pre holds the value of the pre edge.
     type: object
   ent.ResourceRestByQueriesAllRes:
     properties:
       items:
+        items:
+          $ref: '#/definitions/ent.ResourceBaseGetRes'
+        type: array
+      total:
+        type: integer
+    type: object
+  ent.ResourceRestGetNextByResourceIdRes:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/ent.ResourceBaseGetRes'
+        type: array
+      total:
+        type: integer
+    type: object
+  ent.Role:
+    properties:
+      comments:
+        description: Comments holds the value of the "comments" field.
+        type: string
+      create_time:
+        description: CreateTime holds the value of the "create_time" field.
+        type: string
+      edges:
+        $ref: '#/definitions/ent.RoleEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the RoleQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: integer
+      level:
+        description: Level holds the value of the "level" field.
+        type: integer
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
+      update_time:
+        description: UpdateTime holds the value of the "update_time" field.
+        type: string
+    type: object
+  ent.RoleBaseCreateReq:
+    properties:
+      comments:
+        type: string
+      level:
+        type: integer
+      name:
+        type: string
+    type: object
+  ent.RoleBaseGetRes:
+    properties:
+      comments:
+        type: string
+      id:
+        type: integer
+      level:
+        type: integer
+      name:
+        type: string
+    type: object
+  ent.RoleBaseUpdateReq:
+    properties:
+      comments:
+        type: string
+      id:
+        type: integer
+      level:
+        type: integer
+      name:
+        type: string
+    type: object
+  ent.RoleEdges:
+    properties:
+      resources:
+        description: Resources holds the value of the resources edge.
+        items:
+          $ref: '#/definitions/ent.Resource'
+        type: array
+    type: object
+  ent.RoleRestByQueriesAllRes:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/ent.RoleBaseGetRes'
+        type: array
+      total:
+        type: integer
+    type: object
+  ent.RoleRestGetResourcesByRoleIdRes:
+    properties:
+      list:
         items:
           $ref: '#/definitions/ent.ResourceBaseGetRes'
         type: array
@@ -406,6 +523,11 @@ definitions:
       age:
         description: Age holds the value of the "age" field.
         type: integer
+      edges:
+        $ref: '#/definitions/ent.UserEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the UserQuery when eager-loading is set.
       enable:
         description: Enable holds the value of the "enable" field.
         type: boolean
@@ -465,6 +587,14 @@ definitions:
       token:
         type: string
     type: object
+  ent.UserEdges:
+    properties:
+      roles:
+        description: Roles holds the value of the roles edge.
+        items:
+          $ref: '#/definitions/ent.Role'
+        type: array
+    type: object
   ent.UserRestByQueriesAllRes:
     properties:
       items:
@@ -474,9 +604,18 @@ definitions:
       total:
         type: integer
     type: object
+  ent.UserRestGetRolesByUserIdRes:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/ent.RoleBaseGetRes'
+        type: array
+      total:
+        type: integer
+    type: object
   project.ProjectRestAddBindServicesByProjectIdBodySwag:
     properties:
-      serviceIds:
+      servicesIds:
         items:
           type: integer
         type: array
@@ -492,7 +631,7 @@ definitions:
     type: object
   project.ProjectRestRemoveBindServicesByProjectIdBodySwag:
     properties:
-      serviceIds:
+      servicesIds:
         items:
           type: integer
         type: array
@@ -527,6 +666,13 @@ definitions:
       traceId:
         type: string
     type: object
+  resource.ResourceRestAddBindNextByResourceIdBodySwag:
+    properties:
+      nextIds:
+        items:
+          type: integer
+        type: array
+    type: object
   resource.ResourceRestCreateBodySwag:
     properties:
       action:
@@ -539,6 +685,41 @@ definitions:
         type: string
       path:
         type: string
+      type:
+        type: string
+    type: object
+  resource.ResourceRestCreatePreByResourceIdBodySwag:
+    properties:
+      action:
+        type: string
+      comments:
+        type: string
+      key:
+        type: string
+      name:
+        type: string
+      path:
+        type: string
+      type:
+        type: string
+    type: object
+  resource.ResourceRestRemoveBindNextByResourceIdBodySwag:
+    properties:
+      nextIds:
+        items:
+          type: integer
+        type: array
+    type: object
+  resource.ResourceRestUpdateBindNextByResourceIdBodySwag:
+    properties:
+      NewIds:
+        items:
+          type: integer
+        type: array
+      OldIds:
+        items:
+          type: integer
+        type: array
     type: object
   resource.ResourceRestUpdateByIdBodySwag:
     properties:
@@ -554,8 +735,63 @@ definitions:
         type: string
       path:
         type: string
+      type:
+        type: string
     type: object
   resource.SwagResponse:
+    properties:
+      data: {}
+      status:
+        type: integer
+      traceId:
+        type: string
+    type: object
+  role.RoleRestAddBindResourcesByRoleIdBodySwag:
+    properties:
+      resourcesIds:
+        items:
+          type: integer
+        type: array
+    type: object
+  role.RoleRestCreateBodySwag:
+    properties:
+      comments:
+        type: string
+      level:
+        type: integer
+      name:
+        type: string
+    type: object
+  role.RoleRestRemoveBindResourcesByRoleIdBodySwag:
+    properties:
+      resourcesIds:
+        items:
+          type: integer
+        type: array
+    type: object
+  role.RoleRestUpdateBindResourcesByRoleIdBodySwag:
+    properties:
+      NewIds:
+        items:
+          type: integer
+        type: array
+      OldIds:
+        items:
+          type: integer
+        type: array
+    type: object
+  role.RoleRestUpdateByIdBodySwag:
+    properties:
+      comments:
+        type: string
+      id:
+        type: integer
+      level:
+        type: integer
+      name:
+        type: string
+    type: object
+  role.SwagResponse:
     properties:
       data: {}
       status:
@@ -620,6 +856,13 @@ definitions:
       traceId:
         type: string
     type: object
+  user.UserRestAddBindRolesByUserIdBodySwag:
+    properties:
+      rolesIds:
+        items:
+          type: integer
+        type: array
+    type: object
   user.UserRestCreateBodySwag:
     properties:
       age:
@@ -632,6 +875,24 @@ definitions:
         type: string
       token:
         type: string
+    type: object
+  user.UserRestRemoveBindRolesByUserIdBodySwag:
+    properties:
+      rolesIds:
+        items:
+          type: integer
+        type: array
+    type: object
+  user.UserRestUpdateBindRolesByUserIdBodySwag:
+    properties:
+      NewIds:
+        items:
+          type: integer
+        type: array
+      OldIds:
+        items:
+          type: integer
+        type: array
     type: object
   user.UserRestUpdateByIdBodySwag:
     properties:
@@ -1064,7 +1325,7 @@ paths:
         in: query
         items:
           type: integer
-        name: serviceIds
+        name: servicesIds
         type: array
       - description: ' '
         in: path
@@ -1398,6 +1659,662 @@ paths:
               type: object
       tags:
       - ResourceService
+  /resources/{resourceId}/next:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - collectionFormat: multi
+        in: query
+        items:
+          type: integer
+        name: nextIds
+        type: array
+      - description: ' '
+        in: path
+        name: resourceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - ResourceService
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: resourceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.ResourceRestGetNextByResourceIdRes'
+              type: object
+      tags:
+      - ResourceService
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/ent.ResourceBaseCreateReq'
+          type: array
+      - description: ' '
+        in: path
+        name: resourceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.Resource'
+              type: object
+      tags:
+      - ResourceService
+  /resources/{resourceId}/next/bind/add:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/resource.ResourceRestAddBindNextByResourceIdBodySwag'
+      - description: ' '
+        in: path
+        name: resourceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - ResourceService
+  /resources/{resourceId}/next/bind/remove:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/resource.ResourceRestRemoveBindNextByResourceIdBodySwag'
+      - description: ' '
+        in: path
+        name: resourceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - ResourceService
+  /resources/{resourceId}/next/bind/update:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/resource.ResourceRestUpdateBindNextByResourceIdBodySwag'
+      - description: ' '
+        in: path
+        name: resourceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - ResourceService
+  /resources/{resourceId}/pre:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: resourceId
+        required: true
+        type: string
+      - description: ' '
+        in: path
+        name: preId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - ResourceService
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: resourceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.ResourceBaseGetRes'
+              type: object
+      tags:
+      - ResourceService
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/resource.ResourceRestCreatePreByResourceIdBodySwag'
+      - description: ' '
+        in: path
+        name: resourceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.Resource'
+              type: object
+      tags:
+      - ResourceService
+  /resources/{resourceId}/pre/{preId}/bind/add:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: resourceId
+        required: true
+        type: string
+      - description: ' '
+        in: path
+        name: preId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - ResourceService
+  /resources/{resourceId}/pre/{preId}/bind/update:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: resourceId
+        required: true
+        type: string
+      - description: ' '
+        in: path
+        name: preId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - ResourceService
+  /resources/{resourceId}/pre/bind/remove:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: resourceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resource.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - ResourceService
+  /role:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/role.RoleRestCreateBodySwag'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/role.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.Role'
+              type: object
+      tags:
+      - RoleService
+  /roles:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - collectionFormat: multi
+        in: query
+        items:
+          type: integer
+        name: ids
+        type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/role.SwagResponse'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+      tags:
+      - RoleService
+    get:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/role.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.RoleRestByQueriesAllRes'
+              type: object
+      tags:
+      - RoleService
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/ent.RoleBaseCreateReq'
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/role.SwagResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/ent.Role'
+                  type: array
+              type: object
+      tags:
+      - RoleService
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/ent.RoleBaseUpdateReq'
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/role.SwagResponse'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+      tags:
+      - RoleService
+  /roles/{roleId}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: roleId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/role.SwagResponse'
+            - properties:
+                data:
+                  type: boolean
+              type: object
+      tags:
+      - RoleService
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: roleId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/role.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.RoleBaseGetRes'
+              type: object
+      tags:
+      - RoleService
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/role.RoleRestUpdateByIdBodySwag'
+      - description: ' '
+        in: path
+        name: roleId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/role.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.Role'
+              type: object
+      tags:
+      - RoleService
+  /roles/{roleId}/resources:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - collectionFormat: multi
+        in: query
+        items:
+          type: integer
+        name: resourcesIds
+        type: array
+      - description: ' '
+        in: path
+        name: roleId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/role.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - RoleService
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: roleId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/role.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.RoleRestGetResourcesByRoleIdRes'
+              type: object
+      tags:
+      - RoleService
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/ent.ResourceBaseCreateReq'
+          type: array
+      - description: ' '
+        in: path
+        name: roleId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/role.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.Role'
+              type: object
+      tags:
+      - RoleService
+  /roles/{roleId}/resources/bind/add:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/role.RoleRestAddBindResourcesByRoleIdBodySwag'
+      - description: ' '
+        in: path
+        name: roleId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/role.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - RoleService
+  /roles/{roleId}/resources/bind/remove:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/role.RoleRestRemoveBindResourcesByRoleIdBodySwag'
+      - description: ' '
+        in: path
+        name: roleId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/role.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - RoleService
+  /roles/{roleId}/resources/bind/update:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/role.RoleRestUpdateBindResourcesByRoleIdBodySwag'
+      - description: ' '
+        in: path
+        name: roleId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/role.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - RoleService
   /service:
     post:
       consumes:
@@ -1936,6 +2853,168 @@ paths:
             - properties:
                 data:
                   $ref: '#/definitions/ent.User'
+              type: object
+      tags:
+      - UserService
+  /users/{userId}/roles:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - collectionFormat: multi
+        in: query
+        items:
+          type: integer
+        name: rolesIds
+        type: array
+      - description: ' '
+        in: path
+        name: userId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - UserService
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: userId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.UserRestGetRolesByUserIdRes'
+              type: object
+      tags:
+      - UserService
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/ent.RoleBaseCreateReq'
+          type: array
+      - description: ' '
+        in: path
+        name: userId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.User'
+              type: object
+      tags:
+      - UserService
+  /users/{userId}/roles/bind/add:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.UserRestAddBindRolesByUserIdBodySwag'
+      - description: ' '
+        in: path
+        name: userId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - UserService
+  /users/{userId}/roles/bind/remove:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.UserRestRemoveBindRolesByUserIdBodySwag'
+      - description: ' '
+        in: path
+        name: userId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+      tags:
+      - UserService
+  /users/{userId}/roles/bind/update:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.UserRestUpdateBindRolesByUserIdBodySwag'
+      - description: ' '
+        in: path
+        name: userId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.SwagResponse'
+            - properties:
+                data:
+                  type: string
               type: object
       tags:
       - UserService

@@ -55,8 +55,10 @@ var (
 		{Name: "key", Type: field.TypeString},
 		{Name: "path", Type: field.TypeString},
 		{Name: "action", Type: field.TypeString},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"api", "page"}},
 		{Name: "comments", Type: field.TypeString},
 		{Name: "resource_next", Type: field.TypeInt, Nullable: true},
+		{Name: "role_resources", Type: field.TypeInt, Nullable: true},
 	}
 	// ResourcesTable holds the schema information for the "resources" table.
 	ResourcesTable = &schema.Table{
@@ -66,8 +68,38 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "resources_resources_next",
-				Columns:    []*schema.Column{ResourcesColumns[8]},
+				Columns:    []*schema.Column{ResourcesColumns[9]},
 				RefColumns: []*schema.Column{ResourcesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "resources_roles_resources",
+				Columns:    []*schema.Column{ResourcesColumns[10]},
+				RefColumns: []*schema.Column{RolesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// RolesColumns holds the columns for the "roles" table.
+	RolesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString},
+		{Name: "level", Type: field.TypeInt},
+		{Name: "comments", Type: field.TypeString},
+		{Name: "user_roles", Type: field.TypeInt, Nullable: true},
+	}
+	// RolesTable holds the schema information for the "roles" table.
+	RolesTable = &schema.Table{
+		Name:       "roles",
+		Columns:    RolesColumns,
+		PrimaryKey: []*schema.Column{RolesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "roles_users_roles",
+				Columns:    []*schema.Column{RolesColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -135,6 +167,7 @@ var (
 		AuditsTable,
 		ProjectsTable,
 		ResourcesTable,
+		RolesTable,
 		ServicesTable,
 		TblServicetreeTable,
 		UsersTable,
@@ -143,6 +176,8 @@ var (
 
 func init() {
 	ResourcesTable.ForeignKeys[0].RefTable = ResourcesTable
+	ResourcesTable.ForeignKeys[1].RefTable = RolesTable
+	RolesTable.ForeignKeys[0].RefTable = UsersTable
 	ServicesTable.ForeignKeys[0].RefTable = ProjectsTable
 	TblServicetreeTable.Annotation = &entsql.Annotation{
 		Table: "tbl_servicetree",

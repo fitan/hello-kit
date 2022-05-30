@@ -15,17 +15,41 @@ import (
 )
 
 const (
+	ResourceRestAddBindNextByResourceIdMethodName = "ResourceRestAddBindNextByResourceId"
+
+	ResourceRestAddBindPreByResourceIdMethodName = "ResourceRestAddBindPreByResourceId"
+
 	ResourceRestByQueriesAllMethodName = "ResourceRestByQueriesAll"
 
 	ResourceRestCreateMethodName = "ResourceRestCreate"
 
 	ResourceRestCreateManyMethodName = "ResourceRestCreateMany"
 
+	ResourceRestCreatePreByResourceIdMethodName = "ResourceRestCreatePreByResourceId"
+
+	ResourceRestCreateResourcesByResourceIdMethodName = "ResourceRestCreateResourcesByResourceId"
+
 	ResourceRestDeleteByIdMethodName = "ResourceRestDeleteById"
 
 	ResourceRestDeleteManyMethodName = "ResourceRestDeleteMany"
 
+	ResourceRestDeleteNextByResourceIdMethodName = "ResourceRestDeleteNextByResourceId"
+
+	ResourceRestDeletePreByResourceIdMethodName = "ResourceRestDeletePreByResourceId"
+
 	ResourceRestGetByIdMethodName = "ResourceRestGetById"
+
+	ResourceRestGetNextByResourceIdMethodName = "ResourceRestGetNextByResourceId"
+
+	ResourceRestGetPreByResourceIdMethodName = "ResourceRestGetPreByResourceId"
+
+	ResourceRestRemoveBindNextByResourceIdMethodName = "ResourceRestRemoveBindNextByResourceId"
+
+	ResourceRestRemoveBindPreByResourceIdMethodName = "ResourceRestRemoveBindPreByResourceId"
+
+	ResourceRestUpdateBindNextByResourceIdMethodName = "ResourceRestUpdateBindNextByResourceId"
+
+	ResourceRestUpdateBindPreByResourceIdMethodName = "ResourceRestUpdateBindPreByResourceId"
 
 	ResourceRestUpdateByIdMethodName = "ResourceRestUpdateById"
 
@@ -35,17 +59,41 @@ const (
 type Mws map[string][]endpoint.Middleware
 
 type Endpoints struct {
+	ResourceRestAddBindNextByResourceIdEndpoint endpoint.Endpoint
+
+	ResourceRestAddBindPreByResourceIdEndpoint endpoint.Endpoint
+
 	ResourceRestByQueriesAllEndpoint endpoint.Endpoint
 
 	ResourceRestCreateEndpoint endpoint.Endpoint
 
 	ResourceRestCreateManyEndpoint endpoint.Endpoint
 
+	ResourceRestCreatePreByResourceIdEndpoint endpoint.Endpoint
+
+	ResourceRestCreateResourcesByResourceIdEndpoint endpoint.Endpoint
+
 	ResourceRestDeleteByIdEndpoint endpoint.Endpoint
 
 	ResourceRestDeleteManyEndpoint endpoint.Endpoint
 
+	ResourceRestDeleteNextByResourceIdEndpoint endpoint.Endpoint
+
+	ResourceRestDeletePreByResourceIdEndpoint endpoint.Endpoint
+
 	ResourceRestGetByIdEndpoint endpoint.Endpoint
+
+	ResourceRestGetNextByResourceIdEndpoint endpoint.Endpoint
+
+	ResourceRestGetPreByResourceIdEndpoint endpoint.Endpoint
+
+	ResourceRestRemoveBindNextByResourceIdEndpoint endpoint.Endpoint
+
+	ResourceRestRemoveBindPreByResourceIdEndpoint endpoint.Endpoint
+
+	ResourceRestUpdateBindNextByResourceIdEndpoint endpoint.Endpoint
+
+	ResourceRestUpdateBindPreByResourceIdEndpoint endpoint.Endpoint
 
 	ResourceRestUpdateByIdEndpoint endpoint.Endpoint
 
@@ -55,17 +103,41 @@ type Endpoints struct {
 func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m endpoint.Middleware) {
 	methods := []string{
 
+		ResourceRestAddBindNextByResourceIdMethodName,
+
+		ResourceRestAddBindPreByResourceIdMethodName,
+
 		ResourceRestByQueriesAllMethodName,
 
 		ResourceRestCreateMethodName,
 
 		ResourceRestCreateManyMethodName,
 
+		ResourceRestCreatePreByResourceIdMethodName,
+
+		ResourceRestCreateResourcesByResourceIdMethodName,
+
 		ResourceRestDeleteByIdMethodName,
 
 		ResourceRestDeleteManyMethodName,
 
+		ResourceRestDeleteNextByResourceIdMethodName,
+
+		ResourceRestDeletePreByResourceIdMethodName,
+
 		ResourceRestGetByIdMethodName,
+
+		ResourceRestGetNextByResourceIdMethodName,
+
+		ResourceRestGetPreByResourceIdMethodName,
+
+		ResourceRestRemoveBindNextByResourceIdMethodName,
+
+		ResourceRestRemoveBindPreByResourceIdMethodName,
+
+		ResourceRestUpdateBindNextByResourceIdMethodName,
+
+		ResourceRestUpdateBindPreByResourceIdMethodName,
 
 		ResourceRestUpdateByIdMethodName,
 
@@ -79,17 +151,41 @@ func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m en
 func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Middleware, m func(n string) endpoint.Middleware) {
 	methods := []string{
 
+		ResourceRestAddBindNextByResourceIdMethodName,
+
+		ResourceRestAddBindPreByResourceIdMethodName,
+
 		ResourceRestByQueriesAllMethodName,
 
 		ResourceRestCreateMethodName,
 
 		ResourceRestCreateManyMethodName,
 
+		ResourceRestCreatePreByResourceIdMethodName,
+
+		ResourceRestCreateResourcesByResourceIdMethodName,
+
 		ResourceRestDeleteByIdMethodName,
 
 		ResourceRestDeleteManyMethodName,
 
+		ResourceRestDeleteNextByResourceIdMethodName,
+
+		ResourceRestDeletePreByResourceIdMethodName,
+
 		ResourceRestGetByIdMethodName,
+
+		ResourceRestGetNextByResourceIdMethodName,
+
+		ResourceRestGetPreByResourceIdMethodName,
+
+		ResourceRestRemoveBindNextByResourceIdMethodName,
+
+		ResourceRestRemoveBindPreByResourceIdMethodName,
+
+		ResourceRestUpdateBindNextByResourceIdMethodName,
+
+		ResourceRestUpdateBindPreByResourceIdMethodName,
 
 		ResourceRestUpdateByIdMethodName,
 
@@ -105,21 +201,53 @@ func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Mi
 func NewEndpoints(s ResourceService, mdw Mws) Endpoints {
 	eps := Endpoints{
 
+		ResourceRestAddBindNextByResourceIdEndpoint: MakeResourceRestAddBindNextByResourceIdEndpoint(s),
+
+		ResourceRestAddBindPreByResourceIdEndpoint: MakeResourceRestAddBindPreByResourceIdEndpoint(s),
+
 		ResourceRestByQueriesAllEndpoint: MakeResourceRestByQueriesAllEndpoint(s),
 
 		ResourceRestCreateEndpoint: MakeResourceRestCreateEndpoint(s),
 
 		ResourceRestCreateManyEndpoint: MakeResourceRestCreateManyEndpoint(s),
 
+		ResourceRestCreatePreByResourceIdEndpoint: MakeResourceRestCreatePreByResourceIdEndpoint(s),
+
+		ResourceRestCreateResourcesByResourceIdEndpoint: MakeResourceRestCreateResourcesByResourceIdEndpoint(s),
+
 		ResourceRestDeleteByIdEndpoint: MakeResourceRestDeleteByIdEndpoint(s),
 
 		ResourceRestDeleteManyEndpoint: MakeResourceRestDeleteManyEndpoint(s),
 
+		ResourceRestDeleteNextByResourceIdEndpoint: MakeResourceRestDeleteNextByResourceIdEndpoint(s),
+
+		ResourceRestDeletePreByResourceIdEndpoint: MakeResourceRestDeletePreByResourceIdEndpoint(s),
+
 		ResourceRestGetByIdEndpoint: MakeResourceRestGetByIdEndpoint(s),
+
+		ResourceRestGetNextByResourceIdEndpoint: MakeResourceRestGetNextByResourceIdEndpoint(s),
+
+		ResourceRestGetPreByResourceIdEndpoint: MakeResourceRestGetPreByResourceIdEndpoint(s),
+
+		ResourceRestRemoveBindNextByResourceIdEndpoint: MakeResourceRestRemoveBindNextByResourceIdEndpoint(s),
+
+		ResourceRestRemoveBindPreByResourceIdEndpoint: MakeResourceRestRemoveBindPreByResourceIdEndpoint(s),
+
+		ResourceRestUpdateBindNextByResourceIdEndpoint: MakeResourceRestUpdateBindNextByResourceIdEndpoint(s),
+
+		ResourceRestUpdateBindPreByResourceIdEndpoint: MakeResourceRestUpdateBindPreByResourceIdEndpoint(s),
 
 		ResourceRestUpdateByIdEndpoint: MakeResourceRestUpdateByIdEndpoint(s),
 
 		ResourceRestUpdateManyEndpoint: MakeResourceRestUpdateManyEndpoint(s),
+	}
+
+	for _, m := range mdw[ResourceRestAddBindNextByResourceIdMethodName] {
+		eps.ResourceRestAddBindNextByResourceIdEndpoint = m(eps.ResourceRestAddBindNextByResourceIdEndpoint)
+	}
+
+	for _, m := range mdw[ResourceRestAddBindPreByResourceIdMethodName] {
+		eps.ResourceRestAddBindPreByResourceIdEndpoint = m(eps.ResourceRestAddBindPreByResourceIdEndpoint)
 	}
 
 	for _, m := range mdw[ResourceRestByQueriesAllMethodName] {
@@ -134,6 +262,14 @@ func NewEndpoints(s ResourceService, mdw Mws) Endpoints {
 		eps.ResourceRestCreateManyEndpoint = m(eps.ResourceRestCreateManyEndpoint)
 	}
 
+	for _, m := range mdw[ResourceRestCreatePreByResourceIdMethodName] {
+		eps.ResourceRestCreatePreByResourceIdEndpoint = m(eps.ResourceRestCreatePreByResourceIdEndpoint)
+	}
+
+	for _, m := range mdw[ResourceRestCreateResourcesByResourceIdMethodName] {
+		eps.ResourceRestCreateResourcesByResourceIdEndpoint = m(eps.ResourceRestCreateResourcesByResourceIdEndpoint)
+	}
+
 	for _, m := range mdw[ResourceRestDeleteByIdMethodName] {
 		eps.ResourceRestDeleteByIdEndpoint = m(eps.ResourceRestDeleteByIdEndpoint)
 	}
@@ -142,8 +278,40 @@ func NewEndpoints(s ResourceService, mdw Mws) Endpoints {
 		eps.ResourceRestDeleteManyEndpoint = m(eps.ResourceRestDeleteManyEndpoint)
 	}
 
+	for _, m := range mdw[ResourceRestDeleteNextByResourceIdMethodName] {
+		eps.ResourceRestDeleteNextByResourceIdEndpoint = m(eps.ResourceRestDeleteNextByResourceIdEndpoint)
+	}
+
+	for _, m := range mdw[ResourceRestDeletePreByResourceIdMethodName] {
+		eps.ResourceRestDeletePreByResourceIdEndpoint = m(eps.ResourceRestDeletePreByResourceIdEndpoint)
+	}
+
 	for _, m := range mdw[ResourceRestGetByIdMethodName] {
 		eps.ResourceRestGetByIdEndpoint = m(eps.ResourceRestGetByIdEndpoint)
+	}
+
+	for _, m := range mdw[ResourceRestGetNextByResourceIdMethodName] {
+		eps.ResourceRestGetNextByResourceIdEndpoint = m(eps.ResourceRestGetNextByResourceIdEndpoint)
+	}
+
+	for _, m := range mdw[ResourceRestGetPreByResourceIdMethodName] {
+		eps.ResourceRestGetPreByResourceIdEndpoint = m(eps.ResourceRestGetPreByResourceIdEndpoint)
+	}
+
+	for _, m := range mdw[ResourceRestRemoveBindNextByResourceIdMethodName] {
+		eps.ResourceRestRemoveBindNextByResourceIdEndpoint = m(eps.ResourceRestRemoveBindNextByResourceIdEndpoint)
+	}
+
+	for _, m := range mdw[ResourceRestRemoveBindPreByResourceIdMethodName] {
+		eps.ResourceRestRemoveBindPreByResourceIdEndpoint = m(eps.ResourceRestRemoveBindPreByResourceIdEndpoint)
+	}
+
+	for _, m := range mdw[ResourceRestUpdateBindNextByResourceIdMethodName] {
+		eps.ResourceRestUpdateBindNextByResourceIdEndpoint = m(eps.ResourceRestUpdateBindNextByResourceIdEndpoint)
+	}
+
+	for _, m := range mdw[ResourceRestUpdateBindPreByResourceIdMethodName] {
+		eps.ResourceRestUpdateBindPreByResourceIdEndpoint = m(eps.ResourceRestUpdateBindPreByResourceIdEndpoint)
 	}
 
 	for _, m := range mdw[ResourceRestUpdateByIdMethodName] {
@@ -155,6 +323,50 @@ func NewEndpoints(s ResourceService, mdw Mws) Endpoints {
 	}
 
 	return eps
+}
+
+func MakeResourceRestAddBindNextByResourceIdEndpoint(s ResourceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ResourceRestAddBindNextByResourceIdReq)
+		rs, err := s.ResourceRestAddBindNextByResourceId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeResourceRestAddBindPreByResourceIdEndpoint(s ResourceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ResourceRestAddBindPreByResourceIdReq)
+		rs, err := s.ResourceRestAddBindPreByResourceId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
 }
 
 func MakeResourceRestByQueriesAllEndpoint(s ResourceService) endpoint.Endpoint {
@@ -223,6 +435,50 @@ func MakeResourceRestCreateManyEndpoint(s ResourceService) endpoint.Endpoint {
 	}
 }
 
+func MakeResourceRestCreatePreByResourceIdEndpoint(s ResourceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ResourceRestCreatePreByResourceIdReq)
+		rs, err := s.ResourceRestCreatePreByResourceId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeResourceRestCreateResourcesByResourceIdEndpoint(s ResourceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ResourceRestCreateResourcesByResourceIdReq)
+		rs, err := s.ResourceRestCreateResourcesByResourceId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
 func MakeResourceRestDeleteByIdEndpoint(s ResourceService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		var err error
@@ -267,6 +523,50 @@ func MakeResourceRestDeleteManyEndpoint(s ResourceService) endpoint.Endpoint {
 	}
 }
 
+func MakeResourceRestDeleteNextByResourceIdEndpoint(s ResourceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ResourceRestDeleteNextByResourceIdReq)
+		rs, err := s.ResourceRestDeleteNextByResourceId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeResourceRestDeletePreByResourceIdEndpoint(s ResourceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ResourceRestDeletePreByResourceIdReq)
+		rs, err := s.ResourceRestDeletePreByResourceId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
 func MakeResourceRestGetByIdEndpoint(s ResourceService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		var err error
@@ -279,6 +579,138 @@ func MakeResourceRestGetByIdEndpoint(s ResourceService) endpoint.Endpoint {
 		}()
 		req := request.(ent.ResourceRestGetByIdReq)
 		rs, err := s.ResourceRestGetById(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeResourceRestGetNextByResourceIdEndpoint(s ResourceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ResourceRestGetNextByResourceIdReq)
+		rs, err := s.ResourceRestGetNextByResourceId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeResourceRestGetPreByResourceIdEndpoint(s ResourceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ResourceRestGetPreByResourceIdReq)
+		rs, err := s.ResourceRestGetPreByResourceId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeResourceRestRemoveBindNextByResourceIdEndpoint(s ResourceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ResourceRestRemoveBindNextByResourceIdReq)
+		rs, err := s.ResourceRestRemoveBindNextByResourceId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeResourceRestRemoveBindPreByResourceIdEndpoint(s ResourceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ResourceRestRemoveBindPreByResourceIdReq)
+		rs, err := s.ResourceRestRemoveBindPreByResourceId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeResourceRestUpdateBindNextByResourceIdEndpoint(s ResourceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ResourceRestUpdateBindNextByResourceIdReq)
+		rs, err := s.ResourceRestUpdateBindNextByResourceId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeResourceRestUpdateBindPreByResourceIdEndpoint(s ResourceService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.ResourceRestUpdateBindPreByResourceIdReq)
+		rs, err := s.ResourceRestUpdateBindPreByResourceId(ctx, req)
 		if err != nil {
 			result["err"] = err.Error()
 			return result, nil

@@ -816,7 +816,7 @@ const docTemplate = `{
                             "type": "integer"
                         },
                         "collectionFormat": "multi",
-                        "name": "serviceIds",
+                        "name": "servicesIds",
                         "in": "query"
                     },
                     {
@@ -1303,6 +1303,1141 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/{resourceId}/next": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "resourceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.ResourceRestGetNextByResourceIdRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.ResourceBaseCreateReq"
+                            }
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "resourceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.Resource"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "multi",
+                        "name": "nextIds",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "resourceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/{resourceId}/next/bind/add": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/resource.ResourceRestAddBindNextByResourceIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "resourceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/{resourceId}/next/bind/remove": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/resource.ResourceRestRemoveBindNextByResourceIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "resourceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/{resourceId}/next/bind/update": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/resource.ResourceRestUpdateBindNextByResourceIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "resourceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/{resourceId}/pre": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "resourceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.ResourceBaseGetRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/resource.ResourceRestCreatePreByResourceIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "resourceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.Resource"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "resourceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "preId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/{resourceId}/pre/bind/remove": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "resourceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/{resourceId}/pre/{preId}/bind/add": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "resourceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "preId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/resources/{resourceId}/pre/{preId}/bind/update": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ResourceService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "resourceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "preId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resource.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/role": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RoleService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/role.RoleRestCreateBodySwag"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/role.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.Role"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/roles": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RoleService"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/role.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.RoleRestByQueriesAllRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RoleService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.RoleBaseUpdateReq"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/role.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RoleService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.RoleBaseCreateReq"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/role.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/ent.Role"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RoleService"
+                ],
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "multi",
+                        "name": "ids",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/role.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/roles/{roleId}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RoleService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "roleId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/role.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.RoleBaseGetRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RoleService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/role.RoleRestUpdateByIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "roleId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/role.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.Role"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RoleService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "roleId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/role.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/roles/{roleId}/resources": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RoleService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "roleId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/role.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.RoleRestGetResourcesByRoleIdRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RoleService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.ResourceBaseCreateReq"
+                            }
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "roleId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/role.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.Role"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RoleService"
+                ],
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "multi",
+                        "name": "resourcesIds",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "roleId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/role.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/roles/{roleId}/resources/bind/add": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RoleService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/role.RoleRestAddBindResourcesByRoleIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "roleId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/role.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/roles/{roleId}/resources/bind/remove": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RoleService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/role.RoleRestRemoveBindResourcesByRoleIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "roleId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/role.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/roles/{roleId}/resources/bind/update": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RoleService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/role.RoleRestUpdateBindResourcesByRoleIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "roleId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/role.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -2254,6 +3389,284 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/{userId}/roles": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "UserService"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.UserRestGetRolesByUserIdRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "UserService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.RoleBaseCreateReq"
+                            }
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/ent.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "UserService"
+                ],
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "multi",
+                        "name": "rolesIds",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userId}/roles/bind/add": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "UserService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UserRestAddBindRolesByUserIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userId}/roles/bind/remove": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "UserService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UserRestRemoveBindRolesByUserIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userId}/roles/bind/update": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "UserService"
+                ],
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UserRestUpdateBindRolesByUserIdBodySwag"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.SwagResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -2600,6 +4013,10 @@ const docTemplate = `{
                     "description": "CreateTime holds the value of the \"create_time\" field.",
                     "type": "string"
                 },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the ResourceQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.ResourceEdges"
+                },
                 "id": {
                     "description": "ID of the ent.",
                     "type": "integer"
@@ -2614,6 +4031,10 @@ const docTemplate = `{
                 },
                 "path": {
                     "description": "Path holds the value of the \"path\" field.",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type holds the value of the \"type\" field.",
                     "type": "string"
                 },
                 "update_time": {
@@ -2639,6 +4060,9 @@ const docTemplate = `{
                 },
                 "path": {
                     "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
@@ -2661,6 +4085,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "path": {
+                    "type": "string"
+                },
+                "type": {
                     "type": "string"
                 }
             }
@@ -2685,6 +4112,25 @@ const docTemplate = `{
                 },
                 "path": {
                     "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "ent.ResourceEdges": {
+            "type": "object",
+            "properties": {
+                "next": {
+                    "description": "Next holds the value of the next edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Resource"
+                    }
+                },
+                "pre": {
+                    "description": "Pre holds the value of the pre edge.",
+                    "$ref": "#/definitions/ent.Resource"
                 }
             }
         },
@@ -2692,6 +4138,141 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.ResourceBaseGetRes"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ent.ResourceRestGetNextByResourceIdRes": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.ResourceBaseGetRes"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ent.Role": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "description": "Comments holds the value of the \"comments\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the RoleQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.RoleEdges"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "level": {
+                    "description": "Level holds the value of the \"level\" field.",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "Name holds the value of the \"name\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.RoleBaseCreateReq": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "ent.RoleBaseGetRes": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "ent.RoleBaseUpdateReq": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "ent.RoleEdges": {
+            "type": "object",
+            "properties": {
+                "resources": {
+                    "description": "Resources holds the value of the resources edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Resource"
+                    }
+                }
+            }
+        },
+        "ent.RoleRestByQueriesAllRes": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.RoleBaseGetRes"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ent.RoleRestGetResourcesByRoleIdRes": {
+            "type": "object",
+            "properties": {
+                "list": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ent.ResourceBaseGetRes"
@@ -2852,6 +4433,10 @@ const docTemplate = `{
                     "description": "Age holds the value of the \"age\" field.",
                     "type": "integer"
                 },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the UserQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.UserEdges"
+                },
                 "enable": {
                     "description": "Enable holds the value of the \"enable\" field.",
                     "type": "boolean"
@@ -2940,6 +4525,18 @@ const docTemplate = `{
                 }
             }
         },
+        "ent.UserEdges": {
+            "type": "object",
+            "properties": {
+                "roles": {
+                    "description": "Roles holds the value of the roles edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Role"
+                    }
+                }
+            }
+        },
         "ent.UserRestByQueriesAllRes": {
             "type": "object",
             "properties": {
@@ -2954,10 +4551,24 @@ const docTemplate = `{
                 }
             }
         },
+        "ent.UserRestGetRolesByUserIdRes": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.RoleBaseGetRes"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "project.ProjectRestAddBindServicesByProjectIdBodySwag": {
             "type": "object",
             "properties": {
-                "serviceIds": {
+                "servicesIds": {
                     "type": "array",
                     "items": {
                         "type": "integer"
@@ -2982,7 +4593,7 @@ const docTemplate = `{
         "project.ProjectRestRemoveBindServicesByProjectIdBodySwag": {
             "type": "object",
             "properties": {
-                "serviceIds": {
+                "servicesIds": {
                     "type": "array",
                     "items": {
                         "type": "integer"
@@ -3036,6 +4647,17 @@ const docTemplate = `{
                 }
             }
         },
+        "resource.ResourceRestAddBindNextByResourceIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "nextIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
         "resource.ResourceRestCreateBodySwag": {
             "type": "object",
             "properties": {
@@ -3053,6 +4675,60 @@ const docTemplate = `{
                 },
                 "path": {
                     "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "resource.ResourceRestCreatePreByResourceIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "resource.ResourceRestRemoveBindNextByResourceIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "nextIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "resource.ResourceRestUpdateBindNextByResourceIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "NewIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "OldIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
@@ -3076,10 +4752,95 @@ const docTemplate = `{
                 },
                 "path": {
                     "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
         "resource.SwagResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "status": {
+                    "type": "integer"
+                },
+                "traceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "role.RoleRestAddBindResourcesByRoleIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "resourcesIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "role.RoleRestCreateBodySwag": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "role.RoleRestRemoveBindResourcesByRoleIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "resourcesIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "role.RoleRestUpdateBindResourcesByRoleIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "NewIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "OldIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "role.RoleRestUpdateByIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "role.SwagResponse": {
             "type": "object",
             "properties": {
                 "data": {},
@@ -3178,6 +4939,17 @@ const docTemplate = `{
                 }
             }
         },
+        "user.UserRestAddBindRolesByUserIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "rolesIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
         "user.UserRestCreateBodySwag": {
             "type": "object",
             "properties": {
@@ -3195,6 +4967,34 @@ const docTemplate = `{
                 },
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "user.UserRestRemoveBindRolesByUserIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "rolesIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "user.UserRestUpdateBindRolesByUserIdBodySwag": {
+            "type": "object",
+            "properties": {
+                "NewIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "OldIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },

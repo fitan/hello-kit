@@ -27,6 +27,7 @@ type hooks struct {
 	Audit                   []ent.Hook
 	Project                 []ent.Hook
 	Resource                []ent.Hook
+	Role                    []ent.Hook
 	Service                 []ent.Hook
 	SpiderDevTblServicetree []ent.Hook
 	User                    []ent.Hook

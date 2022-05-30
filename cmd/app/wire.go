@@ -20,6 +20,7 @@ import (
 	"hello/pkg/services/casbin"
 	"hello/pkg/services/project"
 	"hello/pkg/services/resource"
+	"hello/pkg/services/role"
 	"hello/pkg/services/service"
 	"hello/pkg/services/user"
 )
@@ -53,7 +54,7 @@ var casbinServiceSet = wire.NewSet(casbin.NewBasicService, casbin.NewService, ca
 
 //var userServiceSet = wire.NewSet(user.NewBasicService, user.NewService, user.NewEndpointMiddleware, user.NewServiceMiddleware, user.NewEndpoints, user.NewServiceOption, user.NewHTTPHandler)
 
-var servicesSet = wire.NewSet(resource.ResourceKitSet, service.ServiceKitSet, project.ProjectKitSet, audit.AuditKitSet, casbinServiceSet, user.UserServiceSet, wire.Struct(new(services.HttpHandler), "*"), wire.Struct(new(services.Services), "*"))
+var servicesSet = wire.NewSet(role.RoleKitSet, resource.ResourceKitSet, service.ServiceKitSet, project.ProjectKitSet, audit.AuditKitSet, casbinServiceSet, user.UserServiceSet, wire.Struct(new(services.HttpHandler), "*"), wire.Struct(new(services.Services), "*"))
 
 var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 

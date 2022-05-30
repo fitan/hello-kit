@@ -1559,6 +1559,58 @@ func (f ResourceTableActionContainsFoldForm) CountQuery() bool {
 	return true
 }
 
+type ResourceTableTypeEQForm struct {
+	TypeEQ *resource.Type `form:"TypeEQ" json:"TypeEQ"`
+}
+
+func (f ResourceTableTypeEQForm) Query(q *ResourceQuery) {
+	if f.TypeEQ != nil {
+		q.Where(resource.TypeEQ(*f.TypeEQ))
+	}
+}
+func (f ResourceTableTypeEQForm) CountQuery() bool {
+	return true
+}
+
+type ResourceTableTypeNEQForm struct {
+	TypeNEQ *resource.Type `form:"TypeNEQ" json:"TypeNEQ"`
+}
+
+func (f ResourceTableTypeNEQForm) Query(q *ResourceQuery) {
+	if f.TypeNEQ != nil {
+		q.Where(resource.TypeNEQ(*f.TypeNEQ))
+	}
+}
+func (f ResourceTableTypeNEQForm) CountQuery() bool {
+	return true
+}
+
+type ResourceTableTypeInForm struct {
+	TypeIn *[]resource.Type `form:"TypeIn" json:"TypeIn"`
+}
+
+func (f ResourceTableTypeInForm) Query(q *ResourceQuery) {
+	if f.TypeIn != nil {
+		q.Where(resource.TypeIn(*f.TypeIn...))
+	}
+}
+func (f ResourceTableTypeInForm) CountQuery() bool {
+	return true
+}
+
+type ResourceTableTypeNotInForm struct {
+	TypeNotIn *[]resource.Type `form:"TypeNotIn" json:"TypeNotIn"`
+}
+
+func (f ResourceTableTypeNotInForm) Query(q *ResourceQuery) {
+	if f.TypeNotIn != nil {
+		q.Where(resource.TypeNotIn(*f.TypeNotIn...))
+	}
+}
+func (f ResourceTableTypeNotInForm) CountQuery() bool {
+	return true
+}
+
 type ResourceTableCommentsEQForm struct {
 	CommentsEQ *string `form:"CommentsEQ" json:"CommentsEQ"`
 }

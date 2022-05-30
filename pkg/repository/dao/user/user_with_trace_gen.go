@@ -127,6 +127,31 @@ func (_d UserServiceWithTracing) CreateMany(ctx context.Context, vs []ent.UserBa
 	return _d.UserService.CreateMany(ctx, vs)
 }
 
+// CreateRolesByUserId implements UserService
+func (_d UserServiceWithTracing) CreateRolesByUserId(ctx context.Context, id int, vs []ent.RoleBaseCreateReq) (res *ent.User, err error) {
+
+	var name = "UserService.CreateRolesByUserId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id,
+					"vs": vs},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.CreateRolesByUserId(ctx, id, vs)
+}
+
 // DeleteById implements UserService
 func (_d UserServiceWithTracing) DeleteById(ctx context.Context, id int) (err error) {
 
@@ -195,6 +220,56 @@ func (_d UserServiceWithTracing) GetById(ctx context.Context, id int) (res ent.U
 	}()
 
 	return _d.UserService.GetById(ctx, id)
+}
+
+// GetRolesByUserId implements UserService
+func (_d UserServiceWithTracing) GetRolesByUserId(ctx context.Context, id int, i interface{}) (res []ent.RoleBaseGetRes, count int, err error) {
+
+	var name = "UserService.GetRolesByUserId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id,
+					"i":  i},
+				"result": map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.GetRolesByUserId(ctx, id, i)
+}
+
+// RawAddBindRolesByUserId implements UserService
+func (_d UserServiceWithTracing) RawAddBindRolesByUserId(ctx context.Context, id int, addIds []int) (err error) {
+
+	var name = "UserService.RawAddBindRolesByUserId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id":     id,
+					"addIds": addIds},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.RawAddBindRolesByUserId(ctx, id, addIds)
 }
 
 // RawByQueriesAll implements UserService
@@ -294,6 +369,55 @@ func (_d UserServiceWithTracing) RawCreateMany(ctx context.Context, vs ent.Users
 	return _d.UserService.RawCreateMany(ctx, vs)
 }
 
+// RawCreateRolesByUserId implements UserService
+func (_d UserServiceWithTracing) RawCreateRolesByUserId(ctx context.Context, id int, vs ent.Roles) (res *ent.User, err error) {
+
+	var name = "UserService.RawCreateRolesByUserId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id,
+					"vs": vs},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.RawCreateRolesByUserId(ctx, id, vs)
+}
+
+// RawDeleteRolesByUserId implements UserService
+func (_d UserServiceWithTracing) RawDeleteRolesByUserId(ctx context.Context, id int, deleteIds []int) (err error) {
+
+	var name = "UserService.RawDeleteRolesByUserId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id":        id,
+					"deleteIds": deleteIds},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.RawDeleteRolesByUserId(ctx, id, deleteIds)
+}
+
 // RawGetById implements UserService
 func (_d UserServiceWithTracing) RawGetById(ctx context.Context, id int) (res *ent.User, err error) {
 
@@ -316,6 +440,81 @@ func (_d UserServiceWithTracing) RawGetById(ctx context.Context, id int) (res *e
 	}()
 
 	return _d.UserService.RawGetById(ctx, id)
+}
+
+// RawGetRolesByUserId implements UserService
+func (_d UserServiceWithTracing) RawGetRolesByUserId(ctx context.Context, id int, i interface{}) (res ent.Roles, count int, err error) {
+
+	var name = "UserService.RawGetRolesByUserId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id,
+					"i":  i},
+				"result": map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.RawGetRolesByUserId(ctx, id, i)
+}
+
+// RawRemoveBindRolesByUserId implements UserService
+func (_d UserServiceWithTracing) RawRemoveBindRolesByUserId(ctx context.Context, id int, removeIds []int) (err error) {
+
+	var name = "UserService.RawRemoveBindRolesByUserId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id":        id,
+					"removeIds": removeIds},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.RawRemoveBindRolesByUserId(ctx, id, removeIds)
+}
+
+// RawUpdateBindRolesByUserId implements UserService
+func (_d UserServiceWithTracing) RawUpdateBindRolesByUserId(ctx context.Context, id int, removeIds []int, addIds []int) (err error) {
+
+	var name = "UserService.RawUpdateBindRolesByUserId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id":        id,
+					"removeIds": removeIds,
+					"addIds":    addIds},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.UserService.RawUpdateBindRolesByUserId(ctx, id, removeIds, addIds)
 }
 
 // RawUpdateById implements UserService

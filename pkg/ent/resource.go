@@ -28,12 +28,15 @@ type Resource struct {
 	Path string `json:"path,omitempty"`
 	// Action holds the value of the "action" field.
 	Action string `json:"action,omitempty"`
+	// Type holds the value of the "type" field.
+	Type resource.Type `json:"type,omitempty"`
 	// Comments holds the value of the "comments" field.
 	Comments string `json:"comments,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ResourceQuery when eager-loading is set.
-	Edges         ResourceEdges `json:"edges"`
-	resource_next *int
+	Edges          ResourceEdges `json:"edges"`
+	resource_next  *int
+	role_resources *int
 }
 
 // ResourceEdges holds the relations/edges for other nodes in the graph.
@@ -77,11 +80,13 @@ func (*Resource) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case resource.FieldID:
 			values[i] = new(sql.NullInt64)
-		case resource.FieldName, resource.FieldKey, resource.FieldPath, resource.FieldAction, resource.FieldComments:
+		case resource.FieldName, resource.FieldKey, resource.FieldPath, resource.FieldAction, resource.FieldType, resource.FieldComments:
 			values[i] = new(sql.NullString)
 		case resource.FieldCreateTime, resource.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		case resource.ForeignKeys[0]: // resource_next
+			values[i] = new(sql.NullInt64)
+		case resource.ForeignKeys[1]: // role_resources
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Resource", columns[i])
@@ -140,6 +145,12 @@ func (r *Resource) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				r.Action = value.String
 			}
+		case resource.FieldType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field type", values[i])
+			} else if value.Valid {
+				r.Type = resource.Type(value.String)
+			}
 		case resource.FieldComments:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field comments", values[i])
@@ -152,6 +163,13 @@ func (r *Resource) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				r.resource_next = new(int)
 				*r.resource_next = int(value.Int64)
+			}
+		case resource.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field role_resources", value)
+			} else if value.Valid {
+				r.role_resources = new(int)
+				*r.role_resources = int(value.Int64)
 			}
 		}
 	}
@@ -203,6 +221,8 @@ func (r *Resource) String() string {
 	builder.WriteString(r.Path)
 	builder.WriteString(", action=")
 	builder.WriteString(r.Action)
+	builder.WriteString(", type=")
+	builder.WriteString(fmt.Sprintf("%v", r.Type))
 	builder.WriteString(", comments=")
 	builder.WriteString(r.Comments)
 	builder.WriteByte(')')

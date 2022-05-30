@@ -5,6 +5,7 @@ import (
 	"hello/pkg/services/casbin"
 	"hello/pkg/services/project"
 	"hello/pkg/services/resource"
+	"hello/pkg/services/role"
 	"hello/pkg/services/service"
 	"hello/pkg/services/user"
 )
@@ -15,6 +16,7 @@ type HttpHandler struct {
 	Project  project.HttpHandler
 	Service  service.HttpHandler
 	Resource resource.HttpHandler
+	Role     role.HttpHandler
 }
 
 type Services struct {
@@ -24,4 +26,5 @@ type Services struct {
 	Casbin   casbin.CasbinService
 	Service  service.ServiceService
 	Resource resource.ResourceService
+	Role     role.RoleService
 }

@@ -15,6 +15,9 @@ type Project func(*sql.Selector)
 // Resource is the predicate function for resource builders.
 type Resource func(*sql.Selector)
 
+// Role is the predicate function for role builders.
+type Role func(*sql.Selector)
+
 // Service is the predicate function for service builders.
 type Service func(*sql.Selector)
 

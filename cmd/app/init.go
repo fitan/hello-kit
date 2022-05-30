@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/schema"
 	"fmt"
 	microConsul "github.com/asim/go-micro/plugins/registry/consul/v4"
 	httpServer "github.com/asim/go-micro/plugins/server/http/v4"
@@ -36,6 +37,7 @@ import (
 	_ "hello/docs"
 	"hello/pkg/debug"
 	"hello/pkg/ent"
+	resource2 "hello/pkg/ent/resource"
 	"hello/pkg/middleware"
 	"hello/pkg/repository"
 	"hello/pkg/services"
@@ -47,6 +49,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path"
 	"syscall"
 	"time"
 )
@@ -136,14 +139,17 @@ func PathPutInStorage(confName string) error {
 	}
 	list := app.debug.List()
 	req := make([]ent.ResourceBaseCreateReq, 0)
+	t := resource2.TypeAPI
 	for _, v := range list {
 		_, err := app.repository.Resource.ByQueriesOne(
 			context.Background(), struct {
 				ent.ResourceTableActionEQForm
 				ent.ResourceTablePathEQForm
+				ent.ResourceTableTypeEQForm
 			}{
 				ResourceTableActionEQForm: ent.ResourceTableActionEQForm{ActionEQ: &v.Method},
 				ResourceTablePathEQForm:   ent.ResourceTablePathEQForm{PathEQ: &v.Path},
+				ResourceTableTypeEQForm:   ent.ResourceTableTypeEQForm{TypeEQ: &t},
 			},
 		)
 		if err == nil {
@@ -158,10 +164,11 @@ func PathPutInStorage(confName string) error {
 
 		req = append(req, ent.ResourceBaseCreateReq{
 			Name:     v.Annotation,
-			Key:      v.Path + v.Method,
+			Key:      path.Join(v.Method, v.Path),
 			Path:     v.Path,
 			Action:   v.Method,
 			Comments: v.Annotation,
+			Type:     resource2.TypeAPI,
 		})
 	}
 	_, err = app.repository.Resource.CreateMany(context.Background(), req)
@@ -233,7 +240,7 @@ func initEnt(conf *conf.MyConf) (*ent.Client, error) {
 	}
 	client := ent.NewClient(ent.Driver(drv)).Debug()
 	if conf.Mysql.AutoCreate {
-		if err = client.Schema.Create(context.Background()); err != nil {
+		if err = client.Schema.Create(context.Background(), schema.WithForeignKeys(false)); err != nil {
 			return nil, err
 		}
 	}

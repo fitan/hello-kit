@@ -38,6 +38,20 @@ func NewUserServiceWithPrometheus(base UserService) UserServiceWithPrometheus {
 	}
 }
 
+// UserRestAddBindRolesByUserId implements UserService
+func (_d UserServiceWithPrometheus) UserRestAddBindRolesByUserId(ctx context.Context, req ent.UserRestAddBindRolesByUserIdReq) (res string, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UserRestAddBindRolesByUserId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.UserRestAddBindRolesByUserId(ctx, req)
+}
+
 // UserRestByQueriesAll implements UserService
 func (_d UserServiceWithPrometheus) UserRestByQueriesAll(ctx context.Context, req ent.UserRestByQueriesAllReq) (res ent.UserRestByQueriesAllRes, err error) {
 	_since := time.Now()
@@ -80,6 +94,20 @@ func (_d UserServiceWithPrometheus) UserRestCreateMany(ctx context.Context, req 
 	return _d.base.UserRestCreateMany(ctx, req)
 }
 
+// UserRestCreateRolesByUserId implements UserService
+func (_d UserServiceWithPrometheus) UserRestCreateRolesByUserId(ctx context.Context, req ent.UserRestCreateRolesByUserIdReq) (res *ent.User, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UserRestCreateRolesByUserId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.UserRestCreateRolesByUserId(ctx, req)
+}
+
 // UserRestDeleteById implements UserService
 func (_d UserServiceWithPrometheus) UserRestDeleteById(ctx context.Context, req ent.UserRestDeleteByIdReq) (success bool, err error) {
 	_since := time.Now()
@@ -108,6 +136,20 @@ func (_d UserServiceWithPrometheus) UserRestDeleteMany(ctx context.Context, req 
 	return _d.base.UserRestDeleteMany(ctx, req)
 }
 
+// UserRestDeleteRolesByUserId implements UserService
+func (_d UserServiceWithPrometheus) UserRestDeleteRolesByUserId(ctx context.Context, req ent.UserRestDeleteRolesByUserIdReq) (res string, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UserRestDeleteRolesByUserId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.UserRestDeleteRolesByUserId(ctx, req)
+}
+
 // UserRestGetById implements UserService
 func (_d UserServiceWithPrometheus) UserRestGetById(ctx context.Context, req ent.UserRestGetByIdReq) (res ent.UserBaseGetRes, err error) {
 	_since := time.Now()
@@ -120,6 +162,48 @@ func (_d UserServiceWithPrometheus) UserRestGetById(ctx context.Context, req ent
 		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UserRestGetById", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.UserRestGetById(ctx, req)
+}
+
+// UserRestGetRolesByUserId implements UserService
+func (_d UserServiceWithPrometheus) UserRestGetRolesByUserId(ctx context.Context, req ent.UserRestGetRolesByUserIdReq) (res ent.UserRestGetRolesByUserIdRes, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UserRestGetRolesByUserId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.UserRestGetRolesByUserId(ctx, req)
+}
+
+// UserRestRemoveBindRolesByUserId implements UserService
+func (_d UserServiceWithPrometheus) UserRestRemoveBindRolesByUserId(ctx context.Context, req ent.UserRestRemoveBindRolesByUserIdReq) (res string, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UserRestRemoveBindRolesByUserId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.UserRestRemoveBindRolesByUserId(ctx, req)
+}
+
+// UserRestUpdateBindRolesByUserId implements UserService
+func (_d UserServiceWithPrometheus) UserRestUpdateBindRolesByUserId(ctx context.Context, req ent.UserRestUpdateBindRolesByUserIdReq) (res string, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "UserRestUpdateBindRolesByUserId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.UserRestUpdateBindRolesByUserId(ctx, req)
 }
 
 // UserRestUpdateById implements UserService

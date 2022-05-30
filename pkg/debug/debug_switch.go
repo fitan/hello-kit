@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/fitan/gink/transport/http"
 	"github.com/gin-gonic/gin"
+	Path "path"
 	"sync"
 )
 
@@ -44,7 +45,7 @@ type msg struct {
 func (d *DebugSwitch) Register(annotation, path, method string) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
-	d.m[path+method] = false
+	d.m[Path.Join(method, path)] = false
 	d.l = append(d.l, msg{
 		Annotation: annotation,
 		Path:       path,
@@ -55,9 +56,9 @@ func (d *DebugSwitch) Register(annotation, path, method string) {
 func (d *DebugSwitch) SetDebug(path, method string, b bool) (err error) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
-	_, ok := d.m[path+method]
+	_, ok := d.m[Path.Join(method, path)]
 	if ok {
-		d.m[path+method] = b
+		d.m[Path.Join(method, path)] = b
 		return nil
 	}
 
@@ -74,7 +75,7 @@ func (d *DebugSwitch) ResetDebug() {
 }
 
 func (d *DebugSwitch) Debug(path, method string) (bool, error) {
-	has, ok := d.m[path+method]
+	has, ok := d.m[Path.Join(method, path)]
 	if ok {
 		return has, nil
 	}

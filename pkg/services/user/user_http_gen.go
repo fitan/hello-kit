@@ -19,17 +19,29 @@ type Ops map[string][]http.ServerOption
 func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option http.ServerOption) {
 	methods := []string{
 
+		UserRestAddBindRolesByUserIdMethodName,
+
 		UserRestByQueriesAllMethodName,
 
 		UserRestCreateMethodName,
 
 		UserRestCreateManyMethodName,
 
+		UserRestCreateRolesByUserIdMethodName,
+
 		UserRestDeleteByIdMethodName,
 
 		UserRestDeleteManyMethodName,
 
+		UserRestDeleteRolesByUserIdMethodName,
+
 		UserRestGetByIdMethodName,
+
+		UserRestGetRolesByUserIdMethodName,
+
+		UserRestRemoveBindRolesByUserIdMethodName,
+
+		UserRestUpdateBindRolesByUserIdMethodName,
 
 		UserRestUpdateByIdMethodName,
 
@@ -45,21 +57,35 @@ type HttpHandler struct {
 
 func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch *debug.DebugSwitch) HttpHandler {
 
+	debugSwitch.Register("UserRestAddBindRolesByUserId", "/users/:userId/roles/bind/add", "PUT")
+
 	debugSwitch.Register("UserRestByQueriesAll", "/users", "GET")
 
 	debugSwitch.Register("UserRestCreate", "/user", "POST")
 
 	debugSwitch.Register("UserRestCreateMany", "/users", "POST")
 
+	debugSwitch.Register("UserRestCreateRolesByUserId", "/users/:userId/roles", "POST")
+
 	debugSwitch.Register("UserRestDeleteById", "/users/:userId", "DELETE")
 
 	debugSwitch.Register("UserRestDeleteMany", "/users", "DELETE")
 
+	debugSwitch.Register("UserRestDeleteRolesByUserId", "/users/:userId/roles", "DELETE")
+
 	debugSwitch.Register("UserRestGetById", "/users/:userId", "GET")
+
+	debugSwitch.Register("UserRestGetRolesByUserId", "/users/:userId/roles", "GET")
+
+	debugSwitch.Register("UserRestRemoveBindRolesByUserId", "/users/:userId/roles/bind/remove", "PUT")
+
+	debugSwitch.Register("UserRestUpdateBindRolesByUserId", "/users/:userId/roles/bind/update", "PUT")
 
 	debugSwitch.Register("UserRestUpdateById", "/users/:userId", "PUT")
 
 	debugSwitch.Register("UserRestUpdateMany", "/users", "PUT")
+
+	makeUserRestAddBindRolesByUserIdHandler(r, endpoints, options[UserRestAddBindRolesByUserIdMethodName])
 
 	makeUserRestByQueriesAllHandler(r, endpoints, options[UserRestByQueriesAllMethodName])
 
@@ -67,11 +93,21 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch
 
 	makeUserRestCreateManyHandler(r, endpoints, options[UserRestCreateManyMethodName])
 
+	makeUserRestCreateRolesByUserIdHandler(r, endpoints, options[UserRestCreateRolesByUserIdMethodName])
+
 	makeUserRestDeleteByIdHandler(r, endpoints, options[UserRestDeleteByIdMethodName])
 
 	makeUserRestDeleteManyHandler(r, endpoints, options[UserRestDeleteManyMethodName])
 
+	makeUserRestDeleteRolesByUserIdHandler(r, endpoints, options[UserRestDeleteRolesByUserIdMethodName])
+
 	makeUserRestGetByIdHandler(r, endpoints, options[UserRestGetByIdMethodName])
+
+	makeUserRestGetRolesByUserIdHandler(r, endpoints, options[UserRestGetRolesByUserIdMethodName])
+
+	makeUserRestRemoveBindRolesByUserIdHandler(r, endpoints, options[UserRestRemoveBindRolesByUserIdMethodName])
+
+	makeUserRestUpdateBindRolesByUserIdHandler(r, endpoints, options[UserRestUpdateBindRolesByUserIdMethodName])
 
 	makeUserRestUpdateByIdHandler(r, endpoints, options[UserRestUpdateByIdMethodName])
 
@@ -84,6 +120,37 @@ type SwagResponse struct {
 	TraceId string      `json:"traceId"`
 	Status  int         `json:"status"`
 	Data    interface{} `json:"data"`
+}
+
+type UserRestAddBindRolesByUserIdBodySwag struct {
+	RolesIds []int `json:"rolesIds"`
+}
+
+// @Accept  json
+// @Tags UserService
+// @Param body body UserRestAddBindRolesByUserIdBodySwag true " "
+// @Param userId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /users/{userId}/roles/bind/add [put]
+func makeUserRestAddBindRolesByUserIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/users/:userId/roles/bind/add", http.NewServer(endpoints.UserRestAddBindRolesByUserIdEndpoint, decodeUserRestAddBindRolesByUserIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeUserRestAddBindRolesByUserIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestAddBindRolesByUserIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindJSON(&req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
 }
 
 type UserRestByQueriesAllQuerySwag ent.UserQueryOps
@@ -155,6 +222,35 @@ func decodeUserRestCreateManyRequest(_ context.Context, ctx *gin.Context) (inter
 	return req, err
 }
 
+type UserRestCreateRolesByUserIdBodySwag []ent.RoleBaseCreateReq
+
+// @Accept  json
+// @Tags UserService
+// @Param body body UserRestCreateRolesByUserIdBodySwag true " "
+// @Param userId path string true " "
+// @Success 200 {object} SwagResponse{data=ent.User}
+// @Router /users/{userId}/roles [post]
+func makeUserRestCreateRolesByUserIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.POST("/users/:userId/roles", http.NewServer(endpoints.UserRestCreateRolesByUserIdEndpoint, decodeUserRestCreateRolesByUserIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeUserRestCreateRolesByUserIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestCreateRolesByUserIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindJSON(&req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
 // @Accept  json
 // @Tags UserService
 // @Param userId path string true " "
@@ -201,6 +297,37 @@ func decodeUserRestDeleteManyRequest(_ context.Context, ctx *gin.Context) (inter
 	return req, err
 }
 
+type UserRestDeleteRolesByUserIdQuerySwag struct {
+	RolesIds []int `json:"rolesIds" form:"rolesIds"`
+}
+
+// @Accept  json
+// @Tags UserService
+// @Param query query UserRestDeleteRolesByUserIdQuerySwag false " "
+// @Param userId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /users/{userId}/roles [delete]
+func makeUserRestDeleteRolesByUserIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.DELETE("/users/:userId/roles", http.NewServer(endpoints.UserRestDeleteRolesByUserIdEndpoint, decodeUserRestDeleteRolesByUserIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeUserRestDeleteRolesByUserIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestDeleteRolesByUserIdReq
+	var err error
+
+	err = ctx.ShouldBindQuery(&req.Query)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
 // @Accept  json
 // @Tags UserService
 // @Param userId path string true " "
@@ -215,6 +342,98 @@ func decodeUserRestGetByIdRequest(_ context.Context, ctx *gin.Context) (interfac
 	var err error
 
 	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+type UserRestGetRolesByUserIdQuerySwag ent.RoleQueryOps
+
+// @Accept  json
+// @Tags UserService
+// @Param query query UserRestGetRolesByUserIdQuerySwag false " "
+// @Param userId path string true " "
+// @Success 200 {object} SwagResponse{data=ent.UserRestGetRolesByUserIdRes}
+// @Router /users/{userId}/roles [get]
+func makeUserRestGetRolesByUserIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.GET("/users/:userId/roles", http.NewServer(endpoints.UserRestGetRolesByUserIdEndpoint, decodeUserRestGetRolesByUserIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeUserRestGetRolesByUserIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestGetRolesByUserIdReq
+	var err error
+
+	err = ctx.ShouldBindQuery(&req.Query)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+type UserRestRemoveBindRolesByUserIdBodySwag struct {
+	RolesIds []int `json:"rolesIds"`
+}
+
+// @Accept  json
+// @Tags UserService
+// @Param body body UserRestRemoveBindRolesByUserIdBodySwag true " "
+// @Param userId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /users/{userId}/roles/bind/remove [put]
+func makeUserRestRemoveBindRolesByUserIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/users/:userId/roles/bind/remove", http.NewServer(endpoints.UserRestRemoveBindRolesByUserIdEndpoint, decodeUserRestRemoveBindRolesByUserIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeUserRestRemoveBindRolesByUserIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestRemoveBindRolesByUserIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindJSON(&req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+type UserRestUpdateBindRolesByUserIdBodySwag struct {
+	OldIds []int `json:"OldIds"`
+	NewIds []int `json:"NewIds"`
+}
+
+// @Accept  json
+// @Tags UserService
+// @Param body body UserRestUpdateBindRolesByUserIdBodySwag true " "
+// @Param userId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /users/{userId}/roles/bind/update [put]
+func makeUserRestUpdateBindRolesByUserIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/users/:userId/roles/bind/update", http.NewServer(endpoints.UserRestUpdateBindRolesByUserIdEndpoint, decodeUserRestUpdateBindRolesByUserIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeUserRestUpdateBindRolesByUserIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.UserRestUpdateBindRolesByUserIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindJSON(&req.Body)
 	if err != nil {
 		return nil, err
 	}

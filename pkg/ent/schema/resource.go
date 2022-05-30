@@ -45,6 +45,12 @@ func (Resource) Fields() []ent.Field {
 			Read:     true,
 			QueryOps: nil,
 		}),
+		field.Enum("type").Values("api", "page").Annotations(FieldAnnotation{
+			Create:   true,
+			Update:   true,
+			Read:     true,
+			QueryOps: nil,
+		}),
 		field.String("comments").Annotations(FieldAnnotation{
 			Create:   true,
 			Update:   true,

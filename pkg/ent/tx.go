@@ -18,6 +18,8 @@ type Tx struct {
 	Project *ProjectClient
 	// Resource is the client for interacting with the Resource builders.
 	Resource *ResourceClient
+	// Role is the client for interacting with the Role builders.
+	Role *RoleClient
 	// Service is the client for interacting with the Service builders.
 	Service *ServiceClient
 	// SpiderDevTblServicetree is the client for interacting with the SpiderDevTblServicetree builders.
@@ -162,6 +164,7 @@ func (tx *Tx) init() {
 	tx.Audit = NewAuditClient(tx.config)
 	tx.Project = NewProjectClient(tx.config)
 	tx.Resource = NewResourceClient(tx.config)
+	tx.Role = NewRoleClient(tx.config)
 	tx.Service = NewServiceClient(tx.config)
 	tx.SpiderDevTblServicetree = NewSpiderDevTblServicetreeClient(tx.config)
 	tx.User = NewUserClient(tx.config)

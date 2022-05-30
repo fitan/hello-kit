@@ -23,6 +23,7 @@ import (
 	"hello/pkg/services/casbin"
 	project2 "hello/pkg/services/project"
 	resource2 "hello/pkg/services/resource"
+	"hello/pkg/services/role"
 	service2 "hello/pkg/services/service"
 	user2 "hello/pkg/services/user"
 )
@@ -106,6 +107,9 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 	baseService6 := resource2.NewBasicService(client)
 	v13 := resource2.NewServiceMiddleware(sugaredLogger)
 	resourceResourceService := resource2.NewService(baseService6, v13)
+	roleBaseService := role.NewBasicService(client)
+	v14 := role.NewServiceMiddleware(sugaredLogger)
+	roleService := role.NewService(roleBaseService, v14)
 	servicesServices := &services.Services{
 		User:     userUserService,
 		Audit:    auditAuditService,
@@ -113,36 +117,42 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 		Casbin:   casbinService,
 		Service:  serviceServiceService,
 		Resource: resourceResourceService,
+		Role:     roleService,
 	}
 	debugSwitch := initDebugSwitch()
-	v14 := initEndpointMiddleware(servicesServices, repository2)
-	mws := user2.NewEndpointMiddleware(sugaredLogger, v14)
+	v15 := initEndpointMiddleware(servicesServices, repository2)
+	mws := user2.NewEndpointMiddleware(sugaredLogger, v15)
 	endpoints := user2.NewEndpoints(userUserService, mws)
-	v15 := initHttpServerOption(debugSwitch)
-	ops := user2.NewServiceOption(v15)
+	v16 := initHttpServerOption(debugSwitch)
+	ops := user2.NewServiceOption(v16)
 	httpHandler := user2.NewHTTPHandler(r, endpoints, ops, debugSwitch)
-	auditMws := audit2.NewEndpointMiddleware(sugaredLogger, v14)
+	auditMws := audit2.NewEndpointMiddleware(sugaredLogger, v15)
 	auditEndpoints := audit2.NewEndpoints(auditAuditService, auditMws)
-	auditOps := audit2.NewServiceOption(v15)
+	auditOps := audit2.NewServiceOption(v16)
 	auditHttpHandler := audit2.NewHTTPHandler(r, auditEndpoints, auditOps, debugSwitch)
-	projectMws := project2.NewEndpointMiddleware(sugaredLogger, v14)
+	projectMws := project2.NewEndpointMiddleware(sugaredLogger, v15)
 	projectEndpoints := project2.NewEndpoints(projectProjectService, projectMws)
-	projectOps := project2.NewServiceOption(v15)
+	projectOps := project2.NewServiceOption(v16)
 	projectHttpHandler := project2.NewHTTPHandler(r, projectEndpoints, projectOps, debugSwitch)
-	serviceMws := service2.NewEndpointMiddleware(sugaredLogger, v14)
+	serviceMws := service2.NewEndpointMiddleware(sugaredLogger, v15)
 	serviceEndpoints := service2.NewEndpoints(serviceServiceService, serviceMws)
-	serviceOps := service2.NewServiceOption(v15)
+	serviceOps := service2.NewServiceOption(v16)
 	serviceHttpHandler := service2.NewHTTPHandler(r, serviceEndpoints, serviceOps, debugSwitch)
-	resourceMws := resource2.NewEndpointMiddleware(sugaredLogger, v14)
+	resourceMws := resource2.NewEndpointMiddleware(sugaredLogger, v15)
 	resourceEndpoints := resource2.NewEndpoints(resourceResourceService, resourceMws)
-	resourceOps := resource2.NewServiceOption(v15)
+	resourceOps := resource2.NewServiceOption(v16)
 	resourceHttpHandler := resource2.NewHTTPHandler(r, resourceEndpoints, resourceOps, debugSwitch)
+	roleMws := role.NewEndpointMiddleware(sugaredLogger, v15)
+	roleEndpoints := role.NewEndpoints(roleService, roleMws)
+	roleOps := role.NewServiceOption(v16)
+	roleHttpHandler := role.NewHTTPHandler(r, roleEndpoints, roleOps, debugSwitch)
 	servicesHttpHandler := &services.HttpHandler{
 		User:     httpHandler,
 		Audit:    auditHttpHandler,
 		Project:  projectHttpHandler,
 		Service:  serviceHttpHandler,
 		Resource: resourceHttpHandler,
+		Role:     roleHttpHandler,
 	}
 	tracerProvider := initTracer(myConf)
 	db, err := initDb(myConf)
@@ -214,7 +224,7 @@ var repoSet = wire.NewSet(resource.ResourceServiceSet, service.ServiceServiceSet
 // http service
 var casbinServiceSet = wire.NewSet(casbin.NewBasicService, casbin.NewService, casbin.NewServiceMiddleware)
 
-var servicesSet = wire.NewSet(resource2.ResourceKitSet, service2.ServiceKitSet, project2.ProjectKitSet, audit2.AuditKitSet, casbinServiceSet, user2.UserServiceSet, wire.Struct(new(services.HttpHandler), "*"), wire.Struct(new(services.Services), "*"))
+var servicesSet = wire.NewSet(role.RoleKitSet, resource2.ResourceKitSet, service2.ServiceKitSet, project2.ProjectKitSet, audit2.AuditKitSet, casbinServiceSet, user2.UserServiceSet, wire.Struct(new(services.HttpHandler), "*"), wire.Struct(new(services.Services), "*"))
 
 var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 

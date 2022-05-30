@@ -197,6 +197,51 @@ func (_d UserServiceWithLog) CreateMany(ctx context.Context, vs []ent.UserBaseCr
 	return _d._base.CreateMany(ctx, vs)
 }
 
+// CreateRolesByUserId implements UserService
+func (_d UserServiceWithLog) CreateRolesByUserId(ctx context.Context, id int, vs []ent.RoleBaseCreateReq) (res *ent.User, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling CreateRolesByUserId", "params", map[string]interface{}{
+					"id": id,
+					"vs": vs}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling CreateRolesByUserId", "params", map[string]interface{}{
+					"id": id,
+					"vs": vs}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling CreateRolesByUserId", "params", map[string]interface{}{
+				"id": id,
+				"vs": vs}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling CreateRolesByUserId", "params", map[string]interface{}{
+				"id": id,
+				"vs": vs}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.CreateRolesByUserId(ctx, id, vs)
+}
+
 // DeleteById implements UserService
 func (_d UserServiceWithLog) DeleteById(ctx context.Context, id int) (err error) {
 
@@ -310,6 +355,96 @@ func (_d UserServiceWithLog) GetById(ctx context.Context, id int) (res ent.UserB
 		}
 	}()
 	return _d._base.GetById(ctx, id)
+}
+
+// GetRolesByUserId implements UserService
+func (_d UserServiceWithLog) GetRolesByUserId(ctx context.Context, id int, i interface{}) (res []ent.RoleBaseGetRes, count int, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling GetRolesByUserId", "params", map[string]interface{}{
+					"id": id,
+					"i":  i}, "results", map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling GetRolesByUserId", "params", map[string]interface{}{
+					"id": id,
+					"i":  i}, "results", map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling GetRolesByUserId", "params", map[string]interface{}{
+				"id": id,
+				"i":  i}, "results", map[string]interface{}{
+				"res":   res,
+				"count": count,
+				"err":   fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling GetRolesByUserId", "params", map[string]interface{}{
+				"id": id,
+				"i":  i}, "results", map[string]interface{}{
+				"res":   res,
+				"count": count,
+				"err":   fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.GetRolesByUserId(ctx, id, i)
+}
+
+// RawAddBindRolesByUserId implements UserService
+func (_d UserServiceWithLog) RawAddBindRolesByUserId(ctx context.Context, id int, addIds []int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawAddBindRolesByUserId", "params", map[string]interface{}{
+					"id":     id,
+					"addIds": addIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawAddBindRolesByUserId", "params", map[string]interface{}{
+					"id":     id,
+					"addIds": addIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawAddBindRolesByUserId", "params", map[string]interface{}{
+				"id":     id,
+				"addIds": addIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawAddBindRolesByUserId", "params", map[string]interface{}{
+				"id":     id,
+				"addIds": addIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawAddBindRolesByUserId(ctx, id, addIds)
 }
 
 // RawByQueriesAll implements UserService
@@ -480,6 +615,92 @@ func (_d UserServiceWithLog) RawCreateMany(ctx context.Context, vs ent.Users) (u
 	return _d._base.RawCreateMany(ctx, vs)
 }
 
+// RawCreateRolesByUserId implements UserService
+func (_d UserServiceWithLog) RawCreateRolesByUserId(ctx context.Context, id int, vs ent.Roles) (res *ent.User, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawCreateRolesByUserId", "params", map[string]interface{}{
+					"id": id,
+					"vs": vs}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawCreateRolesByUserId", "params", map[string]interface{}{
+					"id": id,
+					"vs": vs}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawCreateRolesByUserId", "params", map[string]interface{}{
+				"id": id,
+				"vs": vs}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawCreateRolesByUserId", "params", map[string]interface{}{
+				"id": id,
+				"vs": vs}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawCreateRolesByUserId(ctx, id, vs)
+}
+
+// RawDeleteRolesByUserId implements UserService
+func (_d UserServiceWithLog) RawDeleteRolesByUserId(ctx context.Context, id int, deleteIds []int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawDeleteRolesByUserId", "params", map[string]interface{}{
+					"id":        id,
+					"deleteIds": deleteIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawDeleteRolesByUserId", "params", map[string]interface{}{
+					"id":        id,
+					"deleteIds": deleteIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawDeleteRolesByUserId", "params", map[string]interface{}{
+				"id":        id,
+				"deleteIds": deleteIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawDeleteRolesByUserId", "params", map[string]interface{}{
+				"id":        id,
+				"deleteIds": deleteIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawDeleteRolesByUserId(ctx, id, deleteIds)
+}
+
 // RawGetById implements UserService
 func (_d UserServiceWithLog) RawGetById(ctx context.Context, id int) (res *ent.User, err error) {
 
@@ -519,6 +740,141 @@ func (_d UserServiceWithLog) RawGetById(ctx context.Context, id int) (res *ent.U
 		}
 	}()
 	return _d._base.RawGetById(ctx, id)
+}
+
+// RawGetRolesByUserId implements UserService
+func (_d UserServiceWithLog) RawGetRolesByUserId(ctx context.Context, id int, i interface{}) (res ent.Roles, count int, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawGetRolesByUserId", "params", map[string]interface{}{
+					"id": id,
+					"i":  i}, "results", map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawGetRolesByUserId", "params", map[string]interface{}{
+					"id": id,
+					"i":  i}, "results", map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawGetRolesByUserId", "params", map[string]interface{}{
+				"id": id,
+				"i":  i}, "results", map[string]interface{}{
+				"res":   res,
+				"count": count,
+				"err":   fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawGetRolesByUserId", "params", map[string]interface{}{
+				"id": id,
+				"i":  i}, "results", map[string]interface{}{
+				"res":   res,
+				"count": count,
+				"err":   fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawGetRolesByUserId(ctx, id, i)
+}
+
+// RawRemoveBindRolesByUserId implements UserService
+func (_d UserServiceWithLog) RawRemoveBindRolesByUserId(ctx context.Context, id int, removeIds []int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawRemoveBindRolesByUserId", "params", map[string]interface{}{
+					"id":        id,
+					"removeIds": removeIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawRemoveBindRolesByUserId", "params", map[string]interface{}{
+					"id":        id,
+					"removeIds": removeIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawRemoveBindRolesByUserId", "params", map[string]interface{}{
+				"id":        id,
+				"removeIds": removeIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawRemoveBindRolesByUserId", "params", map[string]interface{}{
+				"id":        id,
+				"removeIds": removeIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawRemoveBindRolesByUserId(ctx, id, removeIds)
+}
+
+// RawUpdateBindRolesByUserId implements UserService
+func (_d UserServiceWithLog) RawUpdateBindRolesByUserId(ctx context.Context, id int, removeIds []int, addIds []int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawUpdateBindRolesByUserId", "params", map[string]interface{}{
+					"id":        id,
+					"removeIds": removeIds,
+					"addIds":    addIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawUpdateBindRolesByUserId", "params", map[string]interface{}{
+					"id":        id,
+					"removeIds": removeIds,
+					"addIds":    addIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawUpdateBindRolesByUserId", "params", map[string]interface{}{
+				"id":        id,
+				"removeIds": removeIds,
+				"addIds":    addIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawUpdateBindRolesByUserId", "params", map[string]interface{}{
+				"id":        id,
+				"removeIds": removeIds,
+				"addIds":    addIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawUpdateBindRolesByUserId(ctx, id, removeIds, addIds)
 }
 
 // RawUpdateById implements UserService

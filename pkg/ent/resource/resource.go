@@ -3,6 +3,7 @@
 package resource
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -23,6 +24,8 @@ const (
 	FieldPath = "path"
 	// FieldAction holds the string denoting the action field in the database.
 	FieldAction = "action"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
 	// FieldComments holds the string denoting the comments field in the database.
 	FieldComments = "comments"
 	// EdgePre holds the string denoting the pre edge name in mutations.
@@ -50,6 +53,7 @@ var Columns = []string{
 	FieldKey,
 	FieldPath,
 	FieldAction,
+	FieldType,
 	FieldComments,
 }
 
@@ -57,6 +61,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"resource_next",
+	"role_resources",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -82,3 +87,26 @@ var (
 	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
 	UpdateDefaultUpdateTime func() time.Time
 )
+
+// Type defines the type for the "type" enum field.
+type Type string
+
+// Type values.
+const (
+	TypeAPI  Type = "api"
+	TypePage Type = "page"
+)
+
+func (_type Type) String() string {
+	return string(_type)
+}
+
+// TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
+func TypeValidator(_type Type) error {
+	switch _type {
+	case TypeAPI, TypePage:
+		return nil
+	default:
+		return fmt.Errorf("resource: invalid enum value for type field: %q", _type)
+	}
+}

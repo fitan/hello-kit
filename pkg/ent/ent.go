@@ -8,6 +8,7 @@ import (
 	"hello/pkg/ent/audit"
 	"hello/pkg/ent/project"
 	"hello/pkg/ent/resource"
+	"hello/pkg/ent/role"
 	"hello/pkg/ent/service"
 	"hello/pkg/ent/spiderdevtblservicetree"
 	"hello/pkg/ent/user"
@@ -37,6 +38,7 @@ func columnChecker(table string) func(string) error {
 		audit.Table:                   audit.ValidColumn,
 		project.Table:                 project.ValidColumn,
 		resource.Table:                resource.ValidColumn,
+		role.Table:                    role.ValidColumn,
 		service.Table:                 service.ValidColumn,
 		spiderdevtblservicetree.Table: spiderdevtblservicetree.ValidColumn,
 		user.Table:                    user.ValidColumn,

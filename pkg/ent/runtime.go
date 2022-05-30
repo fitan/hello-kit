@@ -6,6 +6,7 @@ import (
 	"hello/pkg/ent/audit"
 	"hello/pkg/ent/project"
 	"hello/pkg/ent/resource"
+	"hello/pkg/ent/role"
 	"hello/pkg/ent/schema"
 	"hello/pkg/ent/service"
 	"hello/pkg/ent/user"
@@ -61,6 +62,21 @@ func init() {
 	resource.DefaultUpdateTime = resourceDescUpdateTime.Default.(func() time.Time)
 	// resource.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	resource.UpdateDefaultUpdateTime = resourceDescUpdateTime.UpdateDefault.(func() time.Time)
+	roleMixin := schema.Role{}.Mixin()
+	roleMixinFields0 := roleMixin[0].Fields()
+	_ = roleMixinFields0
+	roleFields := schema.Role{}.Fields()
+	_ = roleFields
+	// roleDescCreateTime is the schema descriptor for create_time field.
+	roleDescCreateTime := roleMixinFields0[0].Descriptor()
+	// role.DefaultCreateTime holds the default value on creation for the create_time field.
+	role.DefaultCreateTime = roleDescCreateTime.Default.(func() time.Time)
+	// roleDescUpdateTime is the schema descriptor for update_time field.
+	roleDescUpdateTime := roleMixinFields0[1].Descriptor()
+	// role.DefaultUpdateTime holds the default value on creation for the update_time field.
+	role.DefaultUpdateTime = roleDescUpdateTime.Default.(func() time.Time)
+	// role.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	role.UpdateDefaultUpdateTime = roleDescUpdateTime.UpdateDefault.(func() time.Time)
 	serviceMixin := schema.Service{}.Mixin()
 	serviceMixinFields0 := serviceMixin[0].Fields()
 	_ = serviceMixinFields0

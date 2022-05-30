@@ -12,6 +12,7 @@ import (
 	"hello/pkg/ent/audit"
 	"hello/pkg/ent/project"
 	"hello/pkg/ent/resource"
+	"hello/pkg/ent/role"
 	"hello/pkg/ent/service"
 	"hello/pkg/ent/spiderdevtblservicetree"
 	"hello/pkg/ent/user"
@@ -32,6 +33,8 @@ type Client struct {
 	Project *ProjectClient
 	// Resource is the client for interacting with the Resource builders.
 	Resource *ResourceClient
+	// Role is the client for interacting with the Role builders.
+	Role *RoleClient
 	// Service is the client for interacting with the Service builders.
 	Service *ServiceClient
 	// SpiderDevTblServicetree is the client for interacting with the SpiderDevTblServicetree builders.
@@ -54,6 +57,7 @@ func (c *Client) init() {
 	c.Audit = NewAuditClient(c.config)
 	c.Project = NewProjectClient(c.config)
 	c.Resource = NewResourceClient(c.config)
+	c.Role = NewRoleClient(c.config)
 	c.Service = NewServiceClient(c.config)
 	c.SpiderDevTblServicetree = NewSpiderDevTblServicetreeClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -93,6 +97,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Audit:                   NewAuditClient(cfg),
 		Project:                 NewProjectClient(cfg),
 		Resource:                NewResourceClient(cfg),
+		Role:                    NewRoleClient(cfg),
 		Service:                 NewServiceClient(cfg),
 		SpiderDevTblServicetree: NewSpiderDevTblServicetreeClient(cfg),
 		User:                    NewUserClient(cfg),
@@ -118,6 +123,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Audit:                   NewAuditClient(cfg),
 		Project:                 NewProjectClient(cfg),
 		Resource:                NewResourceClient(cfg),
+		Role:                    NewRoleClient(cfg),
 		Service:                 NewServiceClient(cfg),
 		SpiderDevTblServicetree: NewSpiderDevTblServicetreeClient(cfg),
 		User:                    NewUserClient(cfg),
@@ -153,6 +159,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Audit.Use(hooks...)
 	c.Project.Use(hooks...)
 	c.Resource.Use(hooks...)
+	c.Role.Use(hooks...)
 	c.Service.Use(hooks...)
 	c.SpiderDevTblServicetree.Use(hooks...)
 	c.User.Use(hooks...)
@@ -899,19 +906,19 @@ type ResourceBaseInterface interface {
 	RawUpdateById(ctx context.Context, id int, v *Resource) (*Resource, error)
 	RawUpdateMany(ctx context.Context, vs Resources) (err error)
 
-	RawCreateResourceByResourceId(ctx context.Context, id int, v *Resource) (res *Resource, err error)
-	RawGetResourceByResourceId(ctx context.Context, id int) (res *Resource, err error)
-	RawDeleteResourceByResourceId(ctx context.Context, id int, deleteId int) (err error)
-	RawUpdateBindResourceByResourceId(ctx context.Context, id int, updateId int) (err error)
-	RawAddBindResourceByResourceId(ctx context.Context, id int, addId int) (err error)
-	RawRemoveBindResourceByResourceId(ctx context.Context, id int) (err error)
+	RawCreatePreByResourceId(ctx context.Context, id int, v *Resource) (res *Resource, err error)
+	RawGetPreByResourceId(ctx context.Context, id int) (res *Resource, err error)
+	RawDeletePreByResourceId(ctx context.Context, id int, deleteId int) (err error)
+	RawUpdateBindPreByResourceId(ctx context.Context, id int, updateId int) (err error)
+	RawAddBindPreByResourceId(ctx context.Context, id int, addId int) (err error)
+	RawRemoveBindPreByResourceId(ctx context.Context, id int) (err error)
 
 	RawCreateResourcesByResourceId(ctx context.Context, id int, vs Resources) (res *Resource, err error)
-	RawGetResourcesByResourceId(ctx context.Context, id int, i interface{}) (res Resources, count int, err error)
-	RawDeleteResourcesByResourceId(ctx context.Context, id int, deleteIds []int) (err error)
-	RawUpdateBindResourcesByResourceId(ctx context.Context, id int, removeIds []int, addIds []int) (err error)
-	RawAddBindResourcesByResourceId(ctx context.Context, id int, addIds []int) (err error)
-	RawRemoveBindResourcesByResourceId(ctx context.Context, id int, removeIds []int) (err error)
+	RawGetNextByResourceId(ctx context.Context, id int, i interface{}) (res Resources, count int, err error)
+	RawDeleteNextByResourceId(ctx context.Context, id int, deleteIds []int) (err error)
+	RawUpdateBindNextByResourceId(ctx context.Context, id int, removeIds []int, addIds []int) (err error)
+	RawAddBindNextByResourceId(ctx context.Context, id int, addIds []int) (err error)
+	RawRemoveBindNextByResourceId(ctx context.Context, id int, removeIds []int) (err error)
 
 	Create(ctx context.Context, v ResourceBaseCreateReq) (res *Resource, err error)
 	CreateMany(ctx context.Context, vs []ResourceBaseCreateReq) (Resources, error)
@@ -923,11 +930,11 @@ type ResourceBaseInterface interface {
 	DeleteById(ctx context.Context, id int) error
 	DeleteMany(ctx context.Context, ids []int) (err error)
 
-	CreateResourceByResourceId(ctx context.Context, id int, v ResourceBaseCreateReq) (res *Resource, err error)
-	GetResourceByResourceId(ctx context.Context, id int) (res ResourceBaseGetRes, err error)
+	CreatePreByResourceId(ctx context.Context, id int, v ResourceBaseCreateReq) (res *Resource, err error)
+	GetPreByResourceId(ctx context.Context, id int) (res ResourceBaseGetRes, err error)
 
 	CreateResourcesByResourceId(ctx context.Context, id int, vs []ResourceBaseCreateReq) (res *Resource, err error)
-	GetResourcesByResourceId(ctx context.Context, id int, i interface{}) (res []ResourceBaseGetRes, count int, err error)
+	GetNextByResourceId(ctx context.Context, id int, i interface{}) (res []ResourceBaseGetRes, count int, err error)
 }
 
 type ResourceBase struct {
@@ -942,6 +949,7 @@ func RawResourceBaseCreateSet(create *ResourceCreate, v *Resource) *ResourceCrea
 		SetKey(v.Key).
 		SetPath(v.Path).
 		SetAction(v.Action).
+		SetType(v.Type).
 		SetComments(v.Comments)
 }
 
@@ -980,6 +988,7 @@ func RawResourceBaseUpdateSet(update *ResourceUpdateOne, v *Resource) *ResourceU
 		SetKey(v.Key).
 		SetPath(v.Path).
 		SetAction(v.Action).
+		SetType(v.Type).
 		SetComments(v.Comments)
 }
 
@@ -1018,7 +1027,7 @@ func (c *ResourceBase) RawUpdateMany(ctx context.Context, vs Resources) (err err
 	return nil
 }
 
-func (c *ResourceBase) RawCreateResourceByResourceId(ctx context.Context, id int, v *Resource) (res *Resource, err error) {
+func (c *ResourceBase) RawCreatePreByResourceId(ctx context.Context, id int, v *Resource) (res *Resource, err error) {
 	tx, err := c.client.Tx(ctx)
 	if err != nil {
 		return
@@ -1043,14 +1052,14 @@ func (c *ResourceBase) RawCreateResourceByResourceId(ctx context.Context, id int
 	return tx.Resource.UpdateOneID(id).SetPre(save).Save(ctx)
 }
 
-func (c *ResourceBase) RawGetResourceByResourceId(ctx context.Context, id int) (res *Resource, err error) {
+func (c *ResourceBase) RawGetPreByResourceId(ctx context.Context, id int) (res *Resource, err error) {
 	return c.client.Resource.Query().Where(resource.ID(id)).QueryPre().First(ctx)
 }
 func (c *ResourceBase) RawRemoveBindPreByResourceId(ctx context.Context, id int) (err error) {
 	_, err = c.client.Resource.UpdateOneID(id).ClearPre().Save(ctx)
 	return
 }
-func (c *ResourceBase) RawDeleteResourceByResourceId(ctx context.Context, id int, deleteId int) (err error) {
+func (c *ResourceBase) RawDeletePreByResourceId(ctx context.Context, id int, deleteId int) (err error) {
 	tx, err := c.client.Tx(ctx)
 	if err != nil {
 		return
@@ -1065,7 +1074,7 @@ func (c *ResourceBase) RawDeleteResourceByResourceId(ctx context.Context, id int
 		err = tx.Commit()
 	}()
 
-	_, err = tx.client.Resource.UpdateOneID(id).ClearResource().Save(ctx)
+	_, err = tx.client.Resource.UpdateOneID(id).ClearPre().Save(ctx)
 	if err != nil {
 		return
 	}
@@ -1073,12 +1082,12 @@ func (c *ResourceBase) RawDeleteResourceByResourceId(ctx context.Context, id int
 	return
 }
 
-func (c *ResourceBase) RawUpdateBindResourceByResourceId(ctx context.Context, id int, updateId int) (err error) {
-	return c.client.Resource.UpdateOneID(id).SetResourceID(updateId).Exec(ctx)
+func (c *ResourceBase) RawUpdateBindPreByResourceId(ctx context.Context, id int, updateId int) (err error) {
+	return c.client.Resource.UpdateOneID(id).SetPreID(updateId).Exec(ctx)
 }
 
-func (c *ResourceBase) RawAddBindResourceByResourceId(ctx context.Context, id int, addId int) (err error) {
-	return c.client.Resource.UpdateOneID(id).SetResourceID(addId).Exec(ctx)
+func (c *ResourceBase) RawAddBindPreByResourceId(ctx context.Context, id int, addId int) (err error) {
+	return c.client.Resource.UpdateOneID(id).SetPreID(addId).Exec(ctx)
 }
 
 func (c *ResourceBase) RawCreateResourcesByResourceId(ctx context.Context, id int, vs Resources) (res *Resource, err error) {
@@ -1109,14 +1118,14 @@ func (c *ResourceBase) RawCreateResourcesByResourceId(ctx context.Context, id in
 
 	return tx.Resource.UpdateOneID(id).AddNext(save...).Save(ctx)
 }
-func (c *ResourceBase) RawGetResourcesByResourceId(ctx context.Context, id int, i interface{}) (res Resources, count int, err error) {
+func (c *ResourceBase) RawGetNextByResourceId(ctx context.Context, id int, i interface{}) (res Resources, count int, err error) {
 	return c.client.Resource.Query().Where(resource.ID(id)).QueryNext().ByQueriesAll(ctx, i)
 }
-func (c *ResourceBase) RawRemoveBindResourcesByResourceId(ctx context.Context, id int, removeIds []int) (err error) {
-	_, err = c.client.Resource.UpdateOneID(id).RemoveResourceIDs(removeIds...).Save(ctx)
+func (c *ResourceBase) RawRemoveBindNextByResourceId(ctx context.Context, id int, removeIds []int) (err error) {
+	_, err = c.client.Resource.UpdateOneID(id).RemoveNextIDs(removeIds...).Save(ctx)
 	return
 }
-func (c *ResourceBase) RawDeleteResourcesByResourceId(ctx context.Context, id int, deleteIds []int) (err error) {
+func (c *ResourceBase) RawDeleteNextByResourceId(ctx context.Context, id int, deleteIds []int) (err error) {
 	tx, err := c.client.Tx(ctx)
 	if err != nil {
 		return
@@ -1131,7 +1140,7 @@ func (c *ResourceBase) RawDeleteResourcesByResourceId(ctx context.Context, id in
 		err = tx.Commit()
 	}()
 
-	_, err = tx.client.Resource.UpdateOneID(id).RemoveResourceIDs(deleteIds...).Save(ctx)
+	_, err = tx.client.Resource.UpdateOneID(id).RemoveNextIDs(deleteIds...).Save(ctx)
 	if err != nil {
 		return
 	}
@@ -1139,12 +1148,12 @@ func (c *ResourceBase) RawDeleteResourcesByResourceId(ctx context.Context, id in
 	return
 }
 
-func (c *ResourceBase) RawUpdateBindResourcesByResourceId(ctx context.Context, id int, removeIds []int, addIds []int) (err error) {
-	return c.client.Resource.UpdateOneID(id).RemoveResourceIDs(removeIds...).AddResourceIDs(addIds...).Exec(ctx)
+func (c *ResourceBase) RawUpdateBindNextByResourceId(ctx context.Context, id int, removeIds []int, addIds []int) (err error) {
+	return c.client.Resource.UpdateOneID(id).RemoveNextIDs(removeIds...).AddNextIDs(addIds...).Exec(ctx)
 }
 
-func (c *ResourceBase) RawAddBindResourcesByResourceId(ctx context.Context, id int, addIds []int) (err error) {
-	return c.client.Resource.UpdateOneID(id).AddResourceIDs(addIds...).Exec(ctx)
+func (c *ResourceBase) RawAddBindNextByResourceId(ctx context.Context, id int, addIds []int) (err error) {
+	return c.client.Resource.UpdateOneID(id).AddNextIDs(addIds...).Exec(ctx)
 }
 
 type ResourceBaseCreateReq struct {
@@ -1156,6 +1165,8 @@ type ResourceBaseCreateReq struct {
 
 	Action string `json:"action,omitempty""`
 
+	Type resource.Type `json:"type,omitempty""`
+
 	Comments string `json:"comments,omitempty""`
 }
 
@@ -1165,6 +1176,7 @@ func ResourceBaseCreateSet(create *ResourceCreate, v ResourceBaseCreateReq) *Res
 		SetKey(v.Key).
 		SetPath(v.Path).
 		SetAction(v.Action).
+		SetType(v.Type).
 		SetComments(v.Comments)
 }
 
@@ -1195,6 +1207,8 @@ type ResourceBaseGetRes struct {
 
 	Action string `json:"action,omitempty"`
 
+	Type resource.Type `json:"type,omitempty"`
+
 	Comments string `json:"comments,omitempty"`
 }
 
@@ -1217,6 +1231,8 @@ func (c *ResourceBase) GetById(ctx context.Context, id int) (res ResourceBaseGet
 
 	res.Action = v.Action
 
+	res.Type = v.Type
+
 	res.Comments = v.Comments
 
 	return
@@ -1237,6 +1253,8 @@ func (c *ResourceBase) ByQueriesOne(ctx context.Context, i interface{}) (res Res
 
 	res.Action = v.Action
 
+	res.Type = v.Type
+
 	res.Comments = v.Comments
 
 	return
@@ -1256,6 +1274,8 @@ func (c *ResourceBase) ByQueriesAll(ctx context.Context, i interface{}) (res []R
 
 			Action: v.Action,
 
+			Type: v.Type,
+
 			Comments: v.Comments,
 		})
 	}
@@ -1273,6 +1293,8 @@ type ResourceBaseUpdateReq struct {
 
 	Action string `json:"action,omitempty"`
 
+	Type resource.Type `json:"type,omitempty"`
+
 	Comments string `json:"comments,omitempty"`
 }
 
@@ -1282,6 +1304,7 @@ func ResourceBaseUpdateSet(update *ResourceUpdateOne, v ResourceBaseUpdateReq) *
 		SetKey(v.Key).
 		SetPath(v.Path).
 		SetAction(v.Action).
+		SetType(v.Type).
 		SetComments(v.Comments)
 }
 
@@ -1329,7 +1352,7 @@ func (c *ResourceBase) DeleteMany(ctx context.Context, ids []int) error {
 	return err
 }
 
-func (c *ResourceBase) CreateResourceByResourceId(ctx context.Context, id int, v ResourceBaseCreateReq) (res *Resource, err error) {
+func (c *ResourceBase) CreatePreByResourceId(ctx context.Context, id int, v ResourceBaseCreateReq) (res *Resource, err error) {
 	tx, err := c.client.Tx(ctx)
 	if err != nil {
 		return
@@ -1354,7 +1377,7 @@ func (c *ResourceBase) CreateResourceByResourceId(ctx context.Context, id int, v
 	return tx.Resource.UpdateOneID(id).SetPre(save).Save(ctx)
 }
 
-func (c *ResourceBase) GetResourceByResourceId(ctx context.Context, id int) (res ResourceBaseGetRes, err error) {
+func (c *ResourceBase) GetPreByResourceId(ctx context.Context, id int) (res ResourceBaseGetRes, err error) {
 	v, err := c.client.Resource.Query().Where(resource.ID(id)).QueryPre().First(ctx)
 	if err != nil {
 		return
@@ -1368,6 +1391,8 @@ func (c *ResourceBase) GetResourceByResourceId(ctx context.Context, id int) (res
 	res.Path = v.Path
 
 	res.Action = v.Action
+
+	res.Type = v.Type
 
 	res.Comments = v.Comments
 
@@ -1402,7 +1427,7 @@ func (c *ResourceBase) CreateResourcesByResourceId(ctx context.Context, id int, 
 
 	return tx.Resource.UpdateOneID(id).AddNext(save...).Save(ctx)
 }
-func (c *ResourceBase) GetResourcesByResourceId(ctx context.Context, id int, i interface{}) (res []ResourceBaseGetRes, count int, err error) {
+func (c *ResourceBase) GetNextByResourceId(ctx context.Context, id int, i interface{}) (res []ResourceBaseGetRes, count int, err error) {
 	vs, count, err := c.client.Resource.Query().Where(resource.ID(id)).QueryNext().ByQueriesAll(ctx, i)
 	for _, v := range vs {
 		res = append(res, ResourceBaseGetRes{
@@ -1416,6 +1441,8 @@ func (c *ResourceBase) GetResourcesByResourceId(ctx context.Context, id int, i i
 
 			Action: v.Action,
 
+			Type: v.Type,
+
 			Comments: v.Comments,
 		})
 	}
@@ -1424,6 +1451,394 @@ func (c *ResourceBase) GetResourcesByResourceId(ctx context.Context, id int, i i
 
 func NewResourceBase(client *Client) ResourceBaseInterface {
 	return &ResourceBase{client: client}
+}
+
+type RoleBaseInterface interface {
+	RawCreate(ctx context.Context, v *Role) (res *Role, err error)
+	RawCreateMany(ctx context.Context, vs Roles) (Roles, error)
+	RawGetById(ctx context.Context, id int) (res *Role, err error)
+	RawByQueriesAll(ctx context.Context, i interface{}) (res Roles, count int, err error)
+	RawByQueriesOne(ctx context.Context, i interface{}) (res *Role, err error)
+	RawUpdateById(ctx context.Context, id int, v *Role) (*Role, error)
+	RawUpdateMany(ctx context.Context, vs Roles) (err error)
+
+	RawCreateResourcesByRoleId(ctx context.Context, id int, vs Resources) (res *Role, err error)
+	RawGetResourcesByRoleId(ctx context.Context, id int, i interface{}) (res Resources, count int, err error)
+	RawDeleteResourcesByRoleId(ctx context.Context, id int, deleteIds []int) (err error)
+	RawUpdateBindResourcesByRoleId(ctx context.Context, id int, removeIds []int, addIds []int) (err error)
+	RawAddBindResourcesByRoleId(ctx context.Context, id int, addIds []int) (err error)
+	RawRemoveBindResourcesByRoleId(ctx context.Context, id int, removeIds []int) (err error)
+
+	Create(ctx context.Context, v RoleBaseCreateReq) (res *Role, err error)
+	CreateMany(ctx context.Context, vs []RoleBaseCreateReq) (Roles, error)
+	GetById(ctx context.Context, id int) (res RoleBaseGetRes, err error)
+	ByQueriesAll(ctx context.Context, i interface{}) (res []RoleBaseGetRes, count int, err error)
+	ByQueriesOne(ctx context.Context, i interface{}) (res RoleBaseGetRes, err error)
+	UpdateById(ctx context.Context, id int, v RoleBaseUpdateReq) (*Role, error)
+	UpdateMany(ctx context.Context, vs []RoleBaseUpdateReq) (err error)
+	DeleteById(ctx context.Context, id int) error
+	DeleteMany(ctx context.Context, ids []int) (err error)
+
+	CreateResourcesByRoleId(ctx context.Context, id int, vs []ResourceBaseCreateReq) (res *Role, err error)
+	GetResourcesByRoleId(ctx context.Context, id int, i interface{}) (res []ResourceBaseGetRes, count int, err error)
+}
+
+type RoleBase struct {
+	client *Client
+}
+
+func RawRoleBaseCreateSet(create *RoleCreate, v *Role) *RoleCreate {
+	return create.
+		SetCreateTime(v.CreateTime).
+		SetUpdateTime(v.UpdateTime).
+		SetName(v.Name).
+		SetLevel(v.Level).
+		SetComments(v.Comments)
+}
+
+func (c *RoleBase) RawCreate(ctx context.Context, v *Role) (res *Role, err error) {
+	create := c.client.Role.Create()
+	RawRoleBaseCreateSet(create, v)
+	return create.Save(ctx)
+}
+
+func (c *RoleBase) RawCreateMany(ctx context.Context, vs Roles) (Roles, error) {
+	bulk := make([]*RoleCreate, len(vs))
+	for i, v := range vs {
+		create := c.client.Role.Create()
+		RawRoleBaseCreateSet(create, v)
+		bulk[i] = create
+	}
+	return c.client.Role.CreateBulk(bulk...).Save(ctx)
+}
+
+func (c *RoleBase) RawGetById(ctx context.Context, id int) (res *Role, err error) {
+	return c.client.Role.Query().Where(role.IDEQ(id)).First(ctx)
+}
+
+func (c *RoleBase) RawByQueriesOne(ctx context.Context, i interface{}) (res *Role, err error) {
+	return c.client.Role.Query().Queries(i).First(ctx)
+}
+
+func (c *RoleBase) RawByQueriesAll(ctx context.Context, i interface{}) (res Roles, count int, err error) {
+	return c.client.Role.Query().ByQueriesAll(ctx, i)
+}
+
+func RawRoleBaseUpdateSet(update *RoleUpdateOne, v *Role) *RoleUpdateOne {
+	return update.
+		SetUpdateTime(v.UpdateTime).
+		SetName(v.Name).
+		SetLevel(v.Level).
+		SetComments(v.Comments)
+}
+
+func (c *RoleBase) RawUpdateById(ctx context.Context, id int, v *Role) (*Role, error) {
+	update := c.client.Role.UpdateOneID(id)
+	RawRoleBaseUpdateSet(update, v)
+	return update.Save(ctx)
+}
+
+func (c *RoleBase) RawUpdateMany(ctx context.Context, vs Roles) (err error) {
+	tx, err := c.client.Tx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+
+		err = tx.Commit()
+	}()
+
+	for _, v := range vs {
+		update := tx.Role.UpdateOneID(v.ID)
+		RawRoleBaseUpdateSet(update, v)
+		_, err = update.Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *RoleBase) RawCreateResourcesByRoleId(ctx context.Context, id int, vs Resources) (res *Role, err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	bulk := make([]*ResourceCreate, len(vs))
+	for i, v := range vs {
+		create := c.client.Resource.Create()
+		RawResourceBaseCreateSet(create, v)
+		bulk[i] = create
+	}
+	save, err := tx.Resource.CreateBulk(bulk...).Save(ctx)
+	if err != nil {
+		return
+	}
+
+	return tx.Role.UpdateOneID(id).AddResources(save...).Save(ctx)
+}
+func (c *RoleBase) RawGetResourcesByRoleId(ctx context.Context, id int, i interface{}) (res Resources, count int, err error) {
+	return c.client.Role.Query().Where(role.ID(id)).QueryResources().ByQueriesAll(ctx, i)
+}
+func (c *RoleBase) RawRemoveBindResourcesByRoleId(ctx context.Context, id int, removeIds []int) (err error) {
+	_, err = c.client.Role.UpdateOneID(id).RemoveResourceIDs(removeIds...).Save(ctx)
+	return
+}
+func (c *RoleBase) RawDeleteResourcesByRoleId(ctx context.Context, id int, deleteIds []int) (err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	_, err = tx.client.Role.UpdateOneID(id).RemoveResourceIDs(deleteIds...).Save(ctx)
+	if err != nil {
+		return
+	}
+	_, err = tx.client.Resource.Delete().Where(resource.IDIn(deleteIds...)).Exec(ctx)
+	return
+}
+
+func (c *RoleBase) RawUpdateBindResourcesByRoleId(ctx context.Context, id int, removeIds []int, addIds []int) (err error) {
+	return c.client.Role.UpdateOneID(id).RemoveResourceIDs(removeIds...).AddResourceIDs(addIds...).Exec(ctx)
+}
+
+func (c *RoleBase) RawAddBindResourcesByRoleId(ctx context.Context, id int, addIds []int) (err error) {
+	return c.client.Role.UpdateOneID(id).AddResourceIDs(addIds...).Exec(ctx)
+}
+
+type RoleBaseCreateReq struct {
+	Name string `json:"name,omitempty""`
+
+	Level int `json:"level,omitempty""`
+
+	Comments string `json:"comments,omitempty""`
+}
+
+func RoleBaseCreateSet(create *RoleCreate, v RoleBaseCreateReq) *RoleCreate {
+	return create.
+		SetName(v.Name).
+		SetLevel(v.Level).
+		SetComments(v.Comments)
+}
+
+func (c *RoleBase) Create(ctx context.Context, v RoleBaseCreateReq) (res *Role, err error) {
+	create := c.client.Role.Create()
+	RoleBaseCreateSet(create, v)
+	return create.Save(ctx)
+}
+
+func (c *RoleBase) CreateMany(ctx context.Context, vs []RoleBaseCreateReq) (Roles, error) {
+	bulk := make([]*RoleCreate, len(vs))
+	for i, v := range vs {
+		create := c.client.Role.Create()
+		RoleBaseCreateSet(create, v)
+		bulk[i] = create
+	}
+	return c.client.Role.CreateBulk(bulk...).Save(ctx)
+}
+
+type RoleBaseGetRes struct {
+	ID int `json:"id,omitempty"`
+
+	Name string `json:"name,omitempty"`
+
+	Level int `json:"level,omitempty"`
+
+	Comments string `json:"comments,omitempty"`
+}
+
+func (c *RoleBase) GetById(ctx context.Context, id int) (res RoleBaseGetRes, err error) {
+	query := c.client.Role.Query()
+	query = query.Where(role.IDEQ(id))
+
+	v, err := query.First(ctx)
+	if err != nil {
+		return
+	}
+
+	res.ID = v.ID
+
+	res.Name = v.Name
+
+	res.Level = v.Level
+
+	res.Comments = v.Comments
+
+	return
+}
+
+func (c *RoleBase) ByQueriesOne(ctx context.Context, i interface{}) (res RoleBaseGetRes, err error) {
+	v, err := c.client.Role.Query().Queries(i).First(ctx)
+	if err != nil {
+		return
+	}
+	res.ID = v.ID
+
+	res.Name = v.Name
+
+	res.Level = v.Level
+
+	res.Comments = v.Comments
+
+	return
+}
+
+func (c *RoleBase) ByQueriesAll(ctx context.Context, i interface{}) (res []RoleBaseGetRes, count int, err error) {
+	vs, count, err := c.client.Role.Query().ByQueriesAll(ctx, i)
+	for _, v := range vs {
+		res = append(res, RoleBaseGetRes{
+			ID: v.ID,
+
+			Name: v.Name,
+
+			Level: v.Level,
+
+			Comments: v.Comments,
+		})
+	}
+	return
+}
+
+type RoleBaseUpdateReq struct {
+	ID int `json:"id,omitempty"`
+
+	Name string `json:"name,omitempty"`
+
+	Level int `json:"level,omitempty"`
+
+	Comments string `json:"comments,omitempty"`
+}
+
+func RoleBaseUpdateSet(update *RoleUpdateOne, v RoleBaseUpdateReq) *RoleUpdateOne {
+	return update.
+		SetName(v.Name).
+		SetLevel(v.Level).
+		SetComments(v.Comments)
+}
+
+func (c *RoleBase) UpdateById(ctx context.Context, id int, v RoleBaseUpdateReq) (*Role, error) {
+	update := c.client.Role.UpdateOneID(id)
+	RoleBaseUpdateSet(update, v)
+	return update.Save(ctx)
+}
+
+func (c *RoleBase) UpdateMany(ctx context.Context, vs []RoleBaseUpdateReq) (err error) {
+	tx, err := c.client.Tx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+
+		err = tx.Commit()
+	}()
+
+	for _, v := range vs {
+		update := tx.Role.UpdateOneID(v.ID)
+		RoleBaseUpdateSet(update, v)
+		_, err = update.Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *RoleBase) DeleteById(ctx context.Context, id int) error {
+	return c.client.Role.DeleteOneID(id).Exec(ctx)
+}
+
+func (c *RoleBase) DeleteMany(ctx context.Context, ids []int) error {
+	_, err := c.client.Role.Delete().Where(role.IDIn(ids...)).Exec(ctx)
+	return err
+}
+
+func (c *RoleBase) CreateResourcesByRoleId(ctx context.Context, id int, vs []ResourceBaseCreateReq) (res *Role, err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	bulk := make([]*ResourceCreate, len(vs))
+	for i, v := range vs {
+		create := c.client.Resource.Create()
+		ResourceBaseCreateSet(create, v)
+		bulk[i] = create
+	}
+	save, err := tx.Resource.CreateBulk(bulk...).Save(ctx)
+	if err != nil {
+		return
+	}
+
+	return tx.Role.UpdateOneID(id).AddResources(save...).Save(ctx)
+}
+func (c *RoleBase) GetResourcesByRoleId(ctx context.Context, id int, i interface{}) (res []ResourceBaseGetRes, count int, err error) {
+	vs, count, err := c.client.Role.Query().Where(role.ID(id)).QueryResources().ByQueriesAll(ctx, i)
+	for _, v := range vs {
+		res = append(res, ResourceBaseGetRes{
+			ID: v.ID,
+
+			Name: v.Name,
+
+			Key: v.Key,
+
+			Path: v.Path,
+
+			Action: v.Action,
+
+			Type: v.Type,
+
+			Comments: v.Comments,
+		})
+	}
+	return
+}
+
+func NewRoleBase(client *Client) RoleBaseInterface {
+	return &RoleBase{client: client}
 }
 
 type ServiceBaseInterface interface {
@@ -2083,6 +2498,13 @@ type UserBaseInterface interface {
 	RawUpdateById(ctx context.Context, id int, v *User) (*User, error)
 	RawUpdateMany(ctx context.Context, vs Users) (err error)
 
+	RawCreateRolesByUserId(ctx context.Context, id int, vs Roles) (res *User, err error)
+	RawGetRolesByUserId(ctx context.Context, id int, i interface{}) (res Roles, count int, err error)
+	RawDeleteRolesByUserId(ctx context.Context, id int, deleteIds []int) (err error)
+	RawUpdateBindRolesByUserId(ctx context.Context, id int, removeIds []int, addIds []int) (err error)
+	RawAddBindRolesByUserId(ctx context.Context, id int, addIds []int) (err error)
+	RawRemoveBindRolesByUserId(ctx context.Context, id int, removeIds []int) (err error)
+
 	Create(ctx context.Context, v UserBaseCreateReq) (res *User, err error)
 	CreateMany(ctx context.Context, vs []UserBaseCreateReq) (Users, error)
 	GetById(ctx context.Context, id int) (res UserBaseGetRes, err error)
@@ -2092,6 +2514,9 @@ type UserBaseInterface interface {
 	UpdateMany(ctx context.Context, vs []UserBaseUpdateReq) (err error)
 	DeleteById(ctx context.Context, id int) error
 	DeleteMany(ctx context.Context, ids []int) (err error)
+
+	CreateRolesByUserId(ctx context.Context, id int, vs []RoleBaseCreateReq) (res *User, err error)
+	GetRolesByUserId(ctx context.Context, id int, i interface{}) (res []RoleBaseGetRes, count int, err error)
 }
 
 type UserBase struct {
@@ -2177,6 +2602,72 @@ func (c *UserBase) RawUpdateMany(ctx context.Context, vs Users) (err error) {
 		}
 	}
 	return nil
+}
+
+func (c *UserBase) RawCreateRolesByUserId(ctx context.Context, id int, vs Roles) (res *User, err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	bulk := make([]*RoleCreate, len(vs))
+	for i, v := range vs {
+		create := c.client.Role.Create()
+		RawRoleBaseCreateSet(create, v)
+		bulk[i] = create
+	}
+	save, err := tx.Role.CreateBulk(bulk...).Save(ctx)
+	if err != nil {
+		return
+	}
+
+	return tx.User.UpdateOneID(id).AddRoles(save...).Save(ctx)
+}
+func (c *UserBase) RawGetRolesByUserId(ctx context.Context, id int, i interface{}) (res Roles, count int, err error) {
+	return c.client.User.Query().Where(user.ID(id)).QueryRoles().ByQueriesAll(ctx, i)
+}
+func (c *UserBase) RawRemoveBindRolesByUserId(ctx context.Context, id int, removeIds []int) (err error) {
+	_, err = c.client.User.UpdateOneID(id).RemoveRoleIDs(removeIds...).Save(ctx)
+	return
+}
+func (c *UserBase) RawDeleteRolesByUserId(ctx context.Context, id int, deleteIds []int) (err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	_, err = tx.client.User.UpdateOneID(id).RemoveRoleIDs(deleteIds...).Save(ctx)
+	if err != nil {
+		return
+	}
+	_, err = tx.client.Role.Delete().Where(role.IDIn(deleteIds...)).Exec(ctx)
+	return
+}
+
+func (c *UserBase) RawUpdateBindRolesByUserId(ctx context.Context, id int, removeIds []int, addIds []int) (err error) {
+	return c.client.User.UpdateOneID(id).RemoveRoleIDs(removeIds...).AddRoleIDs(addIds...).Exec(ctx)
+}
+
+func (c *UserBase) RawAddBindRolesByUserId(ctx context.Context, id int, addIds []int) (err error) {
+	return c.client.User.UpdateOneID(id).AddRoleIDs(addIds...).Exec(ctx)
 }
 
 type UserBaseCreateReq struct {
@@ -2361,6 +2852,50 @@ func (c *UserBase) DeleteMany(ctx context.Context, ids []int) error {
 	return err
 }
 
+func (c *UserBase) CreateRolesByUserId(ctx context.Context, id int, vs []RoleBaseCreateReq) (res *User, err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	bulk := make([]*RoleCreate, len(vs))
+	for i, v := range vs {
+		create := c.client.Role.Create()
+		RoleBaseCreateSet(create, v)
+		bulk[i] = create
+	}
+	save, err := tx.Role.CreateBulk(bulk...).Save(ctx)
+	if err != nil {
+		return
+	}
+
+	return tx.User.UpdateOneID(id).AddRoles(save...).Save(ctx)
+}
+func (c *UserBase) GetRolesByUserId(ctx context.Context, id int, i interface{}) (res []RoleBaseGetRes, count int, err error) {
+	vs, count, err := c.client.User.Query().Where(user.ID(id)).QueryRoles().ByQueriesAll(ctx, i)
+	for _, v := range vs {
+		res = append(res, RoleBaseGetRes{
+			ID: v.ID,
+
+			Name: v.Name,
+
+			Level: v.Level,
+
+			Comments: v.Comments,
+		})
+	}
+	return
+}
+
 func NewUserBase(client *Client) UserBaseInterface {
 	return &UserBase{client: client}
 }
@@ -2371,6 +2906,8 @@ type RestInterface interface {
 	ProjectRestInterface
 
 	ResourceRestInterface
+
+	RoleRestInterface
 
 	ServiceRestInterface
 
@@ -2385,6 +2922,8 @@ type rest struct {
 	ProjectRestInterface
 
 	ResourceRestInterface
+
+	RoleRestInterface
 
 	ServiceRestInterface
 
@@ -2401,6 +2940,8 @@ func NewRest(db *Client) *rest {
 		ProjectRestInterface: NewProjectRest(db),
 
 		ResourceRestInterface: NewResourceRest(db),
+
+		RoleRestInterface: NewRoleRest(db),
 
 		ServiceRestInterface: NewServiceRest(db),
 
@@ -2692,12 +3233,12 @@ type ProjectRestDeleteServicesByProjectIdReq struct {
 		ProjectId int `json:"projectId" uri:"projectId"`
 	} `json:"uri"`
 	Query struct {
-		ServiceIds []int `json:"serviceIds" form:"serviceIds"`
+		ServicesIds []int `json:"servicesIds" form:"servicesIds"`
 	}
 }
 
 func (rest *ProjectRest) ProjectRestDeleteServicesByProjectId(ctx context.Context, req ProjectRestDeleteServicesByProjectIdReq) (res string, err error) {
-	return "", rest.repo.RawDeleteServicesByProjectId(ctx, req.Uri.ProjectId, req.Query.ServiceIds)
+	return "", rest.repo.RawDeleteServicesByProjectId(ctx, req.Uri.ProjectId, req.Query.ServicesIds)
 
 }
 
@@ -2706,12 +3247,12 @@ type ProjectRestRemoveBindServicesByProjectIdReq struct {
 		ProjectId int `json:"projectId" uri:"projectId"`
 	} `json:"uri"`
 	Body struct {
-		ServiceIds []int `json:"serviceIds"`
+		ServicesIds []int `json:"servicesIds"`
 	}
 }
 
 func (rest *ProjectRest) ProjectRestRemoveBindServicesByProjectId(ctx context.Context, req ProjectRestRemoveBindServicesByProjectIdReq) (res string, err error) {
-	return "", rest.repo.RawRemoveBindServicesByProjectId(ctx, req.Uri.ProjectId, req.Body.ServiceIds)
+	return "", rest.repo.RawRemoveBindServicesByProjectId(ctx, req.Uri.ProjectId, req.Body.ServicesIds)
 }
 
 type ProjectRestAddBindServicesByProjectIdReq struct {
@@ -2719,12 +3260,12 @@ type ProjectRestAddBindServicesByProjectIdReq struct {
 		ProjectId int `json:"projectId" uri:"projectId"`
 	} `json:"uri"`
 	Body struct {
-		ServiceIds []int `json:"serviceIds"`
+		ServicesIds []int `json:"servicesIds"`
 	}
 }
 
 func (rest *ProjectRest) ProjectRestAddBindServicesByProjectId(ctx context.Context, req ProjectRestAddBindServicesByProjectIdReq) (res string, err error) {
-	return "", rest.repo.RawAddBindServicesByProjectId(ctx, req.Uri.ProjectId, req.Body.ServiceIds)
+	return "", rest.repo.RawAddBindServicesByProjectId(ctx, req.Uri.ProjectId, req.Body.ServicesIds)
 }
 
 type ProjectRestUpdateBindServicesByProjectIdReq struct {
@@ -2760,30 +3301,30 @@ type ResourceRestInterface interface {
 	ResourceRestDeleteMany(ctx context.Context, req ResourceRestDeleteManyReq) (success bool, err error)
 
 	// @http-gin /resources/:resourceId/pre POST
-	ResourceRestCreateResourceByResourceId(ctx context.Context, req ResourceRestCreateResourceByResourceIdReq) (res *Resource, err error)
+	ResourceRestCreatePreByResourceId(ctx context.Context, req ResourceRestCreatePreByResourceIdReq) (res *Resource, err error)
 	// @http-gin /resources/:resourceId/pre GET
-	ResourceRestGetResourceByResourceId(ctx context.Context, req ResourceRestGetResourceByResourceIdReq) (res ResourceBaseGetRes, err error)
+	ResourceRestGetPreByResourceId(ctx context.Context, req ResourceRestGetPreByResourceIdReq) (res ResourceBaseGetRes, err error)
 	// @http-gin /resources/:resourceId/pre DELETE
-	ResourceRestDeleteResourceByResourceId(ctx context.Context, req ResourceRestDeleteResourceByResourceIdReq) (res string, err error)
+	ResourceRestDeletePreByResourceId(ctx context.Context, req ResourceRestDeletePreByResourceIdReq) (res string, err error)
 	// @http-gin /resources/:resourceId/pre/bind/remove PUT
-	ResourceRestRemoveBindResourceByResourceId(ctx context.Context, req ResourceRestRemoveBindResourceByResourceIdReq) (res string, err error)
-	// @http-gin /resources/:resourceId/pre/:resourceId/bind/add PUT
-	ResourceRestAddBindResourceByResourceId(ctx context.Context, req ResourceRestAddBindResourceByResourceIdReq) (res string, err error)
-	// @http-gin /resources/:resourceId/pre/:resourceId/bind/update PUT
-	ResourceRestUpdateBindResourceByResourceId(ctx context.Context, req ResourceRestUpdateBindResourceByResourceIdReq) (res string, err error)
+	ResourceRestRemoveBindPreByResourceId(ctx context.Context, req ResourceRestRemoveBindPreByResourceIdReq) (res string, err error)
+	// @http-gin /resources/:resourceId/pre/:preId/bind/add PUT
+	ResourceRestAddBindPreByResourceId(ctx context.Context, req ResourceRestAddBindPreByResourceIdReq) (res string, err error)
+	// @http-gin /resources/:resourceId/pre/:preId/bind/update PUT
+	ResourceRestUpdateBindPreByResourceId(ctx context.Context, req ResourceRestUpdateBindPreByResourceIdReq) (res string, err error)
 
-	// @http-gin /resources/:resourceId/resources POST
+	// @http-gin /resources/:resourceId/next POST
 	ResourceRestCreateResourcesByResourceId(ctx context.Context, req ResourceRestCreateResourcesByResourceIdReq) (res *Resource, err error)
-	// @http-gin /resources/:resourceId/resources GET
-	ResourceRestGetResourcesByResourceId(ctx context.Context, req ResourceRestGetResourcesByResourceIdReq) (res ResourceRestGetResourcesByResourceIdRes, err error)
-	// @http-gin /resources/:resourceId/resources DELETE
-	ResourceRestDeleteResourcesByResourceId(ctx context.Context, req ResourceRestDeleteResourcesByResourceIdReq) (res string, err error)
-	// @http-gin /resources/:resourceId/resources/bind/remove PUT
-	ResourceRestRemoveBindResourcesByResourceId(ctx context.Context, req ResourceRestRemoveBindResourcesByResourceIdReq) (res string, err error)
-	// @http-gin /resources/:resourceId/resources/bind/add PUT
-	ResourceRestAddBindResourcesByResourceId(ctx context.Context, req ResourceRestAddBindResourcesByResourceIdReq) (res string, err error)
-	// @http-gin /resources/:resourceId/resources/bind/update PUT
-	ResourceRestUpdateBindResourcesByResourceId(ctx context.Context, req ResourceRestUpdateBindResourcesByResourceIdReq) (res string, err error)
+	// @http-gin /resources/:resourceId/next GET
+	ResourceRestGetNextByResourceId(ctx context.Context, req ResourceRestGetNextByResourceIdReq) (res ResourceRestGetNextByResourceIdRes, err error)
+	// @http-gin /resources/:resourceId/next DELETE
+	ResourceRestDeleteNextByResourceId(ctx context.Context, req ResourceRestDeleteNextByResourceIdReq) (res string, err error)
+	// @http-gin /resources/:resourceId/next/bind/remove PUT
+	ResourceRestRemoveBindNextByResourceId(ctx context.Context, req ResourceRestRemoveBindNextByResourceIdReq) (res string, err error)
+	// @http-gin /resources/:resourceId/next/bind/add PUT
+	ResourceRestAddBindNextByResourceId(ctx context.Context, req ResourceRestAddBindNextByResourceIdReq) (res string, err error)
+	// @http-gin /resources/:resourceId/next/bind/update PUT
+	ResourceRestUpdateBindNextByResourceId(ctx context.Context, req ResourceRestUpdateBindNextByResourceIdReq) (res string, err error)
 }
 
 func NewResourceRest(client *Client) ResourceRestInterface {
@@ -2885,69 +3426,69 @@ func (rest *ResourceRest) ResourceRestDeleteMany(ctx context.Context, req Resour
 	return true, err
 }
 
-type ResourceRestCreateResourceByResourceIdReq struct {
+type ResourceRestCreatePreByResourceIdReq struct {
 	Uri struct {
 		Id int `json:"id" uri:"resourceId"`
 	}
 	Body ResourceBaseCreateReq `json:"body"`
 }
 
-func (rest *ResourceRest) ResourceRestCreateResourceByResourceId(ctx context.Context, req ResourceRestCreateResourceByResourceIdReq) (res *Resource, err error) {
-	return rest.repo.CreateResourceByResourceId(ctx, req.Uri.Id, req.Body)
+func (rest *ResourceRest) ResourceRestCreatePreByResourceId(ctx context.Context, req ResourceRestCreatePreByResourceIdReq) (res *Resource, err error) {
+	return rest.repo.CreatePreByResourceId(ctx, req.Uri.Id, req.Body)
 }
 
-type ResourceRestGetResourceByResourceIdReq struct {
+type ResourceRestGetPreByResourceIdReq struct {
 	Uri struct {
 		Id int `json:"id" uri:"resourceId"`
 	} `json:"uri"`
 }
 
-func (rest *ResourceRest) ResourceRestGetResourceByResourceId(ctx context.Context, req ResourceRestGetResourceByResourceIdReq) (res ResourceBaseGetRes, err error) {
-	return rest.repo.GetResourceByResourceId(ctx, req.Uri.Id)
+func (rest *ResourceRest) ResourceRestGetPreByResourceId(ctx context.Context, req ResourceRestGetPreByResourceIdReq) (res ResourceBaseGetRes, err error) {
+	return rest.repo.GetPreByResourceId(ctx, req.Uri.Id)
 }
 
-type ResourceRestDeleteResourceByResourceIdReq struct {
+type ResourceRestDeletePreByResourceIdReq struct {
 	Uri struct {
 		ResourceId int `json:"resourceId" uri:"resourceId"`
+		PreId      int `json:"preId" uri:"preId"`
+	} `json:"uri"`
+}
+
+func (rest *ResourceRest) ResourceRestDeletePreByResourceId(ctx context.Context, req ResourceRestDeletePreByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawDeletePreByResourceId(ctx, req.Uri.ResourceId, req.Uri.PreId)
+
+}
+
+type ResourceRestRemoveBindPreByResourceIdReq struct {
+	Uri struct {
 		ResourceId int `json:"resourceId" uri:"resourceId"`
 	} `json:"uri"`
 }
 
-func (rest *ResourceRest) ResourceRestDeleteResourceByResourceId(ctx context.Context, req ResourceRestDeleteResourceByResourceIdReq) (res string, err error) {
-	return "", rest.repo.RawDeleteResourceByResourceId(ctx, req.Uri.ResourceId, req.Uri.ResourceId)
-
+func (rest *ResourceRest) ResourceRestRemoveBindPreByResourceId(ctx context.Context, req ResourceRestRemoveBindPreByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawRemoveBindPreByResourceId(ctx, req.Uri.ResourceId)
 }
 
-type ResourceRestRemoveBindResourceByResourceIdReq struct {
+type ResourceRestAddBindPreByResourceIdReq struct {
 	Uri struct {
 		ResourceId int `json:"resourceId" uri:"resourceId"`
+		PreId      int `json:"preId" uri:"preId"`
 	} `json:"uri"`
 }
 
-func (rest *ResourceRest) ResourceRestRemoveBindResourceByResourceId(ctx context.Context, req ResourceRestRemoveBindResourceByResourceIdReq) (res string, err error) {
-	return "", rest.repo.RawRemoveBindResourceByResourceId(ctx, req.Uri.ResourceId)
+func (rest *ResourceRest) ResourceRestAddBindPreByResourceId(ctx context.Context, req ResourceRestAddBindPreByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawAddBindPreByResourceId(ctx, req.Uri.ResourceId, req.Uri.PreId)
 }
 
-type ResourceRestAddBindResourceByResourceIdReq struct {
+type ResourceRestUpdateBindPreByResourceIdReq struct {
 	Uri struct {
 		ResourceId int `json:"resourceId" uri:"resourceId"`
-		ResourceId int `json:"resourceId" uri:"resourceId"`
+		PreId      int `json:"preId" uri:"preId"`
 	} `json:"uri"`
 }
 
-func (rest *ResourceRest) ResourceRestAddBindResourceByResourceId(ctx context.Context, req ResourceRestAddBindResourceByResourceIdReq) (res string, err error) {
-	return "", rest.repo.RawAddBindResourceByResourceId(ctx, req.Uri.ResourceId, req.Uri.ResourceId)
-}
-
-type ResourceRestUpdateBindResourceByResourceIdReq struct {
-	Uri struct {
-		ResourceId int `json:"resourceId" uri:"resourceId"`
-		ResourceId int `json:"resourceId" uri:"resourceId"`
-	} `json:"uri"`
-}
-
-func (rest *ResourceRest) ResourceRestUpdateBindResourceByResourceId(ctx context.Context, req ResourceRestUpdateBindResourceByResourceIdReq) (res string, err error) {
-	return "", rest.repo.RawUpdateBindResourceByResourceId(ctx, req.Uri.ResourceId, req.Uri.ResourceId)
+func (rest *ResourceRest) ResourceRestUpdateBindPreByResourceId(ctx context.Context, req ResourceRestUpdateBindPreByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawUpdateBindPreByResourceId(ctx, req.Uri.ResourceId, req.Uri.PreId)
 }
 
 type ResourceRestCreateResourcesByResourceIdReq struct {
@@ -2961,64 +3502,64 @@ func (rest *ResourceRest) ResourceRestCreateResourcesByResourceId(ctx context.Co
 	return rest.repo.CreateResourcesByResourceId(ctx, req.Uri.Id, req.Body)
 }
 
-type ResourceRestGetResourcesByResourceIdReq struct {
+type ResourceRestGetNextByResourceIdReq struct {
 	Uri struct {
 		Id int `json:"id" uri:"resourceId"`
 	} `json:"uri"`
 	Query ResourceQueryOps `json:"query"`
 }
 
-type ResourceRestGetResourcesByResourceIdRes struct {
+type ResourceRestGetNextByResourceIdRes struct {
 	List  []ResourceBaseGetRes `json:"list"`
 	Total int                  `json:"total"`
 }
 
-func (rest *ResourceRest) ResourceRestGetResourcesByResourceId(ctx context.Context, req ResourceRestGetResourcesByResourceIdReq) (res ResourceRestGetResourcesByResourceIdRes, err error) {
-	list, total, err := rest.repo.GetResourcesByResourceId(ctx, req.Uri.Id, req.Query)
-	return ResourceRestGetResourcesByResourceIdRes{List: list, Total: total}, err
+func (rest *ResourceRest) ResourceRestGetNextByResourceId(ctx context.Context, req ResourceRestGetNextByResourceIdReq) (res ResourceRestGetNextByResourceIdRes, err error) {
+	list, total, err := rest.repo.GetNextByResourceId(ctx, req.Uri.Id, req.Query)
+	return ResourceRestGetNextByResourceIdRes{List: list, Total: total}, err
 }
 
-type ResourceRestDeleteResourcesByResourceIdReq struct {
+type ResourceRestDeleteNextByResourceIdReq struct {
 	Uri struct {
 		ResourceId int `json:"resourceId" uri:"resourceId"`
 	} `json:"uri"`
 	Query struct {
-		ResourceIds []int `json:"resourceIds" form:"resourceIds"`
+		NextIds []int `json:"nextIds" form:"nextIds"`
 	}
 }
 
-func (rest *ResourceRest) ResourceRestDeleteResourcesByResourceId(ctx context.Context, req ResourceRestDeleteResourcesByResourceIdReq) (res string, err error) {
-	return "", rest.repo.RawDeleteResourcesByResourceId(ctx, req.Uri.ResourceId, req.Query.ResourceIds)
+func (rest *ResourceRest) ResourceRestDeleteNextByResourceId(ctx context.Context, req ResourceRestDeleteNextByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawDeleteNextByResourceId(ctx, req.Uri.ResourceId, req.Query.NextIds)
 
 }
 
-type ResourceRestRemoveBindResourcesByResourceIdReq struct {
+type ResourceRestRemoveBindNextByResourceIdReq struct {
 	Uri struct {
 		ResourceId int `json:"resourceId" uri:"resourceId"`
 	} `json:"uri"`
 	Body struct {
-		ResourceIds []int `json:"resourceIds"`
+		NextIds []int `json:"nextIds"`
 	}
 }
 
-func (rest *ResourceRest) ResourceRestRemoveBindResourcesByResourceId(ctx context.Context, req ResourceRestRemoveBindResourcesByResourceIdReq) (res string, err error) {
-	return "", rest.repo.RawRemoveBindResourcesByResourceId(ctx, req.Uri.ResourceId, req.Body.ResourceIds)
+func (rest *ResourceRest) ResourceRestRemoveBindNextByResourceId(ctx context.Context, req ResourceRestRemoveBindNextByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawRemoveBindNextByResourceId(ctx, req.Uri.ResourceId, req.Body.NextIds)
 }
 
-type ResourceRestAddBindResourcesByResourceIdReq struct {
+type ResourceRestAddBindNextByResourceIdReq struct {
 	Uri struct {
 		ResourceId int `json:"resourceId" uri:"resourceId"`
 	} `json:"uri"`
 	Body struct {
-		ResourceIds []int `json:"resourceIds"`
+		NextIds []int `json:"nextIds"`
 	}
 }
 
-func (rest *ResourceRest) ResourceRestAddBindResourcesByResourceId(ctx context.Context, req ResourceRestAddBindResourcesByResourceIdReq) (res string, err error) {
-	return "", rest.repo.RawAddBindResourcesByResourceId(ctx, req.Uri.ResourceId, req.Body.ResourceIds)
+func (rest *ResourceRest) ResourceRestAddBindNextByResourceId(ctx context.Context, req ResourceRestAddBindNextByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawAddBindNextByResourceId(ctx, req.Uri.ResourceId, req.Body.NextIds)
 }
 
-type ResourceRestUpdateBindResourcesByResourceIdReq struct {
+type ResourceRestUpdateBindNextByResourceIdReq struct {
 	Uri struct {
 		ResourceId int `json:"resourceId" uri:"resourceId"`
 	} `json:"uri"`
@@ -3028,8 +3569,221 @@ type ResourceRestUpdateBindResourcesByResourceIdReq struct {
 	} `json:"body"`
 }
 
-func (rest *ResourceRest) ResourceRestUpdateBindResourcesByResourceId(ctx context.Context, req ResourceRestUpdateBindResourcesByResourceIdReq) (res string, err error) {
-	return "", rest.repo.RawUpdateBindResourcesByResourceId(ctx, req.Uri.ResourceId, req.Body.OldIds, req.Body.NewIds)
+func (rest *ResourceRest) ResourceRestUpdateBindNextByResourceId(ctx context.Context, req ResourceRestUpdateBindNextByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawUpdateBindNextByResourceId(ctx, req.Uri.ResourceId, req.Body.OldIds, req.Body.NewIds)
+}
+
+type RoleRestInterface interface {
+	// @http-gin /role POST
+	RoleRestCreate(ctx context.Context, req RoleRestCreateReq) (res *Role, err error)
+	// @http-gin /roles POST
+	RoleRestCreateMany(ctx context.Context, req RoleRestCreateManyReq) (res Roles, err error)
+	// @http-gin /roles/:roleId GET
+	RoleRestGetById(ctx context.Context, req RoleRestGetByIdReq) (res RoleBaseGetRes, err error)
+	// @http-gin /roles GET
+	RoleRestByQueriesAll(ctx context.Context, req RoleRestByQueriesAllReq) (res RoleRestByQueriesAllRes, err error)
+	// @http-gin /roles/:roleId PUT
+	RoleRestUpdateById(ctx context.Context, req RoleRestUpdateByIdReq) (res *Role, err error)
+	// @http-gin /roles PUT
+	RoleRestUpdateMany(ctx context.Context, req RoleRestUpdateManyReq) (success bool, err error)
+	// @http-gin /roles/:roleId DELETE
+	RoleRestDeleteById(ctx context.Context, req RoleRestDeleteByIdReq) (success bool, err error)
+	// @http-gin /roles DELETE
+	RoleRestDeleteMany(ctx context.Context, req RoleRestDeleteManyReq) (success bool, err error)
+
+	// @http-gin /roles/:roleId/resources POST
+	RoleRestCreateResourcesByRoleId(ctx context.Context, req RoleRestCreateResourcesByRoleIdReq) (res *Role, err error)
+	// @http-gin /roles/:roleId/resources GET
+	RoleRestGetResourcesByRoleId(ctx context.Context, req RoleRestGetResourcesByRoleIdReq) (res RoleRestGetResourcesByRoleIdRes, err error)
+	// @http-gin /roles/:roleId/resources DELETE
+	RoleRestDeleteResourcesByRoleId(ctx context.Context, req RoleRestDeleteResourcesByRoleIdReq) (res string, err error)
+	// @http-gin /roles/:roleId/resources/bind/remove PUT
+	RoleRestRemoveBindResourcesByRoleId(ctx context.Context, req RoleRestRemoveBindResourcesByRoleIdReq) (res string, err error)
+	// @http-gin /roles/:roleId/resources/bind/add PUT
+	RoleRestAddBindResourcesByRoleId(ctx context.Context, req RoleRestAddBindResourcesByRoleIdReq) (res string, err error)
+	// @http-gin /roles/:roleId/resources/bind/update PUT
+	RoleRestUpdateBindResourcesByRoleId(ctx context.Context, req RoleRestUpdateBindResourcesByRoleIdReq) (res string, err error)
+}
+
+func NewRoleRest(client *Client) RoleRestInterface {
+	return &RoleRest{repo: &RoleBase{client: client}}
+}
+
+type RoleRest struct {
+	repo RoleBaseInterface
+}
+
+type RoleRestCreateReq struct {
+	Body RoleBaseCreateReq `json:"body"`
+}
+
+func (rest *RoleRest) RoleRestCreate(ctx context.Context, req RoleRestCreateReq) (res *Role, err error) {
+	return rest.repo.Create(ctx, req.Body)
+}
+
+type RoleRestCreateManyReq struct {
+	Body []RoleBaseCreateReq `json:"body"`
+}
+
+func (rest *RoleRest) RoleRestCreateMany(ctx context.Context, req RoleRestCreateManyReq) (res Roles, err error) {
+	return rest.repo.CreateMany(ctx, req.Body)
+}
+
+type RoleRestGetByIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"roleId"`
+	}
+}
+
+func (rest *RoleRest) RoleRestGetById(ctx context.Context, req RoleRestGetByIdReq) (res RoleBaseGetRes, err error) {
+	return rest.repo.GetById(ctx, req.Uri.Id)
+}
+
+type RoleRestByQueriesAllReq struct {
+	Query RoleQueryOps `json:"query"`
+}
+
+type RoleRestByQueriesAllRes struct {
+	List  []RoleBaseGetRes `json:"items"`
+	Total int              `json:"total"`
+}
+
+func (rest *RoleRest) RoleRestByQueriesAll(ctx context.Context, req RoleRestByQueriesAllReq) (res RoleRestByQueriesAllRes, err error) {
+	list, total, err := rest.repo.ByQueriesAll(ctx, req.Query)
+	return RoleRestByQueriesAllRes{List: list, Total: total}, err
+}
+
+type RoleRestUpdateByIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"roleId"`
+	} `json:"uri"`
+	Body RoleBaseUpdateReq `json:"body"`
+}
+
+func (rest *RoleRest) RoleRestUpdateById(ctx context.Context, req RoleRestUpdateByIdReq) (res *Role, err error) {
+	return rest.repo.UpdateById(ctx, req.Uri.Id, req.Body)
+}
+
+type RoleRestUpdateManyReq struct {
+	Body []RoleBaseUpdateReq `json:"body"`
+}
+
+func (rest *RoleRest) RoleRestUpdateMany(ctx context.Context, req RoleRestUpdateManyReq) (success bool, err error) {
+	err = rest.repo.UpdateMany(ctx, req.Body)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+type RoleRestDeleteByIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"roleId"`
+	} `json:"uri"`
+}
+
+func (rest *RoleRest) RoleRestDeleteById(ctx context.Context, req RoleRestDeleteByIdReq) (success bool, err error) {
+	err = rest.repo.DeleteById(ctx, req.Uri.Id)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+type RoleRestDeleteManyReq struct {
+	Query struct {
+		Ids []int `json:"ids" form:"ids"`
+	} `json:"query"`
+}
+
+func (rest *RoleRest) RoleRestDeleteMany(ctx context.Context, req RoleRestDeleteManyReq) (success bool, err error) {
+	err = rest.repo.DeleteMany(ctx, req.Query.Ids)
+	if err != nil {
+		return false, err
+	}
+	return true, err
+}
+
+type RoleRestCreateResourcesByRoleIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"roleId"`
+	}
+	Body []ResourceBaseCreateReq `json:"body"`
+}
+
+func (rest *RoleRest) RoleRestCreateResourcesByRoleId(ctx context.Context, req RoleRestCreateResourcesByRoleIdReq) (res *Role, err error) {
+	return rest.repo.CreateResourcesByRoleId(ctx, req.Uri.Id, req.Body)
+}
+
+type RoleRestGetResourcesByRoleIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"roleId"`
+	} `json:"uri"`
+	Query ResourceQueryOps `json:"query"`
+}
+
+type RoleRestGetResourcesByRoleIdRes struct {
+	List  []ResourceBaseGetRes `json:"list"`
+	Total int                  `json:"total"`
+}
+
+func (rest *RoleRest) RoleRestGetResourcesByRoleId(ctx context.Context, req RoleRestGetResourcesByRoleIdReq) (res RoleRestGetResourcesByRoleIdRes, err error) {
+	list, total, err := rest.repo.GetResourcesByRoleId(ctx, req.Uri.Id, req.Query)
+	return RoleRestGetResourcesByRoleIdRes{List: list, Total: total}, err
+}
+
+type RoleRestDeleteResourcesByRoleIdReq struct {
+	Uri struct {
+		RoleId int `json:"roleId" uri:"roleId"`
+	} `json:"uri"`
+	Query struct {
+		ResourcesIds []int `json:"resourcesIds" form:"resourcesIds"`
+	}
+}
+
+func (rest *RoleRest) RoleRestDeleteResourcesByRoleId(ctx context.Context, req RoleRestDeleteResourcesByRoleIdReq) (res string, err error) {
+	return "", rest.repo.RawDeleteResourcesByRoleId(ctx, req.Uri.RoleId, req.Query.ResourcesIds)
+
+}
+
+type RoleRestRemoveBindResourcesByRoleIdReq struct {
+	Uri struct {
+		RoleId int `json:"roleId" uri:"roleId"`
+	} `json:"uri"`
+	Body struct {
+		ResourcesIds []int `json:"resourcesIds"`
+	}
+}
+
+func (rest *RoleRest) RoleRestRemoveBindResourcesByRoleId(ctx context.Context, req RoleRestRemoveBindResourcesByRoleIdReq) (res string, err error) {
+	return "", rest.repo.RawRemoveBindResourcesByRoleId(ctx, req.Uri.RoleId, req.Body.ResourcesIds)
+}
+
+type RoleRestAddBindResourcesByRoleIdReq struct {
+	Uri struct {
+		RoleId int `json:"roleId" uri:"roleId"`
+	} `json:"uri"`
+	Body struct {
+		ResourcesIds []int `json:"resourcesIds"`
+	}
+}
+
+func (rest *RoleRest) RoleRestAddBindResourcesByRoleId(ctx context.Context, req RoleRestAddBindResourcesByRoleIdReq) (res string, err error) {
+	return "", rest.repo.RawAddBindResourcesByRoleId(ctx, req.Uri.RoleId, req.Body.ResourcesIds)
+}
+
+type RoleRestUpdateBindResourcesByRoleIdReq struct {
+	Uri struct {
+		RoleId int `json:"roleId" uri:"roleId"`
+	} `json:"uri"`
+	Body struct {
+		OldIds []int `json:"OldIds"`
+		NewIds []int `json:"NewIds"`
+	} `json:"body"`
+}
+
+func (rest *RoleRest) RoleRestUpdateBindResourcesByRoleId(ctx context.Context, req RoleRestUpdateBindResourcesByRoleIdReq) (res string, err error) {
+	return "", rest.repo.RawUpdateBindResourcesByRoleId(ctx, req.Uri.RoleId, req.Body.OldIds, req.Body.NewIds)
 }
 
 type ServiceRestInterface interface {
@@ -3363,6 +4117,19 @@ type UserRestInterface interface {
 	UserRestDeleteById(ctx context.Context, req UserRestDeleteByIdReq) (success bool, err error)
 	// @http-gin /users DELETE
 	UserRestDeleteMany(ctx context.Context, req UserRestDeleteManyReq) (success bool, err error)
+
+	// @http-gin /users/:userId/roles POST
+	UserRestCreateRolesByUserId(ctx context.Context, req UserRestCreateRolesByUserIdReq) (res *User, err error)
+	// @http-gin /users/:userId/roles GET
+	UserRestGetRolesByUserId(ctx context.Context, req UserRestGetRolesByUserIdReq) (res UserRestGetRolesByUserIdRes, err error)
+	// @http-gin /users/:userId/roles DELETE
+	UserRestDeleteRolesByUserId(ctx context.Context, req UserRestDeleteRolesByUserIdReq) (res string, err error)
+	// @http-gin /users/:userId/roles/bind/remove PUT
+	UserRestRemoveBindRolesByUserId(ctx context.Context, req UserRestRemoveBindRolesByUserIdReq) (res string, err error)
+	// @http-gin /users/:userId/roles/bind/add PUT
+	UserRestAddBindRolesByUserId(ctx context.Context, req UserRestAddBindRolesByUserIdReq) (res string, err error)
+	// @http-gin /users/:userId/roles/bind/update PUT
+	UserRestUpdateBindRolesByUserId(ctx context.Context, req UserRestUpdateBindRolesByUserIdReq) (res string, err error)
 }
 
 func NewUserRest(client *Client) UserRestInterface {
@@ -3462,6 +4229,88 @@ func (rest *UserRest) UserRestDeleteMany(ctx context.Context, req UserRestDelete
 		return false, err
 	}
 	return true, err
+}
+
+type UserRestCreateRolesByUserIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"userId"`
+	}
+	Body []RoleBaseCreateReq `json:"body"`
+}
+
+func (rest *UserRest) UserRestCreateRolesByUserId(ctx context.Context, req UserRestCreateRolesByUserIdReq) (res *User, err error) {
+	return rest.repo.CreateRolesByUserId(ctx, req.Uri.Id, req.Body)
+}
+
+type UserRestGetRolesByUserIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"userId"`
+	} `json:"uri"`
+	Query RoleQueryOps `json:"query"`
+}
+
+type UserRestGetRolesByUserIdRes struct {
+	List  []RoleBaseGetRes `json:"list"`
+	Total int              `json:"total"`
+}
+
+func (rest *UserRest) UserRestGetRolesByUserId(ctx context.Context, req UserRestGetRolesByUserIdReq) (res UserRestGetRolesByUserIdRes, err error) {
+	list, total, err := rest.repo.GetRolesByUserId(ctx, req.Uri.Id, req.Query)
+	return UserRestGetRolesByUserIdRes{List: list, Total: total}, err
+}
+
+type UserRestDeleteRolesByUserIdReq struct {
+	Uri struct {
+		UserId int `json:"userId" uri:"userId"`
+	} `json:"uri"`
+	Query struct {
+		RolesIds []int `json:"rolesIds" form:"rolesIds"`
+	}
+}
+
+func (rest *UserRest) UserRestDeleteRolesByUserId(ctx context.Context, req UserRestDeleteRolesByUserIdReq) (res string, err error) {
+	return "", rest.repo.RawDeleteRolesByUserId(ctx, req.Uri.UserId, req.Query.RolesIds)
+
+}
+
+type UserRestRemoveBindRolesByUserIdReq struct {
+	Uri struct {
+		UserId int `json:"userId" uri:"userId"`
+	} `json:"uri"`
+	Body struct {
+		RolesIds []int `json:"rolesIds"`
+	}
+}
+
+func (rest *UserRest) UserRestRemoveBindRolesByUserId(ctx context.Context, req UserRestRemoveBindRolesByUserIdReq) (res string, err error) {
+	return "", rest.repo.RawRemoveBindRolesByUserId(ctx, req.Uri.UserId, req.Body.RolesIds)
+}
+
+type UserRestAddBindRolesByUserIdReq struct {
+	Uri struct {
+		UserId int `json:"userId" uri:"userId"`
+	} `json:"uri"`
+	Body struct {
+		RolesIds []int `json:"rolesIds"`
+	}
+}
+
+func (rest *UserRest) UserRestAddBindRolesByUserId(ctx context.Context, req UserRestAddBindRolesByUserIdReq) (res string, err error) {
+	return "", rest.repo.RawAddBindRolesByUserId(ctx, req.Uri.UserId, req.Body.RolesIds)
+}
+
+type UserRestUpdateBindRolesByUserIdReq struct {
+	Uri struct {
+		UserId int `json:"userId" uri:"userId"`
+	} `json:"uri"`
+	Body struct {
+		OldIds []int `json:"OldIds"`
+		NewIds []int `json:"NewIds"`
+	} `json:"body"`
+}
+
+func (rest *UserRest) UserRestUpdateBindRolesByUserId(ctx context.Context, req UserRestUpdateBindRolesByUserIdReq) (res string, err error) {
+	return "", rest.repo.RawUpdateBindRolesByUserId(ctx, req.Uri.UserId, req.Body.OldIds, req.Body.NewIds)
 }
 
 // AuditClient is a client for the Audit schema.
@@ -3782,6 +4631,112 @@ func (c *ResourceClient) Hooks() []Hook {
 	return c.hooks.Resource
 }
 
+// RoleClient is a client for the Role schema.
+type RoleClient struct {
+	config
+}
+
+// NewRoleClient returns a client for the Role from the given config.
+func NewRoleClient(c config) *RoleClient {
+	return &RoleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `role.Hooks(f(g(h())))`.
+func (c *RoleClient) Use(hooks ...Hook) {
+	c.hooks.Role = append(c.hooks.Role, hooks...)
+}
+
+// Create returns a create builder for Role.
+func (c *RoleClient) Create() *RoleCreate {
+	mutation := newRoleMutation(c.config, OpCreate)
+	return &RoleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Role entities.
+func (c *RoleClient) CreateBulk(builders ...*RoleCreate) *RoleCreateBulk {
+	return &RoleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Role.
+func (c *RoleClient) Update() *RoleUpdate {
+	mutation := newRoleMutation(c.config, OpUpdate)
+	return &RoleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RoleClient) UpdateOne(r *Role) *RoleUpdateOne {
+	mutation := newRoleMutation(c.config, OpUpdateOne, withRole(r))
+	return &RoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RoleClient) UpdateOneID(id int) *RoleUpdateOne {
+	mutation := newRoleMutation(c.config, OpUpdateOne, withRoleID(id))
+	return &RoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Role.
+func (c *RoleClient) Delete() *RoleDelete {
+	mutation := newRoleMutation(c.config, OpDelete)
+	return &RoleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *RoleClient) DeleteOne(r *Role) *RoleDeleteOne {
+	return c.DeleteOneID(r.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *RoleClient) DeleteOneID(id int) *RoleDeleteOne {
+	builder := c.Delete().Where(role.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RoleDeleteOne{builder}
+}
+
+// Query returns a query builder for Role.
+func (c *RoleClient) Query() *RoleQuery {
+	return &RoleQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Role entity by its id.
+func (c *RoleClient) Get(ctx context.Context, id int) (*Role, error) {
+	return c.Query().Where(role.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RoleClient) GetX(ctx context.Context, id int) *Role {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryResources queries the resources edge of a Role.
+func (c *RoleClient) QueryResources(r *Role) *ResourceQuery {
+	query := &ResourceQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(role.Table, role.FieldID, id),
+			sqlgraph.To(resource.Table, resource.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, role.ResourcesTable, role.ResourcesColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *RoleClient) Hooks() []Hook {
+	return c.hooks.Role
+}
+
 // ServiceClient is a client for the Service schema.
 type ServiceClient struct {
 	config
@@ -4061,6 +5016,22 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryRoles queries the roles edge of a User.
+func (c *UserClient) QueryRoles(u *User) *RoleQuery {
+	query := &RoleQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.RolesTable, user.RolesColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.

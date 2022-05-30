@@ -128,6 +128,56 @@ func (_d ResourceServiceWithTracing) CreateMany(ctx context.Context, vs []ent.Re
 	return _d.ResourceService.CreateMany(ctx, vs)
 }
 
+// CreatePreByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) CreatePreByResourceId(ctx context.Context, id int, v ent.ResourceBaseCreateReq) (res *ent.Resource, err error) {
+
+	var name = "ResourceService.CreatePreByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id,
+					"v":  v},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.CreatePreByResourceId(ctx, id, v)
+}
+
+// CreateResourcesByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) CreateResourcesByResourceId(ctx context.Context, id int, vs []ent.ResourceBaseCreateReq) (res *ent.Resource, err error) {
+
+	var name = "ResourceService.CreateResourcesByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id,
+					"vs": vs},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.CreateResourcesByResourceId(ctx, id, vs)
+}
+
 // DeleteById implements ResourceService
 func (_d ResourceServiceWithTracing) DeleteById(ctx context.Context, id int) (err error) {
 
@@ -198,6 +248,56 @@ func (_d ResourceServiceWithTracing) GetById(ctx context.Context, id int) (res e
 	return _d.ResourceService.GetById(ctx, id)
 }
 
+// GetNextByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) GetNextByResourceId(ctx context.Context, id int, i interface{}) (res []ent.ResourceBaseGetRes, count int, err error) {
+
+	var name = "ResourceService.GetNextByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id,
+					"i":  i},
+				"result": map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.GetNextByResourceId(ctx, id, i)
+}
+
+// GetPreByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) GetPreByResourceId(ctx context.Context, id int) (res ent.ResourceBaseGetRes, err error) {
+
+	var name = "ResourceService.GetPreByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.GetPreByResourceId(ctx, id)
+}
+
 // IdByResource implements ResourceService
 func (_d ResourceServiceWithTracing) IdByResource(ctx context.Context, path string, action string) (i1 int, err error) {
 
@@ -221,6 +321,54 @@ func (_d ResourceServiceWithTracing) IdByResource(ctx context.Context, path stri
 	}()
 
 	return _d.ResourceService.IdByResource(ctx, path, action)
+}
+
+// RawAddBindNextByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) RawAddBindNextByResourceId(ctx context.Context, id int, addIds []int) (err error) {
+
+	var name = "ResourceService.RawAddBindNextByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id":     id,
+					"addIds": addIds},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawAddBindNextByResourceId(ctx, id, addIds)
+}
+
+// RawAddBindPreByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) RawAddBindPreByResourceId(ctx context.Context, id int, addId int) (err error) {
+
+	var name = "ResourceService.RawAddBindPreByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id":    id,
+					"addId": addId},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawAddBindPreByResourceId(ctx, id, addId)
 }
 
 // RawByQueriesAll implements ResourceService
@@ -320,6 +468,104 @@ func (_d ResourceServiceWithTracing) RawCreateMany(ctx context.Context, vs ent.R
 	return _d.ResourceService.RawCreateMany(ctx, vs)
 }
 
+// RawCreatePreByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) RawCreatePreByResourceId(ctx context.Context, id int, v *ent.Resource) (res *ent.Resource, err error) {
+
+	var name = "ResourceService.RawCreatePreByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id,
+					"v":  v},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawCreatePreByResourceId(ctx, id, v)
+}
+
+// RawCreateResourcesByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) RawCreateResourcesByResourceId(ctx context.Context, id int, vs ent.Resources) (res *ent.Resource, err error) {
+
+	var name = "ResourceService.RawCreateResourcesByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id,
+					"vs": vs},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawCreateResourcesByResourceId(ctx, id, vs)
+}
+
+// RawDeleteNextByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) RawDeleteNextByResourceId(ctx context.Context, id int, deleteIds []int) (err error) {
+
+	var name = "ResourceService.RawDeleteNextByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id":        id,
+					"deleteIds": deleteIds},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawDeleteNextByResourceId(ctx, id, deleteIds)
+}
+
+// RawDeletePreByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) RawDeletePreByResourceId(ctx context.Context, id int, deleteId int) (err error) {
+
+	var name = "ResourceService.RawDeletePreByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id":       id,
+					"deleteId": deleteId},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawDeletePreByResourceId(ctx, id, deleteId)
+}
+
 // RawGetById implements ResourceService
 func (_d ResourceServiceWithTracing) RawGetById(ctx context.Context, id int) (res *ent.Resource, err error) {
 
@@ -342,6 +588,152 @@ func (_d ResourceServiceWithTracing) RawGetById(ctx context.Context, id int) (re
 	}()
 
 	return _d.ResourceService.RawGetById(ctx, id)
+}
+
+// RawGetNextByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) RawGetNextByResourceId(ctx context.Context, id int, i interface{}) (res ent.Resources, count int, err error) {
+
+	var name = "ResourceService.RawGetNextByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id,
+					"i":  i},
+				"result": map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawGetNextByResourceId(ctx, id, i)
+}
+
+// RawGetPreByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) RawGetPreByResourceId(ctx context.Context, id int) (res *ent.Resource, err error) {
+
+	var name = "ResourceService.RawGetPreByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id},
+				"result": map[string]interface{}{
+					"res": res,
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawGetPreByResourceId(ctx, id)
+}
+
+// RawRemoveBindNextByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) RawRemoveBindNextByResourceId(ctx context.Context, id int, removeIds []int) (err error) {
+
+	var name = "ResourceService.RawRemoveBindNextByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id":        id,
+					"removeIds": removeIds},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawRemoveBindNextByResourceId(ctx, id, removeIds)
+}
+
+// RawRemoveBindPreByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) RawRemoveBindPreByResourceId(ctx context.Context, id int) (err error) {
+
+	var name = "ResourceService.RawRemoveBindPreByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id": id},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawRemoveBindPreByResourceId(ctx, id)
+}
+
+// RawUpdateBindNextByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) RawUpdateBindNextByResourceId(ctx context.Context, id int, removeIds []int, addIds []int) (err error) {
+
+	var name = "ResourceService.RawUpdateBindNextByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id":        id,
+					"removeIds": removeIds,
+					"addIds":    addIds},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawUpdateBindNextByResourceId(ctx, id, removeIds, addIds)
+}
+
+// RawUpdateBindPreByResourceId implements ResourceService
+func (_d ResourceServiceWithTracing) RawUpdateBindPreByResourceId(ctx context.Context, id int, updateId int) (err error) {
+
+	var name = "ResourceService.RawUpdateBindPreByResourceId"
+	_, span := otel.Tracer(name).Start(ctx, name)
+	defer func() {
+		if err != nil {
+			l := map[string]interface{}{
+				"params": map[string]interface{}{
+					"id":       id,
+					"updateId": updateId},
+				"result": map[string]interface{}{
+					"err": err},
+			}
+			s, _ := json.Marshal(l)
+			span.AddEvent(semconv.ExceptionEventName, trace.WithAttributes(semconv.ExceptionTypeKey.String("context"), semconv.ExceptionMessageKey.String(string(s))))
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
+
+	return _d.ResourceService.RawUpdateBindPreByResourceId(ctx, id, updateId)
 }
 
 // RawUpdateById implements ResourceService

@@ -95,6 +95,34 @@ func (_d ResourceServiceWithPrometheus) CreateMany(ctx context.Context, vs []ent
 	return _d.base.CreateMany(ctx, vs)
 }
 
+// CreatePreByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) CreatePreByResourceId(ctx context.Context, id int, v ent.ResourceBaseCreateReq) (res *ent.Resource, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "CreatePreByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.CreatePreByResourceId(ctx, id, v)
+}
+
+// CreateResourcesByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) CreateResourcesByResourceId(ctx context.Context, id int, vs []ent.ResourceBaseCreateReq) (res *ent.Resource, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "CreateResourcesByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.CreateResourcesByResourceId(ctx, id, vs)
+}
+
 // DeleteById implements ResourceService
 func (_d ResourceServiceWithPrometheus) DeleteById(ctx context.Context, id int) (err error) {
 	_since := time.Now()
@@ -137,6 +165,34 @@ func (_d ResourceServiceWithPrometheus) GetById(ctx context.Context, id int) (re
 	return _d.base.GetById(ctx, id)
 }
 
+// GetNextByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) GetNextByResourceId(ctx context.Context, id int, i interface{}) (res []ent.ResourceBaseGetRes, count int, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetNextByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.GetNextByResourceId(ctx, id, i)
+}
+
+// GetPreByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) GetPreByResourceId(ctx context.Context, id int) (res ent.ResourceBaseGetRes, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetPreByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.GetPreByResourceId(ctx, id)
+}
+
 // IdByResource implements ResourceService
 func (_d ResourceServiceWithPrometheus) IdByResource(ctx context.Context, path string, action string) (i1 int, err error) {
 	_since := time.Now()
@@ -149,6 +205,34 @@ func (_d ResourceServiceWithPrometheus) IdByResource(ctx context.Context, path s
 		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "IdByResource", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.IdByResource(ctx, path, action)
+}
+
+// RawAddBindNextByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) RawAddBindNextByResourceId(ctx context.Context, id int, addIds []int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawAddBindNextByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawAddBindNextByResourceId(ctx, id, addIds)
+}
+
+// RawAddBindPreByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) RawAddBindPreByResourceId(ctx context.Context, id int, addId int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawAddBindPreByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawAddBindPreByResourceId(ctx, id, addId)
 }
 
 // RawByQueriesAll implements ResourceService
@@ -207,6 +291,62 @@ func (_d ResourceServiceWithPrometheus) RawCreateMany(ctx context.Context, vs en
 	return _d.base.RawCreateMany(ctx, vs)
 }
 
+// RawCreatePreByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) RawCreatePreByResourceId(ctx context.Context, id int, v *ent.Resource) (res *ent.Resource, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawCreatePreByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawCreatePreByResourceId(ctx, id, v)
+}
+
+// RawCreateResourcesByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) RawCreateResourcesByResourceId(ctx context.Context, id int, vs ent.Resources) (res *ent.Resource, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawCreateResourcesByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawCreateResourcesByResourceId(ctx, id, vs)
+}
+
+// RawDeleteNextByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) RawDeleteNextByResourceId(ctx context.Context, id int, deleteIds []int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawDeleteNextByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawDeleteNextByResourceId(ctx, id, deleteIds)
+}
+
+// RawDeletePreByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) RawDeletePreByResourceId(ctx context.Context, id int, deleteId int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawDeletePreByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawDeletePreByResourceId(ctx, id, deleteId)
+}
+
 // RawGetById implements ResourceService
 func (_d ResourceServiceWithPrometheus) RawGetById(ctx context.Context, id int) (res *ent.Resource, err error) {
 	_since := time.Now()
@@ -219,6 +359,90 @@ func (_d ResourceServiceWithPrometheus) RawGetById(ctx context.Context, id int) 
 		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawGetById", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.RawGetById(ctx, id)
+}
+
+// RawGetNextByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) RawGetNextByResourceId(ctx context.Context, id int, i interface{}) (res ent.Resources, count int, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawGetNextByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawGetNextByResourceId(ctx, id, i)
+}
+
+// RawGetPreByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) RawGetPreByResourceId(ctx context.Context, id int) (res *ent.Resource, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawGetPreByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawGetPreByResourceId(ctx, id)
+}
+
+// RawRemoveBindNextByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) RawRemoveBindNextByResourceId(ctx context.Context, id int, removeIds []int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawRemoveBindNextByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawRemoveBindNextByResourceId(ctx, id, removeIds)
+}
+
+// RawRemoveBindPreByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) RawRemoveBindPreByResourceId(ctx context.Context, id int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawRemoveBindPreByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawRemoveBindPreByResourceId(ctx, id)
+}
+
+// RawUpdateBindNextByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) RawUpdateBindNextByResourceId(ctx context.Context, id int, removeIds []int, addIds []int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawUpdateBindNextByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawUpdateBindNextByResourceId(ctx, id, removeIds, addIds)
+}
+
+// RawUpdateBindPreByResourceId implements ResourceService
+func (_d ResourceServiceWithPrometheus) RawUpdateBindPreByResourceId(ctx context.Context, id int, updateId int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		resourceserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawUpdateBindPreByResourceId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawUpdateBindPreByResourceId(ctx, id, updateId)
 }
 
 // RawUpdateById implements ResourceService

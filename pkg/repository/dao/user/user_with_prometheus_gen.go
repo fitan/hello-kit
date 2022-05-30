@@ -94,6 +94,20 @@ func (_d UserServiceWithPrometheus) CreateMany(ctx context.Context, vs []ent.Use
 	return _d.base.CreateMany(ctx, vs)
 }
 
+// CreateRolesByUserId implements UserService
+func (_d UserServiceWithPrometheus) CreateRolesByUserId(ctx context.Context, id int, vs []ent.RoleBaseCreateReq) (res *ent.User, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "CreateRolesByUserId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.CreateRolesByUserId(ctx, id, vs)
+}
+
 // DeleteById implements UserService
 func (_d UserServiceWithPrometheus) DeleteById(ctx context.Context, id int) (err error) {
 	_since := time.Now()
@@ -134,6 +148,34 @@ func (_d UserServiceWithPrometheus) GetById(ctx context.Context, id int) (res en
 		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetById", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.GetById(ctx, id)
+}
+
+// GetRolesByUserId implements UserService
+func (_d UserServiceWithPrometheus) GetRolesByUserId(ctx context.Context, id int, i interface{}) (res []ent.RoleBaseGetRes, count int, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "GetRolesByUserId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.GetRolesByUserId(ctx, id, i)
+}
+
+// RawAddBindRolesByUserId implements UserService
+func (_d UserServiceWithPrometheus) RawAddBindRolesByUserId(ctx context.Context, id int, addIds []int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawAddBindRolesByUserId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawAddBindRolesByUserId(ctx, id, addIds)
 }
 
 // RawByQueriesAll implements UserService
@@ -192,6 +234,34 @@ func (_d UserServiceWithPrometheus) RawCreateMany(ctx context.Context, vs ent.Us
 	return _d.base.RawCreateMany(ctx, vs)
 }
 
+// RawCreateRolesByUserId implements UserService
+func (_d UserServiceWithPrometheus) RawCreateRolesByUserId(ctx context.Context, id int, vs ent.Roles) (res *ent.User, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawCreateRolesByUserId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawCreateRolesByUserId(ctx, id, vs)
+}
+
+// RawDeleteRolesByUserId implements UserService
+func (_d UserServiceWithPrometheus) RawDeleteRolesByUserId(ctx context.Context, id int, deleteIds []int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawDeleteRolesByUserId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawDeleteRolesByUserId(ctx, id, deleteIds)
+}
+
 // RawGetById implements UserService
 func (_d UserServiceWithPrometheus) RawGetById(ctx context.Context, id int) (res *ent.User, err error) {
 	_since := time.Now()
@@ -204,6 +274,48 @@ func (_d UserServiceWithPrometheus) RawGetById(ctx context.Context, id int) (res
 		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawGetById", result).Observe(time.Since(_since).Seconds())
 	}()
 	return _d.base.RawGetById(ctx, id)
+}
+
+// RawGetRolesByUserId implements UserService
+func (_d UserServiceWithPrometheus) RawGetRolesByUserId(ctx context.Context, id int, i interface{}) (res ent.Roles, count int, err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawGetRolesByUserId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawGetRolesByUserId(ctx, id, i)
+}
+
+// RawRemoveBindRolesByUserId implements UserService
+func (_d UserServiceWithPrometheus) RawRemoveBindRolesByUserId(ctx context.Context, id int, removeIds []int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawRemoveBindRolesByUserId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawRemoveBindRolesByUserId(ctx, id, removeIds)
+}
+
+// RawUpdateBindRolesByUserId implements UserService
+func (_d UserServiceWithPrometheus) RawUpdateBindRolesByUserId(ctx context.Context, id int, removeIds []int, addIds []int) (err error) {
+	_since := time.Now()
+	defer func() {
+		result := "ok"
+		if err != nil {
+			result = "error"
+		}
+
+		userserviceDurationSummaryVec.WithLabelValues(_d.instanceName, "RawUpdateBindRolesByUserId", result).Observe(time.Since(_since).Seconds())
+	}()
+	return _d.base.RawUpdateBindRolesByUserId(ctx, id, removeIds, addIds)
 }
 
 // RawUpdateById implements UserService

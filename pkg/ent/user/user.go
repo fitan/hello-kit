@@ -17,8 +17,17 @@ const (
 	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// EdgeRoles holds the string denoting the roles edge name in mutations.
+	EdgeRoles = "roles"
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// RolesTable is the table that holds the roles relation/edge.
+	RolesTable = "roles"
+	// RolesInverseTable is the table name for the Role entity.
+	// It exists in this package in order to avoid circular dependency with the "role" package.
+	RolesInverseTable = "roles"
+	// RolesColumn is the table column denoting the roles relation/edge.
+	RolesColumn = "user_roles"
 )
 
 // Columns holds all SQL columns for user fields.

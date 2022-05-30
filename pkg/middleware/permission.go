@@ -6,6 +6,8 @@ import (
 	ginkHttp "github.com/fitan/gink/transport/http"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/pkg/errors"
+	"hello/pkg/ent"
+	resource2 "hello/pkg/ent/resource"
 	"hello/pkg/repository"
 	"hello/pkg/services"
 	"hello/pkg/services/casbin"
@@ -25,7 +27,6 @@ func PermissionMiddleware(services *services.Services, repository repository.Rep
 			//	return
 			//}
 			if !projectOK && !serviceOK {
-				fmt.Println("!!!!! not ok")
 				return e(ctx, request)
 			}
 
@@ -51,18 +52,27 @@ func PermissionMiddleware(services *services.Services, repository repository.Rep
 
 			method, _ := ctx.Value(ginkHttp.ContextKeyRequestMethod).(string)
 			path, _ := ctx.Value(ginkHttp.ContextKeyRequestFullPath).(string)
-
-			resourceId, err := repository.Resource.IdByResource(ctx, path, method)
+			t := resource2.TypeAPI
+			one, err := repository.Resource.ByQueriesOne(
+				ctx, struct {
+					ent.ResourceTableActionEQForm
+					ent.ResourceTableTypeEQForm
+					ent.ResourceTablePathEQForm
+				}{
+					ResourceTableActionEQForm: ent.ResourceTableActionEQForm{ActionEQ: &method},
+					ResourceTableTypeEQForm:   ent.ResourceTableTypeEQForm{TypeEQ: &t},
+					ResourceTablePathEQForm:   ent.ResourceTablePathEQForm{PathEQ: &path},
+				},
+			)
 			if err != nil {
-				err = errors.Wrap(err, "Resource.IdByResource")
-				return nil, err
+				return nil, errors.Wrap(err, "Resource.ByQueriesOne")
 			}
 
 			permission, err := services.Casbin.CheckPermission(
 				ctx, casbin.CheckPermission{
 					User:       UserId,
 					Domain:     domain,
-					ResourceId: resourceId,
+					ResourceId: one.ID,
 				},
 			)
 			if err != nil {

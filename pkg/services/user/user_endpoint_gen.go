@@ -15,17 +15,29 @@ import (
 )
 
 const (
+	UserRestAddBindRolesByUserIdMethodName = "UserRestAddBindRolesByUserId"
+
 	UserRestByQueriesAllMethodName = "UserRestByQueriesAll"
 
 	UserRestCreateMethodName = "UserRestCreate"
 
 	UserRestCreateManyMethodName = "UserRestCreateMany"
 
+	UserRestCreateRolesByUserIdMethodName = "UserRestCreateRolesByUserId"
+
 	UserRestDeleteByIdMethodName = "UserRestDeleteById"
 
 	UserRestDeleteManyMethodName = "UserRestDeleteMany"
 
+	UserRestDeleteRolesByUserIdMethodName = "UserRestDeleteRolesByUserId"
+
 	UserRestGetByIdMethodName = "UserRestGetById"
+
+	UserRestGetRolesByUserIdMethodName = "UserRestGetRolesByUserId"
+
+	UserRestRemoveBindRolesByUserIdMethodName = "UserRestRemoveBindRolesByUserId"
+
+	UserRestUpdateBindRolesByUserIdMethodName = "UserRestUpdateBindRolesByUserId"
 
 	UserRestUpdateByIdMethodName = "UserRestUpdateById"
 
@@ -35,17 +47,29 @@ const (
 type Mws map[string][]endpoint.Middleware
 
 type Endpoints struct {
+	UserRestAddBindRolesByUserIdEndpoint endpoint.Endpoint
+
 	UserRestByQueriesAllEndpoint endpoint.Endpoint
 
 	UserRestCreateEndpoint endpoint.Endpoint
 
 	UserRestCreateManyEndpoint endpoint.Endpoint
 
+	UserRestCreateRolesByUserIdEndpoint endpoint.Endpoint
+
 	UserRestDeleteByIdEndpoint endpoint.Endpoint
 
 	UserRestDeleteManyEndpoint endpoint.Endpoint
 
+	UserRestDeleteRolesByUserIdEndpoint endpoint.Endpoint
+
 	UserRestGetByIdEndpoint endpoint.Endpoint
+
+	UserRestGetRolesByUserIdEndpoint endpoint.Endpoint
+
+	UserRestRemoveBindRolesByUserIdEndpoint endpoint.Endpoint
+
+	UserRestUpdateBindRolesByUserIdEndpoint endpoint.Endpoint
 
 	UserRestUpdateByIdEndpoint endpoint.Endpoint
 
@@ -55,17 +79,29 @@ type Endpoints struct {
 func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m endpoint.Middleware) {
 	methods := []string{
 
+		UserRestAddBindRolesByUserIdMethodName,
+
 		UserRestByQueriesAllMethodName,
 
 		UserRestCreateMethodName,
 
 		UserRestCreateManyMethodName,
 
+		UserRestCreateRolesByUserIdMethodName,
+
 		UserRestDeleteByIdMethodName,
 
 		UserRestDeleteManyMethodName,
 
+		UserRestDeleteRolesByUserIdMethodName,
+
 		UserRestGetByIdMethodName,
+
+		UserRestGetRolesByUserIdMethodName,
+
+		UserRestRemoveBindRolesByUserIdMethodName,
+
+		UserRestUpdateBindRolesByUserIdMethodName,
 
 		UserRestUpdateByIdMethodName,
 
@@ -79,17 +115,29 @@ func AddEndpointMiddlewareToAllMethods(mw map[string][]endpoint.Middleware, m en
 func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Middleware, m func(n string) endpoint.Middleware) {
 	methods := []string{
 
+		UserRestAddBindRolesByUserIdMethodName,
+
 		UserRestByQueriesAllMethodName,
 
 		UserRestCreateMethodName,
 
 		UserRestCreateManyMethodName,
 
+		UserRestCreateRolesByUserIdMethodName,
+
 		UserRestDeleteByIdMethodName,
 
 		UserRestDeleteManyMethodName,
 
+		UserRestDeleteRolesByUserIdMethodName,
+
 		UserRestGetByIdMethodName,
+
+		UserRestGetRolesByUserIdMethodName,
+
+		UserRestRemoveBindRolesByUserIdMethodName,
+
+		UserRestUpdateBindRolesByUserIdMethodName,
 
 		UserRestUpdateByIdMethodName,
 
@@ -105,21 +153,37 @@ func AddEndpointMiddlewareToAllMethodsWithMethodName(mw map[string][]endpoint.Mi
 func NewEndpoints(s UserService, mdw Mws) Endpoints {
 	eps := Endpoints{
 
+		UserRestAddBindRolesByUserIdEndpoint: MakeUserRestAddBindRolesByUserIdEndpoint(s),
+
 		UserRestByQueriesAllEndpoint: MakeUserRestByQueriesAllEndpoint(s),
 
 		UserRestCreateEndpoint: MakeUserRestCreateEndpoint(s),
 
 		UserRestCreateManyEndpoint: MakeUserRestCreateManyEndpoint(s),
 
+		UserRestCreateRolesByUserIdEndpoint: MakeUserRestCreateRolesByUserIdEndpoint(s),
+
 		UserRestDeleteByIdEndpoint: MakeUserRestDeleteByIdEndpoint(s),
 
 		UserRestDeleteManyEndpoint: MakeUserRestDeleteManyEndpoint(s),
 
+		UserRestDeleteRolesByUserIdEndpoint: MakeUserRestDeleteRolesByUserIdEndpoint(s),
+
 		UserRestGetByIdEndpoint: MakeUserRestGetByIdEndpoint(s),
+
+		UserRestGetRolesByUserIdEndpoint: MakeUserRestGetRolesByUserIdEndpoint(s),
+
+		UserRestRemoveBindRolesByUserIdEndpoint: MakeUserRestRemoveBindRolesByUserIdEndpoint(s),
+
+		UserRestUpdateBindRolesByUserIdEndpoint: MakeUserRestUpdateBindRolesByUserIdEndpoint(s),
 
 		UserRestUpdateByIdEndpoint: MakeUserRestUpdateByIdEndpoint(s),
 
 		UserRestUpdateManyEndpoint: MakeUserRestUpdateManyEndpoint(s),
+	}
+
+	for _, m := range mdw[UserRestAddBindRolesByUserIdMethodName] {
+		eps.UserRestAddBindRolesByUserIdEndpoint = m(eps.UserRestAddBindRolesByUserIdEndpoint)
 	}
 
 	for _, m := range mdw[UserRestByQueriesAllMethodName] {
@@ -134,6 +198,10 @@ func NewEndpoints(s UserService, mdw Mws) Endpoints {
 		eps.UserRestCreateManyEndpoint = m(eps.UserRestCreateManyEndpoint)
 	}
 
+	for _, m := range mdw[UserRestCreateRolesByUserIdMethodName] {
+		eps.UserRestCreateRolesByUserIdEndpoint = m(eps.UserRestCreateRolesByUserIdEndpoint)
+	}
+
 	for _, m := range mdw[UserRestDeleteByIdMethodName] {
 		eps.UserRestDeleteByIdEndpoint = m(eps.UserRestDeleteByIdEndpoint)
 	}
@@ -142,8 +210,24 @@ func NewEndpoints(s UserService, mdw Mws) Endpoints {
 		eps.UserRestDeleteManyEndpoint = m(eps.UserRestDeleteManyEndpoint)
 	}
 
+	for _, m := range mdw[UserRestDeleteRolesByUserIdMethodName] {
+		eps.UserRestDeleteRolesByUserIdEndpoint = m(eps.UserRestDeleteRolesByUserIdEndpoint)
+	}
+
 	for _, m := range mdw[UserRestGetByIdMethodName] {
 		eps.UserRestGetByIdEndpoint = m(eps.UserRestGetByIdEndpoint)
+	}
+
+	for _, m := range mdw[UserRestGetRolesByUserIdMethodName] {
+		eps.UserRestGetRolesByUserIdEndpoint = m(eps.UserRestGetRolesByUserIdEndpoint)
+	}
+
+	for _, m := range mdw[UserRestRemoveBindRolesByUserIdMethodName] {
+		eps.UserRestRemoveBindRolesByUserIdEndpoint = m(eps.UserRestRemoveBindRolesByUserIdEndpoint)
+	}
+
+	for _, m := range mdw[UserRestUpdateBindRolesByUserIdMethodName] {
+		eps.UserRestUpdateBindRolesByUserIdEndpoint = m(eps.UserRestUpdateBindRolesByUserIdEndpoint)
 	}
 
 	for _, m := range mdw[UserRestUpdateByIdMethodName] {
@@ -155,6 +239,28 @@ func NewEndpoints(s UserService, mdw Mws) Endpoints {
 	}
 
 	return eps
+}
+
+func MakeUserRestAddBindRolesByUserIdEndpoint(s UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.UserRestAddBindRolesByUserIdReq)
+		rs, err := s.UserRestAddBindRolesByUserId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
 }
 
 func MakeUserRestByQueriesAllEndpoint(s UserService) endpoint.Endpoint {
@@ -223,6 +329,28 @@ func MakeUserRestCreateManyEndpoint(s UserService) endpoint.Endpoint {
 	}
 }
 
+func MakeUserRestCreateRolesByUserIdEndpoint(s UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.UserRestCreateRolesByUserIdReq)
+		rs, err := s.UserRestCreateRolesByUserId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
 func MakeUserRestDeleteByIdEndpoint(s UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		var err error
@@ -267,6 +395,28 @@ func MakeUserRestDeleteManyEndpoint(s UserService) endpoint.Endpoint {
 	}
 }
 
+func MakeUserRestDeleteRolesByUserIdEndpoint(s UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.UserRestDeleteRolesByUserIdReq)
+		rs, err := s.UserRestDeleteRolesByUserId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
 func MakeUserRestGetByIdEndpoint(s UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		var err error
@@ -279,6 +429,72 @@ func MakeUserRestGetByIdEndpoint(s UserService) endpoint.Endpoint {
 		}()
 		req := request.(ent.UserRestGetByIdReq)
 		rs, err := s.UserRestGetById(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeUserRestGetRolesByUserIdEndpoint(s UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.UserRestGetRolesByUserIdReq)
+		rs, err := s.UserRestGetRolesByUserId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeUserRestRemoveBindRolesByUserIdEndpoint(s UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.UserRestRemoveBindRolesByUserIdReq)
+		rs, err := s.UserRestRemoveBindRolesByUserId(ctx, req)
+		if err != nil {
+			result["err"] = err.Error()
+			return result, nil
+		}
+		result["data"] = rs
+		result["traceId"] = trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+		return result, nil
+	}
+}
+
+func MakeUserRestUpdateBindRolesByUserIdEndpoint(s UserService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		var err error
+		result := make(map[string]interface{}, 0)
+		defer func() {
+			if err != nil {
+				result["status"] = 500
+			}
+			result["status"] = 0
+		}()
+		req := request.(ent.UserRestUpdateBindRolesByUserIdReq)
+		rs, err := s.UserRestUpdateBindRolesByUserId(ctx, req)
 		if err != nil {
 			result["err"] = err.Error()
 			return result, nil

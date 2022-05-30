@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"hello/pkg/ent/role"
 	"hello/pkg/ent/user"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -63,6 +64,21 @@ func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
 		uc.SetName(*s)
 	}
 	return uc
+}
+
+// AddRoleIDs adds the "roles" edge to the Role entity by IDs.
+func (uc *UserCreate) AddRoleIDs(ids ...int) *UserCreate {
+	uc.mutation.AddRoleIDs(ids...)
+	return uc
+}
+
+// AddRoles adds the "roles" edges to the Role entity.
+func (uc *UserCreate) AddRoles(r ...*Role) *UserCreate {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uc.AddRoleIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -222,6 +238,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldName,
 		})
 		_node.Name = value
+	}
+	if nodes := uc.mutation.RolesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RolesTable,
+			Columns: []string{user.RolesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: role.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

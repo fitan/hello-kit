@@ -58,6 +58,12 @@ func (ru *ResourceUpdate) SetAction(s string) *ResourceUpdate {
 	return ru
 }
 
+// SetType sets the "type" field.
+func (ru *ResourceUpdate) SetType(r resource.Type) *ResourceUpdate {
+	ru.mutation.SetType(r)
+	return ru
+}
+
 // SetComments sets the "comments" field.
 func (ru *ResourceUpdate) SetComments(s string) *ResourceUpdate {
 	ru.mutation.SetComments(s)
@@ -138,12 +144,18 @@ func (ru *ResourceUpdate) Save(ctx context.Context) (int, error) {
 	)
 	ru.defaults()
 	if len(ru.hooks) == 0 {
+		if err = ru.check(); err != nil {
+			return 0, err
+		}
 		affected, err = ru.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ResourceMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = ru.check(); err != nil {
+				return 0, err
 			}
 			ru.mutation = mutation
 			affected, err = ru.sqlSave(ctx)
@@ -191,6 +203,16 @@ func (ru *ResourceUpdate) defaults() {
 		v := resource.UpdateDefaultUpdateTime()
 		ru.mutation.SetUpdateTime(v)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (ru *ResourceUpdate) check() error {
+	if v, ok := ru.mutation.GetType(); ok {
+		if err := resource.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Resource.type": %w`, err)}
+		}
+	}
+	return nil
 }
 
 func (ru *ResourceUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -244,6 +266,13 @@ func (ru *ResourceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: resource.FieldAction,
+		})
+	}
+	if value, ok := ru.mutation.GetType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: resource.FieldType,
 		})
 	}
 	if value, ok := ru.mutation.Comments(); ok {
@@ -391,6 +420,12 @@ func (ruo *ResourceUpdateOne) SetAction(s string) *ResourceUpdateOne {
 	return ruo
 }
 
+// SetType sets the "type" field.
+func (ruo *ResourceUpdateOne) SetType(r resource.Type) *ResourceUpdateOne {
+	ruo.mutation.SetType(r)
+	return ruo
+}
+
 // SetComments sets the "comments" field.
 func (ruo *ResourceUpdateOne) SetComments(s string) *ResourceUpdateOne {
 	ruo.mutation.SetComments(s)
@@ -478,12 +513,18 @@ func (ruo *ResourceUpdateOne) Save(ctx context.Context) (*Resource, error) {
 	)
 	ruo.defaults()
 	if len(ruo.hooks) == 0 {
+		if err = ruo.check(); err != nil {
+			return nil, err
+		}
 		node, err = ruo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ResourceMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = ruo.check(); err != nil {
+				return nil, err
 			}
 			ruo.mutation = mutation
 			node, err = ruo.sqlSave(ctx)
@@ -531,6 +572,16 @@ func (ruo *ResourceUpdateOne) defaults() {
 		v := resource.UpdateDefaultUpdateTime()
 		ruo.mutation.SetUpdateTime(v)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (ruo *ResourceUpdateOne) check() error {
+	if v, ok := ruo.mutation.GetType(); ok {
+		if err := resource.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Resource.type": %w`, err)}
+		}
+	}
+	return nil
 }
 
 func (ruo *ResourceUpdateOne) sqlSave(ctx context.Context) (_node *Resource, err error) {
@@ -601,6 +652,13 @@ func (ruo *ResourceUpdateOne) sqlSave(ctx context.Context) (_node *Resource, err
 			Type:   field.TypeString,
 			Value:  value,
 			Column: resource.FieldAction,
+		})
+	}
+	if value, ok := ruo.mutation.GetType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: resource.FieldType,
 		})
 	}
 	if value, ok := ruo.mutation.Comments(); ok {

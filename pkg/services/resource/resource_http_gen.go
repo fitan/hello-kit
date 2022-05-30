@@ -19,17 +19,41 @@ type Ops map[string][]http.ServerOption
 func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option http.ServerOption) {
 	methods := []string{
 
+		ResourceRestAddBindNextByResourceIdMethodName,
+
+		ResourceRestAddBindPreByResourceIdMethodName,
+
 		ResourceRestByQueriesAllMethodName,
 
 		ResourceRestCreateMethodName,
 
 		ResourceRestCreateManyMethodName,
 
+		ResourceRestCreatePreByResourceIdMethodName,
+
+		ResourceRestCreateResourcesByResourceIdMethodName,
+
 		ResourceRestDeleteByIdMethodName,
 
 		ResourceRestDeleteManyMethodName,
 
+		ResourceRestDeleteNextByResourceIdMethodName,
+
+		ResourceRestDeletePreByResourceIdMethodName,
+
 		ResourceRestGetByIdMethodName,
+
+		ResourceRestGetNextByResourceIdMethodName,
+
+		ResourceRestGetPreByResourceIdMethodName,
+
+		ResourceRestRemoveBindNextByResourceIdMethodName,
+
+		ResourceRestRemoveBindPreByResourceIdMethodName,
+
+		ResourceRestUpdateBindNextByResourceIdMethodName,
+
+		ResourceRestUpdateBindPreByResourceIdMethodName,
 
 		ResourceRestUpdateByIdMethodName,
 
@@ -45,21 +69,49 @@ type HttpHandler struct {
 
 func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch *debug.DebugSwitch) HttpHandler {
 
+	debugSwitch.Register("ResourceRestAddBindNextByResourceId", "/resources/:resourceId/next/bind/add", "PUT")
+
+	debugSwitch.Register("ResourceRestAddBindPreByResourceId", "/resources/:resourceId/pre/:preId/bind/add", "PUT")
+
 	debugSwitch.Register("ResourceRestByQueriesAll", "/resources", "GET")
 
 	debugSwitch.Register("ResourceRestCreate", "/resource", "POST")
 
 	debugSwitch.Register("ResourceRestCreateMany", "/resources", "POST")
 
+	debugSwitch.Register("ResourceRestCreatePreByResourceId", "/resources/:resourceId/pre", "POST")
+
+	debugSwitch.Register("ResourceRestCreateResourcesByResourceId", "/resources/:resourceId/next", "POST")
+
 	debugSwitch.Register("ResourceRestDeleteById", "/resources/:resourceId", "DELETE")
 
 	debugSwitch.Register("ResourceRestDeleteMany", "/resources", "DELETE")
 
+	debugSwitch.Register("ResourceRestDeleteNextByResourceId", "/resources/:resourceId/next", "DELETE")
+
+	debugSwitch.Register("ResourceRestDeletePreByResourceId", "/resources/:resourceId/pre", "DELETE")
+
 	debugSwitch.Register("ResourceRestGetById", "/resources/:resourceId", "GET")
+
+	debugSwitch.Register("ResourceRestGetNextByResourceId", "/resources/:resourceId/next", "GET")
+
+	debugSwitch.Register("ResourceRestGetPreByResourceId", "/resources/:resourceId/pre", "GET")
+
+	debugSwitch.Register("ResourceRestRemoveBindNextByResourceId", "/resources/:resourceId/next/bind/remove", "PUT")
+
+	debugSwitch.Register("ResourceRestRemoveBindPreByResourceId", "/resources/:resourceId/pre/bind/remove", "PUT")
+
+	debugSwitch.Register("ResourceRestUpdateBindNextByResourceId", "/resources/:resourceId/next/bind/update", "PUT")
+
+	debugSwitch.Register("ResourceRestUpdateBindPreByResourceId", "/resources/:resourceId/pre/:preId/bind/update", "PUT")
 
 	debugSwitch.Register("ResourceRestUpdateById", "/resources/:resourceId", "PUT")
 
 	debugSwitch.Register("ResourceRestUpdateMany", "/resources", "PUT")
+
+	makeResourceRestAddBindNextByResourceIdHandler(r, endpoints, options[ResourceRestAddBindNextByResourceIdMethodName])
+
+	makeResourceRestAddBindPreByResourceIdHandler(r, endpoints, options[ResourceRestAddBindPreByResourceIdMethodName])
 
 	makeResourceRestByQueriesAllHandler(r, endpoints, options[ResourceRestByQueriesAllMethodName])
 
@@ -67,11 +119,31 @@ func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch
 
 	makeResourceRestCreateManyHandler(r, endpoints, options[ResourceRestCreateManyMethodName])
 
+	makeResourceRestCreatePreByResourceIdHandler(r, endpoints, options[ResourceRestCreatePreByResourceIdMethodName])
+
+	makeResourceRestCreateResourcesByResourceIdHandler(r, endpoints, options[ResourceRestCreateResourcesByResourceIdMethodName])
+
 	makeResourceRestDeleteByIdHandler(r, endpoints, options[ResourceRestDeleteByIdMethodName])
 
 	makeResourceRestDeleteManyHandler(r, endpoints, options[ResourceRestDeleteManyMethodName])
 
+	makeResourceRestDeleteNextByResourceIdHandler(r, endpoints, options[ResourceRestDeleteNextByResourceIdMethodName])
+
+	makeResourceRestDeletePreByResourceIdHandler(r, endpoints, options[ResourceRestDeletePreByResourceIdMethodName])
+
 	makeResourceRestGetByIdHandler(r, endpoints, options[ResourceRestGetByIdMethodName])
+
+	makeResourceRestGetNextByResourceIdHandler(r, endpoints, options[ResourceRestGetNextByResourceIdMethodName])
+
+	makeResourceRestGetPreByResourceIdHandler(r, endpoints, options[ResourceRestGetPreByResourceIdMethodName])
+
+	makeResourceRestRemoveBindNextByResourceIdHandler(r, endpoints, options[ResourceRestRemoveBindNextByResourceIdMethodName])
+
+	makeResourceRestRemoveBindPreByResourceIdHandler(r, endpoints, options[ResourceRestRemoveBindPreByResourceIdMethodName])
+
+	makeResourceRestUpdateBindNextByResourceIdHandler(r, endpoints, options[ResourceRestUpdateBindNextByResourceIdMethodName])
+
+	makeResourceRestUpdateBindPreByResourceIdHandler(r, endpoints, options[ResourceRestUpdateBindPreByResourceIdMethodName])
 
 	makeResourceRestUpdateByIdHandler(r, endpoints, options[ResourceRestUpdateByIdMethodName])
 
@@ -84,6 +156,59 @@ type SwagResponse struct {
 	TraceId string      `json:"traceId"`
 	Status  int         `json:"status"`
 	Data    interface{} `json:"data"`
+}
+
+type ResourceRestAddBindNextByResourceIdBodySwag struct {
+	NextIds []int `json:"nextIds"`
+}
+
+// @Accept  json
+// @Tags ResourceService
+// @Param body body ResourceRestAddBindNextByResourceIdBodySwag true " "
+// @Param resourceId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /resources/{resourceId}/next/bind/add [put]
+func makeResourceRestAddBindNextByResourceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/resources/:resourceId/next/bind/add", http.NewServer(endpoints.ResourceRestAddBindNextByResourceIdEndpoint, decodeResourceRestAddBindNextByResourceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeResourceRestAddBindNextByResourceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ResourceRestAddBindNextByResourceIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindJSON(&req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+// @Accept  json
+// @Tags ResourceService
+// @Param resourceId path string true " "
+// @Param preId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /resources/{resourceId}/pre/{preId}/bind/add [put]
+func makeResourceRestAddBindPreByResourceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/resources/:resourceId/pre/:preId/bind/add", http.NewServer(endpoints.ResourceRestAddBindPreByResourceIdEndpoint, decodeResourceRestAddBindPreByResourceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeResourceRestAddBindPreByResourceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ResourceRestAddBindPreByResourceIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
 }
 
 type ResourceRestByQueriesAllQuerySwag ent.ResourceQueryOps
@@ -155,6 +280,64 @@ func decodeResourceRestCreateManyRequest(_ context.Context, ctx *gin.Context) (i
 	return req, err
 }
 
+type ResourceRestCreatePreByResourceIdBodySwag ent.ResourceBaseCreateReq
+
+// @Accept  json
+// @Tags ResourceService
+// @Param body body ResourceRestCreatePreByResourceIdBodySwag true " "
+// @Param resourceId path string true " "
+// @Success 200 {object} SwagResponse{data=ent.Resource}
+// @Router /resources/{resourceId}/pre [post]
+func makeResourceRestCreatePreByResourceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.POST("/resources/:resourceId/pre", http.NewServer(endpoints.ResourceRestCreatePreByResourceIdEndpoint, decodeResourceRestCreatePreByResourceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeResourceRestCreatePreByResourceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ResourceRestCreatePreByResourceIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindJSON(&req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+type ResourceRestCreateResourcesByResourceIdBodySwag []ent.ResourceBaseCreateReq
+
+// @Accept  json
+// @Tags ResourceService
+// @Param body body ResourceRestCreateResourcesByResourceIdBodySwag true " "
+// @Param resourceId path string true " "
+// @Success 200 {object} SwagResponse{data=ent.Resource}
+// @Router /resources/{resourceId}/next [post]
+func makeResourceRestCreateResourcesByResourceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.POST("/resources/:resourceId/next", http.NewServer(endpoints.ResourceRestCreateResourcesByResourceIdEndpoint, decodeResourceRestCreateResourcesByResourceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeResourceRestCreateResourcesByResourceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ResourceRestCreateResourcesByResourceIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindJSON(&req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
 // @Accept  json
 // @Tags ResourceService
 // @Param resourceId path string true " "
@@ -201,6 +384,59 @@ func decodeResourceRestDeleteManyRequest(_ context.Context, ctx *gin.Context) (i
 	return req, err
 }
 
+type ResourceRestDeleteNextByResourceIdQuerySwag struct {
+	NextIds []int `json:"nextIds" form:"nextIds"`
+}
+
+// @Accept  json
+// @Tags ResourceService
+// @Param query query ResourceRestDeleteNextByResourceIdQuerySwag false " "
+// @Param resourceId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /resources/{resourceId}/next [delete]
+func makeResourceRestDeleteNextByResourceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.DELETE("/resources/:resourceId/next", http.NewServer(endpoints.ResourceRestDeleteNextByResourceIdEndpoint, decodeResourceRestDeleteNextByResourceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeResourceRestDeleteNextByResourceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ResourceRestDeleteNextByResourceIdReq
+	var err error
+
+	err = ctx.ShouldBindQuery(&req.Query)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+// @Accept  json
+// @Tags ResourceService
+// @Param resourceId path string true " "
+// @Param preId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /resources/{resourceId}/pre [delete]
+func makeResourceRestDeletePreByResourceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.DELETE("/resources/:resourceId/pre", http.NewServer(endpoints.ResourceRestDeletePreByResourceIdEndpoint, decodeResourceRestDeletePreByResourceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeResourceRestDeletePreByResourceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ResourceRestDeletePreByResourceIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
 // @Accept  json
 // @Tags ResourceService
 // @Param resourceId path string true " "
@@ -212,6 +448,162 @@ func makeResourceRestGetByIdHandler(r *gin.Engine, endpoints Endpoints, options 
 
 func decodeResourceRestGetByIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
 	var req ent.ResourceRestGetByIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+type ResourceRestGetNextByResourceIdQuerySwag ent.ResourceQueryOps
+
+// @Accept  json
+// @Tags ResourceService
+// @Param query query ResourceRestGetNextByResourceIdQuerySwag false " "
+// @Param resourceId path string true " "
+// @Success 200 {object} SwagResponse{data=ent.ResourceRestGetNextByResourceIdRes}
+// @Router /resources/{resourceId}/next [get]
+func makeResourceRestGetNextByResourceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.GET("/resources/:resourceId/next", http.NewServer(endpoints.ResourceRestGetNextByResourceIdEndpoint, decodeResourceRestGetNextByResourceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeResourceRestGetNextByResourceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ResourceRestGetNextByResourceIdReq
+	var err error
+
+	err = ctx.ShouldBindQuery(&req.Query)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+// @Accept  json
+// @Tags ResourceService
+// @Param resourceId path string true " "
+// @Success 200 {object} SwagResponse{data=ent.ResourceBaseGetRes}
+// @Router /resources/{resourceId}/pre [get]
+func makeResourceRestGetPreByResourceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.GET("/resources/:resourceId/pre", http.NewServer(endpoints.ResourceRestGetPreByResourceIdEndpoint, decodeResourceRestGetPreByResourceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeResourceRestGetPreByResourceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ResourceRestGetPreByResourceIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+type ResourceRestRemoveBindNextByResourceIdBodySwag struct {
+	NextIds []int `json:"nextIds"`
+}
+
+// @Accept  json
+// @Tags ResourceService
+// @Param body body ResourceRestRemoveBindNextByResourceIdBodySwag true " "
+// @Param resourceId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /resources/{resourceId}/next/bind/remove [put]
+func makeResourceRestRemoveBindNextByResourceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/resources/:resourceId/next/bind/remove", http.NewServer(endpoints.ResourceRestRemoveBindNextByResourceIdEndpoint, decodeResourceRestRemoveBindNextByResourceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeResourceRestRemoveBindNextByResourceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ResourceRestRemoveBindNextByResourceIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindJSON(&req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+// @Accept  json
+// @Tags ResourceService
+// @Param resourceId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /resources/{resourceId}/pre/bind/remove [put]
+func makeResourceRestRemoveBindPreByResourceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/resources/:resourceId/pre/bind/remove", http.NewServer(endpoints.ResourceRestRemoveBindPreByResourceIdEndpoint, decodeResourceRestRemoveBindPreByResourceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeResourceRestRemoveBindPreByResourceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ResourceRestRemoveBindPreByResourceIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+type ResourceRestUpdateBindNextByResourceIdBodySwag struct {
+	OldIds []int `json:"OldIds"`
+	NewIds []int `json:"NewIds"`
+}
+
+// @Accept  json
+// @Tags ResourceService
+// @Param body body ResourceRestUpdateBindNextByResourceIdBodySwag true " "
+// @Param resourceId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /resources/{resourceId}/next/bind/update [put]
+func makeResourceRestUpdateBindNextByResourceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/resources/:resourceId/next/bind/update", http.NewServer(endpoints.ResourceRestUpdateBindNextByResourceIdEndpoint, decodeResourceRestUpdateBindNextByResourceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeResourceRestUpdateBindNextByResourceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ResourceRestUpdateBindNextByResourceIdReq
+	var err error
+
+	err = ctx.ShouldBindUri(&req.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.ShouldBindJSON(&req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, err
+}
+
+// @Accept  json
+// @Tags ResourceService
+// @Param resourceId path string true " "
+// @Param preId path string true " "
+// @Success 200 {object} SwagResponse{data=string}
+// @Router /resources/{resourceId}/pre/{preId}/bind/update [put]
+func makeResourceRestUpdateBindPreByResourceIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+	r.PUT("/resources/:resourceId/pre/:preId/bind/update", http.NewServer(endpoints.ResourceRestUpdateBindPreByResourceIdEndpoint, decodeResourceRestUpdateBindPreByResourceIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
+}
+
+func decodeResourceRestUpdateBindPreByResourceIdRequest(_ context.Context, ctx *gin.Context) (interface{}, error) {
+	var req ent.ResourceRestUpdateBindPreByResourceIdReq
 	var err error
 
 	err = ctx.ShouldBindUri(&req.Uri)

@@ -72,6 +72,12 @@ func (rc *ResourceCreate) SetAction(s string) *ResourceCreate {
 	return rc
 }
 
+// SetType sets the "type" field.
+func (rc *ResourceCreate) SetType(r resource.Type) *ResourceCreate {
+	rc.mutation.SetType(r)
+	return rc
+}
+
 // SetComments sets the "comments" field.
 func (rc *ResourceCreate) SetComments(s string) *ResourceCreate {
 	rc.mutation.SetComments(s)
@@ -213,6 +219,14 @@ func (rc *ResourceCreate) check() error {
 	if _, ok := rc.mutation.Action(); !ok {
 		return &ValidationError{Name: "action", err: errors.New(`ent: missing required field "Resource.action"`)}
 	}
+	if _, ok := rc.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "Resource.type"`)}
+	}
+	if v, ok := rc.mutation.GetType(); ok {
+		if err := resource.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Resource.type": %w`, err)}
+		}
+	}
 	if _, ok := rc.mutation.Comments(); !ok {
 		return &ValidationError{Name: "comments", err: errors.New(`ent: missing required field "Resource.comments"`)}
 	}
@@ -290,6 +304,14 @@ func (rc *ResourceCreate) createSpec() (*Resource, *sqlgraph.CreateSpec) {
 			Column: resource.FieldAction,
 		})
 		_node.Action = value
+	}
+	if value, ok := rc.mutation.GetType(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: resource.FieldType,
+		})
+		_node.Type = value
 	}
 	if value, ok := rc.mutation.Comments(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

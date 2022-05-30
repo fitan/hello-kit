@@ -123,7 +123,7 @@ type SwagResponse struct {
 }
 
 type ProjectRestAddBindServicesByProjectIdBodySwag struct {
-	ServiceIds []int `json:"serviceIds"`
+	ServicesIds []int `json:"servicesIds"`
 }
 
 // @Accept  json
@@ -298,7 +298,7 @@ func decodeProjectRestDeleteManyRequest(_ context.Context, ctx *gin.Context) (in
 }
 
 type ProjectRestDeleteServicesByProjectIdQuerySwag struct {
-	ServiceIds []int `json:"serviceIds" form:"serviceIds"`
+	ServicesIds []int `json:"servicesIds" form:"servicesIds"`
 }
 
 // @Accept  json
@@ -379,7 +379,7 @@ func decodeProjectRestGetServicesByProjectIdRequest(_ context.Context, ctx *gin.
 }
 
 type ProjectRestRemoveBindServicesByProjectIdBodySwag struct {
-	ServiceIds []int `json:"serviceIds"`
+	ServicesIds []int `json:"servicesIds"`
 }
 
 // @Accept  json

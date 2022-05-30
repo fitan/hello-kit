@@ -198,6 +198,96 @@ func (_d ResourceServiceWithLog) CreateMany(ctx context.Context, vs []ent.Resour
 	return _d._base.CreateMany(ctx, vs)
 }
 
+// CreatePreByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) CreatePreByResourceId(ctx context.Context, id int, v ent.ResourceBaseCreateReq) (res *ent.Resource, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling CreatePreByResourceId", "params", map[string]interface{}{
+					"id": id,
+					"v":  v}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling CreatePreByResourceId", "params", map[string]interface{}{
+					"id": id,
+					"v":  v}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling CreatePreByResourceId", "params", map[string]interface{}{
+				"id": id,
+				"v":  v}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling CreatePreByResourceId", "params", map[string]interface{}{
+				"id": id,
+				"v":  v}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.CreatePreByResourceId(ctx, id, v)
+}
+
+// CreateResourcesByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) CreateResourcesByResourceId(ctx context.Context, id int, vs []ent.ResourceBaseCreateReq) (res *ent.Resource, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling CreateResourcesByResourceId", "params", map[string]interface{}{
+					"id": id,
+					"vs": vs}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling CreateResourcesByResourceId", "params", map[string]interface{}{
+					"id": id,
+					"vs": vs}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling CreateResourcesByResourceId", "params", map[string]interface{}{
+				"id": id,
+				"vs": vs}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling CreateResourcesByResourceId", "params", map[string]interface{}{
+				"id": id,
+				"vs": vs}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.CreateResourcesByResourceId(ctx, id, vs)
+}
+
 // DeleteById implements ResourceService
 func (_d ResourceServiceWithLog) DeleteById(ctx context.Context, id int) (err error) {
 
@@ -313,6 +403,96 @@ func (_d ResourceServiceWithLog) GetById(ctx context.Context, id int) (res ent.R
 	return _d._base.GetById(ctx, id)
 }
 
+// GetNextByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) GetNextByResourceId(ctx context.Context, id int, i interface{}) (res []ent.ResourceBaseGetRes, count int, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling GetNextByResourceId", "params", map[string]interface{}{
+					"id": id,
+					"i":  i}, "results", map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling GetNextByResourceId", "params", map[string]interface{}{
+					"id": id,
+					"i":  i}, "results", map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling GetNextByResourceId", "params", map[string]interface{}{
+				"id": id,
+				"i":  i}, "results", map[string]interface{}{
+				"res":   res,
+				"count": count,
+				"err":   fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling GetNextByResourceId", "params", map[string]interface{}{
+				"id": id,
+				"i":  i}, "results", map[string]interface{}{
+				"res":   res,
+				"count": count,
+				"err":   fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.GetNextByResourceId(ctx, id, i)
+}
+
+// GetPreByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) GetPreByResourceId(ctx context.Context, id int) (res ent.ResourceBaseGetRes, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling GetPreByResourceId", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling GetPreByResourceId", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling GetPreByResourceId", "params", map[string]interface{}{
+				"id": id}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling GetPreByResourceId", "params", map[string]interface{}{
+				"id": id}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.GetPreByResourceId(ctx, id)
+}
+
 // IdByResource implements ResourceService
 func (_d ResourceServiceWithLog) IdByResource(ctx context.Context, path string, action string) (i1 int, err error) {
 
@@ -356,6 +536,88 @@ func (_d ResourceServiceWithLog) IdByResource(ctx context.Context, path string, 
 		}
 	}()
 	return _d._base.IdByResource(ctx, path, action)
+}
+
+// RawAddBindNextByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) RawAddBindNextByResourceId(ctx context.Context, id int, addIds []int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawAddBindNextByResourceId", "params", map[string]interface{}{
+					"id":     id,
+					"addIds": addIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawAddBindNextByResourceId", "params", map[string]interface{}{
+					"id":     id,
+					"addIds": addIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawAddBindNextByResourceId", "params", map[string]interface{}{
+				"id":     id,
+				"addIds": addIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawAddBindNextByResourceId", "params", map[string]interface{}{
+				"id":     id,
+				"addIds": addIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawAddBindNextByResourceId(ctx, id, addIds)
+}
+
+// RawAddBindPreByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) RawAddBindPreByResourceId(ctx context.Context, id int, addId int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawAddBindPreByResourceId", "params", map[string]interface{}{
+					"id":    id,
+					"addId": addId}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawAddBindPreByResourceId", "params", map[string]interface{}{
+					"id":    id,
+					"addId": addId}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawAddBindPreByResourceId", "params", map[string]interface{}{
+				"id":    id,
+				"addId": addId}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawAddBindPreByResourceId", "params", map[string]interface{}{
+				"id":    id,
+				"addId": addId}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawAddBindPreByResourceId(ctx, id, addId)
 }
 
 // RawByQueriesAll implements ResourceService
@@ -526,6 +788,178 @@ func (_d ResourceServiceWithLog) RawCreateMany(ctx context.Context, vs ent.Resou
 	return _d._base.RawCreateMany(ctx, vs)
 }
 
+// RawCreatePreByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) RawCreatePreByResourceId(ctx context.Context, id int, v *ent.Resource) (res *ent.Resource, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawCreatePreByResourceId", "params", map[string]interface{}{
+					"id": id,
+					"v":  v}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawCreatePreByResourceId", "params", map[string]interface{}{
+					"id": id,
+					"v":  v}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawCreatePreByResourceId", "params", map[string]interface{}{
+				"id": id,
+				"v":  v}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawCreatePreByResourceId", "params", map[string]interface{}{
+				"id": id,
+				"v":  v}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawCreatePreByResourceId(ctx, id, v)
+}
+
+// RawCreateResourcesByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) RawCreateResourcesByResourceId(ctx context.Context, id int, vs ent.Resources) (res *ent.Resource, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawCreateResourcesByResourceId", "params", map[string]interface{}{
+					"id": id,
+					"vs": vs}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawCreateResourcesByResourceId", "params", map[string]interface{}{
+					"id": id,
+					"vs": vs}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawCreateResourcesByResourceId", "params", map[string]interface{}{
+				"id": id,
+				"vs": vs}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawCreateResourcesByResourceId", "params", map[string]interface{}{
+				"id": id,
+				"vs": vs}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawCreateResourcesByResourceId(ctx, id, vs)
+}
+
+// RawDeleteNextByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) RawDeleteNextByResourceId(ctx context.Context, id int, deleteIds []int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawDeleteNextByResourceId", "params", map[string]interface{}{
+					"id":        id,
+					"deleteIds": deleteIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawDeleteNextByResourceId", "params", map[string]interface{}{
+					"id":        id,
+					"deleteIds": deleteIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawDeleteNextByResourceId", "params", map[string]interface{}{
+				"id":        id,
+				"deleteIds": deleteIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawDeleteNextByResourceId", "params", map[string]interface{}{
+				"id":        id,
+				"deleteIds": deleteIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawDeleteNextByResourceId(ctx, id, deleteIds)
+}
+
+// RawDeletePreByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) RawDeletePreByResourceId(ctx context.Context, id int, deleteId int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawDeletePreByResourceId", "params", map[string]interface{}{
+					"id":       id,
+					"deleteId": deleteId}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawDeletePreByResourceId", "params", map[string]interface{}{
+					"id":       id,
+					"deleteId": deleteId}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawDeletePreByResourceId", "params", map[string]interface{}{
+				"id":       id,
+				"deleteId": deleteId}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawDeletePreByResourceId", "params", map[string]interface{}{
+				"id":       id,
+				"deleteId": deleteId}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawDeletePreByResourceId(ctx, id, deleteId)
+}
+
 // RawGetById implements ResourceService
 func (_d ResourceServiceWithLog) RawGetById(ctx context.Context, id int) (res *ent.Resource, err error) {
 
@@ -565,6 +999,260 @@ func (_d ResourceServiceWithLog) RawGetById(ctx context.Context, id int) (res *e
 		}
 	}()
 	return _d._base.RawGetById(ctx, id)
+}
+
+// RawGetNextByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) RawGetNextByResourceId(ctx context.Context, id int, i interface{}) (res ent.Resources, count int, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawGetNextByResourceId", "params", map[string]interface{}{
+					"id": id,
+					"i":  i}, "results", map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawGetNextByResourceId", "params", map[string]interface{}{
+					"id": id,
+					"i":  i}, "results", map[string]interface{}{
+					"res":   res,
+					"count": count,
+					"err":   fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawGetNextByResourceId", "params", map[string]interface{}{
+				"id": id,
+				"i":  i}, "results", map[string]interface{}{
+				"res":   res,
+				"count": count,
+				"err":   fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawGetNextByResourceId", "params", map[string]interface{}{
+				"id": id,
+				"i":  i}, "results", map[string]interface{}{
+				"res":   res,
+				"count": count,
+				"err":   fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawGetNextByResourceId(ctx, id, i)
+}
+
+// RawGetPreByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) RawGetPreByResourceId(ctx context.Context, id int) (res *ent.Resource, err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawGetPreByResourceId", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawGetPreByResourceId", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"res": res,
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawGetPreByResourceId", "params", map[string]interface{}{
+				"id": id}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawGetPreByResourceId", "params", map[string]interface{}{
+				"id": id}, "results", map[string]interface{}{
+				"res": res,
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawGetPreByResourceId(ctx, id)
+}
+
+// RawRemoveBindNextByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) RawRemoveBindNextByResourceId(ctx context.Context, id int, removeIds []int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawRemoveBindNextByResourceId", "params", map[string]interface{}{
+					"id":        id,
+					"removeIds": removeIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawRemoveBindNextByResourceId", "params", map[string]interface{}{
+					"id":        id,
+					"removeIds": removeIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawRemoveBindNextByResourceId", "params", map[string]interface{}{
+				"id":        id,
+				"removeIds": removeIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawRemoveBindNextByResourceId", "params", map[string]interface{}{
+				"id":        id,
+				"removeIds": removeIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawRemoveBindNextByResourceId(ctx, id, removeIds)
+}
+
+// RawRemoveBindPreByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) RawRemoveBindPreByResourceId(ctx context.Context, id int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawRemoveBindPreByResourceId", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawRemoveBindPreByResourceId", "params", map[string]interface{}{
+					"id": id}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawRemoveBindPreByResourceId", "params", map[string]interface{}{
+				"id": id}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawRemoveBindPreByResourceId", "params", map[string]interface{}{
+				"id": id}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawRemoveBindPreByResourceId(ctx, id)
+}
+
+// RawUpdateBindNextByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) RawUpdateBindNextByResourceId(ctx context.Context, id int, removeIds []int, addIds []int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawUpdateBindNextByResourceId", "params", map[string]interface{}{
+					"id":        id,
+					"removeIds": removeIds,
+					"addIds":    addIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawUpdateBindNextByResourceId", "params", map[string]interface{}{
+					"id":        id,
+					"removeIds": removeIds,
+					"addIds":    addIds}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawUpdateBindNextByResourceId", "params", map[string]interface{}{
+				"id":        id,
+				"removeIds": removeIds,
+				"addIds":    addIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawUpdateBindNextByResourceId", "params", map[string]interface{}{
+				"id":        id,
+				"removeIds": removeIds,
+				"addIds":    addIds}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawUpdateBindNextByResourceId(ctx, id, removeIds, addIds)
+}
+
+// RawUpdateBindPreByResourceId implements ResourceService
+func (_d ResourceServiceWithLog) RawUpdateBindPreByResourceId(ctx context.Context, id int, updateId int) (err error) {
+
+	_log := _d._log.With(zap.String("traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String()))
+
+	debug, _ := ctx.Value(ginkHttp.ContextKeyRequestDebug).(bool)
+
+	defer func() {
+		if debug {
+			if err == nil {
+				_log.Infow("with_log calling RawUpdateBindPreByResourceId", "params", map[string]interface{}{
+					"id":       id,
+					"updateId": updateId}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+			if err != nil {
+				_log.Errorw("with_log calling RawUpdateBindPreByResourceId", "params", map[string]interface{}{
+					"id":       id,
+					"updateId": updateId}, "results", map[string]interface{}{
+					"err": fmt.Sprintf("%v", err)})
+			}
+
+		}
+		if !debug && err == nil {
+			_log.Debugw("with_log calling RawUpdateBindPreByResourceId", "params", map[string]interface{}{
+				"id":       id,
+				"updateId": updateId}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+
+		if err != nil && !debug {
+			_log.Errorw("with_log calling RawUpdateBindPreByResourceId", "params", map[string]interface{}{
+				"id":       id,
+				"updateId": updateId}, "results", map[string]interface{}{
+				"err": fmt.Sprintf("%v", err)})
+		}
+	}()
+	return _d._base.RawUpdateBindPreByResourceId(ctx, id, updateId)
 }
 
 // RawUpdateById implements ResourceService
