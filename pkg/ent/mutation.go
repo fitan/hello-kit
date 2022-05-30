@@ -1805,6 +1805,11 @@ type ResourceMutation struct {
 	action        *string
 	comments      *string
 	clearedFields map[string]struct{}
+	pre           *int
+	clearedpre    bool
+	next          map[int]struct{}
+	removednext   map[int]struct{}
+	clearednext   bool
 	done          bool
 	oldValue      func(context.Context) (*Resource, error)
 	predicates    []predicate.Resource
@@ -2160,6 +2165,99 @@ func (m *ResourceMutation) ResetComments() {
 	m.comments = nil
 }
 
+// SetPreID sets the "pre" edge to the Resource entity by id.
+func (m *ResourceMutation) SetPreID(id int) {
+	m.pre = &id
+}
+
+// ClearPre clears the "pre" edge to the Resource entity.
+func (m *ResourceMutation) ClearPre() {
+	m.clearedpre = true
+}
+
+// PreCleared reports if the "pre" edge to the Resource entity was cleared.
+func (m *ResourceMutation) PreCleared() bool {
+	return m.clearedpre
+}
+
+// PreID returns the "pre" edge ID in the mutation.
+func (m *ResourceMutation) PreID() (id int, exists bool) {
+	if m.pre != nil {
+		return *m.pre, true
+	}
+	return
+}
+
+// PreIDs returns the "pre" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PreID instead. It exists only for internal usage by the builders.
+func (m *ResourceMutation) PreIDs() (ids []int) {
+	if id := m.pre; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPre resets all changes to the "pre" edge.
+func (m *ResourceMutation) ResetPre() {
+	m.pre = nil
+	m.clearedpre = false
+}
+
+// AddNextIDs adds the "next" edge to the Resource entity by ids.
+func (m *ResourceMutation) AddNextIDs(ids ...int) {
+	if m.next == nil {
+		m.next = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.next[ids[i]] = struct{}{}
+	}
+}
+
+// ClearNext clears the "next" edge to the Resource entity.
+func (m *ResourceMutation) ClearNext() {
+	m.clearednext = true
+}
+
+// NextCleared reports if the "next" edge to the Resource entity was cleared.
+func (m *ResourceMutation) NextCleared() bool {
+	return m.clearednext
+}
+
+// RemoveNextIDs removes the "next" edge to the Resource entity by IDs.
+func (m *ResourceMutation) RemoveNextIDs(ids ...int) {
+	if m.removednext == nil {
+		m.removednext = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.next, ids[i])
+		m.removednext[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedNext returns the removed IDs of the "next" edge to the Resource entity.
+func (m *ResourceMutation) RemovedNextIDs() (ids []int) {
+	for id := range m.removednext {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// NextIDs returns the "next" edge IDs in the mutation.
+func (m *ResourceMutation) NextIDs() (ids []int) {
+	for id := range m.next {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetNext resets all changes to the "next" edge.
+func (m *ResourceMutation) ResetNext() {
+	m.next = nil
+	m.clearednext = false
+	m.removednext = nil
+}
+
 // Where appends a list predicates to the ResourceMutation builder.
 func (m *ResourceMutation) Where(ps ...predicate.Resource) {
 	m.predicates = append(m.predicates, ps...)
@@ -2380,49 +2478,103 @@ func (m *ResourceMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ResourceMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.pre != nil {
+		edges = append(edges, resource.EdgePre)
+	}
+	if m.next != nil {
+		edges = append(edges, resource.EdgeNext)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *ResourceMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case resource.EdgePre:
+		if id := m.pre; id != nil {
+			return []ent.Value{*id}
+		}
+	case resource.EdgeNext:
+		ids := make([]ent.Value, 0, len(m.next))
+		for id := range m.next {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ResourceMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.removednext != nil {
+		edges = append(edges, resource.EdgeNext)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *ResourceMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case resource.EdgeNext:
+		ids := make([]ent.Value, 0, len(m.removednext))
+		for id := range m.removednext {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ResourceMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.clearedpre {
+		edges = append(edges, resource.EdgePre)
+	}
+	if m.clearednext {
+		edges = append(edges, resource.EdgeNext)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *ResourceMutation) EdgeCleared(name string) bool {
+	switch name {
+	case resource.EdgePre:
+		return m.clearedpre
+	case resource.EdgeNext:
+		return m.clearednext
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *ResourceMutation) ClearEdge(name string) error {
+	switch name {
+	case resource.EdgePre:
+		m.ClearPre()
+		return nil
+	}
 	return fmt.Errorf("unknown Resource unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *ResourceMutation) ResetEdge(name string) error {
+	switch name {
+	case resource.EdgePre:
+		m.ResetPre()
+		return nil
+	case resource.EdgeNext:
+		m.ResetNext()
+		return nil
+	}
 	return fmt.Errorf("unknown Resource edge %s", name)
 }
 

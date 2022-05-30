@@ -30,6 +30,44 @@ type Resource struct {
 	Action string `json:"action,omitempty"`
 	// Comments holds the value of the "comments" field.
 	Comments string `json:"comments,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the ResourceQuery when eager-loading is set.
+	Edges         ResourceEdges `json:"edges"`
+	resource_next *int
+}
+
+// ResourceEdges holds the relations/edges for other nodes in the graph.
+type ResourceEdges struct {
+	// Pre holds the value of the pre edge.
+	Pre *Resource `json:"pre,omitempty"`
+	// Next holds the value of the next edge.
+	Next []*Resource `json:"next,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// PreOrErr returns the Pre value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ResourceEdges) PreOrErr() (*Resource, error) {
+	if e.loadedTypes[0] {
+		if e.Pre == nil {
+			// The edge pre was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: resource.Label}
+		}
+		return e.Pre, nil
+	}
+	return nil, &NotLoadedError{edge: "pre"}
+}
+
+// NextOrErr returns the Next value or an error if the edge
+// was not loaded in eager-loading.
+func (e ResourceEdges) NextOrErr() ([]*Resource, error) {
+	if e.loadedTypes[1] {
+		return e.Next, nil
+	}
+	return nil, &NotLoadedError{edge: "next"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -43,6 +81,8 @@ func (*Resource) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullString)
 		case resource.FieldCreateTime, resource.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
+		case resource.ForeignKeys[0]: // resource_next
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Resource", columns[i])
 		}
@@ -106,9 +146,26 @@ func (r *Resource) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				r.Comments = value.String
 			}
+		case resource.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field resource_next", value)
+			} else if value.Valid {
+				r.resource_next = new(int)
+				*r.resource_next = int(value.Int64)
+			}
 		}
 	}
 	return nil
+}
+
+// QueryPre queries the "pre" edge of the Resource entity.
+func (r *Resource) QueryPre() *ResourceQuery {
+	return (&ResourceClient{config: r.config}).QueryPre(r)
+}
+
+// QueryNext queries the "next" edge of the Resource entity.
+func (r *Resource) QueryNext() *ResourceQuery {
+	return (&ResourceClient{config: r.config}).QueryNext(r)
 }
 
 // Update returns a builder for updating this Resource.

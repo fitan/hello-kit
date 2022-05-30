@@ -78,6 +78,40 @@ func (rc *ResourceCreate) SetComments(s string) *ResourceCreate {
 	return rc
 }
 
+// SetPreID sets the "pre" edge to the Resource entity by ID.
+func (rc *ResourceCreate) SetPreID(id int) *ResourceCreate {
+	rc.mutation.SetPreID(id)
+	return rc
+}
+
+// SetNillablePreID sets the "pre" edge to the Resource entity by ID if the given value is not nil.
+func (rc *ResourceCreate) SetNillablePreID(id *int) *ResourceCreate {
+	if id != nil {
+		rc = rc.SetPreID(*id)
+	}
+	return rc
+}
+
+// SetPre sets the "pre" edge to the Resource entity.
+func (rc *ResourceCreate) SetPre(r *Resource) *ResourceCreate {
+	return rc.SetPreID(r.ID)
+}
+
+// AddNextIDs adds the "next" edge to the Resource entity by IDs.
+func (rc *ResourceCreate) AddNextIDs(ids ...int) *ResourceCreate {
+	rc.mutation.AddNextIDs(ids...)
+	return rc
+}
+
+// AddNext adds the "next" edges to the Resource entity.
+func (rc *ResourceCreate) AddNext(r ...*Resource) *ResourceCreate {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return rc.AddNextIDs(ids...)
+}
+
 // Mutation returns the ResourceMutation object of the builder.
 func (rc *ResourceCreate) Mutation() *ResourceMutation {
 	return rc.mutation
@@ -264,6 +298,45 @@ func (rc *ResourceCreate) createSpec() (*Resource, *sqlgraph.CreateSpec) {
 			Column: resource.FieldComments,
 		})
 		_node.Comments = value
+	}
+	if nodes := rc.mutation.PreIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resource.PreTable,
+			Columns: []string{resource.PreColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: resource.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.resource_next = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := rc.mutation.NextIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resource.NextTable,
+			Columns: []string{resource.NextColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: resource.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

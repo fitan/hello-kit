@@ -56,12 +56,21 @@ var (
 		{Name: "path", Type: field.TypeString},
 		{Name: "action", Type: field.TypeString},
 		{Name: "comments", Type: field.TypeString},
+		{Name: "resource_next", Type: field.TypeInt, Nullable: true},
 	}
 	// ResourcesTable holds the schema information for the "resources" table.
 	ResourcesTable = &schema.Table{
 		Name:       "resources",
 		Columns:    ResourcesColumns,
 		PrimaryKey: []*schema.Column{ResourcesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "resources_resources_next",
+				Columns:    []*schema.Column{ResourcesColumns[8]},
+				RefColumns: []*schema.Column{ResourcesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// ServicesColumns holds the columns for the "services" table.
 	ServicesColumns = []*schema.Column{
@@ -133,6 +142,7 @@ var (
 )
 
 func init() {
+	ResourcesTable.ForeignKeys[0].RefTable = ResourcesTable
 	ServicesTable.ForeignKeys[0].RefTable = ProjectsTable
 	TblServicetreeTable.Annotation = &entsql.Annotation{
 		Table: "tbl_servicetree",

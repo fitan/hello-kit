@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/mixin"
 )
@@ -55,5 +56,7 @@ func (Resource) Fields() []ent.Field {
 
 // Edges of the Resource.
 func (Resource) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("next", Resource.Type).From("pre").Unique(),
+	}
 }

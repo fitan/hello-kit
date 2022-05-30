@@ -25,8 +25,20 @@ const (
 	FieldAction = "action"
 	// FieldComments holds the string denoting the comments field in the database.
 	FieldComments = "comments"
+	// EdgePre holds the string denoting the pre edge name in mutations.
+	EdgePre = "pre"
+	// EdgeNext holds the string denoting the next edge name in mutations.
+	EdgeNext = "next"
 	// Table holds the table name of the resource in the database.
 	Table = "resources"
+	// PreTable is the table that holds the pre relation/edge.
+	PreTable = "resources"
+	// PreColumn is the table column denoting the pre relation/edge.
+	PreColumn = "resource_next"
+	// NextTable is the table that holds the next relation/edge.
+	NextTable = "resources"
+	// NextColumn is the table column denoting the next relation/edge.
+	NextColumn = "resource_next"
 )
 
 // Columns holds all SQL columns for resource fields.
@@ -41,10 +53,21 @@ var Columns = []string{
 	FieldComments,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "resources"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"resource_next",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

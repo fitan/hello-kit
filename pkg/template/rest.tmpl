@@ -306,8 +306,8 @@ func (c *{{$structName}}) RawCreate{{pascal $e.Type.Name}}By{{$n.Name}}Id(ctx co
 func (c *{{$structName}}) RawGet{{pascal $e.Type.Name}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}) (res *{{$e.Type.Name}}, err error) {
 	return c.client.{{$n.Name}}.Query().Where({{lower $n.Name}}.ID(id)).Query{{pascal $e.Name}}().First(ctx)
 }
-func (c *{{$structName}}) RawRemoveBind{{pascal $e.Type.Name}}By{{pascal $n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}) (err error) {
-	_, err = c.client.{{pascal $n.Name}}.UpdateOneID(id).Clear{{pascal $e.Type.Name}}().Save(ctx)
+func (c *{{$structName}}) RawRemoveBind{{$e.StructField}}By{{$n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}) (err error) {
+	_, err = c.client.{{pascal $n.Name}}.UpdateOneID(id).{{$e.MutationClear}}().Save(ctx)
 	return
 }
 func (c *{{$structName}}) RawDelete{{pascal $e.Type.Name}}By{{pascal $n.Name}}Id(ctx context.Context,id {{$n.ID.Type.String}}, deleteId {{$e.Type.ID.Type.String}}) (err error) {

@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"hello/pkg/ent/predicate"
@@ -26,6 +27,10 @@ type ResourceQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Resource
+	// eager-loading edges.
+	withPre  *ResourceQuery
+	withNext *ResourceQuery
+	withFKs  bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,6 +65,50 @@ func (rq *ResourceQuery) Unique(unique bool) *ResourceQuery {
 func (rq *ResourceQuery) Order(o ...OrderFunc) *ResourceQuery {
 	rq.order = append(rq.order, o...)
 	return rq
+}
+
+// QueryPre chains the current query on the "pre" edge.
+func (rq *ResourceQuery) QueryPre() *ResourceQuery {
+	query := &ResourceQuery{config: rq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resource.Table, resource.FieldID, selector),
+			sqlgraph.To(resource.Table, resource.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, resource.PreTable, resource.PreColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryNext chains the current query on the "next" edge.
+func (rq *ResourceQuery) QueryNext() *ResourceQuery {
+	query := &ResourceQuery{config: rq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resource.Table, resource.FieldID, selector),
+			sqlgraph.To(resource.Table, resource.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, resource.NextTable, resource.NextColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Resource entity from the query.
@@ -243,11 +292,35 @@ func (rq *ResourceQuery) Clone() *ResourceQuery {
 		offset:     rq.offset,
 		order:      append([]OrderFunc{}, rq.order...),
 		predicates: append([]predicate.Resource{}, rq.predicates...),
+		withPre:    rq.withPre.Clone(),
+		withNext:   rq.withNext.Clone(),
 		// clone intermediate query.
 		sql:    rq.sql.Clone(),
 		path:   rq.path,
 		unique: rq.unique,
 	}
+}
+
+// WithPre tells the query-builder to eager-load the nodes that are connected to
+// the "pre" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *ResourceQuery) WithPre(opts ...func(*ResourceQuery)) *ResourceQuery {
+	query := &ResourceQuery{config: rq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	rq.withPre = query
+	return rq
+}
+
+// WithNext tells the query-builder to eager-load the nodes that are connected to
+// the "next" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *ResourceQuery) WithNext(opts ...func(*ResourceQuery)) *ResourceQuery {
+	query := &ResourceQuery{config: rq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	rq.withNext = query
+	return rq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -313,9 +386,20 @@ func (rq *ResourceQuery) prepareQuery(ctx context.Context) error {
 
 func (rq *ResourceQuery) sqlAll(ctx context.Context) ([]*Resource, error) {
 	var (
-		nodes = []*Resource{}
-		_spec = rq.querySpec()
+		nodes       = []*Resource{}
+		withFKs     = rq.withFKs
+		_spec       = rq.querySpec()
+		loadedTypes = [2]bool{
+			rq.withPre != nil,
+			rq.withNext != nil,
+		}
 	)
+	if rq.withPre != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, resource.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Resource{config: rq.config}
 		nodes = append(nodes, node)
@@ -326,6 +410,7 @@ func (rq *ResourceQuery) sqlAll(ctx context.Context) ([]*Resource, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, rq.driver, _spec); err != nil {
@@ -334,6 +419,65 @@ func (rq *ResourceQuery) sqlAll(ctx context.Context) ([]*Resource, error) {
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := rq.withPre; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Resource)
+		for i := range nodes {
+			if nodes[i].resource_next == nil {
+				continue
+			}
+			fk := *nodes[i].resource_next
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(resource.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "resource_next" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Pre = n
+			}
+		}
+	}
+
+	if query := rq.withNext; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Resource)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Next = []*Resource{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Resource(func(s *sql.Selector) {
+			s.Where(sql.InValues(resource.NextColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.resource_next
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "resource_next" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "resource_next" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Next = append(node.Edges.Next, n)
+		}
+	}
+
 	return nodes, nil
 }
 

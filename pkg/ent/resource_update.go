@@ -64,9 +64,70 @@ func (ru *ResourceUpdate) SetComments(s string) *ResourceUpdate {
 	return ru
 }
 
+// SetPreID sets the "pre" edge to the Resource entity by ID.
+func (ru *ResourceUpdate) SetPreID(id int) *ResourceUpdate {
+	ru.mutation.SetPreID(id)
+	return ru
+}
+
+// SetNillablePreID sets the "pre" edge to the Resource entity by ID if the given value is not nil.
+func (ru *ResourceUpdate) SetNillablePreID(id *int) *ResourceUpdate {
+	if id != nil {
+		ru = ru.SetPreID(*id)
+	}
+	return ru
+}
+
+// SetPre sets the "pre" edge to the Resource entity.
+func (ru *ResourceUpdate) SetPre(r *Resource) *ResourceUpdate {
+	return ru.SetPreID(r.ID)
+}
+
+// AddNextIDs adds the "next" edge to the Resource entity by IDs.
+func (ru *ResourceUpdate) AddNextIDs(ids ...int) *ResourceUpdate {
+	ru.mutation.AddNextIDs(ids...)
+	return ru
+}
+
+// AddNext adds the "next" edges to the Resource entity.
+func (ru *ResourceUpdate) AddNext(r ...*Resource) *ResourceUpdate {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return ru.AddNextIDs(ids...)
+}
+
 // Mutation returns the ResourceMutation object of the builder.
 func (ru *ResourceUpdate) Mutation() *ResourceMutation {
 	return ru.mutation
+}
+
+// ClearPre clears the "pre" edge to the Resource entity.
+func (ru *ResourceUpdate) ClearPre() *ResourceUpdate {
+	ru.mutation.ClearPre()
+	return ru
+}
+
+// ClearNext clears all "next" edges to the Resource entity.
+func (ru *ResourceUpdate) ClearNext() *ResourceUpdate {
+	ru.mutation.ClearNext()
+	return ru
+}
+
+// RemoveNextIDs removes the "next" edge to Resource entities by IDs.
+func (ru *ResourceUpdate) RemoveNextIDs(ids ...int) *ResourceUpdate {
+	ru.mutation.RemoveNextIDs(ids...)
+	return ru
+}
+
+// RemoveNext removes "next" edges to Resource entities.
+func (ru *ResourceUpdate) RemoveNext(r ...*Resource) *ResourceUpdate {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return ru.RemoveNextIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -192,6 +253,95 @@ func (ru *ResourceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: resource.FieldComments,
 		})
 	}
+	if ru.mutation.PreCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resource.PreTable,
+			Columns: []string{resource.PreColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: resource.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.PreIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resource.PreTable,
+			Columns: []string{resource.PreColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: resource.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ru.mutation.NextCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resource.NextTable,
+			Columns: []string{resource.NextColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: resource.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.RemovedNextIDs(); len(nodes) > 0 && !ru.mutation.NextCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resource.NextTable,
+			Columns: []string{resource.NextColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: resource.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ru.mutation.NextIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resource.NextTable,
+			Columns: []string{resource.NextColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: resource.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ru.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{resource.Label}
@@ -247,9 +397,70 @@ func (ruo *ResourceUpdateOne) SetComments(s string) *ResourceUpdateOne {
 	return ruo
 }
 
+// SetPreID sets the "pre" edge to the Resource entity by ID.
+func (ruo *ResourceUpdateOne) SetPreID(id int) *ResourceUpdateOne {
+	ruo.mutation.SetPreID(id)
+	return ruo
+}
+
+// SetNillablePreID sets the "pre" edge to the Resource entity by ID if the given value is not nil.
+func (ruo *ResourceUpdateOne) SetNillablePreID(id *int) *ResourceUpdateOne {
+	if id != nil {
+		ruo = ruo.SetPreID(*id)
+	}
+	return ruo
+}
+
+// SetPre sets the "pre" edge to the Resource entity.
+func (ruo *ResourceUpdateOne) SetPre(r *Resource) *ResourceUpdateOne {
+	return ruo.SetPreID(r.ID)
+}
+
+// AddNextIDs adds the "next" edge to the Resource entity by IDs.
+func (ruo *ResourceUpdateOne) AddNextIDs(ids ...int) *ResourceUpdateOne {
+	ruo.mutation.AddNextIDs(ids...)
+	return ruo
+}
+
+// AddNext adds the "next" edges to the Resource entity.
+func (ruo *ResourceUpdateOne) AddNext(r ...*Resource) *ResourceUpdateOne {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return ruo.AddNextIDs(ids...)
+}
+
 // Mutation returns the ResourceMutation object of the builder.
 func (ruo *ResourceUpdateOne) Mutation() *ResourceMutation {
 	return ruo.mutation
+}
+
+// ClearPre clears the "pre" edge to the Resource entity.
+func (ruo *ResourceUpdateOne) ClearPre() *ResourceUpdateOne {
+	ruo.mutation.ClearPre()
+	return ruo
+}
+
+// ClearNext clears all "next" edges to the Resource entity.
+func (ruo *ResourceUpdateOne) ClearNext() *ResourceUpdateOne {
+	ruo.mutation.ClearNext()
+	return ruo
+}
+
+// RemoveNextIDs removes the "next" edge to Resource entities by IDs.
+func (ruo *ResourceUpdateOne) RemoveNextIDs(ids ...int) *ResourceUpdateOne {
+	ruo.mutation.RemoveNextIDs(ids...)
+	return ruo
+}
+
+// RemoveNext removes "next" edges to Resource entities.
+func (ruo *ResourceUpdateOne) RemoveNext(r ...*Resource) *ResourceUpdateOne {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return ruo.RemoveNextIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -398,6 +609,95 @@ func (ruo *ResourceUpdateOne) sqlSave(ctx context.Context) (_node *Resource, err
 			Value:  value,
 			Column: resource.FieldComments,
 		})
+	}
+	if ruo.mutation.PreCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resource.PreTable,
+			Columns: []string{resource.PreColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: resource.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.PreIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resource.PreTable,
+			Columns: []string{resource.PreColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: resource.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ruo.mutation.NextCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resource.NextTable,
+			Columns: []string{resource.NextColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: resource.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.RemovedNextIDs(); len(nodes) > 0 && !ruo.mutation.NextCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resource.NextTable,
+			Columns: []string{resource.NextColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: resource.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ruo.mutation.NextIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resource.NextTable,
+			Columns: []string{resource.NextColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: resource.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Resource{config: ruo.config}
 	_spec.Assign = _node.assignValues

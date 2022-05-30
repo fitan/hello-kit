@@ -899,6 +899,20 @@ type ResourceBaseInterface interface {
 	RawUpdateById(ctx context.Context, id int, v *Resource) (*Resource, error)
 	RawUpdateMany(ctx context.Context, vs Resources) (err error)
 
+	RawCreateResourceByResourceId(ctx context.Context, id int, v *Resource) (res *Resource, err error)
+	RawGetResourceByResourceId(ctx context.Context, id int) (res *Resource, err error)
+	RawDeleteResourceByResourceId(ctx context.Context, id int, deleteId int) (err error)
+	RawUpdateBindResourceByResourceId(ctx context.Context, id int, updateId int) (err error)
+	RawAddBindResourceByResourceId(ctx context.Context, id int, addId int) (err error)
+	RawRemoveBindResourceByResourceId(ctx context.Context, id int) (err error)
+
+	RawCreateResourcesByResourceId(ctx context.Context, id int, vs Resources) (res *Resource, err error)
+	RawGetResourcesByResourceId(ctx context.Context, id int, i interface{}) (res Resources, count int, err error)
+	RawDeleteResourcesByResourceId(ctx context.Context, id int, deleteIds []int) (err error)
+	RawUpdateBindResourcesByResourceId(ctx context.Context, id int, removeIds []int, addIds []int) (err error)
+	RawAddBindResourcesByResourceId(ctx context.Context, id int, addIds []int) (err error)
+	RawRemoveBindResourcesByResourceId(ctx context.Context, id int, removeIds []int) (err error)
+
 	Create(ctx context.Context, v ResourceBaseCreateReq) (res *Resource, err error)
 	CreateMany(ctx context.Context, vs []ResourceBaseCreateReq) (Resources, error)
 	GetById(ctx context.Context, id int) (res ResourceBaseGetRes, err error)
@@ -908,6 +922,12 @@ type ResourceBaseInterface interface {
 	UpdateMany(ctx context.Context, vs []ResourceBaseUpdateReq) (err error)
 	DeleteById(ctx context.Context, id int) error
 	DeleteMany(ctx context.Context, ids []int) (err error)
+
+	CreateResourceByResourceId(ctx context.Context, id int, v ResourceBaseCreateReq) (res *Resource, err error)
+	GetResourceByResourceId(ctx context.Context, id int) (res ResourceBaseGetRes, err error)
+
+	CreateResourcesByResourceId(ctx context.Context, id int, vs []ResourceBaseCreateReq) (res *Resource, err error)
+	GetResourcesByResourceId(ctx context.Context, id int, i interface{}) (res []ResourceBaseGetRes, count int, err error)
 }
 
 type ResourceBase struct {
@@ -996,6 +1016,135 @@ func (c *ResourceBase) RawUpdateMany(ctx context.Context, vs Resources) (err err
 		}
 	}
 	return nil
+}
+
+func (c *ResourceBase) RawCreateResourceByResourceId(ctx context.Context, id int, v *Resource) (res *Resource, err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	create := tx.Resource.Create()
+	RawResourceBaseCreateSet(create, v)
+	save, err := create.Save(ctx)
+	if err != nil {
+		return
+	}
+
+	return tx.Resource.UpdateOneID(id).SetPre(save).Save(ctx)
+}
+
+func (c *ResourceBase) RawGetResourceByResourceId(ctx context.Context, id int) (res *Resource, err error) {
+	return c.client.Resource.Query().Where(resource.ID(id)).QueryPre().First(ctx)
+}
+func (c *ResourceBase) RawRemoveBindPreByResourceId(ctx context.Context, id int) (err error) {
+	_, err = c.client.Resource.UpdateOneID(id).ClearPre().Save(ctx)
+	return
+}
+func (c *ResourceBase) RawDeleteResourceByResourceId(ctx context.Context, id int, deleteId int) (err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	_, err = tx.client.Resource.UpdateOneID(id).ClearResource().Save(ctx)
+	if err != nil {
+		return
+	}
+	_, err = tx.client.Resource.Delete().Where(resource.IDEQ(deleteId)).Exec(ctx)
+	return
+}
+
+func (c *ResourceBase) RawUpdateBindResourceByResourceId(ctx context.Context, id int, updateId int) (err error) {
+	return c.client.Resource.UpdateOneID(id).SetResourceID(updateId).Exec(ctx)
+}
+
+func (c *ResourceBase) RawAddBindResourceByResourceId(ctx context.Context, id int, addId int) (err error) {
+	return c.client.Resource.UpdateOneID(id).SetResourceID(addId).Exec(ctx)
+}
+
+func (c *ResourceBase) RawCreateResourcesByResourceId(ctx context.Context, id int, vs Resources) (res *Resource, err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	bulk := make([]*ResourceCreate, len(vs))
+	for i, v := range vs {
+		create := c.client.Resource.Create()
+		RawResourceBaseCreateSet(create, v)
+		bulk[i] = create
+	}
+	save, err := tx.Resource.CreateBulk(bulk...).Save(ctx)
+	if err != nil {
+		return
+	}
+
+	return tx.Resource.UpdateOneID(id).AddNext(save...).Save(ctx)
+}
+func (c *ResourceBase) RawGetResourcesByResourceId(ctx context.Context, id int, i interface{}) (res Resources, count int, err error) {
+	return c.client.Resource.Query().Where(resource.ID(id)).QueryNext().ByQueriesAll(ctx, i)
+}
+func (c *ResourceBase) RawRemoveBindResourcesByResourceId(ctx context.Context, id int, removeIds []int) (err error) {
+	_, err = c.client.Resource.UpdateOneID(id).RemoveResourceIDs(removeIds...).Save(ctx)
+	return
+}
+func (c *ResourceBase) RawDeleteResourcesByResourceId(ctx context.Context, id int, deleteIds []int) (err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	_, err = tx.client.Resource.UpdateOneID(id).RemoveResourceIDs(deleteIds...).Save(ctx)
+	if err != nil {
+		return
+	}
+	_, err = tx.client.Resource.Delete().Where(resource.IDIn(deleteIds...)).Exec(ctx)
+	return
+}
+
+func (c *ResourceBase) RawUpdateBindResourcesByResourceId(ctx context.Context, id int, removeIds []int, addIds []int) (err error) {
+	return c.client.Resource.UpdateOneID(id).RemoveResourceIDs(removeIds...).AddResourceIDs(addIds...).Exec(ctx)
+}
+
+func (c *ResourceBase) RawAddBindResourcesByResourceId(ctx context.Context, id int, addIds []int) (err error) {
+	return c.client.Resource.UpdateOneID(id).AddResourceIDs(addIds...).Exec(ctx)
 }
 
 type ResourceBaseCreateReq struct {
@@ -1178,6 +1327,99 @@ func (c *ResourceBase) DeleteById(ctx context.Context, id int) error {
 func (c *ResourceBase) DeleteMany(ctx context.Context, ids []int) error {
 	_, err := c.client.Resource.Delete().Where(resource.IDIn(ids...)).Exec(ctx)
 	return err
+}
+
+func (c *ResourceBase) CreateResourceByResourceId(ctx context.Context, id int, v ResourceBaseCreateReq) (res *Resource, err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	create := tx.Resource.Create()
+	ResourceBaseCreateSet(create, v)
+	save, err := create.Save(ctx)
+	if err != nil {
+		return
+	}
+
+	return tx.Resource.UpdateOneID(id).SetPre(save).Save(ctx)
+}
+
+func (c *ResourceBase) GetResourceByResourceId(ctx context.Context, id int) (res ResourceBaseGetRes, err error) {
+	v, err := c.client.Resource.Query().Where(resource.ID(id)).QueryPre().First(ctx)
+	if err != nil {
+		return
+	}
+	res.ID = v.ID
+
+	res.Name = v.Name
+
+	res.Key = v.Key
+
+	res.Path = v.Path
+
+	res.Action = v.Action
+
+	res.Comments = v.Comments
+
+	return
+}
+
+func (c *ResourceBase) CreateResourcesByResourceId(ctx context.Context, id int, vs []ResourceBaseCreateReq) (res *Resource, err error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: %v", err, rerr)
+			}
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	bulk := make([]*ResourceCreate, len(vs))
+	for i, v := range vs {
+		create := c.client.Resource.Create()
+		ResourceBaseCreateSet(create, v)
+		bulk[i] = create
+	}
+	save, err := tx.Resource.CreateBulk(bulk...).Save(ctx)
+	if err != nil {
+		return
+	}
+
+	return tx.Resource.UpdateOneID(id).AddNext(save...).Save(ctx)
+}
+func (c *ResourceBase) GetResourcesByResourceId(ctx context.Context, id int, i interface{}) (res []ResourceBaseGetRes, count int, err error) {
+	vs, count, err := c.client.Resource.Query().Where(resource.ID(id)).QueryNext().ByQueriesAll(ctx, i)
+	for _, v := range vs {
+		res = append(res, ResourceBaseGetRes{
+			ID: v.ID,
+
+			Name: v.Name,
+
+			Key: v.Key,
+
+			Path: v.Path,
+
+			Action: v.Action,
+
+			Comments: v.Comments,
+		})
+	}
+	return
 }
 
 func NewResourceBase(client *Client) ResourceBaseInterface {
@@ -2516,6 +2758,32 @@ type ResourceRestInterface interface {
 	ResourceRestDeleteById(ctx context.Context, req ResourceRestDeleteByIdReq) (success bool, err error)
 	// @http-gin /resources DELETE
 	ResourceRestDeleteMany(ctx context.Context, req ResourceRestDeleteManyReq) (success bool, err error)
+
+	// @http-gin /resources/:resourceId/pre POST
+	ResourceRestCreateResourceByResourceId(ctx context.Context, req ResourceRestCreateResourceByResourceIdReq) (res *Resource, err error)
+	// @http-gin /resources/:resourceId/pre GET
+	ResourceRestGetResourceByResourceId(ctx context.Context, req ResourceRestGetResourceByResourceIdReq) (res ResourceBaseGetRes, err error)
+	// @http-gin /resources/:resourceId/pre DELETE
+	ResourceRestDeleteResourceByResourceId(ctx context.Context, req ResourceRestDeleteResourceByResourceIdReq) (res string, err error)
+	// @http-gin /resources/:resourceId/pre/bind/remove PUT
+	ResourceRestRemoveBindResourceByResourceId(ctx context.Context, req ResourceRestRemoveBindResourceByResourceIdReq) (res string, err error)
+	// @http-gin /resources/:resourceId/pre/:resourceId/bind/add PUT
+	ResourceRestAddBindResourceByResourceId(ctx context.Context, req ResourceRestAddBindResourceByResourceIdReq) (res string, err error)
+	// @http-gin /resources/:resourceId/pre/:resourceId/bind/update PUT
+	ResourceRestUpdateBindResourceByResourceId(ctx context.Context, req ResourceRestUpdateBindResourceByResourceIdReq) (res string, err error)
+
+	// @http-gin /resources/:resourceId/resources POST
+	ResourceRestCreateResourcesByResourceId(ctx context.Context, req ResourceRestCreateResourcesByResourceIdReq) (res *Resource, err error)
+	// @http-gin /resources/:resourceId/resources GET
+	ResourceRestGetResourcesByResourceId(ctx context.Context, req ResourceRestGetResourcesByResourceIdReq) (res ResourceRestGetResourcesByResourceIdRes, err error)
+	// @http-gin /resources/:resourceId/resources DELETE
+	ResourceRestDeleteResourcesByResourceId(ctx context.Context, req ResourceRestDeleteResourcesByResourceIdReq) (res string, err error)
+	// @http-gin /resources/:resourceId/resources/bind/remove PUT
+	ResourceRestRemoveBindResourcesByResourceId(ctx context.Context, req ResourceRestRemoveBindResourcesByResourceIdReq) (res string, err error)
+	// @http-gin /resources/:resourceId/resources/bind/add PUT
+	ResourceRestAddBindResourcesByResourceId(ctx context.Context, req ResourceRestAddBindResourcesByResourceIdReq) (res string, err error)
+	// @http-gin /resources/:resourceId/resources/bind/update PUT
+	ResourceRestUpdateBindResourcesByResourceId(ctx context.Context, req ResourceRestUpdateBindResourcesByResourceIdReq) (res string, err error)
 }
 
 func NewResourceRest(client *Client) ResourceRestInterface {
@@ -2615,6 +2883,153 @@ func (rest *ResourceRest) ResourceRestDeleteMany(ctx context.Context, req Resour
 		return false, err
 	}
 	return true, err
+}
+
+type ResourceRestCreateResourceByResourceIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"resourceId"`
+	}
+	Body ResourceBaseCreateReq `json:"body"`
+}
+
+func (rest *ResourceRest) ResourceRestCreateResourceByResourceId(ctx context.Context, req ResourceRestCreateResourceByResourceIdReq) (res *Resource, err error) {
+	return rest.repo.CreateResourceByResourceId(ctx, req.Uri.Id, req.Body)
+}
+
+type ResourceRestGetResourceByResourceIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"resourceId"`
+	} `json:"uri"`
+}
+
+func (rest *ResourceRest) ResourceRestGetResourceByResourceId(ctx context.Context, req ResourceRestGetResourceByResourceIdReq) (res ResourceBaseGetRes, err error) {
+	return rest.repo.GetResourceByResourceId(ctx, req.Uri.Id)
+}
+
+type ResourceRestDeleteResourceByResourceIdReq struct {
+	Uri struct {
+		ResourceId int `json:"resourceId" uri:"resourceId"`
+		ResourceId int `json:"resourceId" uri:"resourceId"`
+	} `json:"uri"`
+}
+
+func (rest *ResourceRest) ResourceRestDeleteResourceByResourceId(ctx context.Context, req ResourceRestDeleteResourceByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawDeleteResourceByResourceId(ctx, req.Uri.ResourceId, req.Uri.ResourceId)
+
+}
+
+type ResourceRestRemoveBindResourceByResourceIdReq struct {
+	Uri struct {
+		ResourceId int `json:"resourceId" uri:"resourceId"`
+	} `json:"uri"`
+}
+
+func (rest *ResourceRest) ResourceRestRemoveBindResourceByResourceId(ctx context.Context, req ResourceRestRemoveBindResourceByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawRemoveBindResourceByResourceId(ctx, req.Uri.ResourceId)
+}
+
+type ResourceRestAddBindResourceByResourceIdReq struct {
+	Uri struct {
+		ResourceId int `json:"resourceId" uri:"resourceId"`
+		ResourceId int `json:"resourceId" uri:"resourceId"`
+	} `json:"uri"`
+}
+
+func (rest *ResourceRest) ResourceRestAddBindResourceByResourceId(ctx context.Context, req ResourceRestAddBindResourceByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawAddBindResourceByResourceId(ctx, req.Uri.ResourceId, req.Uri.ResourceId)
+}
+
+type ResourceRestUpdateBindResourceByResourceIdReq struct {
+	Uri struct {
+		ResourceId int `json:"resourceId" uri:"resourceId"`
+		ResourceId int `json:"resourceId" uri:"resourceId"`
+	} `json:"uri"`
+}
+
+func (rest *ResourceRest) ResourceRestUpdateBindResourceByResourceId(ctx context.Context, req ResourceRestUpdateBindResourceByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawUpdateBindResourceByResourceId(ctx, req.Uri.ResourceId, req.Uri.ResourceId)
+}
+
+type ResourceRestCreateResourcesByResourceIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"resourceId"`
+	}
+	Body []ResourceBaseCreateReq `json:"body"`
+}
+
+func (rest *ResourceRest) ResourceRestCreateResourcesByResourceId(ctx context.Context, req ResourceRestCreateResourcesByResourceIdReq) (res *Resource, err error) {
+	return rest.repo.CreateResourcesByResourceId(ctx, req.Uri.Id, req.Body)
+}
+
+type ResourceRestGetResourcesByResourceIdReq struct {
+	Uri struct {
+		Id int `json:"id" uri:"resourceId"`
+	} `json:"uri"`
+	Query ResourceQueryOps `json:"query"`
+}
+
+type ResourceRestGetResourcesByResourceIdRes struct {
+	List  []ResourceBaseGetRes `json:"list"`
+	Total int                  `json:"total"`
+}
+
+func (rest *ResourceRest) ResourceRestGetResourcesByResourceId(ctx context.Context, req ResourceRestGetResourcesByResourceIdReq) (res ResourceRestGetResourcesByResourceIdRes, err error) {
+	list, total, err := rest.repo.GetResourcesByResourceId(ctx, req.Uri.Id, req.Query)
+	return ResourceRestGetResourcesByResourceIdRes{List: list, Total: total}, err
+}
+
+type ResourceRestDeleteResourcesByResourceIdReq struct {
+	Uri struct {
+		ResourceId int `json:"resourceId" uri:"resourceId"`
+	} `json:"uri"`
+	Query struct {
+		ResourceIds []int `json:"resourceIds" form:"resourceIds"`
+	}
+}
+
+func (rest *ResourceRest) ResourceRestDeleteResourcesByResourceId(ctx context.Context, req ResourceRestDeleteResourcesByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawDeleteResourcesByResourceId(ctx, req.Uri.ResourceId, req.Query.ResourceIds)
+
+}
+
+type ResourceRestRemoveBindResourcesByResourceIdReq struct {
+	Uri struct {
+		ResourceId int `json:"resourceId" uri:"resourceId"`
+	} `json:"uri"`
+	Body struct {
+		ResourceIds []int `json:"resourceIds"`
+	}
+}
+
+func (rest *ResourceRest) ResourceRestRemoveBindResourcesByResourceId(ctx context.Context, req ResourceRestRemoveBindResourcesByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawRemoveBindResourcesByResourceId(ctx, req.Uri.ResourceId, req.Body.ResourceIds)
+}
+
+type ResourceRestAddBindResourcesByResourceIdReq struct {
+	Uri struct {
+		ResourceId int `json:"resourceId" uri:"resourceId"`
+	} `json:"uri"`
+	Body struct {
+		ResourceIds []int `json:"resourceIds"`
+	}
+}
+
+func (rest *ResourceRest) ResourceRestAddBindResourcesByResourceId(ctx context.Context, req ResourceRestAddBindResourcesByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawAddBindResourcesByResourceId(ctx, req.Uri.ResourceId, req.Body.ResourceIds)
+}
+
+type ResourceRestUpdateBindResourcesByResourceIdReq struct {
+	Uri struct {
+		ResourceId int `json:"resourceId" uri:"resourceId"`
+	} `json:"uri"`
+	Body struct {
+		OldIds []int `json:"OldIds"`
+		NewIds []int `json:"NewIds"`
+	} `json:"body"`
+}
+
+func (rest *ResourceRest) ResourceRestUpdateBindResourcesByResourceId(ctx context.Context, req ResourceRestUpdateBindResourcesByResourceIdReq) (res string, err error) {
+	return "", rest.repo.RawUpdateBindResourcesByResourceId(ctx, req.Uri.ResourceId, req.Body.OldIds, req.Body.NewIds)
 }
 
 type ServiceRestInterface interface {
@@ -3328,6 +3743,38 @@ func (c *ResourceClient) GetX(ctx context.Context, id int) *Resource {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryPre queries the pre edge of a Resource.
+func (c *ResourceClient) QueryPre(r *Resource) *ResourceQuery {
+	query := &ResourceQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resource.Table, resource.FieldID, id),
+			sqlgraph.To(resource.Table, resource.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, resource.PreTable, resource.PreColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryNext queries the next edge of a Resource.
+func (c *ResourceClient) QueryNext(r *Resource) *ResourceQuery {
+	query := &ResourceQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resource.Table, resource.FieldID, id),
+			sqlgraph.To(resource.Table, resource.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, resource.NextTable, resource.NextColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
