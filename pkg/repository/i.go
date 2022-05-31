@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/google/wire"
 	"hello/pkg/repository/api/baidu"
 	"hello/pkg/repository/api/taobao"
 	"hello/pkg/repository/dao/audit"
@@ -19,3 +20,15 @@ type Repository struct {
 	Service  service.ServiceService
 	Resource resource.ResourceService
 }
+
+var RepoSet = wire.NewSet(
+	baidu.BaiduServiceSet,
+	taobao.TaobaoServiceSet,
+
+	resource.ResourceServiceSet,
+	service.ServiceServiceSet,
+	project.ProjectServiceSet,
+	audit.AuditServiceSet,
+	user.UserServiceSet,
+	wire.Struct(new(Repository), "*"),
+)

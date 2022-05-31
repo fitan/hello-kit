@@ -1,6 +1,9 @@
 package user
 
-import "go.uber.org/zap"
+import (
+	"github.com/google/wire"
+	"go.uber.org/zap"
+)
 
 type Middleware func(UserService) UserService
 
@@ -27,3 +30,5 @@ func NewService(svc BaseService, middleware []Middleware) UserService {
 	}
 	return svc
 }
+
+var UserServiceSet = wire.NewSet(NewBasicService, NewService, NewServiceMiddleware)

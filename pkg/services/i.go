@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/google/wire"
 	"hello/pkg/services/audit"
 	"hello/pkg/services/casbin"
 	"hello/pkg/services/project"
@@ -28,3 +29,15 @@ type Services struct {
 	Resource resource.ResourceService
 	Role     role.RoleService
 }
+
+var ServicesSet = wire.NewSet(
+	role.RoleKitSet,
+	resource.ResourceKitSet,
+	service.ServiceKitSet,
+	project.ProjectKitSet,
+	audit.AuditKitSet,
+	user.UserServiceSet,
+	casbin.CasbinSet,
+	wire.Struct(new(HttpHandler), "*"),
+	wire.Struct(new(Services), "*"),
+)

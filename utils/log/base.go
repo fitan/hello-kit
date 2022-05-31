@@ -2,11 +2,11 @@ package log
 
 import (
 	"context"
+	"github.com/mattn/go-colorable"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"os"
 	"path"
 )
 
@@ -37,7 +37,7 @@ func DefaultZapCore(fileName string, dir string, openLevel zapcore.Level) zapcor
 	warnWriter := getLogWriter(path.Join(dir, fileName+"_warn.log"))
 	debugWriter := getLogWriter(path.Join(dir, fileName+"_debug.log"))
 
-	stdout := zapcore.AddSync(os.Stdout)
+	stdout := zapcore.AddSync(colorable.NewColorableStdout())
 	infoCore := zapcore.NewCore(getEncoder(), zapcore.NewMultiWriteSyncer(infoLogWriter, stdout), infoEnable)
 	errCore := zapcore.NewCore(getEncoder(), zapcore.NewMultiWriteSyncer(errLogWriter, stdout), errEnable)
 	warnCore := zapcore.NewCore(getEncoder(), zapcore.NewMultiWriteSyncer(warnWriter, stdout), warnEnable)
@@ -50,7 +50,8 @@ func getEncoder() zapcore.Encoder {
 	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	return zapcore.NewJSONEncoder(encoderConfig)
+	return zapcore.NewConsoleEncoder(encoderConfig)
+	//return zapcore.NewJSONEncoder(encoderConfig)
 }
 
 func getLogWriter(fileName string) zapcore.WriteSyncer {

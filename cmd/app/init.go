@@ -373,7 +373,6 @@ func initMetricsEndpoint(g *run.Group, conf *conf.MyConf, debugSwitch *debug2.De
 		return
 	})
 
-	//http.DefaultServeMux.Handle("/metrics", promhttp.Handler())
 	debugListener, err := net.Listen("tcp", conf.Debug.Addr)
 	if err != nil {
 		logger.Errorw("net.Listen", "transport", "debug/HTTP", "during", "Listen", "err", err.Error())

@@ -1,6 +1,7 @@
 package taobao
 
 import (
+	"github.com/google/wire"
 	"go.uber.org/zap"
 )
 
@@ -29,3 +30,5 @@ func NewService(svc BaseService, middleware []Middleware) TaobaoService {
 	}
 	return svc
 }
+
+var TaobaoServiceSet = wire.NewSet(NewBasicService, NewService, NewServiceMiddleware)

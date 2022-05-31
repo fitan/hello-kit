@@ -1,6 +1,9 @@
 package casbin
 
-import "go.uber.org/zap"
+import (
+	"github.com/google/wire"
+	"go.uber.org/zap"
+)
 
 type Middleware func(CasbinService) CasbinService
 
@@ -27,3 +30,5 @@ func NewService(svc BaseService, middleware []Middleware) CasbinService {
 	}
 	return svc
 }
+
+var CasbinSet = wire.NewSet(NewBasicService, NewService, NewServiceMiddleware)

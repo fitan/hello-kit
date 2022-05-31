@@ -211,21 +211,20 @@ var auditMidSet = wire.NewSet(initAuditMid)
 
 var debugSwitchSet = wire.NewSet(initDebugSwitch)
 
-// repo.api.service
-var baiduHttpSet = wire.NewSet(baidu.NewBasicService, baidu.NewServiceMiddleware, baidu.NewService)
-
-var taobaoHttpSet = wire.NewSet(taobao.NewBasicService, taobao.NewServiceMiddleware, taobao.NewService)
-
-// repo.dao.service
-var userDaoSet = wire.NewSet(user.NewBasicService, user.NewServiceMiddleware, user.NewService)
-
-var repoSet = wire.NewSet(resource.ResourceServiceSet, service.ServiceServiceSet, project.ProjectServiceSet, userDaoSet, baiduHttpSet, taobaoHttpSet, audit.AuditServiceSet, wire.Struct(new(repository.Repository), "*"))
-
-// http service
-var casbinServiceSet = wire.NewSet(casbin.NewBasicService, casbin.NewService, casbin.NewServiceMiddleware)
-
-var servicesSet = wire.NewSet(role.RoleKitSet, resource2.ResourceKitSet, service2.ServiceKitSet, project2.ProjectKitSet, audit2.AuditKitSet, casbinServiceSet, user2.UserServiceSet, wire.Struct(new(services.HttpHandler), "*"), wire.Struct(new(services.Services), "*"))
-
 var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 
 var gSet = wire.NewSet(initCancelInterrupt, initMetricsEndpoint, initMicro)
+
+var initSet = wire.NewSet(
+	debugSwitchSet,
+	auditMidSet,
+	casbinSet,
+	entSet,
+	pyroscopeSet,
+	dbSet,
+	gSet,
+	mwSet,
+	confSet,
+	logSet,
+	traceSet,
+)

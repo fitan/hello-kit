@@ -1,6 +1,7 @@
 package baidu
 
 import (
+	"github.com/google/wire"
 	"go.uber.org/zap"
 )
 
@@ -29,3 +30,5 @@ func NewService(svc BaseService, middleware []Middleware) BaiduService {
 	}
 	return svc
 }
+
+var BaiduServiceSet = wire.NewSet(NewBasicService, NewService, NewServiceMiddleware)
