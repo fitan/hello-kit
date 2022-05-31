@@ -6,7 +6,7 @@ package user
 
 import (
 	"context"
-	"hello/pkg/debug"
+	debug2 "hello/utils/debug"
 
 	"github.com/fitan/gink/transport/http"
 	"github.com/gin-gonic/gin"
@@ -55,7 +55,7 @@ func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option ht
 type HttpHandler struct {
 }
 
-func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch *debug.DebugSwitch) HttpHandler {
+func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch *debug2.DebugSwitch) HttpHandler {
 
 	debugSwitch.Register("UserRestAddBindRolesByUserId", "/users/:userId/roles/bind/add", "PUT")
 

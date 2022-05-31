@@ -15,6 +15,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-kit/kit/endpoint"
+	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/consul/api"
 	"github.com/oklog/run"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -35,7 +36,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	_ "hello/docs"
-	"hello/pkg/debug"
 	"hello/pkg/ent"
 	resource2 "hello/pkg/ent/resource"
 	"hello/pkg/middleware"
@@ -43,6 +43,8 @@ import (
 	"hello/pkg/services"
 	casbin2 "hello/pkg/services/casbin"
 	"hello/utils/conf"
+	debug2 "hello/utils/debug"
+	"hello/utils/httpclient"
 	"hello/utils/log"
 	"io/ioutil"
 	"net"
@@ -63,7 +65,7 @@ type App struct {
 	repository *repository.Repository
 	InitAuditMid
 	services    *services.Services
-	debug       *debug.DebugSwitch
+	debug       *debug2.DebugSwitch
 	httpHandler *services.HttpHandler
 	g           *run.Group
 	conf        *conf.MyConf
@@ -342,7 +344,7 @@ func initTracer(conf *conf.MyConf) *sdktrace.TracerProvider {
 type InitMetricsEndpoint struct {
 }
 
-func initMetricsEndpoint(g *run.Group, conf *conf.MyConf, debugSwitch *debug.DebugSwitch) InitMetricsEndpoint {
+func initMetricsEndpoint(g *run.Group, conf *conf.MyConf, debugSwitch *debug2.DebugSwitch) InitMetricsEndpoint {
 	r := gin.Default()
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -385,8 +387,8 @@ func initMetricsEndpoint(g *run.Group, conf *conf.MyConf, debugSwitch *debug.Deb
 	return InitMetricsEndpoint{}
 }
 
-func initDebugSwitch() *debug.DebugSwitch {
-	return debug.NewDebugSwitch()
+func initDebugSwitch() *debug2.DebugSwitch {
+	return debug2.NewDebugSwitch()
 }
 
 type InitCancelInterrupt struct {
@@ -415,9 +417,9 @@ func initEndpointMiddleware(services *services.Services, repository repository.R
 	return mw
 }
 
-func initHttpServerOption(debugSwitch *debug.DebugSwitch) []ginkHttp.ServerOption {
+func initHttpServerOption(debugSwitch *debug2.DebugSwitch) []ginkHttp.ServerOption {
 	so := make([]ginkHttp.ServerOption, 0)
-	so = append(so, ginkHttp.ServerBefore(ginkHttp.PopulateRequestContext, debug.DebugSwitchRequestContext(debugSwitch), middleware.UrlRequestContext()))
+	so = append(so, ginkHttp.ServerBefore(ginkHttp.PopulateRequestContext, debug2.DebugSwitchRequestContext(debugSwitch), middleware.UrlRequestContext()))
 	return so
 }
 
@@ -473,4 +475,8 @@ func initCasbin(conf *conf.MyConf) (*casbin.SyncedEnforcer, error) {
 	e.StartAutoLoadPolicy(10 * time.Second)
 	return e, err
 	//return casbin.NewEnforcer("./conf/rbac_model.conf", a)
+}
+
+func initBaseResty(log *zap.SugaredLogger) *resty.Client {
+	return httpclient.New(httpclient.WithDebugMid(log, 10240))
 }
