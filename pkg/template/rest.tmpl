@@ -144,6 +144,9 @@ func (f {{$.Name}}Table{{ $func }}Form) CountQuery() bool {
 {{$structName := print $n.Name "Base"}}
 {{$interfaceName := print $structName "Interface"}}
 type {{$interfaceName}} interface {
+	RawGetById(ctx context.Context, id {{$n.ID.Type.String}}) (res *{{pascal $n.Name}},err error)
+	RawExistById(ctx context.Context, id {{$n.ID.Type.String}}) (res bool, err error)
+
 	RawCreate(ctx context.Context, v *{{pascal $n.Name}}) (res *{{pascal $n.Name}}, err error)
 	RawCreateMany(ctx context.Context, vs {{plural $n.Name}}) ({{plural $n.Name}}, error)
 	RawGetById(ctx context.Context, id {{$n.ID.Type.String}}) (res *{{pascal $n.Name}}, err error)
@@ -201,6 +204,15 @@ func Raw{{$structName}}CreateSet(create *{{pascal $n.Name}}Create, v *{{pascal $
 	return create
 		{{- range $f := $n.Fields}}.{{ $func := print "Set" $f.StructField }}
 			{{$func}}(v.{{$f.StructField}}){{- end}}
+}
+
+func (c *{{$structName}}) RawGetById(ctx context.Context, id {{$n.ID.Type.String}}) (res *{{pascal $n.Name}},err error) {
+	return c.client.{{pascal $n.Name}}.Get(ctx, id)
+}
+
+func (c *{{$structName}}) RawExistById(ctx context.Context, id {{$n.ID.Type.String}}) (res bool, err error)	{
+	_, err = c.client.{{pascal $n.Name}}.Get(ctx, id)
+	return IsNotFound(err), MaskNotFound(err)
 }
 
 func (c *{{$structName}}) RawCreate(ctx context.Context, v *{{pascal $n.Name}}) (res *{{pascal $n.Name}}, err error) {
