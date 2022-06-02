@@ -163,6 +163,7 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 	if err != nil {
 		return App{}, err
 	}
+	newFunc := initDefaultHttpClient()
 	appInitCancelInterrupt := initCancelInterrupt(g)
 	appInitMetricsEndpoint := initMetricsEndpoint(g, myConf, debugSwitch)
 	appInitMicro, err := initMicro(g, r, myConf)
@@ -184,6 +185,7 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 		ent:                 client,
 		pyroscope:           profiler,
 		casbin:              syncedEnforcer,
+		httpNewFunc:         newFunc,
 		InitCancelInterrupt: appInitCancelInterrupt,
 		InitMetricsEndpoint: appInitMetricsEndpoint,
 		InitMicro:           appInitMicro,
@@ -211,11 +213,14 @@ var auditMidSet = wire.NewSet(initAuditMid)
 
 var debugSwitchSet = wire.NewSet(initDebugSwitch)
 
+var DefaultHttpClient = wire.NewSet(initDefaultHttpClient)
+
 var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 
 var gSet = wire.NewSet(initCancelInterrupt, initMetricsEndpoint, initMicro)
 
 var initSet = wire.NewSet(
+	DefaultHttpClient,
 	debugSwitchSet,
 	auditMidSet,
 	casbinSet,

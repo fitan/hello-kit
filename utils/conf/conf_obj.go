@@ -21,7 +21,7 @@ type Debug struct {
 }
 
 type Redis struct {
-	Url       string `yaml:"url"`
+	Addr       string `yaml:"addr"`
 	Password  string `yaml:"password"`
 	Db        int    `yaml:"db"`
 	OpenTrace bool   `yaml:"openTrace"`

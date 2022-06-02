@@ -20,12 +20,14 @@ var pyroscopeSet = wire.NewSet(initPyroscope)
 var casbinSet = wire.NewSet(initCasbin)
 var auditMidSet = wire.NewSet(initAuditMid)
 var debugSwitchSet = wire.NewSet(initDebugSwitch)
+var DefaultHttpClient = wire.NewSet(initDefaultHttpClient)
 
 var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 
 var gSet = wire.NewSet(initCancelInterrupt, initMetricsEndpoint, initMicro)
 
 var initSet = wire.NewSet(
+	DefaultHttpClient,
 	debugSwitchSet,
 	auditMidSet,
 	casbinSet,

@@ -75,6 +75,7 @@ type App struct {
 	ent         *ent.Client
 	pyroscope   *profiler.Profiler
 	casbin      *casbin.SyncedEnforcer
+	httpNewFunc httpclient.NewFunc
 	InitCancelInterrupt
 	InitMetricsEndpoint
 	//InitHttpHandler
@@ -476,6 +477,20 @@ func initCasbin(conf *conf.MyConf) (*casbin.SyncedEnforcer, error) {
 	//return casbin.NewEnforcer("./conf/rbac_model.conf", a)
 }
 
-func initBaseResty(log *zap.SugaredLogger) *resty.Client {
-	return httpclient.New(httpclient.WithDebugMid(log, 10240))
+
+func initDefaultHttpClient() httpclient.NewFunc {
+	return func(fs ...httpclient.Option) *resty.Client {
+		fs = append(fs,
+			httpclient.WithDebugMid(logger, 10240),
+			httpclient.WithTimeOut(30 * time.Second),
+		)
+		return httpclient.New(fs...)
+	}
 }
+
+//func initCache(conf *conf.MyConf) *marshaler.Marshaler {
+//	promMetrics := metrics.NewPrometheus("hello")
+//	redisStore := store.NewRedis(redis.NewClient(&redis.Options{Addr: conf.Redis.Addr}),nil)
+//	cacheManager := cache.NewMetric(promMetrics, cache.New(redisStore))
+//	return marshaler.New(cacheManager)
+//}
