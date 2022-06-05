@@ -15,9 +15,15 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-kit/kit/endpoint"
+	log2 "github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/sd"
+	consulsd "github.com/go-kit/kit/sd/consul"
 	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/consul/api"
+	natsServer "github.com/nats-io/nats-server/v2/server"
+	"github.com/nats-io/nats.go"
 	"github.com/oklog/run"
+	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/pyroscope-io/pyroscope/pkg/agent/profiler"
 	swaggerFiles "github.com/swaggo/files"
@@ -25,12 +31,15 @@ import (
 	"github.com/urfave/cli/v2"
 	"go-micro.dev/v4"
 	"go-micro.dev/v4/server"
+	"go-micro.dev/v4/util/addr"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gorm.io/driver/mysql"
@@ -61,9 +70,10 @@ import (
 var logger *zap.SugaredLogger
 
 type App struct {
-	r          *gin.Engine
+	r          *gin.RouterGroup
 	repository *repository.Repository
 	InitAuditMid
+	nats        *nats.Conn
 	services    *services.Services
 	debug       *debug2.DebugSwitch
 	httpHandler *services.HttpHandler
@@ -88,12 +98,15 @@ func (a *App) Run() error {
 
 func RunApp(confName string) {
 	r := gin.Default()
+	r.Use(otelgin.Middleware("hello-kit"))
+
+	group := r.Group("/kit")
 	opts := ginprom.NewDefaultOpts()
 	opts.EndpointLabelMappingFn = func(c *gin.Context) string {
 		return c.FullPath()
 	}
-	r.Use(ginprom.PromMiddleware(opts))
-	r.Use(cors.New(cors.Config{
+	group.Use(ginprom.PromMiddleware(opts))
+	group.Use(cors.New(cors.Config{
 		AllowMethods:  []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
 		AllowHeaders:  []string{"Origin", "Content-Length", "Content-Type", "X-Total-Count"},
 		ExposeHeaders: []string{"X-Total-Count"},
@@ -103,20 +116,22 @@ func RunApp(confName string) {
 		AllowAllOrigins:  true,
 	}))
 	g := &run.Group{}
-	app, err := InitApp(r, g, ConfName(confName))
+	app, err := InitApp(r, group, g, ConfName(confName))
+
 	if err != nil {
 		fmt.Printf("initapp error: %s", err.Error())
 		os.Exit(1)
 
 	}
-	initAuditMid(r, app.repository)
+	initAuditMid(group, app.repository)
 	logger.Errorw("exit", app.Run().Error())
 }
 
 func CasbinInput(confName string) error {
 	g := &run.Group{}
 	r := gin.Default()
-	app, err := InitApp(r, g, ConfName(confName))
+	group := r.Group("/")
+	app, err := InitApp(r, group, g, ConfName(confName))
 	if err != nil {
 		return err
 	}
@@ -136,7 +151,8 @@ func CasbinInput(confName string) error {
 func PathPutInStorage(confName string) error {
 	g := &run.Group{}
 	r := gin.Default()
-	app, err := InitApp(r, g, ConfName(confName))
+	group := r.Group("/")
+	app, err := InitApp(r, group, g, ConfName(confName))
 	if err != nil {
 		return err
 	}
@@ -199,7 +215,7 @@ func (w CustomResponseWriter) WriteString(s string) (int, error) {
 	return w.ResponseWriter.WriteString(s)
 }
 
-func initAuditMid(r *gin.Engine, repository *repository.Repository) InitAuditMid {
+func initAuditMid(r *gin.RouterGroup, repository *repository.Repository) InitAuditMid {
 	r.Use(
 		func(c *gin.Context) {
 
@@ -382,7 +398,10 @@ func initMetricsEndpoint(g *run.Group, conf *conf.MyConf, debugSwitch *debug2.De
 		logger.Infow("init metrics", "transport", "debug/HTTP", "addr", conf.Debug.Addr)
 		return r.RunListener(debugListener)
 	}, func(error) {
-		debugListener.Close()
+		err = debugListener.Close()
+		if err != nil {
+			logger.Errorw("debug http: ", "err", err.Error())
+		}
 	})
 	return InitMetricsEndpoint{}
 }
@@ -417,16 +436,35 @@ func initEndpointMiddleware(services *services.Services, repository repository.R
 	return mw
 }
 
+type ErrorHandler struct {
+}
+
+func (e ErrorHandler) Handle(ctx context.Context, err error) {
+	logger.Errorw("error handler", "traceId", trace.SpanFromContext(ctx).SpanContext().TraceID().String(), "err", err.Error())
+}
+
 func initHttpServerOption(debugSwitch *debug2.DebugSwitch) []ginkHttp.ServerOption {
+	errorEncoder := func(ctx context.Context, err error, gCtx *gin.Context) {
+		gCtx.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusInternalServerError,
+			"err":     err.Error(),
+			"traceId": trace.SpanFromContext(ctx).SpanContext().TraceID().String(),
+		})
+	}
+
 	so := make([]ginkHttp.ServerOption, 0)
-	so = append(so, ginkHttp.ServerBefore(ginkHttp.PopulateRequestContext, debug2.DebugSwitchRequestContext(debugSwitch), middleware.UrlRequestContext()))
+	so = append(so,
+		ginkHttp.ServerErrorHandler(ErrorHandler{}),
+		ginkHttp.ServerErrorEncoder(errorEncoder),
+		ginkHttp.ServerBefore(ginkHttp.PopulateRequestContext, debug2.DebugSwitchRequestContext(debugSwitch), middleware.UrlRequestContext()))
 	return so
 }
 
 type InitMicro struct {
 }
 
-func initMicro(g *run.Group, r *gin.Engine, conf *conf.MyConf) (InitMicro, error) {
+func initMicro(g *run.Group, r *gin.Engine, conf *conf.MyConf) (res InitMicro, err error) {
+
 	consulConf := api.DefaultConfig()
 	consulConf.Address = conf.Consul.Addr
 	registry := microConsul.NewRegistry(microConsul.Config(consulConf))
@@ -457,9 +495,13 @@ func initMicro(g *run.Group, r *gin.Engine, conf *conf.MyConf) (InitMicro, error
 			logger.Infow("micro run...", "transport", "HTTP", "addr", conf.App.Addr)
 			return serivce.Run()
 		}, func(err error) {
-			logger.Errorw("iniMicro.service.Run", "err", err.Error())
-			server.Stop()
+			err = server.Stop()
+			if err != nil {
+				logger.Errorw("iniMicro.service.Run", "err", err.Error())
+			}
 		})
+
+	initSdConsul()
 	return InitMicro{}, nil
 }
 
@@ -477,15 +519,18 @@ func initCasbin(conf *conf.MyConf) (*casbin.SyncedEnforcer, error) {
 	//return casbin.NewEnforcer("./conf/rbac_model.conf", a)
 }
 
-
 func initDefaultHttpClient() httpclient.NewFunc {
 	return func(fs ...httpclient.Option) *resty.Client {
 		fs = append(fs,
 			httpclient.WithDebugMid(logger, 10240),
-			httpclient.WithTimeOut(30 * time.Second),
+			httpclient.WithTimeOut(30*time.Second),
 		)
 		return httpclient.New(fs...)
 	}
+}
+
+func initNats() (res *nats.Conn, err error) {
+	return nats.Connect("nats://localhost:4222", nats.Name("my-nats"))
 }
 
 //func initCache(conf *conf.MyConf) *marshaler.Marshaler {
@@ -494,3 +539,61 @@ func initDefaultHttpClient() httpclient.NewFunc {
 //	cacheManager := cache.NewMetric(promMetrics, cache.New(redisStore))
 //	return marshaler.New(cacheManager)
 //}
+
+// 注册服务到consul
+func initSdConsul() (res sd.Registrar, err error) {
+	consulConf := api.DefaultConfig()
+	consulConf.Address = "localhost:8500"
+	consulClient, err := api.NewClient(consulConf)
+	if err != nil {
+		err = errors.Wrap(err, "consul.NewClient")
+		return
+	}
+	ccc := consulsd.NewClient(consulClient)
+
+	extract, err := addr.Extract("")
+	if err != nil {
+		return nil, err
+	}
+
+	reg := consulsd.NewRegistrar(ccc, &api.AgentServiceRegistration{
+		ID:      "localhost",
+		Name:    "consulSD",
+		Tags:    nil,
+		Port:    8080,
+		Address: extract,
+		Check: &api.AgentServiceCheck{
+			TCP:                            extract + ":8080",
+			Interval:                       "10s",
+			DeregisterCriticalServiceAfter: "12s",
+		},
+	}, log2.NewNopLogger())
+	reg.Register()
+
+	i := consulsd.NewInstancer(ccc, log2.NewNopLogger(), "hello-kit", []string{}, true)
+	c := make(chan sd.Event, 0)
+	go func() {
+		i.Register(c)
+		for v := range c {
+			logger.Infow("consulSD", "event", v.Instances)
+		}
+	}()
+	return
+}
+
+func initNatsServer() (res *natsServer.Server, err error) {
+	res, err = natsServer.NewServer(&natsServer.Options{
+		Host: "localhost",
+		Port: 0,
+		//JetStream: true,
+		//StoreDir: "./data",
+		Debug: true,
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	go res.Start()
+	return
+}

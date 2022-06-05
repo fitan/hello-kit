@@ -21,12 +21,14 @@ var casbinSet = wire.NewSet(initCasbin)
 var auditMidSet = wire.NewSet(initAuditMid)
 var debugSwitchSet = wire.NewSet(initDebugSwitch)
 var DefaultHttpClient = wire.NewSet(initDefaultHttpClient)
+var initNatsSet = wire.NewSet(initNats)
 
 var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 
 var gSet = wire.NewSet(initCancelInterrupt, initMetricsEndpoint, initMicro)
 
 var initSet = wire.NewSet(
+	initNatsSet,
 	DefaultHttpClient,
 	debugSwitchSet,
 	auditMidSet,
@@ -42,7 +44,7 @@ var initSet = wire.NewSet(
 )
 
 //var appSet = wire.NewSet(wire.Struct(App{}, "*"))
-func InitApp(r *gin.Engine, g *group.Group, name ConfName) (App, error) {
+func InitApp(r *gin.Engine, router *gin.RouterGroup, g *group.Group, name ConfName) (App, error) {
 	wire.Build(
 		repository.RepoSet,
 		services.ServicesSet,

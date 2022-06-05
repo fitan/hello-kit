@@ -31,7 +31,7 @@ var (
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @host      localhost:8080
-// @BasePath  /
+// @BasePath  /kit
 
 // @query.collection.format multi
 // @securityDefinitions.basic  BasicAuth

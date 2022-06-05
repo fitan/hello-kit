@@ -35,7 +35,7 @@ import (
 // Injectors from wire.go:
 
 //var appSet = wire.NewSet(wire.Struct(App{}, "*"))
-func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
+func InitApp(r *gin.Engine, router *gin.RouterGroup, g *run.Group, name ConfName) (App, error) {
 	myConf, err := initConf(name)
 	if err != nil {
 		return App{}, err
@@ -75,7 +75,11 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 		Service:  serviceService,
 		Resource: resourceService,
 	}
-	appInitAuditMid := initAuditMid(r, repositoryRepository)
+	appInitAuditMid := initAuditMid(router, repositoryRepository)
+	conn, err := initNats()
+	if err != nil {
+		return App{}, err
+	}
 	repository2 := repository.Repository{
 		Baidu:    baiduService,
 		Taobao:   taobaoService,
@@ -125,27 +129,27 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 	endpoints := user2.NewEndpoints(userUserService, mws)
 	v16 := initHttpServerOption(debugSwitch)
 	ops := user2.NewServiceOption(v16)
-	httpHandler := user2.NewHTTPHandler(r, endpoints, ops, debugSwitch)
+	httpHandler := user2.NewHTTPHandler(router, endpoints, ops, debugSwitch)
 	auditMws := audit2.NewEndpointMiddleware(sugaredLogger, v15)
 	auditEndpoints := audit2.NewEndpoints(auditAuditService, auditMws)
 	auditOps := audit2.NewServiceOption(v16)
-	auditHttpHandler := audit2.NewHTTPHandler(r, auditEndpoints, auditOps, debugSwitch)
+	auditHttpHandler := audit2.NewHTTPHandler(router, auditEndpoints, auditOps, debugSwitch)
 	projectMws := project2.NewEndpointMiddleware(sugaredLogger, v15)
 	projectEndpoints := project2.NewEndpoints(projectProjectService, projectMws)
 	projectOps := project2.NewServiceOption(v16)
-	projectHttpHandler := project2.NewHTTPHandler(r, projectEndpoints, projectOps, debugSwitch)
+	projectHttpHandler := project2.NewHTTPHandler(router, projectEndpoints, projectOps, debugSwitch)
 	serviceMws := service2.NewEndpointMiddleware(sugaredLogger, v15)
 	serviceEndpoints := service2.NewEndpoints(serviceServiceService, serviceMws)
 	serviceOps := service2.NewServiceOption(v16)
-	serviceHttpHandler := service2.NewHTTPHandler(r, serviceEndpoints, serviceOps, debugSwitch)
+	serviceHttpHandler := service2.NewHTTPHandler(router, serviceEndpoints, serviceOps, debugSwitch)
 	resourceMws := resource2.NewEndpointMiddleware(sugaredLogger, v15)
 	resourceEndpoints := resource2.NewEndpoints(resourceResourceService, resourceMws)
 	resourceOps := resource2.NewServiceOption(v16)
-	resourceHttpHandler := resource2.NewHTTPHandler(r, resourceEndpoints, resourceOps, debugSwitch)
+	resourceHttpHandler := resource2.NewHTTPHandler(router, resourceEndpoints, resourceOps, debugSwitch)
 	roleMws := role.NewEndpointMiddleware(sugaredLogger, v15)
 	roleEndpoints := role.NewEndpoints(roleService, roleMws)
 	roleOps := role.NewServiceOption(v16)
-	roleHttpHandler := role.NewHTTPHandler(r, roleEndpoints, roleOps, debugSwitch)
+	roleHttpHandler := role.NewHTTPHandler(router, roleEndpoints, roleOps, debugSwitch)
 	servicesHttpHandler := &services.HttpHandler{
 		User:     httpHandler,
 		Audit:    auditHttpHandler,
@@ -171,9 +175,10 @@ func InitApp(r *gin.Engine, g *run.Group, name ConfName) (App, error) {
 		return App{}, err
 	}
 	app := App{
-		r:                   r,
+		r:                   router,
 		repository:          repositoryRepository,
 		InitAuditMid:        appInitAuditMid,
+		nats:                conn,
 		services:            servicesServices,
 		debug:               debugSwitch,
 		httpHandler:         servicesHttpHandler,
@@ -215,11 +220,14 @@ var debugSwitchSet = wire.NewSet(initDebugSwitch)
 
 var DefaultHttpClient = wire.NewSet(initDefaultHttpClient)
 
+var initNatsSet = wire.NewSet(initNats)
+
 var mwSet = wire.NewSet(initEndpointMiddleware, initHttpServerOption)
 
 var gSet = wire.NewSet(initCancelInterrupt, initMetricsEndpoint, initMicro)
 
 var initSet = wire.NewSet(
+	initNatsSet,
 	DefaultHttpClient,
 	debugSwitchSet,
 	auditMidSet,

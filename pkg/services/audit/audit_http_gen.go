@@ -6,7 +6,7 @@ package audit
 
 import (
 	"context"
-	debug2 "hello/utils/debug"
+	"hello/utils/debug"
 
 	"github.com/fitan/gink/transport/http"
 	"github.com/gin-gonic/gin"
@@ -43,23 +43,23 @@ func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option ht
 type HttpHandler struct {
 }
 
-func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch *debug2.DebugSwitch) HttpHandler {
+func NewHTTPHandler(r *gin.RouterGroup, endpoints Endpoints, options Ops, debugSwitch *debug.DebugSwitch) HttpHandler {
 
-	debugSwitch.Register("AuditRestByQueriesAll", "/audits", "GET")
+	debugSwitch.Register("AuditRestByQueriesAll", r.BasePath()+"/audits", "GET")
 
-	debugSwitch.Register("AuditRestCreate", "/audit", "POST")
+	debugSwitch.Register("AuditRestCreate", r.BasePath()+"/audit", "POST")
 
-	debugSwitch.Register("AuditRestCreateMany", "/audits", "POST")
+	debugSwitch.Register("AuditRestCreateMany", r.BasePath()+"/audits", "POST")
 
-	debugSwitch.Register("AuditRestDeleteById", "/audits/:auditId", "DELETE")
+	debugSwitch.Register("AuditRestDeleteById", r.BasePath()+"/audits/:auditId", "DELETE")
 
-	debugSwitch.Register("AuditRestDeleteMany", "/audits", "DELETE")
+	debugSwitch.Register("AuditRestDeleteMany", r.BasePath()+"/audits", "DELETE")
 
-	debugSwitch.Register("AuditRestGetById", "/audits/:auditId", "GET")
+	debugSwitch.Register("AuditRestGetById", r.BasePath()+"/audits/:auditId", "GET")
 
-	debugSwitch.Register("AuditRestUpdateById", "/audits/:auditId", "PUT")
+	debugSwitch.Register("AuditRestUpdateById", r.BasePath()+"/audits/:auditId", "PUT")
 
-	debugSwitch.Register("AuditRestUpdateMany", "/audits", "PUT")
+	debugSwitch.Register("AuditRestUpdateMany", r.BasePath()+"/audits", "PUT")
 
 	makeAuditRestByQueriesAllHandler(r, endpoints, options[AuditRestByQueriesAllMethodName])
 
@@ -93,7 +93,7 @@ type AuditRestByQueriesAllQuerySwag ent.AuditQueryOps
 // @Param query query AuditRestByQueriesAllQuerySwag false " "
 // @Success 200 {object} SwagResponse{data=ent.AuditRestByQueriesAllRes}
 // @Router /audits [get]
-func makeAuditRestByQueriesAllHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeAuditRestByQueriesAllHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.GET("/audits", http.NewServer(endpoints.AuditRestByQueriesAllEndpoint, decodeAuditRestByQueriesAllRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -116,7 +116,7 @@ type AuditRestCreateBodySwag ent.AuditBaseCreateReq
 // @Param body body AuditRestCreateBodySwag true " "
 // @Success 200 {object} SwagResponse{data=ent.Audit}
 // @Router /audit [post]
-func makeAuditRestCreateHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeAuditRestCreateHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.POST("/audit", http.NewServer(endpoints.AuditRestCreateEndpoint, decodeAuditRestCreateRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -139,7 +139,7 @@ type AuditRestCreateManyBodySwag []ent.AuditBaseCreateReq
 // @Param body body AuditRestCreateManyBodySwag true " "
 // @Success 200 {object} SwagResponse{data=ent.Audits}
 // @Router /audits [post]
-func makeAuditRestCreateManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeAuditRestCreateManyHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.POST("/audits", http.NewServer(endpoints.AuditRestCreateManyEndpoint, decodeAuditRestCreateManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -160,7 +160,7 @@ func decodeAuditRestCreateManyRequest(_ context.Context, ctx *gin.Context) (inte
 // @Param auditId path string true " "
 // @Success 200 {object} SwagResponse{data=bool}
 // @Router /audits/{auditId} [delete]
-func makeAuditRestDeleteByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeAuditRestDeleteByIdHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.DELETE("/audits/:auditId", http.NewServer(endpoints.AuditRestDeleteByIdEndpoint, decodeAuditRestDeleteByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -185,7 +185,7 @@ type AuditRestDeleteManyQuerySwag struct {
 // @Param query query AuditRestDeleteManyQuerySwag false " "
 // @Success 200 {object} SwagResponse{data=bool}
 // @Router /audits [delete]
-func makeAuditRestDeleteManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeAuditRestDeleteManyHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.DELETE("/audits", http.NewServer(endpoints.AuditRestDeleteManyEndpoint, decodeAuditRestDeleteManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -206,7 +206,7 @@ func decodeAuditRestDeleteManyRequest(_ context.Context, ctx *gin.Context) (inte
 // @Param auditId path string true " "
 // @Success 200 {object} SwagResponse{data=ent.AuditBaseGetRes}
 // @Router /audits/{auditId} [get]
-func makeAuditRestGetByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeAuditRestGetByIdHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.GET("/audits/:auditId", http.NewServer(endpoints.AuditRestGetByIdEndpoint, decodeAuditRestGetByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -230,7 +230,7 @@ type AuditRestUpdateByIdBodySwag ent.AuditBaseUpdateReq
 // @Param auditId path string true " "
 // @Success 200 {object} SwagResponse{data=ent.Audit}
 // @Router /audits/{auditId} [put]
-func makeAuditRestUpdateByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeAuditRestUpdateByIdHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.PUT("/audits/:auditId", http.NewServer(endpoints.AuditRestUpdateByIdEndpoint, decodeAuditRestUpdateByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -258,7 +258,7 @@ type AuditRestUpdateManyBodySwag []ent.AuditBaseUpdateReq
 // @Param body body AuditRestUpdateManyBodySwag true " "
 // @Success 200 {object} SwagResponse{data=bool}
 // @Router /audits [put]
-func makeAuditRestUpdateManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeAuditRestUpdateManyHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.PUT("/audits", http.NewServer(endpoints.AuditRestUpdateManyEndpoint, decodeAuditRestUpdateManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 

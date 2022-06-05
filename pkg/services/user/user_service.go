@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/nats-io/nats.go"
 	"hello/pkg/ent"
 	"hello/pkg/repository"
 	"hello/pkg/services/casbin"
@@ -17,6 +18,10 @@ type basicUserService struct {
 	casbin casbin.CasbinService
 	db     *ent.Client
 	ent.UserRestInterface
+	natsConn *nats.Conn
+}
+
+type NatsGetReq struct {
 }
 
 //type GetByIdReq struct {

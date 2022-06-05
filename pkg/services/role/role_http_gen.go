@@ -6,7 +6,7 @@ package role
 
 import (
 	"context"
-	debug2 "hello/utils/debug"
+	"hello/utils/debug"
 
 	"github.com/fitan/gink/transport/http"
 	"github.com/gin-gonic/gin"
@@ -55,35 +55,35 @@ func AddHttpOptionToAllMethods(options map[string][]http.ServerOption, option ht
 type HttpHandler struct {
 }
 
-func NewHTTPHandler(r *gin.Engine, endpoints Endpoints, options Ops, debugSwitch *debug2.DebugSwitch) HttpHandler {
+func NewHTTPHandler(r *gin.RouterGroup, endpoints Endpoints, options Ops, debugSwitch *debug.DebugSwitch) HttpHandler {
 
-	debugSwitch.Register("RoleRestAddBindResourcesByRoleId", "/roles/:roleId/resources/bind/add", "PUT")
+	debugSwitch.Register("RoleRestAddBindResourcesByRoleId", r.BasePath()+"/roles/:roleId/resources/bind/add", "PUT")
 
-	debugSwitch.Register("RoleRestByQueriesAll", "/roles", "GET")
+	debugSwitch.Register("RoleRestByQueriesAll", r.BasePath()+"/roles", "GET")
 
-	debugSwitch.Register("RoleRestCreate", "/role", "POST")
+	debugSwitch.Register("RoleRestCreate", r.BasePath()+"/role", "POST")
 
-	debugSwitch.Register("RoleRestCreateMany", "/roles", "POST")
+	debugSwitch.Register("RoleRestCreateMany", r.BasePath()+"/roles", "POST")
 
-	debugSwitch.Register("RoleRestCreateResourcesByRoleId", "/roles/:roleId/resources", "POST")
+	debugSwitch.Register("RoleRestCreateResourcesByRoleId", r.BasePath()+"/roles/:roleId/resources", "POST")
 
-	debugSwitch.Register("RoleRestDeleteById", "/roles/:roleId", "DELETE")
+	debugSwitch.Register("RoleRestDeleteById", r.BasePath()+"/roles/:roleId", "DELETE")
 
-	debugSwitch.Register("RoleRestDeleteMany", "/roles", "DELETE")
+	debugSwitch.Register("RoleRestDeleteMany", r.BasePath()+"/roles", "DELETE")
 
-	debugSwitch.Register("RoleRestDeleteResourcesByRoleId", "/roles/:roleId/resources", "DELETE")
+	debugSwitch.Register("RoleRestDeleteResourcesByRoleId", r.BasePath()+"/roles/:roleId/resources", "DELETE")
 
-	debugSwitch.Register("RoleRestGetById", "/roles/:roleId", "GET")
+	debugSwitch.Register("RoleRestGetById", r.BasePath()+"/roles/:roleId", "GET")
 
-	debugSwitch.Register("RoleRestGetResourcesByRoleId", "/roles/:roleId/resources", "GET")
+	debugSwitch.Register("RoleRestGetResourcesByRoleId", r.BasePath()+"/roles/:roleId/resources", "GET")
 
-	debugSwitch.Register("RoleRestRemoveBindResourcesByRoleId", "/roles/:roleId/resources/bind/remove", "PUT")
+	debugSwitch.Register("RoleRestRemoveBindResourcesByRoleId", r.BasePath()+"/roles/:roleId/resources/bind/remove", "PUT")
 
-	debugSwitch.Register("RoleRestUpdateBindResourcesByRoleId", "/roles/:roleId/resources/bind/update", "PUT")
+	debugSwitch.Register("RoleRestUpdateBindResourcesByRoleId", r.BasePath()+"/roles/:roleId/resources/bind/update", "PUT")
 
-	debugSwitch.Register("RoleRestUpdateById", "/roles/:roleId", "PUT")
+	debugSwitch.Register("RoleRestUpdateById", r.BasePath()+"/roles/:roleId", "PUT")
 
-	debugSwitch.Register("RoleRestUpdateMany", "/roles", "PUT")
+	debugSwitch.Register("RoleRestUpdateMany", r.BasePath()+"/roles", "PUT")
 
 	makeRoleRestAddBindResourcesByRoleIdHandler(r, endpoints, options[RoleRestAddBindResourcesByRoleIdMethodName])
 
@@ -132,7 +132,7 @@ type RoleRestAddBindResourcesByRoleIdBodySwag struct {
 // @Param roleId path string true " "
 // @Success 200 {object} SwagResponse{data=string}
 // @Router /roles/{roleId}/resources/bind/add [put]
-func makeRoleRestAddBindResourcesByRoleIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeRoleRestAddBindResourcesByRoleIdHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.PUT("/roles/:roleId/resources/bind/add", http.NewServer(endpoints.RoleRestAddBindResourcesByRoleIdEndpoint, decodeRoleRestAddBindResourcesByRoleIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -160,7 +160,7 @@ type RoleRestByQueriesAllQuerySwag ent.RoleQueryOps
 // @Param query query RoleRestByQueriesAllQuerySwag false " "
 // @Success 200 {object} SwagResponse{data=ent.RoleRestByQueriesAllRes}
 // @Router /roles [get]
-func makeRoleRestByQueriesAllHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeRoleRestByQueriesAllHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.GET("/roles", http.NewServer(endpoints.RoleRestByQueriesAllEndpoint, decodeRoleRestByQueriesAllRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -183,7 +183,7 @@ type RoleRestCreateBodySwag ent.RoleBaseCreateReq
 // @Param body body RoleRestCreateBodySwag true " "
 // @Success 200 {object} SwagResponse{data=ent.Role}
 // @Router /role [post]
-func makeRoleRestCreateHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeRoleRestCreateHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.POST("/role", http.NewServer(endpoints.RoleRestCreateEndpoint, decodeRoleRestCreateRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -206,7 +206,7 @@ type RoleRestCreateManyBodySwag []ent.RoleBaseCreateReq
 // @Param body body RoleRestCreateManyBodySwag true " "
 // @Success 200 {object} SwagResponse{data=ent.Roles}
 // @Router /roles [post]
-func makeRoleRestCreateManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeRoleRestCreateManyHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.POST("/roles", http.NewServer(endpoints.RoleRestCreateManyEndpoint, decodeRoleRestCreateManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -230,7 +230,7 @@ type RoleRestCreateResourcesByRoleIdBodySwag []ent.ResourceBaseCreateReq
 // @Param roleId path string true " "
 // @Success 200 {object} SwagResponse{data=ent.Role}
 // @Router /roles/{roleId}/resources [post]
-func makeRoleRestCreateResourcesByRoleIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeRoleRestCreateResourcesByRoleIdHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.POST("/roles/:roleId/resources", http.NewServer(endpoints.RoleRestCreateResourcesByRoleIdEndpoint, decodeRoleRestCreateResourcesByRoleIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -256,7 +256,7 @@ func decodeRoleRestCreateResourcesByRoleIdRequest(_ context.Context, ctx *gin.Co
 // @Param roleId path string true " "
 // @Success 200 {object} SwagResponse{data=bool}
 // @Router /roles/{roleId} [delete]
-func makeRoleRestDeleteByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeRoleRestDeleteByIdHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.DELETE("/roles/:roleId", http.NewServer(endpoints.RoleRestDeleteByIdEndpoint, decodeRoleRestDeleteByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -281,7 +281,7 @@ type RoleRestDeleteManyQuerySwag struct {
 // @Param query query RoleRestDeleteManyQuerySwag false " "
 // @Success 200 {object} SwagResponse{data=bool}
 // @Router /roles [delete]
-func makeRoleRestDeleteManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeRoleRestDeleteManyHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.DELETE("/roles", http.NewServer(endpoints.RoleRestDeleteManyEndpoint, decodeRoleRestDeleteManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -307,7 +307,7 @@ type RoleRestDeleteResourcesByRoleIdQuerySwag struct {
 // @Param roleId path string true " "
 // @Success 200 {object} SwagResponse{data=string}
 // @Router /roles/{roleId}/resources [delete]
-func makeRoleRestDeleteResourcesByRoleIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeRoleRestDeleteResourcesByRoleIdHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.DELETE("/roles/:roleId/resources", http.NewServer(endpoints.RoleRestDeleteResourcesByRoleIdEndpoint, decodeRoleRestDeleteResourcesByRoleIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -333,7 +333,7 @@ func decodeRoleRestDeleteResourcesByRoleIdRequest(_ context.Context, ctx *gin.Co
 // @Param roleId path string true " "
 // @Success 200 {object} SwagResponse{data=ent.RoleBaseGetRes}
 // @Router /roles/{roleId} [get]
-func makeRoleRestGetByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeRoleRestGetByIdHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.GET("/roles/:roleId", http.NewServer(endpoints.RoleRestGetByIdEndpoint, decodeRoleRestGetByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -357,7 +357,7 @@ type RoleRestGetResourcesByRoleIdQuerySwag ent.ResourceQueryOps
 // @Param roleId path string true " "
 // @Success 200 {object} SwagResponse{data=ent.RoleRestGetResourcesByRoleIdRes}
 // @Router /roles/{roleId}/resources [get]
-func makeRoleRestGetResourcesByRoleIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeRoleRestGetResourcesByRoleIdHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.GET("/roles/:roleId/resources", http.NewServer(endpoints.RoleRestGetResourcesByRoleIdEndpoint, decodeRoleRestGetResourcesByRoleIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -388,7 +388,7 @@ type RoleRestRemoveBindResourcesByRoleIdBodySwag struct {
 // @Param roleId path string true " "
 // @Success 200 {object} SwagResponse{data=string}
 // @Router /roles/{roleId}/resources/bind/remove [put]
-func makeRoleRestRemoveBindResourcesByRoleIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeRoleRestRemoveBindResourcesByRoleIdHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.PUT("/roles/:roleId/resources/bind/remove", http.NewServer(endpoints.RoleRestRemoveBindResourcesByRoleIdEndpoint, decodeRoleRestRemoveBindResourcesByRoleIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -420,7 +420,7 @@ type RoleRestUpdateBindResourcesByRoleIdBodySwag struct {
 // @Param roleId path string true " "
 // @Success 200 {object} SwagResponse{data=string}
 // @Router /roles/{roleId}/resources/bind/update [put]
-func makeRoleRestUpdateBindResourcesByRoleIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeRoleRestUpdateBindResourcesByRoleIdHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.PUT("/roles/:roleId/resources/bind/update", http.NewServer(endpoints.RoleRestUpdateBindResourcesByRoleIdEndpoint, decodeRoleRestUpdateBindResourcesByRoleIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -449,7 +449,7 @@ type RoleRestUpdateByIdBodySwag ent.RoleBaseUpdateReq
 // @Param roleId path string true " "
 // @Success 200 {object} SwagResponse{data=ent.Role}
 // @Router /roles/{roleId} [put]
-func makeRoleRestUpdateByIdHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeRoleRestUpdateByIdHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.PUT("/roles/:roleId", http.NewServer(endpoints.RoleRestUpdateByIdEndpoint, decodeRoleRestUpdateByIdRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
@@ -477,7 +477,7 @@ type RoleRestUpdateManyBodySwag []ent.RoleBaseUpdateReq
 // @Param body body RoleRestUpdateManyBodySwag true " "
 // @Success 200 {object} SwagResponse{data=bool}
 // @Router /roles [put]
-func makeRoleRestUpdateManyHandler(r *gin.Engine, endpoints Endpoints, options []http.ServerOption) {
+func makeRoleRestUpdateManyHandler(r *gin.RouterGroup, endpoints Endpoints, options []http.ServerOption) {
 	r.PUT("/roles", http.NewServer(endpoints.RoleRestUpdateManyEndpoint, decodeRoleRestUpdateManyRequest, http.EncodeJSONResponse, options...).ServeHTTP)
 }
 
