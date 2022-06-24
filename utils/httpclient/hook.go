@@ -1,11 +1,12 @@
 package httpclient
 
 import (
-	"context"
 	"fmt"
 	"github.com/fitan/gink/transport/http"
+	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -54,6 +55,7 @@ func BeforeDebug(log *zap.SugaredLogger, bodyLimit int) resty.RequestMiddleware 
 
 func AfterDebug(log *zap.SugaredLogger, bodyLimit int64) resty.ResponseMiddleware {
 	return func(c *resty.Client, res *resty.Response) error {
+
 		debug, ok := res.Request.Context().Value(http.ContextKeyRequestDebug).(bool)
 		if ok && debug {
 			var body string
@@ -92,34 +94,39 @@ func AfterDebug(log *zap.SugaredLogger, bodyLimit int64) resty.ResponseMiddlewar
 	}
 }
 
-type microNext struct{}
-
 
 func BeforeMicroSelect(serviceName string, r registry.Registry, options ...selector.SelectOption) resty.RequestMiddleware {
 	s := selector.NewSelector(selector.Registry(cache.New(r)), selector.SetStrategy(selector.RoundRobin))
+	next, _ := s.Select(serviceName, options...)
 	return func(client *resty.Client, request *resty.Request) error {
 
-		v := request.Context().Value(microNext{})
-		if v != nil {
-			next := v.(selector.Next)
-			node, err := next()
-			if err != nil {
-				return err
-			}
-			client.SetHostURL("http://" + node.Address)
+
+		node, err := next()
+		if err != nil {
+			err = errors.Wrap(err, "select node next")
+			return err
+		}
+
+		reqURL, err := url.Parse(request.URL)
+		if err != nil {
+			return err
+		}
+
+		// If Request.URL is relative path then added c.HostURL into
+		// the request URL otherwise Request.URL will be used as-is
+		if reqURL.IsAbs() {
 			return nil
 		}
 
-		next, err := s.Select(serviceName, options...)
-		if err != nil {
-			return err
+		request.URL = reqURL.String()
+		if len(request.URL) > 0 && request.URL[0] != '/' {
+			request.URL = "/" + request.URL
 		}
-		node, err := next()
-		if err != nil {
-			return err
-		}
-		client.SetHostURL("http://" + node.Address)
-		context.WithValue(request.Context(), microNext{}, next)
+
+
+		request.URL = "http://" + node.Address +  request.URL
+
 		return nil
 	}
 }
+
