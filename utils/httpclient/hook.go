@@ -1,12 +1,19 @@
 package httpclient
 
 import (
+	"context"
 	"fmt"
 	"github.com/fitan/gink/transport/http"
+	"github.com/go-kit/kit/endpoint"
+	"github.com/go-kit/kit/sd"
+	"github.com/go-kit/kit/sd/lb"
+	"github.com/go-kit/log"
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
+	"io"
 	"net/url"
+	"os"
 	"strconv"
 	"time"
 
@@ -89,6 +96,65 @@ func AfterDebug(log *zap.SugaredLogger, bodyLimit int64) resty.ResponseMiddlewar
 				"RemoteAddr", info.RemoteAddr.String(),
 			)
 		}
+
+		return nil
+	}
+}
+
+func ipFactory() sd.Factory {
+	return func(instance string) (endpoint.Endpoint, io.Closer, error) {
+		return func(ctx context.Context, request interface{}) (interface{}, error) {
+			return instance, nil
+		}, nil, nil
+	}
+}
+
+type BeforeKitLBConf struct {
+	balancerFunc func(s sd.Endpointer) lb.Balancer
+}
+
+type BeforeKitLbOption func(conf *BeforeKitLBConf)
+
+func WithBeforeKitLbRandom(seed int64) BeforeKitLbOption {
+	return func(conf *BeforeKitLBConf) {
+		conf.balancerFunc = func(e sd.Endpointer) lb.Balancer {
+			return lb.NewRandom(e,seed)
+		}
+	}
+}
+
+func BeforeKitLb(instance sd.Instancer,options ...BeforeKitLbOption) resty.RequestMiddleware {
+	conf := &BeforeKitLBConf{}
+	for _, option := range options {
+		option(conf)
+	}
+
+	e := sd.NewEndpointer(instance, ipFactory(), log.NewLogfmtLogger(os.Stdout))
+
+	if conf.balancerFunc == nil {
+		conf.balancerFunc = lb.NewRoundRobin
+	}
+
+	balancer := lb.NewRoundRobin(e)
+
+	return func(c *resty.Client, req *resty.Request) error {
+		be,err := balancer.Endpoint()
+		if err != nil {
+			err = errors.Wrap(err, "endpoint error")
+			return err
+		}
+		ip, _ := be(req.Context(), nil)
+
+		urlParse,err := url.Parse(req.URL)
+		if err != nil {
+			err = errors.Wrap(err, "url parse error")
+			return err
+		}
+
+
+		urlParse.Host = ip.(string)
+
+		req.URL = urlParse.String()
 
 		return nil
 	}
