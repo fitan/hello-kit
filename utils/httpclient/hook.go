@@ -24,7 +24,7 @@ import (
 	"go-micro.dev/v4/selector"
 )
 
-func BeforeDebug(log *zap.SugaredLogger, bodyLimit int) resty.RequestMiddleware  {
+func BeforeDebug(log *zap.SugaredLogger, bodyLimit int) resty.RequestMiddleware {
 	return func(c *resty.Client, req *resty.Request) error {
 		debug, ok := req.Context().Value(http.ContextKeyRequestDebug).(bool)
 		if ok && debug {
@@ -118,12 +118,12 @@ type BeforeKitLbOption func(conf *BeforeKitLBConf)
 func WithBeforeKitLbRandom(seed int64) BeforeKitLbOption {
 	return func(conf *BeforeKitLBConf) {
 		conf.balancerFunc = func(e sd.Endpointer) lb.Balancer {
-			return lb.NewRandom(e,seed)
+			return lb.NewRandom(e, seed)
 		}
 	}
 }
 
-func BeforeKitLb(instance sd.Instancer,options ...BeforeKitLbOption) resty.RequestMiddleware {
+func BeforeKitLb(instance sd.Instancer, options ...BeforeKitLbOption) resty.RequestMiddleware {
 	conf := &BeforeKitLBConf{}
 	for _, option := range options {
 		option(conf)
@@ -138,21 +138,21 @@ func BeforeKitLb(instance sd.Instancer,options ...BeforeKitLbOption) resty.Reque
 	balancer := lb.NewRoundRobin(e)
 
 	return func(c *resty.Client, req *resty.Request) error {
-		be,err := balancer.Endpoint()
+		be, err := balancer.Endpoint()
 		if err != nil {
 			err = errors.Wrap(err, "endpoint error")
 			return err
 		}
 		ip, _ := be(req.Context(), nil)
 
-		urlParse,err := url.Parse(req.URL)
+		urlParse, err := url.Parse(req.URL)
 		if err != nil {
 			err = errors.Wrap(err, "url parse error")
 			return err
 		}
 
-
 		urlParse.Host = ip.(string)
+		urlParse.Scheme = "http"
 
 		req.URL = urlParse.String()
 
@@ -160,12 +160,10 @@ func BeforeKitLb(instance sd.Instancer,options ...BeforeKitLbOption) resty.Reque
 	}
 }
 
-
 func BeforeMicroSelect(serviceName string, r registry.Registry, options ...selector.SelectOption) resty.RequestMiddleware {
 	s := selector.NewSelector(selector.Registry(cache.New(r)), selector.SetStrategy(selector.RoundRobin))
 	next, _ := s.Select(serviceName, options...)
 	return func(client *resty.Client, request *resty.Request) error {
-
 
 		node, err := next()
 		if err != nil {
@@ -189,10 +187,8 @@ func BeforeMicroSelect(serviceName string, r registry.Registry, options ...selec
 			request.URL = "/" + request.URL
 		}
 
-
-		request.URL = "http://" + node.Address +  request.URL
+		request.URL = "http://" + node.Address + request.URL
 
 		return nil
 	}
 }
-
